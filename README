@@ -1,0 +1,29 @@
+Bio-Community version 0.01
+==========================
+
+Bio::Community is a BioPerl-based module to represent and manipulate communities
+of organisms. 
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Build.PL
+   ./Build
+   ./Build test
+   ./Build install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  Moose
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2011 by Florent Angly
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.1 or,
+at your option, any later version of Perl 5 you may have available.
+
