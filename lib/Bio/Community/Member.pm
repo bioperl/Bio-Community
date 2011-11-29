@@ -1,6 +1,9 @@
 package Bio::Community::Member;
 
 use Moose;
+use MooseX::NonMoose;
+
+extends 'Bio::Root::Root';
 
 my %ids = ();
 my $last_id = 1;
@@ -20,7 +23,6 @@ after id => sub {
    my $self = shift;
    $ids{$self->{id}} = undef;
 };
-
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

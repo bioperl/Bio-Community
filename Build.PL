@@ -22,6 +22,7 @@ my $build = Module::Build->new(
                              'perl'                => '5.10.0',
                              'Bio::Root::Version'  => '1.006900',
                              'Moose'               => 0,
+                             'MooseX::NonMoose'    => 0,
                             },
     recursive_test_files => 1,
     dynamic_config       => 1,
