@@ -15,5 +15,7 @@ pod2htm*.tmp
 .emacs.*
 blib*
 *.bak
-MYMETA.yml
+MYMETA.*
 *.komodoproject
+LICENSE
+MANIFEST
