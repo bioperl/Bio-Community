@@ -8,8 +8,14 @@ use_ok($_) for qw(
 
 my $member;
 
-ok $member = Bio::Community::Member->new({ id => 426 });
-is $member->id(), 426;
+ok $member = Bio::Community::Member->new({ id => 2 });
+is $member->id(), 2;
+
+ok $member = Bio::Community::Member->new( );
+is $member->id, 1;
+
+ok $member = Bio::Community::Member->new( );
+is $member->id, 3;
 
 done_testing();
 
