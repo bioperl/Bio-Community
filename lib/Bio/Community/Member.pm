@@ -96,8 +96,31 @@ use MooseX::NonMoose;
 
 extends 'Bio::Root::Root';
 
+
 my %ids = ();
 my $last_id = 1;
+
+
+=head2 new
+
+ Title   : new
+ Usage   : $member = Bio::Community::Individual->new( );
+ Function: Create a new Bio::Community::Individual object
+ Args    : 
+ Returns : a new Bio::Community::Individual object
+
+=cut
+
+
+=head2 id
+
+ Title   : id
+ Usage   : 
+ Function: 
+ Args    : 
+ Returns : 
+
+=cut
 
 has id => (
    is => 'ro',

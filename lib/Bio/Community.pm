@@ -82,11 +82,39 @@ package Bio::Community;
 
 use Moose;
 use MooseX::NonMoose;
+use MooseX::Method::Signatures;
+
+use Bio::Community::Member;
+
 
 extends 'Bio::Root::Root';
 
 
+=head2 new
 
+ Title   : new
+ Usage   : $community = Bio::Community->new( ... );
+ Function: Create a new Bio::Community object
+ Args    : 
+ Returns : a new Bio::Community::Individual object
+
+=cut
+
+
+=head2 add_member
+
+ Title   : add_member
+ Usage   : 
+ Function: 
+ Args    : 
+ Returns : 
+
+=cut
+
+method add_member ( Bio::Community::Member $member, Int $count = 1 ) {
+   
+   return 1;
+}
 
 
 no Moose;
