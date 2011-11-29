@@ -12,6 +12,7 @@ ok $member = Bio::Community::Member->new({ id => 2 });
 is $member->id(), 2;
 
 isa_ok $member, 'Bio::Root::RootI';
+isa_ok $member, 'Bio::Community::Member';
 
 ok $member = Bio::Community::Member->new( );
 is $member->id, 1;

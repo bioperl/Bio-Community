@@ -77,8 +77,8 @@ methods. Internal methods are usually preceded with a _
 =head2 new
 
  Title   : new
- Usage   : $community = Bio::Community->new( ... );
  Function: Create a new Bio::Community object
+ Usage   : $community = Bio::Community->new( ... );
  Args    : 
  Returns : a new Bio::Community::Individual object
 
@@ -98,15 +98,16 @@ extends 'Bio::Root::Root';
 =head2 add_member
 
  Title   : add_member
- Usage   : 
- Function: 
- Args    : 
- Returns : 
+ Function: Add members to a community
+ Usage   : $community->add_member($member, 3);
+ Args    : * a Bio::Community::Member to add
+           * how many of this member to add (default: 1)
+ Returns : 1 on success
 
 =cut
 
-method add_member ( Bio::Community::Member $member, PositiveInt $count = 1 where { $_ > 0 } ) {
-   #$self->{_}->{$member};
+method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
+   $self->{_counts}->{$member} += $count;
    return 1;
 }
 

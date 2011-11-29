@@ -90,8 +90,8 @@ methods. Internal methods are usually preceded with a _
 =head2 new
 
  Title   : new
- Usage   : $member = Bio::Community::Individual->new( );
  Function: Create a new Bio::Community::Individual object
+ Usage   : $member = Bio::Community::Individual->new( );
  Args    : 
  Returns : a new Bio::Community::Individual object
 
@@ -112,15 +112,20 @@ my $last_id = 1;
 
 subtype 'PositiveInt'
      => as 'Int'
-     => where { $_ >0 }
-     => message { 'Only positive greater than zero integers accepted' };
+     => where { $_ >= 0 }
+     => message { 'Only positive integers accepted' };
+
+subtype 'StrictlyPositiveInt'
+     => as 'PositiveInt'
+     => where { $_ > 0 }
+     => message { 'Only strictly positive integers accepted' };
 
 
 =head2 id
 
  Title   : id
- Usage   : 
  Function: 
+ Usage   : 
  Args    : 
  Returns : 
 
@@ -128,7 +133,7 @@ subtype 'PositiveInt'
 
 has id => (
    is => 'ro',
-   isa => 'PositiveInt',
+   isa => 'StrictlyPositiveInt',
    required => 0,
    default => sub {
          while (exists $ids{$last_id}) { $last_id++; };
