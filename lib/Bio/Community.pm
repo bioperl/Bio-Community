@@ -95,6 +95,22 @@ use Bio::Community::Member;
 extends 'Bio::Root::Root';
 
 
+=head2 total_count
+
+ Title   : total_count
+ Function: Get the total number of members in the community
+ Usage   : $community->total_count()
+ Args    : none
+ Returns : integer
+
+=cut
+
+has total_count => (
+   is => 'ro',
+   isa => 'StrictlyPositiveInt',
+);
+
+
 =head2 add_member
 
  Title   : add_member
@@ -108,6 +124,7 @@ extends 'Bio::Root::Root';
 
 method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
    $self->{_counts}->{$member} += $count;
+   $self->{total_count} += $count;
    return 1;
 }
 

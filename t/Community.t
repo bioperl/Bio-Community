@@ -19,7 +19,7 @@ ok $community->add_member( Bio::Community::Member->new() );
 
 ok $community->add_member( Bio::Community::Member->new(), 23 );
 
-
+is $community->total_count, 24;
 
 done_testing();
 
