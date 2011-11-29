@@ -240,9 +240,17 @@ method richness {
 
 =head2 get_member_by_id
 
-TODO
+ Title   : get_member_by_id
+ Function: Fetch a member based on its ID
+ Usage   : my $member = $community->get_member_by_id(3);
+ Args    : integer for the member ID
+ Returns : a Bio::Community::Member or undef if member was not found
 
 =cut
+
+method get_member_by_id (Int $member_id) {
+  return $self->{_members}->{$member_id};
+}
 
 
 =head2 get_rel_ab

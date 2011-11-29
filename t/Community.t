@@ -32,6 +32,9 @@ $member3 = Bio::Community::Member->new();
 ok $community->add_member( $member3, 4 );
 is $community->total_count, 28;
 
+isa_ok $community->get_member_by_id(2), 'Bio::Community::Member';
+is $community->get_member_by_id(2)->id, 2;
+
 while (my $member = $community->next_member) {
    isa_ok $member, 'Bio::Community::Member';
    $ids{$member->id} = undef;
@@ -54,6 +57,8 @@ is $community->total_count, 27;
 ok $community->remove_member( $member2, 22 );
 is $community->total_count, 5;
 
+is $community->get_member_by_id(2), undef;
+
 @members = ();
 %ids = ();
 ok @members = $community->all_members;
@@ -67,6 +72,8 @@ is $community->richness, 2;
 is $community->name, 'Unnamed community';
 ok $community->name('ocean sample 3');
 is $community->name, 'ocean sample 3';
+
+
 
 done_testing();
 
