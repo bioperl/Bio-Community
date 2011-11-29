@@ -129,6 +129,37 @@ method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count =
 }
 
 
+=head2 remove_member
+
+ Title   : remove_member
+ Function: remove members from a community
+ Usage   : $community->remove_member($member, 3);
+ Args    : * a Bio::Community::Member to remove
+           * how many of this member to remove (default: 1)
+ Returns : 1 on success
+
+=cut
+
+method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
+   # Sanity checks
+   my $counts = $self->{_counts};
+   if (not exists $counts->{$member}) {
+      die "Error: Could not remove member because it did not exist in the community\n";
+   }
+   if ($count > $counts->{$member}) {
+      die "Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n";
+   }
+   # Now remove unwanted members
+   $counts->{$member} -= $count;
+   if ($counts->{$member} == 0) {
+      delete $counts->{$member};
+   }
+   $self->{total_count} -= $count;
+   return 1;
+}
+
+
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 1;
