@@ -10,7 +10,7 @@
 
 =head1 NAME
 
-Bio::Community::Member - The basic constituent of a biological community, i.e. an organism
+Bio::Community::Member - The basic constituent of a biological community
 
 =head1 SYNOPSIS
 
@@ -24,7 +24,8 @@ Bio::Community::Member - The basic constituent of a biological community, i.e. a
 
 =head1 DESCRIPTION
 
-
+A Bio::Community::Member represents an organism, individual, species or anything
+you like.
 
 =head1 CONSTRUCTOR
 
@@ -86,21 +87,6 @@ Email florent.angly@gmail.com
 The rest of the documentation details each of the object
 methods. Internal methods are usually preceded with a _
 
-=cut
-
-
-package Bio::Community::Member;
-
-use Moose;
-use MooseX::NonMoose;
-
-extends 'Bio::Root::Root';
-
-
-my %ids = ();
-my $last_id = 1;
-
-
 =head2 new
 
  Title   : new
@@ -110,6 +96,24 @@ my $last_id = 1;
  Returns : a new Bio::Community::Individual object
 
 =cut
+
+
+package Bio::Community::Member;
+
+use Moose;
+use MooseX::NonMoose;
+use Moose::Util::TypeConstraints;
+
+extends 'Bio::Root::Root';
+
+
+my %ids = ();
+my $last_id = 1;
+
+subtype 'PositiveInt'
+     => as 'Int'
+     => where { $_ >0 }
+     => message { 'Only positive greater than zero integers accepted' };
 
 
 =head2 id
@@ -124,7 +128,7 @@ my $last_id = 1;
 
 has id => (
    is => 'ro',
-   isa => 'Int',
+   isa => 'PositiveInt',
    required => 0,
    default => sub {
          while (exists $ids{$last_id}) { $last_id++; };

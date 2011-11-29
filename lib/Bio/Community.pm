@@ -74,22 +74,6 @@ Email florent.angly@gmail.com
 The rest of the documentation details each of the object
 methods. Internal methods are usually preceded with a _
 
-=cut
-
-
-
-package Bio::Community;
-
-use Moose;
-use MooseX::NonMoose;
-use MooseX::Method::Signatures;
-
-use Bio::Community::Member;
-
-
-extends 'Bio::Root::Root';
-
-
 =head2 new
 
  Title   : new
@@ -99,6 +83,16 @@ extends 'Bio::Root::Root';
  Returns : a new Bio::Community::Individual object
 
 =cut
+
+
+package Bio::Community;
+
+use Moose;
+use MooseX::NonMoose;
+use MooseX::Method::Signatures;
+use Bio::Community::Member;
+
+extends 'Bio::Root::Root';
 
 
 =head2 add_member
@@ -111,8 +105,8 @@ extends 'Bio::Root::Root';
 
 =cut
 
-method add_member ( Bio::Community::Member $member, Int $count = 1 ) {
-   
+method add_member ( Bio::Community::Member $member, PositiveInt $count = 1 where { $_ > 0 } ) {
+   #$self->{_}->{$member};
    return 1;
 }
 
