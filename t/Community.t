@@ -18,7 +18,7 @@ isa_ok $community, 'Bio::Root::RootI';
 isa_ok $community, 'Bio::Community';
 
 $community = Bio::Community->new();
-###is $community->total_count, 0;
+is $community->total_count, 0;
 
 $member1 = Bio::Community::Member->new();
 ok $community->add_member( $member1 );

@@ -107,8 +107,8 @@ extends 'Bio::Root::Root';
 
 has total_count => (
    is => 'ro',
-   isa => 'StrictlyPositiveInt',
-   #### TODO: initialize to zero
+   isa => 'PositiveInt',
+   default => 0,
 );
 
 
