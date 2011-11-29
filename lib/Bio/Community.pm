@@ -244,7 +244,7 @@ method richness {
  Function: Fetch a member based on its ID
  Usage   : my $member = $community->get_member_by_id(3);
  Args    : integer for the member ID
- Returns : a Bio::Community::Member or undef if member was not found
+ Returns : a Bio::Community::Member object or undef if member was not found
 
 =cut
 
@@ -253,10 +253,35 @@ method get_member_by_id (Int $member_id) {
 }
 
 
+=head2 get_count
+
+ Title   : get_count
+ Function: Fetch the abundance or count of a member
+ Usage   : my $count = $community->get_count($member);
+ Args    : a Bio::Community::Member object
+ Returns : an integer for the count of this member, including zero if the member
+           was not present in the community
+
+=cut
+
+method get_count (Bio::Community::Member $member) {
+  return $self->{_counts}->{$member->id} || 0;
+}
+
+
+
 =head2 get_rel_ab
 
 TODO
 Relative abundance of a member
+
+=cut
+
+
+=head2 get_rank
+
+TODO
+Abundance rank of a member
 
 =cut
 

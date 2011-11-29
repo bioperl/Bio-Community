@@ -34,6 +34,7 @@ is $community->total_count, 28;
 
 isa_ok $community->get_member_by_id(2), 'Bio::Community::Member';
 is $community->get_member_by_id(2)->id, 2;
+is $community->get_count($member2), 23;
 
 while (my $member = $community->next_member) {
    isa_ok $member, 'Bio::Community::Member';
@@ -58,6 +59,7 @@ ok $community->remove_member( $member2, 22 );
 is $community->total_count, 5;
 
 is $community->get_member_by_id(2), undef;
+is $community->get_count($member2), 0;
 
 @members = ();
 %ids = ();
