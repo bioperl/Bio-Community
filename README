@@ -21,10 +21,13 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
   Moose
+  Moose::Util::TypeConstraints
+  MooseX::NonMoose
+  MooseX::Method::Signatures
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2011 by Florent Angly
+Copyright (C) 2011 by Florent Angly <florent.angly@gmail.com>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
