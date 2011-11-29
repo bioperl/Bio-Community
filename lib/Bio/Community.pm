@@ -217,11 +217,25 @@ method all_members {
 }
 
 
-=head2 num_members
+=head2 richness
    
-TODO
+ Title   : richness
+ Function: Report the community richness or number of different types of members
+ Usage   : my $richness = $community->num_members();
+ Args    : none
+ Returns : integer for the richness
 
 =cut
+
+method richness {
+   #### TODO: do not re-calculate this if it has already been calculated and 
+   ####       the community has not changed
+   my $num_members = 0;
+   while ($self->next_member) {
+      $num_members++;
+   }
+   return $num_members;
+}
 
 
 =head2 get_member_by_id
