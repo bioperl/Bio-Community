@@ -18,7 +18,8 @@ Bio::Community - A biological community
 
 =head1 DESCRIPTION
 
-
+A Bio::Community is composed of Bio::Community::Member objects at a specified
+abundance.
 
 =head1 CONSTRUCTOR
 
@@ -93,6 +94,24 @@ use MooseX::Method::Signatures;
 use Bio::Community::Member;
 
 extends 'Bio::Root::Root';
+
+
+=head2 name
+   
+ Title   : name
+ Function: Get or set the name of the community
+ Usage   : $community->name('ocean sample 3');
+           my $name = $community->name();
+ Args    : string for the name
+ Returns : string for the name
+
+=cut
+
+has name => (
+   is => 'rw',
+   isa => 'Str',
+   default => 'Unnamed community',
+);
 
 
 =head2 total_count
@@ -208,6 +227,14 @@ TODO
 =head2 get_member_by_id
 
 TODO
+
+=cut
+
+
+=head2 get_rel_ab
+
+TODO
+Relative abundance of a member
 
 =cut
 

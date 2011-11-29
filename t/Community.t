@@ -60,6 +60,8 @@ for my $member (@members) {
 }
 is_deeply [sort keys %ids], [1, 3];
 
+ok $community->name('ocean sample 3');
+is $community->name, 'ocean sample 3';
 
 done_testing();
 
