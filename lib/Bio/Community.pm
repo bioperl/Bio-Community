@@ -78,7 +78,7 @@ methods. Internal methods are usually preceded with a _
 
  Title   : new
  Function: Create a new Bio::Community object
- Usage   : $community = Bio::Community->new( ... );
+ Usage   : my $community = Bio::Community->new( ... );
  Args    : 
  Returns : a new Bio::Community::Individual object
 
@@ -99,7 +99,7 @@ extends 'Bio::Root::Root';
 
  Title   : total_count
  Function: Get the total number of members in the community
- Usage   : $community->total_count()
+ Usage   : $community->total_count();
  Args    : none
  Returns : integer
 
@@ -123,7 +123,9 @@ has total_count => (
 =cut
 
 method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
-   $self->{_counts}->{$member} += $count;
+   my $member_id = $member->id;
+   $self->{_counts}->{$member_id} += $count;
+   $self->{_members}->{$member_id} = $member;
    $self->{total_count} += $count;
    return 1;
 }
@@ -142,23 +144,65 @@ method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count =
 
 method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
    # Sanity checks
+   my $member_id = $member->id;
    my $counts = $self->{_counts};
-   if (not exists $counts->{$member}) {
+   if (not exists $counts->{$member_id}) {
       die "Error: Could not remove member because it did not exist in the community\n";
    }
-   if ($count > $counts->{$member}) {
+   if ($count > $counts->{$member_id}) {
       die "Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n";
    }
    # Now remove unwanted members
-   $counts->{$member} -= $count;
-   if ($counts->{$member} == 0) {
-      delete $counts->{$member};
+   $counts->{$member_id} -= $count;
+   if ($counts->{$member_id} == 0) {
+      delete $counts->{$member_id};
+      delete $self->{_members}->{$member_id};
    }
    $self->{total_count} -= $count;
    return 1;
 }
 
 
+=head2 next_member
+
+ Title   : next_member
+ Function: Access the next member in a community (in no specific order).
+ Usage   : my $member = $community->next_member();
+ Args    : none
+ Returns : a Bio::Community::Member object
+
+=cut
+
+method next_member {
+   #### display an error if community was changed
+   my (undef, $member) = each %{$self->{_members}};
+   return $member;
+}
+
+
+=head2 all_members
+
+ Title   : all_members
+ Function: Generate a list of all members in a community.
+ Usage   : my @members = $community->all_members();
+ Args    : none
+ Returns : an array of Bio::Community::Member objects
+
+=cut
+
+method all_members {
+   my @members = values %{$self->{_members}};
+   return @members;
+}
+
+
+=head2 num_members
+
+=cut
+
+=head2 get_member_by_id
+
+=cut
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

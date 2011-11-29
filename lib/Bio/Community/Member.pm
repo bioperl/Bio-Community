@@ -91,7 +91,7 @@ methods. Internal methods are usually preceded with a _
 
  Title   : new
  Function: Create a new Bio::Community::Individual object
- Usage   : $member = Bio::Community::Individual->new( );
+ Usage   : my $member = Bio::Community::Individual->new( );
  Args    : 
  Returns : a new Bio::Community::Individual object
 

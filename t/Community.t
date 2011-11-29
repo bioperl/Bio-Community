@@ -8,7 +8,8 @@ use_ok($_) for qw(
     Bio::Community
 );
 
-my ($community, $member1, $member2, $member3);
+my ($community, $member1, $member2, $member3, $richness);
+my @members;
 
 ok $community = Bio::Community->new();
 
@@ -30,13 +31,27 @@ $member3 = Bio::Community::Member->new();
 ok $community->add_member( $member3, 4 );
 is $community->total_count, 28;
 
+$richness = 0;
+for my $member ($community->next_member) {
+   isa_ok $member, 'Bio::Community::Member';
+   $richness++;
+}
+###is $richness, 3
+
+ok @members = $community->all_members;
+is scalar(@members), 3;
+for my $member (@members) {
+   isa_ok $member, 'Bio::Community::Member';
+}
+
 ok $community->remove_member( $member2 );
 is $community->total_count, 27;
 
 ok $community->remove_member( $member2, 22 );
 is $community->total_count, 5;
 
-# Now member 2 is gone from the community
+ok @members = $community->all_members;
+is scalar(@members), 2;
 
 done_testing();
 
