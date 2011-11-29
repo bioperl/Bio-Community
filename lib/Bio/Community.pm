@@ -108,6 +108,7 @@ extends 'Bio::Root::Root';
 has total_count => (
    is => 'ro',
    isa => 'StrictlyPositiveInt',
+   #### TODO: initialize to zero
 );
 
 
@@ -174,7 +175,8 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
 =cut
 
 method next_member {
-   #### display an error if community was changed
+   #### TODO: display an error if community was changed
+   #### TODO: avoid doing a copy of the hash... that defeats the purpose
    my (undef, $member) = each %{$self->{_members}};
    return $member;
 }
@@ -197,12 +199,18 @@ method all_members {
 
 
 =head2 num_members
+   
+TODO
 
 =cut
+
 
 =head2 get_member_by_id
 
+TODO
+
 =cut
+
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

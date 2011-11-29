@@ -8,8 +8,9 @@ use_ok($_) for qw(
     Bio::Community
 );
 
-my ($community, $member1, $member2, $member3, $richness);
-my @members;
+my ($community, $member1, $member2, $member3);
+my  @members;
+my  %ids;
 
 ok $community = Bio::Community->new();
 
@@ -31,18 +32,19 @@ $member3 = Bio::Community::Member->new();
 ok $community->add_member( $member3, 4 );
 is $community->total_count, 28;
 
-$richness = 0;
-for my $member ($community->next_member) {
+while (my $member = $community->next_member) {
    isa_ok $member, 'Bio::Community::Member';
-   $richness++;
+   $ids{$member->id} = undef;
 }
-###is $richness, 3
+is_deeply [sort keys %ids], [1, 2, 3];
 
+%ids = ();
 ok @members = $community->all_members;
-is scalar(@members), 3;
 for my $member (@members) {
    isa_ok $member, 'Bio::Community::Member';
+   $ids{$member->id} = undef;
 }
+is_deeply [sort keys %ids], [1, 2, 3];
 
 ok $community->remove_member( $member2 );
 is $community->total_count, 27;
@@ -50,8 +52,14 @@ is $community->total_count, 27;
 ok $community->remove_member( $member2, 22 );
 is $community->total_count, 5;
 
+@members = ();
+%ids = ();
 ok @members = $community->all_members;
-is scalar(@members), 2;
+for my $member (@members) {
+   $ids{$member->id} = undef;
+}
+is_deeply [sort keys %ids], [1, 3];
+
 
 done_testing();
 
