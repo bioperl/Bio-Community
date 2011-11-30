@@ -192,6 +192,15 @@ has _richness => (
 );
 
 
+has _members_iterator => (
+   is => 'rw',
+   isa => 'Maybe[HashRef]',
+   lazy => 1,
+   default => undef,
+   init_arg => undef,
+);
+
+
 =head2 add_member
 
  Title   : add_member
@@ -257,10 +266,10 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
 =cut
 
 method next_member {
-   #### TODO: display an error if community was changed
-   #### TODO: avoid doing a copy of the hash... that defeats the purpose
-   #### TODO: maybe use MooseX::Iterator for HashRef
-   my (undef, $member) = each %{$self->_members};
+   if (not defined $self->_members_iterator) {
+      $self->_members_iterator($self->_members);
+   }
+   my (undef, $member) = each %{$self->_members_iterator};
    return $member;
 }
 
@@ -406,6 +415,7 @@ method _has_changed {
    # Re-initialize some attributes when the community has changed:
    $self->_ranks( {} );
    $self->_richness( undef );
+   $self->_members_iterator( undef );
    return 1;
 }
 
