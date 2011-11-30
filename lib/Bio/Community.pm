@@ -147,7 +147,7 @@ has use_weights => (
 =cut
 
 has total_count => (
-   is => 'ro',
+   is => 'rw',
    isa => 'PositiveInt',
    lazy => 1,
    default => 0,
@@ -155,13 +155,22 @@ has total_count => (
 );
 
 
-## 
-#has _members => (
-#   is => 'rw',
-##   isa => 'PositiveInt',
-#   lazy => 1,
-#   init_arg => undef,
-#);
+has _members => (
+   is => 'rw',
+   isa => 'HashRef',
+   lazy => 1,
+   default => sub{ {} },
+   init_arg => undef,
+);
+
+
+has _counts => (
+   is => 'rw',
+   isa => 'HashRef',
+   lazy => 1,
+   default => sub{ {} },
+   init_arg => undef,
+);
 
 
 =head2 add_member
@@ -177,9 +186,9 @@ has total_count => (
 
 method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
    my $member_id = $member->id;
-   $self->{_counts}->{$member_id} += $count;
-   $self->{_members}->{$member_id} = $member;
-   $self->{total_count} += $count;
+   $self->_counts->{$member_id} += $count;
+   $self->_members->{$member_id} = $member;
+   $self->total_count( $self->total_count + $count );
    return 1;
 }
 
@@ -198,7 +207,7 @@ method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count =
 method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
    # Sanity checks
    my $member_id = $member->id;
-   my $counts = $self->{_counts};
+   my $counts = $self->_counts;
    if (not exists $counts->{$member_id}) {
       die "Error: Could not remove member because it did not exist in the community\n";
    }
@@ -209,9 +218,9 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
    $counts->{$member_id} -= $count;
    if ($counts->{$member_id} == 0) {
       delete $counts->{$member_id};
-      delete $self->{_members}->{$member_id};
+      delete $self->_members->{$member_id};
    }
-   $self->{total_count} -= $count;
+   $self->total_count( $self->total_count - $count );
    return 1;
 }
 
@@ -230,7 +239,7 @@ method next_member {
    #### TODO: display an error if community was changed
    #### TODO: avoid doing a copy of the hash... that defeats the purpose
    #### TODO: maybe use MooseX::Iterator for HashRef
-   my (undef, $member) = each %{$self->{_members}};
+   my (undef, $member) = each %{$self->_members};
    return $member;
 }
 
@@ -246,7 +255,7 @@ method next_member {
 =cut
 
 method all_members {
-   my @members = values %{$self->{_members}};
+   my @members = values %{$self->_members};
    return @members;
 }
 
@@ -283,7 +292,7 @@ method richness {
 =cut
 
 method get_member_by_id (Int $member_id) {
-   return $self->{_members}->{$member_id};
+   return $self->_members->{$member_id};
 }
 
 
@@ -299,7 +308,7 @@ method get_member_by_id (Int $member_id) {
 =cut
 
 method get_count (Bio::Community::Member $member) {
-   return $self->{_counts}->{$member->id} || 0;
+   return $self->_counts->{$member->id} || 0;
 }
 
 
