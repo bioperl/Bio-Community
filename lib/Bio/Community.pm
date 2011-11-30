@@ -133,6 +133,7 @@ has use_weights => (
    isa => 'Bool',
    lazy => 1,
    default => 0,
+   trigger => \&_has_changed,
 );
 
 
@@ -182,6 +183,15 @@ has _ranks => (
 );
 
 
+has _richness => (
+   is => 'rw',
+   isa => 'Maybe[Int]',
+   lazy => 1,
+   default => undef,
+   init_arg => undef,
+);
+
+
 =head2 add_member
 
  Title   : add_member
@@ -198,6 +208,7 @@ method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count =
    $self->_counts->{$member_id} += $count;
    $self->_members->{$member_id} = $member;
    $self->total_count( $self->total_count + $count );
+   $self->_has_changed;
    return 1;
 }
 
@@ -230,6 +241,7 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
       delete $self->_members->{$member_id};
    }
    $self->total_count( $self->total_count - $count );
+   $self->_has_changed;
    return 1;
 }
 
@@ -269,24 +281,26 @@ method all_members {
 }
 
 
-=head2 richness
+=head2 get_richness
    
- Title   : richness
+ Title   : get_richness
  Function: Report the community richness or number of different types of members
- Usage   : my $richness = $community->num_members();
+ Usage   : my $richness = $community->get_richness();
  Args    : none
  Returns : integer for the richness
 
 =cut
 
-method richness {
-   #### TODO: do not re-calculate this if it has already been calculated and 
-   ####       the community has not changed
-   my $num_members = 0;
-   while ($self->next_member) {
-      $num_members++;
+method get_richness {
+   if (not defined $self->_richness) {
+      # Calculate richness only if it has not previously been calculated
+      my $num_members = 0;
+      while ($self->next_member) {
+         $num_members++;
+      }
+      $self->_richness($num_members);
    }
-   return $num_members;
+   return $self->_richness;
 }
 
 
@@ -363,16 +377,15 @@ method get_rel_ab (Bio::Community::Member $member) {
 method get_rank (Bio::Community::Member $member) {
    my $rank = undef;
    my $member_id = $member->id;
-   if ( $self->get_member_by_id($member_id) ) {
-      # TODO: do not recalculate if the community has not changed
-      # Calculate the ranks if the member exists, the ranks have not already been sorted 
-      $self->_sort_ranks() if scalar keys %{$self->_ranks} == 0;
+   if ( $self->get_member_by_id($member_id) && scalar keys %{$self->_ranks} == 0 ) {
+      # Calculate the ranks if the member exists and the ranks do not already exist
+      $self->_calc_ranks();
    }
    return $self->_ranks->{$member->id} || undef;
 }
 
 
-method _sort_ranks {
+method _calc_ranks {
    my $members = [ $self->all_members ];
    my $rel_abs = [ ];
    for my $member (@$members) {
@@ -389,19 +402,27 @@ method _sort_ranks {
 }
 
 
+method _has_changed {
+   # Re-initialize some attributes when the community has changed:
+   $self->_ranks( {} );
+   $self->_richness( undef );
+   return 1;
+}
+
+
 sub _two_array_sort {
-  # Sort 2 arrays by doing an decreasing numeric sort of the first one and
-  # keeping the match of the elements of the second with those of the first one
-  my ($l1, $l2) = @_;
-  my @ids = map { [ $$l1[$_], $$l2[$_] ] } (0..$#$l1);
-  @ids = sort { $b->[0] <=> $a->[0] } @ids;
-  my @k1;
-  my @k2;
-  for (my $i = 0; $i < scalar @ids; $i++) {
-    $k1[$i] = $ids[$i][0];
-    $k2[$i] = $ids[$i][1];
-  }
-  return \@k1, \@k2;
+   # Sort 2 arrays by doing an decreasing numeric sort of the first one and
+   # keeping the match of the elements of the second with those of the first one
+   my ($l1, $l2) = @_;
+   my @ids = map { [ $$l1[$_], $$l2[$_] ] } (0..$#$l1);
+   @ids = sort { $b->[0] <=> $a->[0] } @ids;
+   my @k1;
+   my @k2;
+   for (my $i = 0; $i < scalar @ids; $i++) {
+      $k1[$i] = $ids[$i][0];
+      $k2[$i] = $ids[$i][1];
+   }
+   return \@k1, \@k2;
 }
 
 

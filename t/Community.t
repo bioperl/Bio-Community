@@ -51,7 +51,7 @@ while (my $member = $community->next_member) {
 }
 is_deeply [sort keys %ids], [1, 2, 3];
 
-is $community->richness, 3;
+is $community->get_richness, 3;
 
 %ids = ();
 ok @members = $community->all_members;
@@ -81,7 +81,7 @@ for my $member (@members) {
 }
 is_deeply [sort keys %ids], [1, 3];
 
-is $community->richness, 2;
+is $community->get_richness, 2;
 
 is $community->name, 'Unnamed community';
 ok $community->name('ocean sample 3');
@@ -93,9 +93,9 @@ is $community->get_count($member3), 4;
 is $community->get_count($member1), 1;
 is $community->get_count($member2), 0;
 
-#is $community->get_rank($member3), 1;
-#is $community->get_rank($member1), 2;
-#is $community->get_rank($member2), undef;
+is $community->get_rank($member3), 1;
+is $community->get_rank($member1), 2;
+is $community->get_rank($member2), undef;
 
 for my $member ($community->all_members) {
    $rel_abs{$member->id} = $community->get_rel_ab($member);
