@@ -149,6 +149,10 @@ after id => sub {
 
 
 ####
+# TODO:
+# For on the fly attributes: http://stackoverflow.com/questions/3996067/how-can-i-flexibly-add-data-to-moose-objects
+# For flexible attributes: https://github.com/cjfields/biome/blob/master/lib/Biome/Role/Identifiable.pm
+# 
 # has desc
 # has seq
 # has taxon

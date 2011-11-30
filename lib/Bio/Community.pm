@@ -173,6 +173,15 @@ has _counts => (
 );
 
 
+has _ranks => (
+   is => 'rw',
+   isa => 'HashRef',
+   lazy => 1,
+   default => sub{ {} },
+   init_arg => undef,
+);
+
+
 =head2 add_member
 
  Title   : add_member
@@ -346,15 +355,53 @@ method get_rel_ab (Bio::Community::Member $member) {
            most abundant has rank 2, etc.
  Usage   : my $rank = $community->get_rank($member);
  Args    : a Bio::Community::Member object
- Returns : integer for the abundance rank of this member
+ Returns : integer for the abundance rank of this member or undef if the member 
+           was not found
 
 =cut
 
 method get_rank (Bio::Community::Member $member) {
-   my $rank = 0;
-   # TODO: call a _sort_ranks() method
-   #       report rank
-   return $rank;
+   my $rank = undef;
+   my $member_id = $member->id;
+   if ( $self->get_member_by_id($member_id) ) {
+      # TODO: do not recalculate if the community has not changed
+      # Calculate the ranks if the member exists, the ranks have not already been sorted 
+      $self->_sort_ranks() if scalar keys %{$self->_ranks} == 0;
+   }
+   return $self->_ranks->{$member->id} || undef;
+}
+
+
+method _sort_ranks {
+   my $members = [ $self->all_members ];
+   my $rel_abs = [ ];
+   for my $member (@$members) {
+      push @$rel_abs, $self->get_rel_ab($member);
+   }
+   ($rel_abs, $members) = _two_array_sort($rel_abs, $members);
+ 
+   my $ranks = $self->_ranks;
+   for my $rank (1 .. scalar @$members) {
+      my $member = $$members[$rank-1];
+      $ranks->{$member->id} = $rank;
+   }
+   return 1;
+}
+
+
+sub _two_array_sort {
+  # Sort 2 arrays by doing an decreasing numeric sort of the first one and
+  # keeping the match of the elements of the second with those of the first one
+  my ($l1, $l2) = @_;
+  my @ids = map { [ $$l1[$_], $$l2[$_] ] } (0..$#$l1);
+  @ids = sort { $b->[0] <=> $a->[0] } @ids;
+  my @k1;
+  my @k2;
+  for (my $i = 0; $i < scalar @ids; $i++) {
+    $k1[$i] = $ids[$i][0];
+    $k2[$i] = $ids[$i][1];
+  }
+  return \@k1, \@k2;
 }
 
 

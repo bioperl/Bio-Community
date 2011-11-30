@@ -12,6 +12,8 @@ my ($community, $member1, $member2, $member3);
 my (%ids, %rel_abs);
 my  @members;
 
+# Add 3 members to a community
+
 ok $community = Bio::Community->new();
 
 isa_ok $community, 'Bio::Root::RootI';
@@ -34,7 +36,14 @@ is $community->total_count, 28;
 
 isa_ok $community->get_member_by_id(2), 'Bio::Community::Member';
 is $community->get_member_by_id(2)->id, 2;
+
 is $community->get_count($member2), 23;
+is $community->get_count($member3), 4;
+is $community->get_count($member1), 1;
+
+is $community->get_rank($member2), 1;
+is $community->get_rank($member3), 2;
+is $community->get_rank($member1), 3;
 
 while (my $member = $community->next_member) {
    isa_ok $member, 'Bio::Community::Member';
@@ -51,6 +60,9 @@ for my $member (@members) {
    $ids{$member->id} = undef;
 }
 is_deeply [sort keys %ids], [1, 2, 3];
+
+
+# Remove a member from the community
 
 ok $community->remove_member( $member2 );
 is $community->total_count, 27;
@@ -76,6 +88,14 @@ ok $community->name('ocean sample 3');
 is $community->name, 'ocean sample 3';
 
 is $community->use_weights, 0;
+
+is $community->get_count($member3), 4;
+is $community->get_count($member1), 1;
+is $community->get_count($member2), 0;
+
+#is $community->get_rank($member3), 1;
+#is $community->get_rank($member1), 2;
+#is $community->get_rank($member2), undef;
 
 for my $member ($community->all_members) {
    $rel_abs{$member->id} = $community->get_rel_ab($member);
