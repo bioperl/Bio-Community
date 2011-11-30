@@ -258,7 +258,9 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
 =head2 next_member
 
  Title   : next_member
- Function: Access the next member in a community (in no specific order).
+ Function: Access the next member in a community (in no specific order). Be
+           warned that each time you change the community, this iterator has to
+           start again from scratch!
  Usage   : my $member = $community->next_member();
  Args    : none
  Returns : a Bio::Community::Member object
@@ -384,7 +386,6 @@ method get_rel_ab (Bio::Community::Member $member) {
 =cut
 
 method get_rank (Bio::Community::Member $member) {
-   my $rank = undef;
    my $member_id = $member->id;
    if ( $self->get_member_by_id($member_id) && scalar keys %{$self->_ranks} == 0 ) {
       # Calculate the ranks if the member exists and the ranks do not already exist
@@ -412,7 +413,8 @@ method _calc_ranks {
 
 
 method _has_changed {
-   # Re-initialize some attributes when the community has changed:
+   # Re-initialize some attributes when the community has changed
+   # TODO: stop this hand-coded madness and have a function to initialize 
    $self->_ranks( {} );
    $self->_richness( undef );
    $self->_members_iterator( undef );
