@@ -13,11 +13,11 @@ my $build = Module::Build->new(
     license              => 'perl',
     recursive_test_files => 1,
     create_license       => 1,
-    #meta_merge           => {
-    #                         'resources' => {
-    #                                         'repository' => '',
-    #                                        },
-    #                        },
+    meta_merge           => {
+                             'resources' => {
+                                             'repository' => 'git@github.com:bioperl/Bio-Community.git',
+                                            },
+                            },
     requires             => {
                              'perl'                         => '5.10.0',
                              'Bio::Root::Version'           => '1.006900',
