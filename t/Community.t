@@ -9,8 +9,8 @@ use_ok($_) for qw(
 );
 
 my ($community, $member1, $member2, $member3);
+my (%ids, %rel_abs);
 my  @members;
-my  %ids;
 
 ok $community = Bio::Community->new();
 
@@ -77,8 +77,15 @@ is $community->name, 'ocean sample 3';
 
 is $community->use_weights, 0;
 
+for my $member ($community->all_members) {
+   $rel_abs{$member->id} = $community->get_rel_ab($member);
+}
+is_deeply \%rel_abs, { 1 => 20, 3 => 80 };
+
 ok $community->use_weights(1);
 is $community->use_weights, 1;
+
+# TODO: relative abundance tests when members are weighted
 
 done_testing();
 

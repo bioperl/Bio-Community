@@ -118,10 +118,12 @@ has name => (
 
  Title   : use_weights
  Function: Set whether or not relative abundance should be normalized by taking
-           into accout the weights of the different members.
+           into accout the weights of the different members (e.g. genome length,
+           gene copy number). Refer to the Bio::Community::Member->weights()
+           method for more details
  Usage   : $community->use_weights(1);
- Args    : 
- Returns : 
+ Args    : boolean
+ Returns : boolean
 
 =cut
 
@@ -268,7 +270,7 @@ method richness {
 =cut
 
 method get_member_by_id (Int $member_id) {
-  return $self->{_members}->{$member_id};
+   return $self->{_members}->{$member_id};
 }
 
 
@@ -284,15 +286,35 @@ method get_member_by_id (Int $member_id) {
 =cut
 
 method get_count (Bio::Community::Member $member) {
-  return $self->{_counts}->{$member->id} || 0;
+   return $self->{_counts}->{$member->id} || 0;
 }
 
 
 =head2 get_rel_ab
 
-TODO Relative abundance of a member, but need to implement weights first
+ Title   : get_rel_ab
+ Function: Determine the relative abundance (in percent) of a member in the
+           community.
+ Usage   : my $rel_ab = $community->get_rel_ab($member);
+ Args    : a Bio::Community::Member object
+ Returns : an integer between 0 and 100 for the relative abundance of this member
 
 =cut
+
+method get_rel_ab (Bio::Community::Member $member) {
+  my ($rel_ab, $weight, $weighted_count) = (0, 1, 0);
+  if ($self->use_weights) {
+     #TODO Relative abundance should take into account weights of the members
+     #$weigthed_count = $self->weighted_count;
+  } else {
+     $weighted_count = $self->total_count;
+  }
+  if ($weighted_count != 0) {
+     $rel_ab = $self->get_count($member) * 100 / ($weight * $weighted_count);
+  }
+  return $rel_ab;
+}
+
 
 
 =head2 get_rank
