@@ -75,7 +75,10 @@ is $community->name, 'Unnamed community';
 ok $community->name('ocean sample 3');
 is $community->name, 'ocean sample 3';
 
+is $community->use_weights, 0;
 
+ok $community->use_weights(1);
+is $community->use_weights, 1;
 
 done_testing();
 

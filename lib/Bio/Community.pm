@@ -114,6 +114,24 @@ has name => (
 );
 
 
+=head2 use_weights
+
+ Title   : use_weights
+ Function: Set whether or not relative abundance should be normalized by taking
+           into accout the weights of the different members.
+ Usage   : $community->use_weights(1);
+ Args    : 
+ Returns : 
+
+=cut
+
+has use_weights => (
+   is => 'rw',
+   isa => 'Bool',
+   default => 0,
+);
+
+
 =head2 total_count
 
  Title   : total_count
@@ -196,6 +214,7 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
 method next_member {
    #### TODO: display an error if community was changed
    #### TODO: avoid doing a copy of the hash... that defeats the purpose
+   #### TODO: maybe use MooseX::Iterator for HashRef
    my (undef, $member) = each %{$self->{_members}};
    return $member;
 }
@@ -269,11 +288,9 @@ method get_count (Bio::Community::Member $member) {
 }
 
 
-
 =head2 get_rel_ab
 
-TODO
-Relative abundance of a member
+TODO Relative abundance of a member, but need to implement weights first
 
 =cut
 
