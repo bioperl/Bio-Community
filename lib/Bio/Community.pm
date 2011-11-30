@@ -110,6 +110,7 @@ extends 'Bio::Root::Root';
 has name => (
    is => 'rw',
    isa => 'Str',
+   lazy => 1,
    default => 'Unnamed community',
 );
 
@@ -130,6 +131,7 @@ has name => (
 has use_weights => (
    is => 'rw',
    isa => 'Bool',
+   lazy => 1,
    default => 0,
 );
 
@@ -147,8 +149,19 @@ has use_weights => (
 has total_count => (
    is => 'ro',
    isa => 'PositiveInt',
+   lazy => 1,
    default => 0,
+   init_arg => undef,
 );
+
+
+## 
+#has _members => (
+#   is => 'rw',
+##   isa => 'PositiveInt',
+#   lazy => 1,
+#   init_arg => undef,
+#);
 
 
 =head2 add_member
@@ -316,13 +329,24 @@ method get_rel_ab (Bio::Community::Member $member) {
 }
 
 
-
 =head2 get_rank
 
-TODO
-Abundance rank of a member
+ Title   : get_rank
+ Function: Determine the abundance rank of a member in the community. The
+           organism with the highest relative abundance has rank 1, the second-
+           most abundant has rank 2, etc.
+ Usage   : my $rank = $community->get_rank($member);
+ Args    : a Bio::Community::Member object
+ Returns : integer for the abundance rank of this member
 
 =cut
+
+method get_rank (Bio::Community::Member $member) {
+   my $rank = 0;
+   # TODO: call a _sort_ranks() method
+   #       report rank
+   return $rank;
+}
 
 
 no Moose;
