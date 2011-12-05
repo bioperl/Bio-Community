@@ -149,11 +149,12 @@ has use_weights => (
 =cut
 
 has total_count => (
-   is => 'rw',
+   is => 'ro',
    isa => 'PositiveInt',
    lazy => 1,
    default => 0,
    init_arg => undef,
+   writer => '_set_total_count',
 );
 
 
@@ -181,6 +182,7 @@ has _ranks => (
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
+   clearer => '_clear_ranks',
 );
 
 
@@ -190,6 +192,7 @@ has _richness => (
    lazy => 1,
    default => undef,
    init_arg => undef,
+   clearer => '_clear_richness',
 );
 
 
@@ -199,6 +202,7 @@ has _members_iterator => (
    lazy => 1,
    default => undef,
    init_arg => undef,
+   clearer => '_clear_members_iterator',
 );
 
 
@@ -217,7 +221,7 @@ method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count =
    my $member_id = $member->id;
    $self->_counts->{$member_id} += $count;
    $self->_members->{$member_id} = $member;
-   $self->total_count( $self->total_count + $count );
+   $self->_set_total_count( $self->total_count + $count );
    $self->_has_changed;
    return 1;
 }
@@ -250,7 +254,7 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
       delete $counts->{$member_id};
       delete $self->_members->{$member_id};
    }
-   $self->total_count( $self->total_count - $count );
+   $self->_set_total_count( $self->total_count - $count );
    $self->_has_changed;
    return 1;
 }
@@ -416,9 +420,9 @@ method _calc_ranks {
 method _has_changed {
    # Re-initialize some attributes when the community has changed
    # TODO: stop this hand-coded madness and have a function to initialize 
-   $self->_ranks( {} );
-   $self->_richness( undef );
-   $self->_members_iterator( undef );
+   $self->_clear_ranks();
+   $self->_clear_richness();
+   $self->_clear_members_iterator();
    return 1;
 }
 
