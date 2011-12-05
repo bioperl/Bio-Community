@@ -103,6 +103,7 @@ package Bio::Community::Member;
 use Moose;
 use MooseX::NonMoose;
 use Moose::Util::TypeConstraints;
+use namespace::autoclean;
 
 extends 'Bio::Root::Root';
 
@@ -160,6 +161,6 @@ after id => sub {
 ####
 
 
-no Moose;
 __PACKAGE__->meta->make_immutable;
+
 1;

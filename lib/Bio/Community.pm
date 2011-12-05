@@ -91,6 +91,7 @@ package Bio::Community;
 use Moose;
 use MooseX::NonMoose;
 use MooseX::Method::Signatures;
+use namespace::autoclean;
 use Bio::Community::Member;
 
 extends 'Bio::Root::Root';
@@ -438,6 +439,6 @@ sub _two_array_sort {
 }
 
 
-no Moose;
 __PACKAGE__->meta->make_immutable;
+
 1;
