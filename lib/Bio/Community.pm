@@ -47,8 +47,6 @@ accepts the following parameters:
 
 =head1 OBJECT METHODS
 
-=back
-
 =head1 FEEDBACK
 
 =head2 Mailing Lists
@@ -107,7 +105,9 @@ use Moose;
 use MooseX::NonMoose;
 use MooseX::Method::Signatures;
 use namespace::autoclean;
+
 use Bio::Community::Member;
+
 
 extends 'Bio::Root::Root';
 
@@ -172,6 +172,14 @@ has total_count => (
    default => 0,
    init_arg => undef,
    writer => '_set_total_count',
+);
+
+has _weighted_count => (
+   is => 'rw',
+   isa => 'PositiveNum',
+   lazy => 1,
+   default => 0,
+   init_arg => undef,
 );
 
 
@@ -239,6 +247,7 @@ method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count =
    $self->_counts->{$member_id} += $count;
    $self->_members->{$member_id} = $member;
    $self->_set_total_count( $self->total_count + $count );
+   $self->_weighted_count( $self->_weighted_count + $count / _prod(@{$member->weights}) );
    $self->_has_changed;
    return 1;
 }
@@ -272,6 +281,7 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
       delete $self->_members->{$member_id};
    }
    $self->_set_total_count( $self->total_count - $count );
+   $self->_weighted_count( $self->_weighted_count - $count / _prod(@{$member->weights}) );
    $self->_has_changed;
    return 1;
 }
@@ -380,11 +390,13 @@ method get_count (Bio::Community::Member $member) {
 =cut
 
 method get_rel_ab (Bio::Community::Member $member) {
-  my ($rel_ab, $weight, $weighted_count) = (0, 1, 0);
+  my $rel_ab = 0;
+  my ($weight, $weighted_count);
   if ($self->use_weights) {
-     #TODO Relative abundance should take into account weights of the members
-     #$weigthed_count = $self->weighted_count;
+     $weight = _prod( @{$member->weights} );
+     $weighted_count = $self->_weighted_count;
   } else {
+     $weight = 1;
      $weighted_count = $self->total_count;
   }
   if ($weighted_count != 0) {
@@ -436,7 +448,6 @@ method _calc_ranks {
 
 method _has_changed {
    # Re-initialize some attributes when the community has changed
-   # TODO: stop this hand-coded madness and have a function to initialize 
    $self->_clear_ranks();
    $self->_clear_richness();
    $self->_clear_members_iterator();
@@ -457,6 +468,15 @@ sub _two_array_sort {
       $k2[$i] = $ids[$i][1];
    }
    return \@k1, \@k2;
+}
+
+
+sub _prod {
+   # Calculate the product of the numbers in an array
+   my (@arr) = @_;
+   my $prod = 1;
+   $prod *= $_ for @arr;
+   return $prod;
 }
 
 

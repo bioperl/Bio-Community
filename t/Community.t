@@ -12,6 +12,7 @@ my ($community, $member1, $member2, $member3);
 my (%ids, %rel_abs);
 my  @members;
 
+
 # Add 3 members to a community
 
 ok $community = Bio::Community->new( -name => 'simple', -use_weights => 0 );
@@ -22,7 +23,7 @@ isa_ok $community, 'Bio::Community';
 $community = Bio::Community->new();
 is $community->total_count, 0;
 
-$member1 = Bio::Community::Member->new();
+$member1 = Bio::Community::Member->new( -weights => [2] );
 ok $community->add_member( $member1 );
 is $community->total_count, 1;
 
@@ -30,7 +31,7 @@ $member2 = Bio::Community::Member->new();
 ok $community->add_member( $member2, 23 );
 is $community->total_count, 24;
 
-$member3 = Bio::Community::Member->new();
+$member3 = Bio::Community::Member->new( -weights => [1,3] );
 ok $community->add_member( $member3, 4 );
 is $community->total_count, 28;
 
@@ -105,7 +106,11 @@ is_deeply \%rel_abs, { 1 => 20, 3 => 80 };
 ok $community->use_weights(1);
 is $community->use_weights, 1;
 
-# TODO: relative abundance tests when members are weighted
+for my $member ($community->all_members) {
+   $rel_abs{$member->id} = $community->get_rel_ab($member);
+}
+is_deeply \%rel_abs, { 1 => 27.2727272727273, 3 => 72.7272727272728 };
+
 
 done_testing();
 

@@ -85,6 +85,7 @@ is_deeply $member->weights(), [4124];
 ok $member = Bio::Community::Member->new( );
 is_deeply $member->weights, [ 1 ];
 
+
 done_testing();
 
 exit;
