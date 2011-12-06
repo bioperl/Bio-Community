@@ -1,17 +1,22 @@
 use strict;
 use warnings;
 use Bio::Root::Test;
+
 use Bio::Taxon;
+use Bio::Seq;
+use Bio::PrimarySeq;
 
 use_ok($_) for qw(
     Bio::Community::Member
 );
 
-my ($member, $taxon);
+my ($member, $taxon, $sequence1, $sequence2);
 
 
 # Test object type
+
 ok $member = Bio::Community::Member->new( );
+
 isa_ok $member, 'Bio::Root::RootI';
 isa_ok $member, 'Bio::Community::Member';
 
@@ -52,6 +57,21 @@ is $member->taxon(), $taxon;
 
 ok $member = Bio::Community::Member->new( );
 is $member->taxon, undef;
+
+
+# Test sequences
+
+$sequence1 = Bio::PrimarySeq->new( -seq => 'AACGT' );
+$sequence2 = Bio::PrimarySeq->new( -seq => 'AACGAAAAA' );
+ok $member = Bio::Community::Member->new( -seqs => [ $sequence1, $sequence2 ] ), 'Sequences';
+is_deeply $member->seqs(), [$sequence1, $sequence2];
+
+$sequence1 = Bio::PrimarySeq->new( -seq => 'AACGAAAAA' );
+ok $member->seqs([$sequence1]);
+is_deeply $member->seqs(), [$sequence1];
+
+ok $member = Bio::Community::Member->new( );
+is_deeply $member->seqs, [];
 
 
 done_testing();

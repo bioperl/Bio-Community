@@ -109,7 +109,8 @@ use Bio::Community::Types;
 extends 'Bio::Root::Root';
 
 with 'Bio::Community::Role::Described',  # -desc
-     'Bio::Community::Role::Classified'; # -taxon
+     'Bio::Community::Role::Classified', # -taxon
+     'Bio::Community::Role::Sequenced';  # -seqs
 
 my %ids = ();
 my $last_id = 1;
@@ -154,7 +155,6 @@ method BUILD {
 # For on the fly attributes: http://stackoverflow.com/questions/3996067/how-can-i-flexibly-add-data-to-moose-objects
 # For flexible attributes: https://github.com/cjfields/biome/blob/master/lib/Biome/Role/Identifiable.pm
 # 
-# has seq
 # has weights
 ####
 
