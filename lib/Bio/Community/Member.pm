@@ -107,6 +107,9 @@ use Bio::Community::Types;
 
 extends 'Bio::Root::Root';
 
+with 'Bio::Community::Role::Described',
+     'Bio::Community::Role::Classified';
+
 my %ids = ();
 my $last_id = 1;
 
