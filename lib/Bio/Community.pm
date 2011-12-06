@@ -94,7 +94,7 @@ methods. Internal methods are usually preceded with a _
  Function: Create a new Bio::Community object
  Usage   : my $community = Bio::Community->new( ... );
  Args    : 
- Returns : a new Bio::Community::Individual object
+ Returns : a new Bio::Community object
 
 =cut
 
@@ -269,10 +269,10 @@ method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $coun
    my $member_id = $member->id;
    my $counts = $self->_counts;
    if (not exists $counts->{$member_id}) {
-      die "Error: Could not remove member because it did not exist in the community\n";
+      $self->throw("Error: Could not remove member because it did not exist in the community\n");
    }
    if ($count > $counts->{$member_id}) {
-      die "Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n";
+      $self->throw("Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n");
    }
    # Now remove unwanted members
    $counts->{$member_id} -= $count;

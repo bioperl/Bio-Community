@@ -14,7 +14,7 @@ Bio::Community::Member - The basic constituent of a biological community
 
 =head1 SYNOPSIS
 
-  use Bio::Member;
+  use Bio::Community::Member;
 
   my $member1 = Bio::Community::Member->new( -id => 2 );
   my $member1_id = $member1->id;
@@ -90,10 +90,10 @@ methods. Internal methods are usually preceded with a _
 =head2 new
 
  Title   : new
- Function: Create a new Bio::Community::Individual object
- Usage   : my $member = Bio::Community::Individual->new( );
+ Function: Create a new Bio::Community::Member object
+ Usage   : my $member = Bio::Community::Member->new( );
  Args    : 
- Returns : a new Bio::Community::Individual object
+ Returns : a new Bio::Community::Member object
 
 =cut
 
@@ -155,8 +155,6 @@ method BUILD {
 # TODO:
 # For on the fly attributes: http://stackoverflow.com/questions/3996067/how-can-i-flexibly-add-data-to-moose-objects
 # For flexible attributes: https://github.com/cjfields/biome/blob/master/lib/Biome/Role/Identifiable.pm
-# 
-# has weights
 ####
 
 
