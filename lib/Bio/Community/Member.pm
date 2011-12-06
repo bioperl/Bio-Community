@@ -16,7 +16,7 @@ Bio::Community::Member - The basic constituent of a biological community
 
   use Bio::Member;
 
-  my $member1 = Bio::Community::Member->new({ id => 2 });
+  my $member1 = Bio::Community::Member->new( -id => 2 );
   my $member1_id = $member1->id;
 
   my $member2 = Bio::Community::Member->new( );
@@ -31,7 +31,7 @@ you like.
 
 =head2 Bio::Community::Member->new()
 
-   $member = Bio::Community::Member->new();
+   my $member = Bio::Community::Member->new();
 
 The new() class method constructs a new Bio::Community::Member object and
 accepts the following parameters:

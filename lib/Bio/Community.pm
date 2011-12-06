@@ -15,6 +15,21 @@ Bio::Community - A biological community
 =head1 SYNOPSIS
 
   use Bio::Community;
+  
+  my $community = Bio::Community->new( -name => 'soil_1' );
+  $community->add_member( $member1 );    # add 1 of this type of Bio::Community::Member
+  $community->add_member( $member2, 3 ); # add 3 of this member
+
+  print "There are ".$community->total_count." members in the community\n";
+  print "The total diversity is ".$community->richness." species\n";
+
+  while (my $member = $community->next_member) {
+     my $member_id     = $member->id;
+     my $member_count  = $community->get_count($member);
+     my $member_rel_ab = $community->get_rel_ab($member);
+     print "The relative abundance of member $member_id is $member_rel_ab % ($member_count counts)\n";
+  }
+  
 
 =head1 DESCRIPTION
 
@@ -25,7 +40,7 @@ abundance.
 
 =head2 Bio::Community->new()
 
-   $member = Bio::Community::Member->new();
+   my $community = Bio::Community::Community->new();
 
 The new() class method constructs a new Bio::Community::Member object and
 accepts the following parameters:
