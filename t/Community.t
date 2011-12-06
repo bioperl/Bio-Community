@@ -14,7 +14,7 @@ my  @members;
 
 # Add 3 members to a community
 
-ok $community = Bio::Community->new();
+ok $community = Bio::Community->new( -name => 'simple', -use_weights => 0 );
 
 isa_ok $community, 'Bio::Root::RootI';
 isa_ok $community, 'Bio::Community';

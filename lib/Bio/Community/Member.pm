@@ -125,6 +125,7 @@ has id => (
    is => 'ro',
    isa => 'StrictlyPositiveInt',
    required => 0,
+   init_arg => '-id',
    default => sub {
          while (exists $ids{$last_id}) { $last_id++; };
          return $last_id;

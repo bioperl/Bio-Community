@@ -113,6 +113,7 @@ has name => (
    isa => 'Str',
    lazy => 1,
    default => 'Unnamed community',
+   init_arg => '-name',
 );
 
 
@@ -134,6 +135,7 @@ has use_weights => (
    isa => 'Bool',
    lazy => 1,
    default => 0,
+   init_arg => '-use_weights',
    trigger => \&_has_changed,
 );
 

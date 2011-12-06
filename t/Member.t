@@ -8,7 +8,7 @@ use_ok($_) for qw(
 
 my $member;
 
-ok $member = Bio::Community::Member->new({ id => 2 });
+ok $member = Bio::Community::Member->new( -id => 2 );
 is $member->id(), 2;
 
 isa_ok $member, 'Bio::Root::RootI';
