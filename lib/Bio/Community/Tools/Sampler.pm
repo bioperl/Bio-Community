@@ -159,7 +159,7 @@ has _members => (
 method get_rand_member () {
    # Pick a random member based on the community's cdf
    my $cdf = $self->_cdf;
-   my $rand_pick = rand(); 
+   my $rand_pick = rand();
    my $index = first {$rand_pick < $$cdf[$_+1]} (0 .. scalar @$cdf - 2);
    return ${$self->_members}[$index];
 }
@@ -183,21 +183,23 @@ method get_rand_community ( StrictlyPositiveInt $total_count = 1 ) {
 
 
 method _calc_cdf () {
-   # Calculate the cumulative density function for the members of this community
+   # Sort the members of the community by decreasing rank and calculate the
+   # cumulative density function of their relative abundance
    my $community = $self->community;
-
-   # TODO: if we sorted the cdf by rank-abundance, we would probably get things
-   # done faster and we could use the get_member_by_rank() method
 
    my @cdf = (0);
    my @members = ();
-   my $sum = 0;
    while (my $member = $community->next_member) {
-      push @members, $member;
+      my $rank = $community->get_rank($member);
+      $members[$rank-1] = $member;
       my $rel_ab = $community->get_rel_ab($member);
-      $sum += $rel_ab / 100;
-      push @cdf, $sum;
+      $cdf[$rank] = $rel_ab / 100;
    }
+
+   for my $i ( 1 .. scalar @cdf - 1 ) {
+      $cdf[$i] += $cdf[$i-1];
+   }
+
    return \@cdf, \@members;
 }
 
