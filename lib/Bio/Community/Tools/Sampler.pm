@@ -92,12 +92,21 @@ methods. Internal methods are usually preceded with a _
 package Bio::Community::Tools::Sampler;
 
 use Moose;
+use MooseX::NonMoose;
 use MooseX::Method::Signatures;
 use namespace::autoclean;
-
+use List::Util qw( first );
 use Bio::Community;
 
 extends 'Bio::Root::Root';
+
+
+method BUILD {
+   # Prepare the CDF that we will be sampling from after new()
+   my ($cdf, $members) = $self->_calc_cdf();
+   $self->_cdf( $cdf );
+   $self->_members( $members );
+}
 
 
 =head2 community
@@ -118,54 +127,78 @@ has community => (
    init_arg => '-community',
 );
 
-after community => sub {
-   # Calculate cdf
-   my $self = shift;
-   $self->_cdf( $self->_calc_cdf() );
-};
+
+has _cdf => (
+   is => 'rw',
+   isa => 'ArrayRef[PositiveNum]',
+   lazy => 1,
+   default => sub{ [] },
+   init_arg => undef,
+);
+
+
+has _members => (
+   is => 'rw',
+   isa => 'ArrayRef[Bio::Community::Member]',
+   lazy => 1,
+   default => sub{ [] },
+   init_arg => undef,
+);
 
 
 =head2 get_rand_member
 
  Title   : get_rand_member
- Function: Get random members from the community
+ Function: Get a random member from a community
  Usage   : my $member = $sampler->get_rand_member();
- Args    : 
- Returns : a Bio::Community object
+ Args    : None
+ Returns : A Bio::Community::Member object
 
 =cut
 
 method get_rand_member () {
-   
+   # Pick a random member based on the community's cdf
+   my $cdf = $self->_cdf;
+   my $rand_pick = rand(); 
+   my $index = first {$rand_pick < $$cdf[$_+1]} (0 .. scalar @$cdf - 2);
+   return ${$self->_members}[$index];
 }
 
 
-method get_rand_community () {
-   
+=head2 get_rand_community
+
+ Title   : get_rand_community
+ Function: Create a community from random members of a community
+ Usage   : my $ = $sampler->get_rand_member();
+ Args    : Number of members
+ Returns : A Bio::Community object
+
+=cut
+
+method get_rand_community ( StrictlyPositiveInt $total_count = 1 ) {
+   my $community = Bio::Community->new();
+   $community->add_member( $self->get_rand_member ) for (1 .. $total_count);
+   return $community;
 }
-
-
-has _cdf => (
-   is => 'rw',
-   isa => 'ArrayRef[PositiveNum]',
-   required => 1,
-   lazy => 1,
-   default => sub{ {} },
-   init_arg => undef,
-);
 
 
 method _calc_cdf () {
-   # Calculate the cumulative density function for this community
+   # Calculate the cumulative density function for the members of this community
    my $community = $self->community;
+
+   # TODO: if we sorted the cdf by rank-abundance, we would probably get things
+   # done faster and we could use the get_member_by_rank() method
+
    my @cdf = (0);
+   my @members = ();
    my $sum = 0;
    while (my $member = $community->next_member) {
+      push @members, $member;
       my $rel_ab = $community->get_rel_ab($member);
-      $sum += $rel_ab;
+      $sum += $rel_ab / 100;
       push @cdf, $sum;
    }
-   return \@cdf;
+   return \@cdf, \@members;
 }
 
 
