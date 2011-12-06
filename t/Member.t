@@ -74,6 +74,17 @@ ok $member = Bio::Community::Member->new( );
 is_deeply $member->seqs, [];
 
 
+# Test weights
+
+ok $member = Bio::Community::Member->new( -weights => [ 0.1, 3 ] ), 'Weights';
+is_deeply $member->weights(), [ 0.1, 3 ];
+
+ok $member->weights([4124]);
+is_deeply $member->weights(), [4124];
+
+ok $member = Bio::Community::Member->new( );
+is_deeply $member->weights, [ 1 ];
+
 done_testing();
 
 exit;

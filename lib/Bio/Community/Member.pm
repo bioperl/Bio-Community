@@ -108,9 +108,10 @@ use Bio::Community::Types;
 
 extends 'Bio::Root::Root';
 
-with 'Bio::Community::Role::Described',  # -desc
+with 'Bio::Community::Role::Described' , # -desc
      'Bio::Community::Role::Classified', # -taxon
-     'Bio::Community::Role::Sequenced';  # -seqs
+     'Bio::Community::Role::Sequenced' , # -seqs
+     'Bio::Community::Role::Weighted'  ; # -weights
 
 my %ids = ();
 my $last_id = 1;
