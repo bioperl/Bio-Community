@@ -103,12 +103,13 @@ package Bio::Community::Member;
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
+use MooseX::Method::Signatures;
 use Bio::Community::Types;
 
 extends 'Bio::Root::Root';
 
-with 'Bio::Community::Role::Described',
-     'Bio::Community::Role::Classified';
+with 'Bio::Community::Role::Described',  # -desc
+     'Bio::Community::Role::Classified'; # -taxon
 
 my %ids = ();
 my $last_id = 1;
@@ -133,13 +134,19 @@ has id => (
          while (exists $ids{$last_id}) { $last_id++; };
          return $last_id;
       },
+   lazy => 1,
 );
 
 after id => sub {
-   # Register ID after its assignment
+   # Register ID after it has been assigned
    my $self = shift;
    $ids{$self->{id}} = undef;
 };
+
+method BUILD {
+   # Ensure that a default ID is assigned if needed after object construction
+   $self->id;
+}
 
 
 ####
@@ -147,9 +154,7 @@ after id => sub {
 # For on the fly attributes: http://stackoverflow.com/questions/3996067/how-can-i-flexibly-add-data-to-moose-objects
 # For flexible attributes: https://github.com/cjfields/biome/blob/master/lib/Biome/Role/Identifiable.pm
 # 
-# has desc
 # has seq
-# has taxon
 # has weights
 ####
 
