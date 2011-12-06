@@ -102,24 +102,13 @@ package Bio::Community::Member;
 
 use Moose;
 use MooseX::NonMoose;
-use Moose::Util::TypeConstraints;
 use namespace::autoclean;
+use Bio::Community::Types;
 
 extends 'Bio::Root::Root';
 
-
 my %ids = ();
 my $last_id = 1;
-
-subtype 'PositiveInt'
-     => as 'Int'
-     => where { $_ >= 0 }
-     => message { 'Only positive integers accepted' };
-
-subtype 'StrictlyPositiveInt'
-     => as 'PositiveInt'
-     => where { $_ > 0 }
-     => message { 'Only strictly positive integers accepted' };
 
 
 =head2 id
