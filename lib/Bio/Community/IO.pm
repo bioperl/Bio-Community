@@ -17,16 +17,21 @@ has 'format' => (
 );
 
 
-#method BUILDER {
-   # apply the role for the proper format
+method BUILD {
+   # Apply the role for the format that is needed
+   my $role = __PACKAGE__."::".$self->format;
 
-#   my $role = 'dummy';
-   #my $role = __PACKAGE__."::".$self->format;
+   eval "require $role";
+   if ($@) {
+      my $msg = "$role cannot be found or contains errors\n".
+                "Exception: $@\n".
+                "For more information about the IO system please see the ".
+                __PACKAGE__." docs.\n";
+      $self->throw($msg);
+   }
 
-#   print "Need to apply $role to \$self\n";
-
-   #__PACKAGE__->meta->apply
-#}
+   $role->meta->apply( $self );
+}
 
 
 #method next_member {
