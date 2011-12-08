@@ -9,12 +9,23 @@ use_ok($_) for qw(
 
 my ($in);
 
-ok $in = Bio::Community::IO->new( -format => 'generic' );
+ 
+# dummy format
+
+ok $in = Bio::Community::IO->new( -format => 'dummy' );
 isa_ok $in, 'Bio::Root::RootI';
 isa_ok $in, 'Bio::Community::IO';
 
-ok $in->test('this is a test');
-is $in->test, 'this is a test';
+ok $in->dummy('this is a test');
+is $in->dummy, 'this is a test';
+
+
+# GAAS format
+
+ok $in = Bio::Community::IO->new( -file => test_input_file('gaas_compo.txt'), -format => 'gaas' );
+
+
+
 
 done_testing();
 

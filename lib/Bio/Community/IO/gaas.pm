@@ -1,10 +1,10 @@
-package Bio::Community::IO::generic;
+package Bio::Community::IO::gaas;
 
 use Moose::Role;
 use namespace::autoclean;
 
 
-has 'test' => (
+has 'dummy' => (
    is => 'rw',
    isa => 'Str',
    required => 0,
