@@ -120,10 +120,11 @@ has 'format' => (
 );
 
 
-method BUILD {
+sub BUILD {
+   my ($self, $args) = @_;
+
    # Apply the role corresponding to the format that is requested
    my $role = __PACKAGE__."::".$self->format;
-
    eval "require $role";
    if ($@) {
       my $msg = "$role cannot be found or contains errors\n".
@@ -132,8 +133,11 @@ method BUILD {
                 __PACKAGE__." docs.\n";
       $self->throw($msg);
    }
-
    $role->meta->apply( $self );
+
+   # Start IOs
+   my @args = %$args;
+   $self->_initialize_io(@args);
 }
 
 

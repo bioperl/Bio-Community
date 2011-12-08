@@ -7,12 +7,12 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $member);
+my ($in, $member, $count);
 
  
 # dummy format
 
-ok $in = Bio::Community::IO->new( -format => 'dummy' );
+ok $in = Bio::Community::IO->new( -format => 'dummy', -file => $0 );
 isa_ok $in, 'Bio::Root::RootI';
 isa_ok $in, 'Bio::Root::IO';
 isa_ok $in, 'Bio::Community::IO';
@@ -25,7 +25,7 @@ is $in->dummy, 'this is a test';
 
 ok $in = Bio::Community::IO->new( -file => test_input_file('gaas_compo.txt'), -format => 'gaas' );
 
-ok $member = $in->next_member;
+ok( ($member, $count) = $in->next_member );
 
 #while (my $community = $in->next_community) {
 #   
