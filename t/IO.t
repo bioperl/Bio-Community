@@ -27,15 +27,20 @@ is $in->dummy, 'this is a test';
 ok $in = Bio::Community::IO->new( -file => test_input_file('gaas_compo.txt'), -format => 'gaas' );
 
 @communities = ();
-while (1) {
-   ok $community = $in->next_community;
-   last if not defined $community;
+while ($community = $in->next_community) {
+   isa_ok $community, 'Bio::Community';
    push @communities, $community;
 }
-
 is scalar @communities, 1;
+$community = $communities[0];
+is $community->get_richness, 3;
 
-#### TODO: verify content and abundance of members
+ok $member = $community->next_member;
+is $community->get_rel_ab($member), 79.1035649011735;
+ok $member = $community->next_member;
+is $community->get_rel_ab($member), 1.28701423616715;
+ok $member = $community->next_member;
+is $community->get_rel_ab($member), 19.6094208626593;
 
 
 done_testing();

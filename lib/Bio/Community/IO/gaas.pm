@@ -88,18 +88,16 @@ use Bio::Community::Member;
 
 method next_member {
 
-   # Read next line and skip comment lines (such as the header line) or empty lines
+   # Read next line
    my $line;
    do {
       $line = $self->_readline;
       if (not defined $line) {
          return undef;
       }
-   } while ($line =~ m/^#/);
+   } while ( ($line =~ m/^#/) || ($line =~ m/^\s*$/) ); # skip comment and empty lines
 
-   #### TODO: skip white lines
-
-   # Parse line
+   # Parse and validate the line 
    chomp $line;
    my ($name, $id, $rel_ab) = split "\t", $line;
 
