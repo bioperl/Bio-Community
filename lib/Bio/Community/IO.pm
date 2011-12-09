@@ -148,8 +148,10 @@ sub BUILD {
  Function: Get the next member from the community and its abundance. This function
            is provided by a driver specific to each file format.
  Args    : None
- Returns : A Bio::Community::Member object
-           A positive integer (XXX or float XXX)
+ Returns : A Bio::Community::Member object, and
+           a positive integer (XXX or float XXX)
+             or
+           undef if there were no members left
 
 =cut
 
@@ -164,17 +166,22 @@ method next_member {
  Usage   : my $community = $in->next_community;
  Function: Get the next community.
  Args    : None
- Returns : A Bio::Community::Member object
-           A positive integer (XXX or float XXX)
+ Returns : A Bio::Community object
+             or
+           undef if there were no communities left
 
 =cut
 
 method next_community {
    my $community = Bio::Community->new();
    while ( my ($member, $count) = $self->next_member ) {
+
+      ### TODO: while loop should abort automatically
+      last if not defined $member;
+
       $community->add_member($member, $count);
    }
-   return $community;
+   return $community->get_richness > 0 ? $community : undef;;
 }
 
 

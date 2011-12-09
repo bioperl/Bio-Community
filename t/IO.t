@@ -7,7 +7,8 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $member, $count);
+my ($in, $community, $member, $count);
+my @communities;
 
  
 # dummy format
@@ -25,12 +26,16 @@ is $in->dummy, 'this is a test';
 
 ok $in = Bio::Community::IO->new( -file => test_input_file('gaas_compo.txt'), -format => 'gaas' );
 
-ok( ($member, $count) = $in->next_member );
+@communities = ();
+while (1) {
+   ok $community = $in->next_community;
+   last if not defined $community;
+   push @communities, $community;
+}
 
-#while (my $community = $in->next_community) {
-#   
-#}
+is scalar @communities, 1;
 
+#### TODO: verify content and abundance of members
 
 
 done_testing();
