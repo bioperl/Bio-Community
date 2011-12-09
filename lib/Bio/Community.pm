@@ -167,7 +167,7 @@ has use_weights => (
 
 has total_count => (
    is => 'ro',
-   isa => 'PositiveInt',
+   isa => 'Count', 
    lazy => 1,
    default => 0,
    init_arg => undef,
@@ -176,7 +176,7 @@ has total_count => (
 
 has _weighted_count => (
    is => 'rw',
-   isa => 'PositiveNum',
+   isa => 'Count',
    lazy => 1,
    default => 0,
    init_arg => undef,
@@ -242,7 +242,7 @@ has _members_iterator => (
 
 =cut
 
-method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
+method add_member ( Bio::Community::Member $member, Count $count = 1 ) {
    my $member_id = $member->id;
    $self->_counts->{$member_id} += $count;
    $self->_members->{$member_id} = $member;
@@ -264,7 +264,7 @@ method add_member ( Bio::Community::Member $member, StrictlyPositiveInt $count =
 
 =cut
 
-method remove_member ( Bio::Community::Member $member, StrictlyPositiveInt $count = 1 ) {
+method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
    # Sanity checks
    my $member_id = $member->id;
    my $counts = $self->_counts;
@@ -324,6 +324,34 @@ method all_members {
 }
 
 
+=head2 get_member_by_id
+
+ Title   : get_member_by_id
+ Function: Fetch a member based on its ID
+ Usage   : my $member = $community->get_member_by_id(3);
+ Args    : integer for the member ID
+ Returns : a Bio::Community::Member object or undef if member was not found
+
+=cut
+
+method get_member_by_id (Int $member_id) {
+   return $self->_members->{$member_id};
+}
+
+
+####
+# TODO: get_member_by_rank
+####
+
+####
+# TODO: get_member_by_rel_ab
+####
+
+####
+# TODO: get_member_by_count
+####
+
+
 =head2 get_richness
    
  Title   : get_richness
@@ -347,29 +375,14 @@ method get_richness {
 }
 
 
-=head2 get_member_by_id
-
- Title   : get_member_by_id
- Function: Fetch a member based on its ID
- Usage   : my $member = $community->get_member_by_id(3);
- Args    : integer for the member ID
- Returns : a Bio::Community::Member object or undef if member was not found
-
-=cut
-
-method get_member_by_id (Int $member_id) {
-   return $self->_members->{$member_id};
-}
-
-
 =head2 get_count
 
  Title   : get_count
  Function: Fetch the abundance or count of a member
  Usage   : my $count = $community->get_count($member);
  Args    : a Bio::Community::Member object
- Returns : an integer for the count of this member, including zero if the member
-           was not present in the community
+ Returns : An integer for the count of this member, including zero if the member
+           was not present in the community.
 
 =cut
 

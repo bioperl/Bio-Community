@@ -77,6 +77,15 @@ subtype 'StrictlyPositiveInt'
      => where { $_ > 0 }
      => message { 'Only strictly positive integers accepted' };
 
+
+# A Count should be a positive integer but to make things easier. We sometimes
+# do not have access to the actual count, but just the relative abundance (a
+# float) that we use as a proxy for a count.
+subtype 'Count'
+     => as 'PositiveNum';
+
+
+
 __PACKAGE__->meta->make_immutable;
 
 1;

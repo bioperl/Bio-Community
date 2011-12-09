@@ -145,16 +145,16 @@ sub BUILD {
 
  Title   : next_member
  Usage   : my ($member, $count) = $in->next_member;
- Function: Get the next member from the community and its abundance
+ Function: Get the next member from the community and its abundance. This function
+           is provided by a driver specific to each file format.
  Args    : None
- Returns : A Bio::Community::Member
+ Returns : A Bio::Community::Member object
            A positive integer (XXX or float XXX)
 
 =cut
 
 method next_member {
-   my ($member, $count) = $self->_next_member();
-   return $member, $count;
+   $self->throw_not_implemented;
 }
 
 
@@ -162,9 +162,9 @@ method next_member {
 
  Title   : next_community
  Usage   : my $community = $in->next_community;
- Function: Get the next community
+ Function: Get the next community.
  Args    : None
- Returns : A Bio::Community::Member
+ Returns : A Bio::Community::Member object
            A positive integer (XXX or float XXX)
 
 =cut
@@ -177,6 +177,37 @@ method next_community {
    return $community;
 }
 
+
+=head2 write_member
+
+ Title   : write_member
+ Usage   : $in->write_member($member, $count);
+ Function: Write the next member from the community and its abundance. This function
+           is provided by a driver specific to each file format.
+ Args    : A Bio::Community::Member object
+           A positive integer (XXX or float XXX)
+ Returns : None
+
+=cut
+
+method write_member (Bio::Community::Member $member, Count $count) {
+   $self->throw_not_implemented;
+}
+
+
+=head2 write_community
+
+ Title   : write_community
+ Usage   : $in->write_community($community);
+ Function: Write the next community.
+ Args    : A Bio::Community object
+ Returns : None
+
+=cut
+
+method write_community (Bio::Community $community) {
+   $self->throw_not_implemented;
+}
 
 
 __PACKAGE__->meta->make_immutable;

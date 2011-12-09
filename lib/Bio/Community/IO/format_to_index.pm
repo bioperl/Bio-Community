@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::IO::dummy
+# BioPerl module for Bio::Community::IO::gaas
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -10,7 +10,7 @@
 
 =head1 NAME
 
-Bio::Community::IO::dummy - Dummy driver (does nothing)
+Bio::Community::IO::gaas - Driver to read and write files in the format used by GAAS
 
 =head1 SYNOPSIS
 
@@ -58,18 +58,62 @@ Email florent.angly@gmail.com
 
 =cut
 
-package Bio::Community::IO::dummy;
-
-use Moose::Role;
-use namespace::autoclean;
-
-
-has 'dummy' => (
+has '_index' => (
    is => 'rw',
-   isa => 'Str',
+   isa => 'ArrayRef[ArrayRef[PositiveInt]]',
    required => 0,
    init_arg => undef,
+   predicate => '_has_index',
 );
+
+
+method _index_file (Str $delim) {
+   # Index the file the first time
+
+   my @arr = (); # an array of array 
+
+   while (my $line = $self->_readline) {
+
+      ####
+      print "line = $line\n";
+      ####
+
+      my $offset = 0;
+      my @matches;
+      while ( 1 ) {
+         my $match = index($line, $delim, $offset);
+         last if $match == -1;
+         push @matches, $match;
+         $offset = $match + 1;
+      }
+      for my $i ( 0 .. scalar @matches - 1) {
+
+         my $match = $matches[$i];
+         push @{$arr[$i]}, $match;
+      }
+   }
+   $self->_index(\@arr);
+
+   #####
+   warn "Indexing file...\n";
+   use Data::Dumper;
+   warn Dumper(\@arr);
+   #####
+
+}
+
+method _next_member {
+   if (not $self->_has_index) {
+      $self->_index_file("\t");
+   }
+
+   ####
+   my $community = Bio::Community->new();
+   my $count  = 0;
+   ####
+
+   return $member, $count;
+}
 
 
 1;
