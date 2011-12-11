@@ -85,6 +85,7 @@ use MooseX::Method::Signatures;
 use Bio::Community::Member;
 
 extends 'Bio::Community::IO';
+with 'Bio::Community::Role::IO';
 
 
 method next_member {

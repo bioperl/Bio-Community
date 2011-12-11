@@ -65,6 +65,8 @@ use Moose;
 use namespace::autoclean;
 
 extends 'Bio::Community::IO';
+with 'Bio::Community::Role::IO';
+
 
 has '_index' => (
    is => 'rw',

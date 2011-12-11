@@ -112,8 +112,6 @@ extends 'Bio::Root::Root',
         'Bio::Root::IO';
 
 
-
-
 sub BUILD {
    my ($self, $args) = @_;
    # Start IOs
@@ -138,8 +136,8 @@ sub new {
    # Use the real driver class here
    $real_class = __PACKAGE__.'::'.$format;
    Class::MOP::load_class($real_class);
-   #$class->throw("Module $real_class does not implement a sequence stream")
-   #    unless $real_class->does('Biome::Role::Stream::Seq');
+   $class->throw("Module $real_class does not implement a community IO stream")
+       unless $real_class->does('Bio::Community::Role::IO');
 
    my $self = Class::MOP::Class->initialize($real_class)->new_object($params);
 

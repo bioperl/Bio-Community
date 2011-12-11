@@ -65,6 +65,8 @@ use Moose;
 use namespace::autoclean;
 
 extends 'Bio::Community::IO';
+with 'Bio::Community::Role::IO';
+
 
 has 'dummy' => (
    is => 'rw',
