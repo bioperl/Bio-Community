@@ -68,7 +68,8 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
 
 
-our $default_sort_members = 0;
+our $default_sort_members = 0; # unsorted
+our $default_abundance    = 'count';
 
 
 has 'dummy' => (

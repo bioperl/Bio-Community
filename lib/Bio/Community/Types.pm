@@ -84,11 +84,18 @@ subtype 'StrictlyPositiveInt'
 subtype 'Count'
    => as 'PositiveNum';
 
-# Sort numerically
+# Sort numerically: 0, 1, -1
 subtype 'NumericSort'
    => as 'Int'
    => where { ($_ >= -1) && ($_ <= 1) }
    => message { "This only accepts 0 (off), 1 (increasing) or -1 (decreasing), but got '$_'" };
+
+
+# Type of abundance: count, percentage, fraction
+subtype 'AbundanceType'
+   => as 'Str'
+   => where { $_ =~ m/^(count|percentage|fraction)$/ }
+   => message { "This only accepts 'count', 'percentage', or 'fraction', but got '$_'" };
 
 
 __PACKAGE__->meta->make_immutable;

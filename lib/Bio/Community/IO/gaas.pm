@@ -87,8 +87,8 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
 
 
-our $default_sort_members = -1;
-
+our $default_sort_members = -1; # sorted by decreasing abundance
+our $default_abundance    = 'fraction';
 
 method next_member {
    # Read next line

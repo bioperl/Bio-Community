@@ -217,25 +217,50 @@ method write_member (Bio::Community::Member $member, Count $count) {
 =cut
 
 method write_community (Bio::Community $community) {
-
-   for my $member ($community->all_members) {
-   ### TODO: should be able to use next_member() but there is a bug
-   # while (my $member = $community->next_member) {
-
-      my $ab = $community->get_count($member);         # count
-      #my $ab = $community->get_rel_ab($member);       # percentage
-      #my $ab = $community->get_rel_ab($member) / 100; # fraction
-
-      $self->write_member($member, $ab);
+   my $sort_members = $self->sort_members;
+   if ($sort_members != 0) {
+      my @members = $community->all_members;
+      if ($sort_members == 1) {
+         ###XXX TODO: Need to sort members by increasing abundance
+      } elsif ($sort_members == -1) {
+         ###XXX TODO: Need to sort members by decreasing abundance
+      } else {
+         $self->throw("Error: $sort_members is not a valid sort value.\n");
+      }
+      for my $member (@members) {
+         $self->_process_member($member, $community);
+      }
+   } else {
+      ### TODO: should be able to use next_member() but there is a bug
+      #while (my $member = $community->next_member) {
+      for my $member ($community->all_members) {
+         $self->_process_member($member, $community);
+      }
    }
    return 1;
+}
+
+
+method _process_member (Bio::Community::Member $member, Bio::Community $community) {
+   my $ab_value;
+   my $ab_type = $self->abundance_type;
+   if ($ab_type eq 'count') {
+      $ab_value = $community->get_count($member);
+   } elsif ($ab_type eq 'percentage') {
+      $ab_value = $community->get_rel_ab($member);
+   } elsif ($ab_type eq 'fraction') {
+      $ab_value = $community->get_rel_ab($member) / 100;
+   } else {
+      $self->throw("Error: $ab_value is not a valid abundance type.\n");
+   }
+   $self->write_member($member, $ab_value);
 }
 
 
 =head2 sort_members
 
  Title   : sort_members
- Usage   : $in->sort_members(-1);
+ Usage   : $in->sort_members();
  Function: When writing a community to a file, sort the community members based
            on their abundance: 0 (off), 1 (by increasing abundance), -1 (by 
            decreasing abundance).
@@ -245,13 +270,36 @@ method write_community (Bio::Community $community) {
 =cut
 
 has 'sort_members' => (
-   is => 'rw',
+   is => 'ro',
    isa => 'NumericSort',
    required => 0,
    lazy => 1,
    init_arg => '-sort_members',
    default => sub { return eval('$'.ref(shift).'::default_sort_members') || 0  },
 );
+
+
+=head2 abundance_type
+
+ Title   : abundance_type
+ Usage   : $in->abundance_type();
+ Function: When writing a community to a file, sort the community members based
+           on their abundance: 0 (off), 1 (by increasing abundance), -1 (by 
+           decreasing abundance).
+ Args    : count, percentage or fraction
+ Returns : count, percentage or fraction
+
+=cut
+
+has 'abundance_type' => (
+   is => 'ro',
+   isa => 'AbundanceType',
+   required => 0,
+   lazy => 1,
+   init_arg => '-abundance_type',
+   default => sub { return eval('$'.ref(shift).'::default_abundance_type') || 'percentage' },
+);
+
 
 
 # Do not inline so that new() can be overridden
