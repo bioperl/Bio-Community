@@ -58,6 +58,7 @@ Email florent.angly@gmail.com
 
 =cut
 
+
 package Bio::Community::IO::dummy;
 
 use Moose;
@@ -73,6 +74,6 @@ has 'dummy' => (
 );
 
 
-__PACKAGE__->meta->make_immutable(inline_constructor => 0);
+__PACKAGE__->meta->make_immutable;
 
 1;

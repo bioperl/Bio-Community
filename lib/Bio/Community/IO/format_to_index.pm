@@ -58,6 +58,14 @@ Email florent.angly@gmail.com
 
 =cut
 
+
+package Bio::Community::IO::format_to_index;
+
+use Moose;
+use namespace::autoclean;
+
+extends 'Bio::Community::IO';
+
 has '_index' => (
    is => 'rw',
    isa => 'ArrayRef[ArrayRef[PositiveInt]]',
@@ -115,5 +123,7 @@ method _next_member {
    return $member, $count;
 }
 
+
+__PACKAGE__->meta->make_immutable;
 
 1;

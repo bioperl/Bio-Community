@@ -113,45 +113,12 @@ extends 'Bio::Root::Root',
 
 
 
-#around BUILDARGS => sub {
-#   my ($orig, $class, %args) = @_;
-#
-#   #####
-#   print "ORIG  = ".$orig."\n";
-#   print "CLASS = ".$class."\n";
-#   use Data::Dumper;
-#   print "ARGS  = ".Dumper(\%args)."\n";
-#   #####
-#
-#   if (not exists $args{'-format'}) {
-#      $class->throw("No format defined, you die right now!");
-#   }
-#
-#   # switch out for the real class here
-#
-#
-#   $class = __PACKAGE__.'::'.$args{'-format'};
-#
-#   ####
-#   print "Initializing a $class object\n";   
-#   ####
-#
-#   #Class::MOP::load_class($class);
-#   ##$class->throw("Module does not implement a sequence stream")
-#   ##   unless $real_class->does('Biome::Role::Stream::Seq');
-#   #return Class::MOP::Class->initialize($class)->new_object(%args);
-#
-#   return $class->$orig(%args);
-#};
 
-#sub BUILD {
-#   my ($self, $args) = @_;
-#
-#   print "I AM A ".ref($self)."\n";
-#
-#   # Start IOs
-#   $self->_initialize_io(%$args);
-#}
+sub BUILD {
+   my ($self, $args) = @_;
+   # Start IOs
+   $self->_initialize_io(%$args);
+}
 
 
 
@@ -167,7 +134,7 @@ sub new {
    if (not defined $format) {
       $real_class->throw("Error: No format was specified.");
    }
-    
+   
    # Use the real driver class here
    $real_class = __PACKAGE__.'::'.$format;
    Class::MOP::load_class($real_class);
@@ -176,8 +143,7 @@ sub new {
 
    my $self = Class::MOP::Class->initialize($real_class)->new_object($params);
 
-   # Start IOs
-   $self->_initialize_io(%$params);
+   $self->BUILD($params);
 
    return $self;
 }
