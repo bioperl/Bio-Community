@@ -68,6 +68,9 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
 
 
+our $default_sort_members = 0;
+
+
 has 'dummy' => (
    is => 'rw',
    isa => 'Str',

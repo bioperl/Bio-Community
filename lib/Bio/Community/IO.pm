@@ -112,15 +112,8 @@ extends 'Bio::Root::Root',
         'Bio::Root::IO';
 
 
-sub BUILD {
-   my ($self, $args) = @_;
-   # Start IOs
-   $self->_initialize_io(%$args);
-}
 
-
-
-# Overriding new. Is there a better alternative?
+# Overriding new... Is there a better alternative?
 sub new {
    my $class = shift;
    my $real_class = Scalar::Util::blessed($class) || $class;
@@ -144,6 +137,13 @@ sub new {
    $self->BUILD($params);
 
    return $self;
+}
+
+
+sub BUILD {
+   my ($self, $args) = @_;
+   # Start IOs
+   $self->_initialize_io(%$args);
 }
 
 
@@ -230,6 +230,28 @@ method write_community (Bio::Community $community) {
    }
    return 1;
 }
+
+
+=head2 sort_members
+
+ Title   : sort_members
+ Usage   : $in->sort_members(-1);
+ Function: When writing a community to a file, sort the community members based
+           on their abundance: 0 (off), 1 (by increasing abundance), -1 (by 
+           decreasing abundance).
+ Args    : 0, 1 or -1
+ Returns : 0, 1 or -1
+
+=cut
+
+has 'sort_members' => (
+   is => 'rw',
+   isa => 'NumericSort',
+   required => 0,
+   lazy => 1,
+   init_arg => '-sort_members',
+   default => sub { return eval('$'.ref(shift).'::default_sort_members') || 0  },
+);
 
 
 # Do not inline so that new() can be overridden

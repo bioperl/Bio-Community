@@ -19,6 +19,7 @@ isa_ok $in, 'Bio::Root::IO';
 isa_ok $in, 'Bio::Community::IO';
 isa_ok $in, 'Bio::Community::IO::dummy';
 is $in->format, 'dummy';
+is $in->sort_members, 0;
 
 @methods = qw(next_member write_member next_community write_community);
 for my $method (@methods) {
@@ -33,7 +34,7 @@ $in->close;
 # Read GAAS format
 
 ok $in = Bio::Community::IO->new( -file => test_input_file('gaas_compo.txt'), -format => 'gaas' ), 'Read GAAS format';
-
+is $in->sort_members, -1;
 @methods = qw(next_member write_member);
 for my $method (@methods) {
    can_ok($in, $method) || diag "Method $method() not implemented";

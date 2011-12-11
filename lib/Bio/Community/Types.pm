@@ -58,32 +58,37 @@ use Moose::Util::TypeConstraints;
 use namespace::autoclean;
 
 subtype 'PositiveNum'
-     => as 'Num'
-     => where { $_ >= 0 }
-     => message { 'Only positive numbers accepted' };
+   => as 'Num'
+   => where { $_ >= 0 }
+   => message { "Only positive numbers accepted, but got '$_'" };
 
 subtype 'StrictlyPositiveNum'
-     => as 'PositiveNum'
-     => where { $_ > 0 }
-     => message { 'Only strictly positive numbers accepted' };
+   => as 'PositiveNum'
+   => where { $_ > 0 }
+   => message { "Only strictly positive numbers accepted, but got '$_'" };
 
 subtype 'PositiveInt'
-     => as 'Int'
-     => where { $_ >= 0 }
-     => message { 'Only positive integers accepted' };
+   => as 'Int'
+   => where { $_ >= 0 }
+   => message { "Only positive integers accepted, but got '$_'" };
 
 subtype 'StrictlyPositiveInt'
-     => as 'PositiveInt'
-     => where { $_ > 0 }
-     => message { 'Only strictly positive integers accepted' };
+   => as 'PositiveInt'
+   => where { $_ > 0 }
+   => message { "Only strictly positive integers accepted, but got '$_'" };
 
 
 # A Count should be a positive integer but to make things easier. We sometimes
 # do not have access to the actual count, but just the relative abundance (a
 # float) that we use as a proxy for a count.
 subtype 'Count'
-     => as 'PositiveNum';
+   => as 'PositiveNum';
 
+# Sort numerically
+subtype 'NumericSort'
+   => as 'Int'
+   => where { ($_ >= -1) && ($_ <= 1) }
+   => message { "This only accepts 0 (off), 1 (increasing) or -1 (decreasing), but got '$_'" };
 
 
 __PACKAGE__->meta->make_immutable;

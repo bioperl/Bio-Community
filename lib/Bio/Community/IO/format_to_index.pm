@@ -68,6 +68,8 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
 
 
+our $default_sort_members = 0;
+
 has '_index' => (
    is => 'rw',
    isa => 'ArrayRef[ArrayRef[PositiveInt]]',

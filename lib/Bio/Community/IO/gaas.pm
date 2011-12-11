@@ -76,7 +76,6 @@ Email florent.angly@gmail.com
 =cut
 
 
-
 package Bio::Community::IO::gaas;
 
 use Moose;
@@ -86,6 +85,9 @@ use Bio::Community::Member;
 
 extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
+
+
+our $default_sort_members = -1;
 
 
 method next_member {
