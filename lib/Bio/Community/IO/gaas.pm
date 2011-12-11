@@ -85,9 +85,7 @@ use MooseX::Method::Signatures;
 use Bio::Community::Member;
 
 
-
 method next_member {
-
    # Read next line
    my $line;
    do {
@@ -109,18 +107,18 @@ method next_member {
 
    ##### TODO:handle things differently if GAAS used a taxonomy file
    my $member = Bio::Community::Member->new( -desc => $name );
-   #####
 
-   # Note that the relative abundance is returned, not a count
+   # Note that a relative abundance is returned, not a count
    return $member, $rel_ab;
 }
 
 
-#### TODO
-#method write_member (Bio::Community::Member $member, PositiveNum $count) {
-#   
-#}
-####
+method write_member (Bio::Community::Member $member, Count $count) {
+   my $line = $member->desc."\t".''."\t".$count."\n";
+   $self->_print( $line );
+   return 1;
+}
+
 
 
 1;

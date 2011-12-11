@@ -112,6 +112,8 @@ extends 'Bio::Root::Root',
         'Bio::Root::IO';
 
 
+#### TODO: format() is probably not needed since it is provided by Bio::Root::IO
+
 has 'format' => (
    is => 'ro',
    isa => 'Str',
@@ -175,10 +177,7 @@ method next_member {
 method next_community {
    my $community = Bio::Community->new();
    while ( my ($member, $count) = $self->next_member ) {
-
-      ### TODO: while loop should abort automatically
       last if not defined $member;
-
       $community->add_member($member, $count);
    }
    return $community->get_richness > 0 ? $community : undef;;
@@ -188,9 +187,10 @@ method next_community {
 =head2 write_member
 
  Title   : write_member
- Usage   : $in->write_member($member, $count);
- Function: Write the next member from the community and its abundance. This function
-           is provided by a driver specific to each file format.
+ Usage   : $in->write_member($member, $abundance);
+ Function: Write the next member from the community and its count or relative
+           abundance. This function is provided by a driver specific to each file
+           format.
  Args    : A Bio::Community::Member object
            A positive integer (XXX or float XXX)
  Returns : None
@@ -213,7 +213,18 @@ method write_member (Bio::Community::Member $member, Count $count) {
 =cut
 
 method write_community (Bio::Community $community) {
-   $self->throw_not_implemented;
+
+   for my $member ($community->all_members) {
+   ### TODO: should be able to use next_member() but there is a bug
+   # while (my $member = $community->next_member) {
+
+      my $ab = $community->get_count($member);         # count
+      #my $ab = $community->get_rel_ab($member);       # percentage
+      #my $ab = $community->get_rel_ab($member) / 100; # fraction
+
+      $self->write_member($member, $ab);
+   }
+   return 1;
 }
 
 
