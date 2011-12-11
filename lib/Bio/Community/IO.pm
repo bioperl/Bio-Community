@@ -30,9 +30,9 @@ formats used by popular programs such as GAAS, QIIME, Pyrotagger.
 
 =head1 CONSTRUCTOR
 
-=head2 Bio::Community::Member->new()
+=head2 Bio::Community::IO->new()
 
-   my $in = Bio::Community::Member::IO->new( );
+   my $in = Bio::Community::IO->new( );
 
 The new() class method constructs a new Bio::Community::Member object and
 accepts the following parameters:
@@ -112,34 +112,74 @@ extends 'Bio::Root::Root',
         'Bio::Root::IO';
 
 
-#### TODO: format() is probably not needed since it is provided by Bio::Root::IO
 
-has 'format' => (
-   is => 'ro',
-   isa => 'Str',
-   required => 1,
-   init_arg => '-format',
-);
+#around BUILDARGS => sub {
+#   my ($orig, $class, %args) = @_;
+#
+#   #####
+#   print "ORIG  = ".$orig."\n";
+#   print "CLASS = ".$class."\n";
+#   use Data::Dumper;
+#   print "ARGS  = ".Dumper(\%args)."\n";
+#   #####
+#
+#   if (not exists $args{'-format'}) {
+#      $class->throw("No format defined, you die right now!");
+#   }
+#
+#   # switch out for the real class here
+#
+#
+#   $class = __PACKAGE__.'::'.$args{'-format'};
+#
+#   ####
+#   print "Initializing a $class object\n";   
+#   ####
+#
+#   #Class::MOP::load_class($class);
+#   ##$class->throw("Module does not implement a sequence stream")
+#   ##   unless $real_class->does('Biome::Role::Stream::Seq');
+#   #return Class::MOP::Class->initialize($class)->new_object(%args);
+#
+#   return $class->$orig(%args);
+#};
+
+#sub BUILD {
+#   my ($self, $args) = @_;
+#
+#   print "I AM A ".ref($self)."\n";
+#
+#   # Start IOs
+#   $self->_initialize_io(%$args);
+#}
 
 
-sub BUILD {
-   my ($self, $args) = @_;
 
-   # Apply the role corresponding to the format that is requested
-   my $role = __PACKAGE__."::".$self->format;
-   eval "require $role";
-   if ($@) {
-      my $msg = "$role cannot be found or contains errors\n".
-                "Exception: $@\n".
-                "For more information about the IO system please see the ".
-                __PACKAGE__." docs.\n";
-      $self->throw($msg);
+# Overriding new. Is there a better alternative?
+sub new {
+   my $class = shift;
+   my $real_class = Scalar::Util::blessed($class) || $class;
+
+   # These all come from the same base, Moose::Object, so this is fine
+   my $params = $real_class->BUILDARGS(@_);
+
+   my $format = $params->{'-format'};
+   if (not defined $format) {
+      $real_class->throw("Error: No format was specified.");
    }
-   $role->meta->apply( $self );
+    
+   # Use the real driver class here
+   $real_class = __PACKAGE__.'::'.$format;
+   Class::MOP::load_class($real_class);
+   #$class->throw("Module $real_class does not implement a sequence stream")
+   #    unless $real_class->does('Biome::Role::Stream::Seq');
+
+   my $self = Class::MOP::Class->initialize($real_class)->new_object($params);
 
    # Start IOs
-   my @args = %$args;
-   $self->_initialize_io(@args);
+   $self->_initialize_io(%$params);
+
+   return $self;
 }
 
 
@@ -228,6 +268,7 @@ method write_community (Bio::Community $community) {
 }
 
 
-__PACKAGE__->meta->make_immutable;
+# Do not inline so that new() can be overridden
+__PACKAGE__->meta->make_immutable(inline_constructor => 0);
 
 1;

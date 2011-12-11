@@ -20,6 +20,7 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
+  BioPerl version >= 1.006902
   Moose
   Moose::Util::TypeConstraints
   MooseX::NonMoose

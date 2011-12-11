@@ -79,10 +79,12 @@ Email florent.angly@gmail.com
 
 package Bio::Community::IO::gaas;
 
-use Moose::Role;
+use Moose;
 use namespace::autoclean;
 use MooseX::Method::Signatures;
 use Bio::Community::Member;
+
+extends 'Bio::Community::IO';
 
 
 method next_member {
@@ -120,5 +122,6 @@ method write_member (Bio::Community::Member $member, Count $count) {
 }
 
 
+__PACKAGE__->meta->make_immutable(inline_constructor => 0);
 
 1;

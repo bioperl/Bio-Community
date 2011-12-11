@@ -108,7 +108,7 @@ method _next_member {
    }
 
    ####
-   my $community = Bio::Community->new();
+   my $member = Bio::Community::Member->new();
    my $count  = 0;
    ####
 

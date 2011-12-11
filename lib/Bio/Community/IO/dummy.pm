@@ -60,9 +60,10 @@ Email florent.angly@gmail.com
 
 package Bio::Community::IO::dummy;
 
-use Moose::Role;
+use Moose;
 use namespace::autoclean;
 
+extends 'Bio::Community::IO';
 
 has 'dummy' => (
    is => 'rw',
@@ -71,5 +72,7 @@ has 'dummy' => (
    init_arg => undef,
 );
 
+
+__PACKAGE__->meta->make_immutable(inline_constructor => 0);
 
 1;
