@@ -68,6 +68,8 @@ is $community->get_rel_ab($member), 19.6094208626593;
 # Read GAAS format
 
 $output_file = test_output_file();
+####
+$output_file = 'temp.txt';
 ok $out = Bio::Community::IO->new( -file => '>'.$output_file, -format => 'gaas' ), 'Write GAAS format';
 ok $out->write_community($community);
 $out->close;

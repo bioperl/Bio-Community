@@ -218,24 +218,27 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 method write_community (Bio::Community $community) {
    my $sort_members = $self->sort_members;
-   if ($sort_members != 0) {
-      my @members = $community->all_members;
-      if ($sort_members == 1) {
-         ###XXX TODO: Need to sort members by increasing abundance
-      } elsif ($sort_members == -1) {
-         ###XXX TODO: Need to sort members by decreasing abundance
-      } else {
-         $self->throw("Error: $sort_members is not a valid sort value.\n");
-      }
-      for my $member (@members) {
+   if ($sort_members == 1) {
+      my $rank = $community->get_richness;
+      while ( my $member = $community->get_member_by_rank($rank) ) {
          $self->_process_member($member, $community);
+         $rank--;
+         last if $rank == 0;
       }
-   } else {
+   } elsif ($sort_members == -1) {
+      my $rank = 1;
+      while ( my $member = $community->get_member_by_rank($rank) ) {
+         $self->_process_member($member, $community);
+         $rank++;
+      }
+   } elsif ($sort_members == 0) {
       ### TODO: should be able to use next_member() but there is a bug
       #while (my $member = $community->next_member) {
       for my $member ($community->all_members) {
          $self->_process_member($member, $community);
       }
+   } else {
+      $self->throw("Error: $sort_members is not a valid sort value.\n");
    }
    return 1;
 }
