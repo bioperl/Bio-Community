@@ -46,6 +46,11 @@ is $community->get_rank($member2), 1;
 is $community->get_rank($member3), 2;
 is $community->get_rank($member1), 3;
 
+is $community->get_member_by_rank(1), $member2;
+is $community->get_member_by_rank(2), $member3;
+is $community->get_member_by_rank(3), $member1;
+is $community->get_member_by_rank(4), undef;
+
 while (my $member = $community->next_member) {
    isa_ok $member, 'Bio::Community::Member';
    $ids{$member->id} = undef;
@@ -97,6 +102,10 @@ is $community->get_count($member2), 0;
 is $community->get_rank($member3), 1;
 is $community->get_rank($member1), 2;
 is $community->get_rank($member2), undef;
+
+is $community->get_member_by_rank(1), $member3;
+is $community->get_member_by_rank(2), $member1;
+is $community->get_member_by_rank(3), undef;
 
 for my $member ($community->all_members) {
    $rel_abs{$member->id} = $community->get_rel_ab($member);

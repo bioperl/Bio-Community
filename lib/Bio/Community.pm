@@ -201,13 +201,23 @@ has _counts => (
 );
 
 
-has _ranks => (
+has _ranks_hash => (
    is => 'rw',
    isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
-   clearer => '_clear_ranks',
+   clearer => '_clear_ranks_hash',
+);
+
+
+has _ranks_arr => (
+   is => 'rw',
+   isa => 'ArrayRef',
+   lazy => 1,
+   default => sub{ [] },
+   init_arg => undef,
+   clearer => '_clear_ranks_arr',
 );
 
 
@@ -339,9 +349,25 @@ method get_member_by_id (Int $member_id) {
 }
 
 
-####
-# TODO: get_member_by_rank
-####
+=head2 get_member_by_rank
+
+ Title   : get_member_by_rank
+ Function: Fetch a member based on its abundance rank
+ Usage   : my $member = $community->get_member_by_rank(1);
+ Args    : positive integer for the member rank
+ Returns : a Bio::Community::Member object or undef if member was not found
+
+=cut
+
+method get_member_by_rank (AbundanceRank $rank) {
+   if ( scalar @{$self->_ranks_arr} == 0 ) {
+      # Calculate the ranks unless they already exist
+      $self->_calc_ranks();
+   }
+   return $self->_ranks_arr->[$rank-1];
+}
+
+
 
 ####
 # TODO: get_member_by_rel_ab
@@ -350,6 +376,7 @@ method get_member_by_id (Int $member_id) {
 ####
 # TODO: get_member_by_count
 ####
+
 
 
 =head2 get_richness
@@ -364,11 +391,18 @@ method get_member_by_id (Int $member_id) {
 
 method get_richness {
    if (not defined $self->_richness) {
-      # Calculate richness only if it has not previously been calculated
-      my $num_members = 0;
-      while ($self->next_member) {
-         $num_members++;
+
+      # Try to calculate the richness from the abundance ranks first
+      my $num_members = scalar @{$self->_ranks_arr};
+      
+      # If rank abundance are not available, calculate richness manually
+      if ($num_members == 0) {
+         while ($self->next_member) {
+            $num_members++;
+         }
       }
+
+      # Save richness for later re-use
       $self->_richness($num_members);
    }
    return $self->_richness;
@@ -434,34 +468,43 @@ method get_rel_ab (Bio::Community::Member $member) {
 
 method get_rank (Bio::Community::Member $member) {
    my $member_id = $member->id;
-   if ( $self->get_member_by_id($member_id) && scalar keys %{$self->_ranks} == 0 ) {
+   if ( $self->get_member_by_id($member_id) && scalar @{$self->_ranks_arr} == 0 ) {
       # Calculate the ranks if the member exists and the ranks do not already exist
       $self->_calc_ranks();
    }
-   return $self->_ranks->{$member->id} || undef;
+   return $self->_ranks_hash->{$member->id} || undef;
 }
 
 
 method _calc_ranks {
+   # Calculate the abundance ranks of the community members. Save them in a hash
+   # and as an array.
+
+   # 1/ Get abundance of all members and sort them
    my $members = [ $self->all_members ];
    my $rel_abs = [ ];
    for my $member (@$members) {
       push @$rel_abs, $self->get_rel_ab($member);
    }
+
+   # 2/ Save ranks in an array
    ($rel_abs, $members) = _two_array_sort($rel_abs, $members);
- 
-   my $ranks = $self->_ranks;
+   $self->_ranks_arr( $members );
+
+   # 3/ Save ranks in a hash
    for my $rank (1 .. scalar @$members) {
       my $member = $$members[$rank-1];
-      $ranks->{$member->id} = $rank;
+      $self->_ranks_hash->{$member->id} = $rank;
    }
+
    return 1;
 }
 
 
 method _has_changed {
    # Re-initialize some attributes when the community has changed
-   $self->_clear_ranks();
+   $self->_clear_ranks_hash();
+   $self->_clear_ranks_arr();
    $self->_clear_richness();
    $self->_clear_members_iterator();
    return 1;

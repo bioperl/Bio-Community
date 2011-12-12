@@ -98,6 +98,11 @@ subtype 'AbundanceType'
    => message { "This only accepts 'count', 'percentage', or 'fraction', but got '$_'" };
 
 
+# Rank: a strictly positive integer
+subtype 'AbundanceRank'
+   => as 'StrictlyPositiveInt';
+
+
 __PACKAGE__->meta->make_immutable;
 
 1;
