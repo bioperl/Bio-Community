@@ -99,16 +99,22 @@ method _index_table () {
    my ($max_line, $max_col) = (0, 0);
 
    my $file_offset = 0;
-   while (my $line = $self->_readline) {
+   while (my $line = $self->_readline(-raw => 1)) {
       my $line_offset = 0;
       my @matches;
       while ( 1 ) {
          my $match = index($line, $self->delim, $line_offset);
          if ($match == -1) {
             # Reached end of line. Register it and move on to next line.
-            $match = length( $line ) - 1;
+            $line =~ m/([\r\n]?\n)$/;
+            my $num_eol_chars = length($1);
+
+            $match = length( $line ) - $num_eol_chars;
             push @matches, $match + $file_offset;
-            $file_offset += $match + 1; ### +2 on non-unix platforms (\r\n) ??
+
+
+            $file_offset += $match + $num_eol_chars;
+
             last;
          } else {
             push @matches, $match + $file_offset;
@@ -167,12 +173,7 @@ method _get_indexed_value (StrictlyPositiveInt $line, StrictlyPositiveInt $colum
       if (defined $offset2) {
          read($self->_fh, $val, $offset2 - $offset1) or
             $self->throw("Error: Could not read content between offset $offset1 and $offset2\n$!\n");
-
-         ####
-         $val =~ s/[\r\n\t]//;
-         #$val =~ s/\t//;
-         ####
-
+         $val =~ s/[\r\n\t]//g; #### should be $delim here, not "\t"
       }
    }
 
