@@ -1,0 +1,4 @@
+Species gut soda_lake
+Streptococcus 241 334
+Goatpox_virus "0" 1023.9
+Lumpy_skin_disease_virus  123

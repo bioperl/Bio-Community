@@ -14,7 +14,7 @@ has 'delim' => (
    is => 'rw',
    isa => 'Str',
    required => 0,
-   init_arg => undef,
+   init_arg => '-delim',
    default => "\t",
    lazy => 1,
 );
@@ -173,7 +173,8 @@ method _get_indexed_value (StrictlyPositiveInt $line, StrictlyPositiveInt $colum
       if (defined $offset2) {
          read($self->_fh, $val, $offset2 - $offset1) or
             $self->throw("Error: Could not read content between offset $offset1 and $offset2\n$!\n");
-         $val =~ s/[\r\n\t]//g; #### should be $delim here, not "\t"
+         my $delim = $self->delim;
+         $val =~ s/[\r\n$delim]//g;
       }
    }
 
