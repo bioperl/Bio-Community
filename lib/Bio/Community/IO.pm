@@ -179,7 +179,13 @@ method next_member {
 =cut
 
 method next_community {
-   my $community = Bio::Community->new();
+   # Initialize things for the next community and give the community a name
+   #my $name = $self->_next_community;
+
+   ### TODO: return undef here if all community have been processed
+
+   # Create and populate a new community
+   my $community = Bio::Community->new( );
    while ( my ($member, $count) = $self->next_member ) {
       last if not defined $member;
       $community->add_member($member, $count);
@@ -266,7 +272,7 @@ method _process_member (Bio::Community::Member $member, Bio::Community $communit
  Usage   : $in->sort_members();
  Function: When writing a community to a file, sort the community members based
            on their abundance: 0 (off), 1 (by increasing abundance), -1 (by 
-           decreasing abundance).
+           decreasing abundance). The default is specific to each driver used.
  Args    : 0, 1 or -1
  Returns : 0, 1 or -1
 
@@ -288,7 +294,7 @@ has 'sort_members' => (
  Usage   : $in->abundance_type();
  Function: When writing a community to a file, sort the community members based
            on their abundance: 0 (off), 1 (by increasing abundance), -1 (by 
-           decreasing abundance).
+           decreasing abundance). The default is specific to each driver used.
  Args    : count, percentage or fraction
  Returns : count, percentage or fraction
 

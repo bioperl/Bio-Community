@@ -118,6 +118,11 @@ method next_member {
 }
 
 
+method _next_community {
+   return 1;
+}
+
+
 method write_member (Bio::Community::Member $member, Count $count) {
    my $line = $member->desc."\t".''."\t".$count."\n";
    $self->_print( $line );
