@@ -108,23 +108,26 @@ method _index_table () {
             # Reached end of line. Register it and move on to next line.
             $line =~ m/([\r\n]?\n)$/;
             my $num_eol_chars = length($1);
-
             $match = length( $line ) - $num_eol_chars;
             push @matches, $match + $file_offset;
-
-
             $file_offset += $match + $num_eol_chars;
-
             last;
          } else {
             push @matches, $match + $file_offset;
             $line_offset = $match + 1;
          }
       }
-      #### complain if the number of column is not the same everywhere?
-      push @arr, \@matches;
+      my $nof_cols = scalar @matches;
+      if ($nof_cols != $max_col) {
+         if ($max_col == 0) {
+            # Initialize the number of columns
+            $max_col = $nof_cols;
+         } else {
+            $self->throw("Error: Got $nof_cols columns at line $. but got a different number ($max_col) at the previous line\n");
+         }
+      }
       $max_line++;
-      $max_col = scalar @matches if scalar @matches > $max_col;
+      push @arr, \@matches;
    }
    $self->_index(\@arr);
    $self->_max_line($max_line);
