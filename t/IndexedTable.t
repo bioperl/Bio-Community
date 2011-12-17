@@ -66,19 +66,16 @@ is $in->_get_indexed_value(4, 3),  123;
 is $in->_get_indexed_value(5, 1), undef;
 is $in->_get_indexed_value(1, 4), undef;
 
-is $in->_get_indexed_value(6, 1), undef;
-is $in->_get_indexed_value(1, 10), undef;
-
 $in->close;
 
 
-# Space-delimited file
+# Double-space-delimited file
 
 ok $in = t::IndexedTable->new(
    -file  => test_input_file('generic_table_space_delim.txt'),
-   -delim => ' ',
+   -delim => '  ',
 );
-is $in->delim, ' ';
+is $in->delim, '  ';
 is $in->_max_col, 3;
 is $in->_max_line, 4;
 
@@ -98,13 +95,67 @@ is $in->_get_indexed_value(4, 3),  123;
 is $in->_get_indexed_value(5, 1), undef;
 is $in->_get_indexed_value(1, 4), undef;
 
-is $in->_get_indexed_value(6, 1), undef;
-is $in->_get_indexed_value(1, 10), undef;
+$in->close;
+
+
+# Table that does not span the entire file
+
+ok $in = t::IndexedTable->new(
+   -file       => test_input_file('generic_table.txt'),
+   -start_line => 2, 
+   -end_line   => 3,
+);
+is $in->delim, "\t";
+is $in->_max_col, 3;
+is $in->_max_line, 2;
+
+is $in->_get_indexed_value(1, 1), 'Streptococcus';
+is $in->_get_indexed_value(1, 2),  241;
+is $in->_get_indexed_value(1, 3),  334;
+is $in->_get_indexed_value(2, 1), 'Goatpox virus';
+is $in->_get_indexed_value(2, 2),  '"0"';
+is $in->_get_indexed_value(2, 3),  1023.9;
+
+is $in->_get_indexed_value(3, 1), undef;
+is $in->_get_indexed_value(1, 4), undef;
 
 $in->close;
 
 
-# file with whitelines at the end
+# Table with a single line
+
+ok $in = t::IndexedTable->new( -file => test_input_file('generic_table_single_line.txt') );
+is $in->delim, "\t";
+is $in->_max_col, 3;
+is $in->_max_line, 1;
+
+is $in->_get_indexed_value(1, 1), 'Species';
+is $in->_get_indexed_value(1, 2), 'gut';
+is $in->_get_indexed_value(1, 3), 'soda lake';
+
+is $in->_get_indexed_value(1, 4), undef;
+is $in->_get_indexed_value(2, 1), undef;
+
+$in->close;
+
+
+# Table with a single column
+
+ok $in = t::IndexedTable->new( -file => test_input_file('generic_table_single_column.txt') );
+is $in->delim, "\t";
+is $in->_max_col, 1;
+is $in->_max_line, 4;
+
+is $in->_get_indexed_value(1, 1), 'Species';
+is $in->_get_indexed_value(2, 1), 'Streptococcus';
+is $in->_get_indexed_value(3, 1), 'Goatpox virus';
+is $in->_get_indexed_value(4, 1), 'Lumpy skin disease virus';
+
+is $in->_get_indexed_value(5, 1), undef;
+is $in->_get_indexed_value(1, 2), undef;
+
+$in->close;
+
 
 done_testing();
 

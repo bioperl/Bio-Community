@@ -43,14 +43,14 @@ has 'delim' => (
 
 =cut
 
-#has 'start_line' => (
-#   is => 'ro',
-#   isa => 'StrictlyPositiveInt',
-#   required => 0,
-#   init_arg => '-start_line',
-#   default => 1,
-#   lazy => 1,
-#);
+has 'start_line' => (
+   is => 'ro',
+   isa => 'StrictlyPositiveInt',
+   required => 0,
+   init_arg => '-start_line',
+   default => 1,
+   lazy => 1,
+);
 
 
 =head2 end_line
@@ -64,14 +64,14 @@ has 'delim' => (
 
 =cut
 
-#has 'end_line' => (
-#   is => 'ro',
-#   isa => 'Maybe[StrictlyPositiveInt]',
-#   required => 0,
-#   init_arg => '-end_line',
-#   default => undef,
-#   lazy => 1,
-#);
+has 'end_line' => (
+   is => 'ro',
+   isa => 'Maybe[StrictlyPositiveInt]',
+   required => 0,
+   init_arg => '-end_line',
+   default => undef,
+   lazy => 1,
+);
 
 
 =head2 _max_line
@@ -134,7 +134,7 @@ has '_index' => (
 
  Title   : _index
  Usage   : $in->_index_table;
- Function: Index a table
+ Function: Index the table in the file
  Args    : None
  Returns : None
 
@@ -143,32 +143,53 @@ has '_index' => (
 method _index_table () {
    # Index the file the first time
 
-   my @arr = ( 0 ); # array of file offsets 
+   my $start_line = $self->start_line;
+   my $end_line   = $self->end_line;
+   if ( (defined $end_line) && ($end_line < $start_line) ) {
+      $self->throw("Error: Got start ($start_line) greater than end ($end_line)\n");
+   }
+
+   my @arr; # array of file offsets 
    my ($max_line, $max_col) = (0, 0);
 
-   #### TODO: provide a start and end line
-   #my $start_line = $self->start_line;
-   #my $end_line   = $self->end_line;
-   ####
-  
    my $delim = $self->delim;
    my $delim_length = length $delim;
 
    my $file_offset = 0;
    while (my $line = $self->_readline(-raw => 1)) {
+
+      # Count line length
+      $line =~ m/([\r\n]?\n)$/;
+      my $num_eol_chars = length($1);
+      my $line_length = length( $line );
+
+      # Do not index the line if it is before or after the table;
+      if ($. < $start_line) {
+         $file_offset += $line_length;   
+         next;
+      }
+      if ( (defined $end_line) && ($. > $end_line) ) {
+         next;
+      }
+
+      # Save the offset of the first line of the table
+      if (scalar @arr == 0) {
+         push @arr, $file_offset;
+      }
+
+      # Index the line
       my $line_offset = 0;
       my @matches;
       while ( 1 ) {
          my $match = index($line, $delim, $line_offset);
          if ($match == -1) {
             # Reached end of line. Register it and move on to next line.
-            $line =~ m/([\r\n]?\n)$/;
-            my $num_eol_chars = length($1);
             $match = length( $line ) - $num_eol_chars;
             push @matches, $match + $file_offset;
-            $file_offset += $match + $num_eol_chars;
+            $file_offset += $line_length;
             last;
          } else {
+            # Save the match
             push @matches, $match + $file_offset;
             $line_offset = $match + $delim_length;
          }
@@ -188,12 +209,6 @@ method _index_table () {
    $self->_index(\@arr);
    $self->_max_line($max_line);
    $self->_max_col($max_col);
-
-   #####
-   warn "Indexing file...\n";
-   use Data::Dumper;
-   warn Dumper(\@arr);
-   #####
 
 }
 
@@ -231,7 +246,6 @@ method _get_indexed_value (StrictlyPositiveInt $line, StrictlyPositiveInt $colum
    }
    return $val;
 }
-
 
 
 
