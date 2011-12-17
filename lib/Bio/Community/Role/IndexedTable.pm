@@ -122,10 +122,7 @@ method BUILD {
 
 has '_index' => (
    is => 'rw',
-   ####
-   #isa => 'ArrayRef[ArrayRef[PositiveInt]]',
    isa => 'ArrayRef[PositiveInt]',
-   ####
    required => 0,
    init_arg => undef,
    default => sub { [] },
@@ -153,13 +150,16 @@ method _index_table () {
    #my $start_line = $self->start_line;
    #my $end_line   = $self->end_line;
    ####
+  
+   my $delim = $self->delim;
+   my $delim_length = length $delim;
 
    my $file_offset = 0;
    while (my $line = $self->_readline(-raw => 1)) {
       my $line_offset = 0;
       my @matches;
       while ( 1 ) {
-         my $match = index($line, $self->delim, $line_offset);
+         my $match = index($line, $delim, $line_offset);
          if ($match == -1) {
             # Reached end of line. Register it and move on to next line.
             $line =~ m/([\r\n]?\n)$/;
@@ -170,7 +170,7 @@ method _index_table () {
             last;
          } else {
             push @matches, $match + $file_offset;
-            $line_offset = $match + 1;
+            $line_offset = $match + $delim_length;
          }
       }
       my $nof_cols = scalar @matches;
@@ -202,8 +202,7 @@ method _index_table () {
 
  Title   : _get_indexed_value
  Usage   : my $value = $in->_get_indexed_value(1,3);
- Function: Get the element of the table at the given line and column. The first
-           time this is called, the file will be indexed.
+ Function: Get the element at the given line and column of the table.
  Args    : A strictly positive integer for the line
            A strictly positive integer for the column
  Returns : A string for the value of the table at the given line and column
