@@ -24,7 +24,9 @@ isa_ok $in, 'Bio::Community::IO::dummy';
 is $in->format, 'dummy';
 is $in->sort_members, 0;
 
-@methods = qw(next_member write_member next_community _next_community write_community);
+@methods = qw( next_member write_member
+               next_community _next_community_init _next_community_finish
+               write_community _write_community_init _write_community_finish );
 for my $method (@methods) {
    can_ok($in, $method) || diag "Method $method() not implemented";
 }

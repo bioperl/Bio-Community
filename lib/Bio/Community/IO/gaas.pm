@@ -90,6 +90,7 @@ with 'Bio::Community::Role::IO';
 our $default_sort_members = -1; # sorted by decreasing abundance
 our $default_abundance    = 'fraction';
 
+
 method next_member {
    # Read next line
    my $line;
@@ -118,7 +119,12 @@ method next_member {
 }
 
 
-method _next_community {
+method _next_community_init {
+   return 1;
+}
+
+
+method _next_community_finish {
    return 1;
 }
 
@@ -126,6 +132,16 @@ method _next_community {
 method write_member (Bio::Community::Member $member, Count $count) {
    my $line = $member->desc."\t".''."\t".$count."\n";
    $self->_print( $line );
+   return 1;
+}
+
+
+method _write_community_init {
+   return 1;
+}
+
+
+method _write_community_finish {
    return 1;
 }
 

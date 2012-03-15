@@ -81,17 +81,38 @@ has 'dummy' => (
 );
 
 
-# Two methods must implemented by a driver: _next_community() and next_member()
+# The methods that must be implemented by a driver are:
+# For reading:
+#    next_member(), _next_community_init(), _next_community_finish()
+# For writing:
+#    write_member(), _write_community_init(), _write_community_finish()
 
-method _next_community {
+
+method next_member {
+   my ($member, $count);
+   return $member, $count;
+}
+
+method _next_community_init {
    return 'dummy';
 }
 
-
-method _next_member {
+method _next_community_finish {
    return 1;
 }
 
+
+method write_member (Bio::Community::Member $member, Count $count) {
+   return 1;
+}
+
+method _write_community_init {
+   return 1;
+}
+
+method _write_community_finish {
+   return 1;
+}
 
 
 __PACKAGE__->meta->make_immutable;

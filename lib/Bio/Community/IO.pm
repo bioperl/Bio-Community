@@ -41,7 +41,7 @@ accepts the following parameters:
 
 =item format
 
-The format of the file: 'gaas', 'qiime' or 'pyrotagger'.
+The format of the file: 'generic', 'gaas', 'qiime' or 'pyrotagger'.
 
 =back
 
@@ -181,22 +181,27 @@ method next_community {
    # Create a new community object
    my $community = Bio::Community->new( );
    # Initialize driver for next community and set community name
-   my $name = $self->_next_community;
+   my $name = $self->_next_community_init;
    $community->name($name) if $name;
    # Populate the community with members
    while ( my ($member, $count) = $self->next_member ) {
       last if not defined $member; # All members have been read
       $community->add_member($member, $count);
    }
+   $self->_next_community_finish;
    # If we are at the last community (richness 0), return undef
    return $community->get_richness > 0 ? $community : undef;
 }
 
-method _next_community {
+method _next_community_init {
    # Driver-side method to initialize new community and return its name
    $self->throw_not_implemented;
 }
 
+method _next_community_finish {
+   # Driver-side method to finalize a community
+   $self->throw_not_implemented;
+}
 
 =head2 write_member
 
@@ -206,7 +211,7 @@ method _next_community {
            abundance. This function is provided by a driver specific to each file
            format.
  Args    : A Bio::Community::Member object
-           A positive integer (XXX or float XXX)
+           A positive number
  Returns : None
 
 =cut
@@ -251,6 +256,15 @@ method write_community (Bio::Community $community) {
    return 1;
 }
 
+method _write_community_init {
+   # Driver-side method to initialize writing a community
+   $self->throw_not_implemented;
+}
+
+method _write_community_finish {
+   # Driver-side method to finalize writing a community
+   $self->throw_not_implemented;
+}
 
 method _process_member (Bio::Community::Member $member, Bio::Community $community) {
    my $ab_value;

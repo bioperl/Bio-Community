@@ -121,45 +121,60 @@ method _generate_members {
 }
 
 
-method _next_community {
-   # Go to start of next column. Return name of new community
-   $self->_col( $self->_col + 1 );
-   $self->_line( 1 );   ### SHOULD PROBABLY PUT THAT STUFF IN VARIABLES
-   my $name = $self->_get_indexed_value(1, $self->_col);
-   return $name;
-}
-
-
 method next_member {
    # The first time, index the file and prepare members
    if (not $self->_has_members) {
       $self->_generate_members();
       $self->_col(2);
    }
-
    my ($member, $count);
-
    my $line = $self->_line;
    while ( $line++ ) {
-
       # Get the abundance of the member (undef if out-of-bounds)
       $count = $self->_get_indexed_value($line, $self->_col);
-
       # No more members for this community.
       last if not defined $count;
-
       # Skip members with no abundance / abundance of 0
       next if not $count;
-
       # Get the member itself
       $member = $self->_members->[$line - 2];
       last;
-
    }
    $self->_line($line);
-
    return $member, $count;
 }
+
+
+method _next_community_init {
+   # Go to start of next column. Return name of new community
+   $self->_col( $self->_col + 1 );
+   $self->_line( 1 );
+   my $name = $self->_get_indexed_value(1, $self->_col);
+   return $name;
+}
+
+
+method _next_community_finish {
+   return 1;
+}
+
+
+method write_member (Bio::Community::Member $member, Count $count) {
+#   my $line = $member->desc."\t".''."\t".$count."\n";
+#   $self->_print( $line );
+#   return 1;
+}
+
+
+method _write_community_init {
+   return 1;
+}
+
+
+method _write_community_finish {
+   return 1;
+}
+
 
 
 __PACKAGE__->meta->make_immutable;
