@@ -192,6 +192,11 @@ method next_community {
    return $community->get_richness > 0 ? $community : undef;
 }
 
+method _next_community {
+   # Driver-side method to initialize new community and return its name
+   $self->throw_not_implemented;
+}
+
 
 =head2 write_member
 

@@ -124,7 +124,7 @@ method _generate_members {
 method _next_community {
    # Go to start of next column. Return name of new community
    $self->_col( $self->_col + 1 );
-   $self->_line( 1 );
+   $self->_line( 1 );   ### SHOULD PROBABLY PUT THAT STUFF IN VARIABLES
    my $name = $self->_get_indexed_value(1, $self->_col);
    return $name;
 }

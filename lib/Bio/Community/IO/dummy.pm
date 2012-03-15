@@ -63,6 +63,7 @@ package Bio::Community::IO::dummy;
 
 use Moose;
 use namespace::autoclean;
+use MooseX::Method::Signatures;
 
 extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
@@ -78,6 +79,19 @@ has 'dummy' => (
    required => 0,
    init_arg => undef,
 );
+
+
+# Two methods must implemented by a driver: _next_community() and next_member()
+
+method _next_community {
+   return 'dummy';
+}
+
+
+method _next_member {
+   return 1;
+}
+
 
 
 __PACKAGE__->meta->make_immutable;
