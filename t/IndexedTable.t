@@ -142,6 +142,7 @@ $in->close;
 # Table with a single column
 
 ok $in = t::IndexedTable->new( -file => test_input_file('generic_table_single_column.txt') );
+ok $in->_index_table;
 is $in->delim, "\t";
 is $in->_max_col, 1;
 is $in->_max_line, 4;

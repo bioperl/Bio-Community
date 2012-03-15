@@ -136,12 +136,16 @@ has '_index' => (
  Usage   : $in->_index_table;
  Function: Index the table in the file
  Args    : None
- Returns : None
+ Returns : 1 on success
 
 =cut
 
 method _index_table () {
    # Index the file the first time
+
+   if ( scalar @{$self->_index} > 0 ) {
+      return 1;
+   }
 
    my $start_line = $self->start_line;
    my $end_line   = $self->end_line;
@@ -165,7 +169,7 @@ method _index_table () {
 
       # Do not index the line if it is before or after the table;
       if ($. < $start_line) {
-         $file_offset += $line_length;   
+         $file_offset += $line_length;
          next;
       }
       if ( (defined $end_line) && ($. > $end_line) ) {
@@ -210,6 +214,7 @@ method _index_table () {
    $self->_max_line($max_line);
    $self->_max_col($max_col);
 
+   return 1;
 }
 
 
