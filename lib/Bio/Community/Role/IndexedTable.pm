@@ -127,7 +127,7 @@ has '_index' => (
    init_arg => undef,
    default => sub { [] },
    lazy => 1,
-   #predicate => '_has_index',
+   predicate => '_has_index',
 );
 
 
@@ -144,8 +144,7 @@ has '_index' => (
 method _index_table () {
    # Index the file the first time
 
-   #  _has_index
-   if ( scalar @{$self->_index} > 0 ) {
+   if ( $self->_has_index ) {
       return 1;
    }
 
