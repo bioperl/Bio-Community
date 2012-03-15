@@ -180,17 +180,17 @@ method next_member {
 
 method next_community {
    # Initialize things for the next community and give the community a name
-   #my $name = $self->_next_community;
-
-   ### TODO: return undef here if all community have been processed
+   
+   ### Give a name
+   ###my $name = $self->_next_community;
 
    # Create and populate a new community
    my $community = Bio::Community->new( );
    while ( my ($member, $count) = $self->next_member ) {
-      last if not defined $member;
+      last if not defined $member; # All members have been read
       $community->add_member($member, $count);
    }
-   return $community->get_richness > 0 ? $community : undef;;
+   return $community->get_richness > 0 ? $community : undef;
 }
 
 

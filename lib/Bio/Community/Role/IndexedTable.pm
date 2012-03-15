@@ -127,7 +127,7 @@ has '_index' => (
    init_arg => undef,
    default => sub { [] },
    lazy => 1,
-   predicate => '_has_index',
+   #predicate => '_has_index',
 );
 
 
