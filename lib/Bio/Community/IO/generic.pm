@@ -121,6 +121,15 @@ method _generate_members {
 }
 
 
+method _next_community {
+   # Go to start of next column. Return name of new community
+   $self->_col( $self->_col + 1 );
+   $self->_line( 1 );
+   my $name = $self->_get_indexed_value(1, $self->_col);
+   return $name;
+}
+
+
 method next_member {
    # The first time, index the file and prepare members
    if (not $self->_has_members) {
@@ -136,18 +145,11 @@ method next_member {
       # Get the abundance of the member (undef if out-of-bounds)
       $count = $self->_get_indexed_value($line, $self->_col);
 
-      # No more members for this community. Don't forget to go to start of next column.
-      if (not defined $count) {
-         $self->_col( $self->_col + 1 );
-         $line = 1;
-         last;
-      }
+      # No more members for this community.
+      last if not defined $count;
 
       # Skip members with no abundance / abundance of 0
-      if (not $count) {
-         $count = undef;
-         next;
-      }
+      next if not $count;
 
       # Get the member itself
       $member = $self->_members->[$line - 2];

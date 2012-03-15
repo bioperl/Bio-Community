@@ -27,12 +27,12 @@ for my $method (@methods) {
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
 is $community->get_richness, 1;
-
-#### Test community name!
+is $community->name, 'gut';
 
 ok $community2 = $in->next_community;
 isa_ok $community2, 'Bio::Community';
 is $community2->get_richness, 3;
+is $community2->name, 'soda lake';
 
 is $in->next_community, undef;
 
