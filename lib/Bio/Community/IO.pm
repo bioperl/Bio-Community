@@ -238,9 +238,7 @@ method write_community (Bio::Community $community) {
          $rank++;
       }
    } elsif ($sort_members == 0) {
-      ### TODO: should be able to use next_member() but there is a bug
-      #while (my $member = $community->next_member) {
-      for my $member ($community->all_members) {
+      while (my $member = $community->next_member) {
          $self->_process_member($member, $community);
       }
    } else {

@@ -12,7 +12,7 @@ my $in;
 
 # Tab-delimited file (default)
 
-ok $in = t::IndexedTable->new( -file => test_input_file('generic_table.txt') );
+ok $in = t::IndexedTable->new( -file => test_input_file('indexed_table.txt') );
 is $in->delim, "\t";
 is $in->_max_col, 3;
 is $in->_max_line, 4;
@@ -45,7 +45,7 @@ $in->close;
 
 # Win32 tab-delimited file
 
-ok $in = t::IndexedTable->new( -file => test_input_file('generic_table_win32.txt') );
+ok $in = t::IndexedTable->new( -file => test_input_file('indexed_table_win32.txt') );
 is $in->delim, "\t";
 is $in->_max_col, 3;
 is $in->_max_line, 4;
@@ -72,7 +72,7 @@ $in->close;
 # Double-space-delimited file
 
 ok $in = t::IndexedTable->new(
-   -file  => test_input_file('generic_table_space_delim.txt'),
+   -file  => test_input_file('indexed_table_space_delim.txt'),
    -delim => '  ',
 );
 is $in->delim, '  ';
@@ -101,7 +101,7 @@ $in->close;
 # Table that does not span the entire file
 
 ok $in = t::IndexedTable->new(
-   -file       => test_input_file('generic_table.txt'),
+   -file       => test_input_file('indexed_table.txt'),
    -start_line => 2, 
    -end_line   => 3,
 );
@@ -124,7 +124,7 @@ $in->close;
 
 # Table with a single line
 
-ok $in = t::IndexedTable->new( -file => test_input_file('generic_table_single_line.txt') );
+ok $in = t::IndexedTable->new( -file => test_input_file('indexed_table_single_line.txt') );
 is $in->delim, "\t";
 is $in->_max_col, 3;
 is $in->_max_line, 1;
@@ -141,7 +141,7 @@ $in->close;
 
 # Table with a single column
 
-ok $in = t::IndexedTable->new( -file => test_input_file('generic_table_single_column.txt') );
+ok $in = t::IndexedTable->new( -file => test_input_file('indexed_table_single_column.txt') );
 ok $in->_index_table;
 is $in->delim, "\t";
 is $in->_max_col, 1;
