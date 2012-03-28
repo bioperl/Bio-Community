@@ -3,11 +3,13 @@ package Bio::Community::Role::IndexedTable;
 use Moose::Role;
 use MooseX::Method::Signatures;
 use namespace::autoclean;
+use Fcntl;
 
 
-# Object has to be a Bio::Root::IO
+#### Consuming class has to inherit from Bio::Root::IO
 requires '_fh',
-         '_readline';
+         '_readline',
+         '_print';
 
 =head1 Constructors
 
@@ -115,11 +117,15 @@ has '_max_col' => (
 
 
 method BUILD {
-   # Index the table after the object has been constructed with new()
-   $self->_index_table;
+   if ($self->mode eq 'r') {
+      # After object constructed with new(), index table if filehandle is readable
+      $self->_index_table;
+   }
 }
 
 
+# When reading, contains index of table cells
+# When writing, contains cell values to write
 has '_index' => (
    is => 'rw',
    isa => 'ArrayRef[PositiveInt]',
@@ -131,9 +137,20 @@ has '_index' => (
 );
 
 
+###has '_values' => (
+###   is => 'rw',
+###   isa => 'ArrayRef',
+###   required => 0,
+###   init_arg => undef,
+###   default => sub { [] },
+###   lazy => 1,
+###   predicate => '_has_values',
+###);
+
+
 =head2 _index_table
 
- Title   : _index
+ Title   : _index_table
  Usage   : $in->_index_table;
  Function: Index the table in the file
  Args    : None
@@ -222,7 +239,7 @@ method _index_table () {
 =head2 _get_indexed_value
 
  Title   : _get_indexed_value
- Usage   : my $value = $in->_get_indexed_value(1,3);
+ Usage   : my $value = $in->_get_indexed_value(1, 3);
  Function: Get the element at the given line and column of the table.
  Args    : A strictly positive integer for the line
            A strictly positive integer for the column
@@ -232,12 +249,12 @@ method _index_table () {
 
 =cut
 
-method _get_indexed_value (StrictlyPositiveInt $line, StrictlyPositiveInt $column) {
-   my $val = undef;
-   if ( ($line <= $self->_max_line) && ($column <= $self->_max_col) ) {
+method _get_indexed_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
+   my $val;
+   if ( ($line <= $self->_max_line) && ($col <= $self->_max_col) ) {
 
       # Retrieve the value if it is within the bounds of the table
-      my $pos = ($line - 1) * $self->_max_col + $column - 1;
+      my $pos = ($line - 1) * $self->_max_col + $col - 1;
       my $index = $self->_index;
       my $offset = $index->[$pos];
       seek $self->_fh, $offset, 0;
@@ -252,6 +269,41 @@ method _get_indexed_value (StrictlyPositiveInt $line, StrictlyPositiveInt $colum
    }
    return $val;
 }
+
+
+#####
+
+=head2 _set_value
+
+ Title   : _set_value
+ Usage   : $out->_set_value(1, 3, $value);
+ Function: Set the element at the given line and column of the table.
+ Args    : A strictly positive integer for the line
+           A strictly positive integer for the column
+           A string for the value of the table at the given line and column
+ Returns : 1 for success
+
+=cut
+
+method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) {
+
+   # Update table dimensions
+   my $max_lines = $self->_max_line;
+   my $new_max_lines = $line > $max_lines ? $line : $max_lines;
+   my $max_cols = $self->_max_col;
+   my $new_max_cols = $col > $max_cols ? $col : $max_cols;
+   $self->_max_line($new_max_lines);
+   $self->_max_col($new_max_cols);
+
+   # Set new value
+   my $pos = ($line - 1) * $new_max_cols + $col - 1;
+   $self->_index->[$pos] = $value;
+
+   return 1;
+}
+
+#####
+
 
 
 
