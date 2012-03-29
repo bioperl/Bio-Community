@@ -268,7 +268,7 @@ is $in->_get_value(3, 1), undef;
 is $in->_get_value(1, 4), undef;
 
 $in->close;
-
+unlink $file;
 
 done_testing();
 
