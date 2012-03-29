@@ -374,12 +374,24 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
    my $new_max_lines = $line > $max_lines ? $line : $max_lines;
    my $max_cols = $self->_max_col;
    my $new_max_cols = $col > $max_cols ? $col : $max_cols;
-
-   ####
-   #for my $pos ( 1 .. $new_max_cols * $new_max_lines ) {
-   #
-   #}
-   ####
+   my $pos = 0;
+   my $data = $self->_data;
+   while ($pos < $new_max_cols * $new_max_lines ) {
+      $pos++;
+      my $cur_col  = ($pos - 1) % $new_max_cols + 1;
+      if ($cur_col > $max_cols) {
+         # Add a column in the table
+         splice @$data, $pos-1, 0, '';
+         next;
+      }
+      my $cur_line = int( ($pos - 1) / $new_max_cols ) + 1;
+      if ($cur_line > $max_lines) {
+         # Add a line in the table
+         splice @$data, $pos-1, 0, ('')x$new_max_cols;
+         $pos += ($new_max_cols - 1);
+         next;
+      }
+   }
 
    # Update table dimensions
    $self->_max_line($new_max_lines);
@@ -387,7 +399,7 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
 
    # Set new value
    my $pos = ($line - 1) * $new_max_cols + $col - 1;
-   $self->_data->[$pos] = $value;
+   $data->[$pos] = $value;
 
    return 1;
 }
