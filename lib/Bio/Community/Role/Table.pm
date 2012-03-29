@@ -369,11 +369,19 @@ method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
 
 method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) {
 
-   # Update table dimensions
+   # Extend table
    my $max_lines = $self->_max_line;
    my $new_max_lines = $line > $max_lines ? $line : $max_lines;
    my $max_cols = $self->_max_col;
    my $new_max_cols = $col > $max_cols ? $col : $max_cols;
+
+   ####
+   #for my $pos ( 1 .. $new_max_cols * $new_max_lines ) {
+   #
+   #}
+   ####
+
+   # Update table dimensions
    $self->_max_line($new_max_lines);
    $self->_max_col($new_max_cols);
 
