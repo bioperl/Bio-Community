@@ -69,7 +69,7 @@ use Bio::Community::Member;
 
 extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO',
-     'Bio::Community::Role::IndexedTable';
+     'Bio::Community::Role::Table';
 
 
 our $default_sort_members = 0; # unsorted
@@ -112,7 +112,7 @@ method _generate_members {
    my @members;
    my $col = 1;
    my $line = 2; # first line is a header
-   while (my $value = $self->_get_indexed_value($line, $col)) {
+   while (my $value = $self->_get_value($line, $col)) {
       my $member = Bio::Community::Member->new( -desc => $value );
       push @members, $member;
       $line++;
@@ -131,7 +131,7 @@ method next_member {
    my $line = $self->_line;
    while ( $line++ ) {
       # Get the abundance of the member (undef if out-of-bounds)
-      $count = $self->_get_indexed_value($line, $self->_col);
+      $count = $self->_get_value($line, $self->_col);
       # No more members for this community.
       last if not defined $count;
       # Skip members with no abundance / abundance of 0
@@ -149,7 +149,7 @@ method _next_community_init {
    # Go to start of next column. Return name of new community
    $self->_col( $self->_col + 1 );
    $self->_line( 1 );
-   my $name = $self->_get_indexed_value(1, $self->_col);
+   my $name = $self->_get_value(1, $self->_col);
    return $name;
 }
 

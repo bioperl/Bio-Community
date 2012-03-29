@@ -3,7 +3,7 @@ use warnings;
 use Bio::Root::Test;
 
 use_ok($_) for qw(
-    t::IndexedTable
+    t::TestTable
 );
 
 
@@ -12,7 +12,7 @@ my $out;
 
 # Tab-delimited file (default)
 
-ok $out = t::IndexedTable->new( -file => '>'.'indexed_table.txt' );
+ok $out = t::TestTable->new( -file => '>'.'table.txt' );
 is $out->delim, "\t";
 is $out->_max_col, 1;
 is $out->_max_line, 1;
@@ -34,7 +34,7 @@ ok $out->_set_value(2, 1, 'Streptococcus');
 ok $out->_set_value(2, 2,  241);
 ok $out->_set_value(2, 3,  334);
 
-use Data::Dumper; print Dumper($out->_index);
+use Data::Dumper; print Dumper($out->_data);
 
 
 $out->close;
