@@ -6,7 +6,7 @@ use namespace::autoclean;
 use Fcntl;
 
 
-#### Consuming class has to inherit from Bio::Root::IO
+# Consuming class has to inherit from Bio::Root::IO
 requires '_fh',
          '_readline',
          '_print';
@@ -68,7 +68,8 @@ has 'delim' => (
  Title   : start_line
  Usage   : my $line_num = $in->start_line;
  Function: Get or set the line number at which the table starts. The default is
-           1, i.e. the table starts at the beginning of the file.
+           1, i.e. the table starts at the beginning of the file. This option
+           is not used when writing a table, but see _write_table() for details.
  Args    : A strictly positive number
  Returns : A strictly positive number
 
@@ -197,9 +198,10 @@ method BUILD {
 
 
 before 'close' =>  sub {
-   # Before closing filehandle, write the table if filehandle is writable
+   # Before closing filehandle, write the table if filehandle is writable and
+   # the table was not already written.
    my $self = shift;
-   if ($self->mode eq 'w') {
+   if ( ($self->mode eq 'w') && (not $self->_was_written) ) {
       $self->_write_table;
    }
 };
@@ -215,6 +217,16 @@ has '_data' => (
    default => sub { [] },
    lazy => 1,
    predicate => '_has_data',
+);
+
+
+has '_was_written' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   init_arg => undef,
+   default => 0,
+   lazy => 1,
 );
 
 
@@ -255,7 +267,7 @@ method _read_table () {
       my $num_eol_chars = length($1);
       my $line_length = length( $line );
 
-      # Do not index the line if it is before or after the table;
+      # Do not index the line if it is before or after the table
       if ($. < $start_line) {
          $file_offset += $line_length;
          next;
@@ -292,7 +304,8 @@ method _read_table () {
             # Initialize the number of columns
             $max_col = $nof_cols;
          } else {
-            $self->throw("Error: Got $nof_cols columns at line $. but got a different number ($max_col) at the previous line\n");
+            $self->throw( "Error: Got $nof_cols columns at line $. but got a ".
+               "different number ($max_col) at the previous line\n" );
          }
       }
       $max_line++;
@@ -376,7 +389,11 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
 
  Title   : _write_table
  Usage   : $out->_write_table;
- Function: Write the content of the cells in the table to a file.
+ Function: Write the content of the cells in the table to a file. This method is
+           called automatically when the filehandle is closed: $out->close;
+           If you want header lines before the table, it is your responsability
+           to write them to file using the _print() method of Bio::Root::IO
+           prior to calling _write_table().
  Args    : None
  Returns : 1 on success
 
@@ -391,9 +408,9 @@ method _write_table () {
       my $end   =  $line      * $max_cols - 1;
       $self->_print( join( $delim, @$data[$start..$end] ) . "\n" );
    }
+   $self->_was_written(1);
    return 1;
 }
-
 
 
 1;
