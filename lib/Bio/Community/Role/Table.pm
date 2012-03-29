@@ -189,40 +189,20 @@ has '_max_col' => (
 
 
 method BUILD {
-
-   #$self->_initialize_io();
-
-   if ($self->mode eq 'r') {
-      # After object constructed with new(), index table if filehandle is readable
+   # After object constructed with new(), index table if filehandle is readable
+   if ($self->mode eq 'r') {   
       $self->_read_table;
    }
 }
 
 
-method DEMOLISH {
-
-   ####
-   use Data::Dumper;
-   print Dumper($self); 
-   print "Demolishing!\n";
-   ####
-
+before 'close' =>  sub {
+   # Before closing filehandle, write the table if filehandle is writable
+   my $self = shift;
    if ($self->mode eq 'w') {
-
-      ####
-      print "writing to file!\n";
-      ####
-
-      # At object destruction, write the table if filehandle is writable
       $self->_write_table;
    }
-  
-   ####
-   else {
-      print "Not writing to file\n";
-   }
-   ####
-}
+};
 
 
 # When reading a table, contains the location index of the cells
@@ -403,23 +383,15 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
 =cut
 
 method _write_table () {
-
-   #### skip if already written??
-
    my $delim    = $self->delim;
    my $data     = $self->_data;
    my $max_cols = $self->_max_col;
    for my $line ( 1 .. $self->_max_line ) {
       my $start = ($line - 1) * $max_cols;
       my $end   =  $line      * $max_cols - 1;
-      my $string = join( $delim, @$data[$start..$end] )."\n";
-
-      ####
-      $self->_print($string);
-      ####
-
+      $self->_print( join( $delim, @$data[$start..$end] ) . "\n" );
    }
-
+   return 1;
 }
 
 
