@@ -398,7 +398,7 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
    $self->_max_col($new_max_cols);
 
    # Set new value
-   my $pos = ($line - 1) * $new_max_cols + $col - 1;
+   $pos = ($line - 1) * $new_max_cols + $col - 1;
    $data->[$pos] = $value;
 
    return 1;
