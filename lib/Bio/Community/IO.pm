@@ -114,6 +114,10 @@ extends 'Bio::Root::Root',
 
 
 # Overriding new... Is there a better alternative?
+### try:
+###    before 'new' => sub {};
+### or:
+###    after 'new' => sub {};
 sub new {
    my $class = shift;
    my $real_class = Scalar::Util::blessed($class) || $class;
@@ -232,6 +236,7 @@ method write_member (Bio::Community::Member $member, Count $count) {
 =cut
 
 method write_community (Bio::Community $community) {
+   $self->_write_community_init($community);
    my $sort_members = $self->sort_members;
    if ($sort_members == 1) {
       my $rank = $community->get_richness;
@@ -253,15 +258,16 @@ method write_community (Bio::Community $community) {
    } else {
       $self->throw("Error: $sort_members is not a valid sort value.\n");
    }
+   $self->_write_community_finish($community);
    return 1;
 }
 
-method _write_community_init {
+method _write_community_init (Bio::Community $community) {
    # Driver-side method to initialize writing a community
    $self->throw_not_implemented;
 }
 
-method _write_community_finish {
+method _write_community_finish (Bio::Community $community) {
    # Driver-side method to finalize writing a community
    $self->throw_not_implemented;
 }

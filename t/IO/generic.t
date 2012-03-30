@@ -18,8 +18,9 @@ ok $in = Bio::Community::IO->new(
    -format => 'generic',
 ), 'Read generic format';
 is $in->sort_members, 0;
+is $in->abundance_type, 'count';
 
-@methods = qw(next_member write_member);
+@methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
 for my $method (@methods) {
    can_ok($in, $method) || diag "Method $method() not implemented";
 }
@@ -63,14 +64,16 @@ is $community2->next_member, undef;
 
 # Write generic format
 
-#$output_file = test_output_file();
-#ok $out = Bio::Community::IO->new( -file => '>'.$output_file, -format => 'generic' ), 'Write generic format';
-#ok $out->write_community($community);
-#$out->close;
+###$output_file = test_output_file();
+$output_file = 'test.txt';
 
-#ok $in = Bio::Community::IO->new( -file => '<'.$output_file, -format => 'generic' );
-#ok $community2 = $in->next_community;
-#$in->close;
+ok $out = Bio::Community::IO->new(
+   -file => '>'.$output_file,
+   -format => 'generic',
+), 'Write generic format';
+ok $out->write_community($community);
+ok $out->write_community($community2);
+$out->close;
 
 
 done_testing();

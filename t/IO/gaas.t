@@ -10,6 +10,7 @@ use_ok($_) for qw(
 my ($in, $out, $output_file, $community, $community2, $member, $count);
 my (@communities, @methods);
 
+
 # Read GAAS format
 
 ok $in = Bio::Community::IO->new(
@@ -17,7 +18,9 @@ ok $in = Bio::Community::IO->new(
    -format => 'gaas',
 ), 'Read GAAS format';
 is $in->sort_members, -1;
-@methods = qw(next_member write_member);
+is $in->abundance_type, 'fraction';
+
+@methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
 for my $method (@methods) {
    can_ok($in, $method) || diag "Method $method() not implemented";
 }

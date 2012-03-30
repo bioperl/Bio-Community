@@ -87,8 +87,8 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
 
 
-our $default_sort_members = -1; # sorted by decreasing abundance
-our $default_abundance    = 'fraction';
+our $default_sort_members   =  -1;        # sorted by decreasing abundance
+our $default_abundance_type = 'fraction'; # fractional number between 0 and 1
 
 
 method next_member {
@@ -136,12 +136,12 @@ method write_member (Bio::Community::Member $member, Count $count) {
 }
 
 
-method _write_community_init {
+method _write_community_init (Bio::Community $community) {
    return 1;
 }
 
 
-method _write_community_finish {
+method _write_community_finish (Bio::Community $community) {
    return 1;
 }
 

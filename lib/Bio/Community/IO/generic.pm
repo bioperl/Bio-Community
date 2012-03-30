@@ -71,9 +71,9 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO',
      'Bio::Community::Role::Table';
 
-
-our $default_sort_members = 0; # unsorted
-our $default_abundance    = 'count';
+#### sorting only effective for first community???
+our $default_sort_members   =  0;      # unsorted
+our $default_abundance_type = 'count'; # absolute count (positive integer)
 
 
 has '_line' => (
@@ -98,7 +98,7 @@ has '_col' => (
 
 has '_members' => (
    is => 'rw',
-   isa => 'ArrayRef',
+   isa => 'ArrayRef[Bio::Community::Member]',
    required => 0,
    init_arg => undef,
    default => sub { [] },
@@ -106,6 +106,15 @@ has '_members' => (
    predicate => '_has_members',
 );
 
+
+has '_id2line' => (
+   is => 'rw',
+   isa => 'HashRef[String]',
+   required => 0,
+   init_arg => undef,
+   default => sub { {} },
+   lazy => 1,
+);
 
 method _generate_members {
    # Make members from the first column
@@ -122,11 +131,14 @@ method _generate_members {
 
 
 method next_member {
+
    # The first time, index the file and prepare members
+   #### should probably be moved to next_community_init
    if (not $self->_has_members) {
       $self->_generate_members();
       $self->_col(2);
    }
+
    my ($member, $count);
    my $line = $self->_line;
    while ( $line++ ) {
@@ -160,18 +172,32 @@ method _next_community_finish {
 
 
 method write_member (Bio::Community::Member $member, Count $count) {
-#   my $line = $member->desc."\t".''."\t".$count."\n";
-#   $self->_print( $line );
-#   return 1;
+    my $id   = $member->id;
+    my $line = $self->_id2line->{$id};
+    if (not defined $line) {
+        # This member has not been written previously for another community
+        $line = $self->_line;
+        $self->_set_value( $line, 1, $member->desc );
+        $self->_id2line->{$id} = $line;
+    }
+    $self->_set_value( $line, $self->_col, $count);
+    $self->_line( $line + 1 );
+    return 1;
 }
 
 
-method _write_community_init {
+method _write_community_init (Bio::Community $community) {
+   # Write header for that community
+   my $line = 1;
+   my $col  = $self->_col + 1;
+   $self->_set_value($line, $col, $community->name);
+   $self->_line( $line + 1);
+   $self->_col( $col );
    return 1;
 }
 
 
-method _write_community_finish {
+method _write_community_finish (Bio::Community $community) {
    return 1;
 }
 
