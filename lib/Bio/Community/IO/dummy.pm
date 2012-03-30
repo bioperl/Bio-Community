@@ -14,11 +14,18 @@ Bio::Community::IO::dummy - Dummy driver (does nothing)
 
 =head1 SYNOPSIS
 
+   my $in = Bio::Community::IO->new( -file => 'gaas_compo.txt', -format => 'dummy' );
+
+   # See Bio::Community::IO for more information
+
 =head1 DESCRIPTION
+
+This module does nothing useful. Its sole purpose is to demonstrate the basic
+way to create a driver for Bio::Community::IO.
 
 =head1 CONSTRUCTOR
 
-=head1 OBJECT METHODS
+See L<Bio::Community::IO>.
 
 =head1 FEEDBACK
 
@@ -69,8 +76,9 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
 
 
-our $default_sort_members = 0; # unsorted
-our $default_abundance    = 'count';
+our $default_sort_members   =  0;      # members not sorted by abundance
+our $default_abundance      = 'count'; # report raw counts
+our $default_missing_string = '-';     # empty members represented as '-'
 
 
 has 'dummy' => (
@@ -106,11 +114,11 @@ method write_member (Bio::Community::Member $member, Count $count) {
    return 1;
 }
 
-method _write_community_init {
+method _write_community_init (Bio::Community $community) {
    return 1;
 }
 
-method _write_community_finish {
+method _write_community_finish (Bio::Community $community) {
    return 1;
 }
 
