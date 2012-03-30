@@ -65,9 +65,6 @@ is $community2->next_member, undef;
 
 $output_file = test_output_file();
 
-####
-$output_file = "test.txt";
-
 ok $out = Bio::Community::IO->new(
    -file   => '>'.$output_file,
    -format => 'generic',
