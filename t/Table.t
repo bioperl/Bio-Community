@@ -131,9 +131,9 @@ is $out->delim, "\t";
 is $out->_max_col, 1;
 is $out->_max_line, 1;
 
-ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(2, 2,  241);
 ok $out->_set_value(1, 2, 'gut');
+ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(3, 1, 'Goatpox virus');
 ok $out->_set_value(4, 1, 'Lumpy skin disease virus');
 ok $out->_set_value(3, 2,  '"0"');

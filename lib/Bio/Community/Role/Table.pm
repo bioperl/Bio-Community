@@ -207,16 +207,26 @@ before 'close' =>  sub {
 };
 
 
-# When reading a table, contains the location index of the cells
-# When writing a table, contains values of the cells
-has '_data' => (
+# Index of the location of the cells (when reading a table)
+has '_index' => (
    is => 'rw',
    isa => 'ArrayRef[PositiveInt]',
    required => 0,
    init_arg => undef,
    default => sub { [] },
    lazy => 1,
-   predicate => '_has_data',
+   predicate => '_has_index',
+);
+
+
+# Value contained in the table cells (when writing a table)
+has '_values' => (
+   is => 'rw',
+   isa => 'ArrayRef[Str]',
+   required => 0,
+   init_arg => undef,
+   default => sub { [''] },
+   lazy => 1,
 );
 
 
@@ -243,7 +253,7 @@ has '_was_written' => (
 method _read_table () {
    # Index the file the first time
 
-   if ( $self->_has_data ) {
+   if ( $self->_has_index ) {
       return 1;
    }
 
@@ -253,7 +263,7 @@ method _read_table () {
       $self->throw("Error: Got start ($start_line) greater than end ($end_line)\n");
    }
 
-   my @arr; # array of file offsets 
+   my @index; # array of file offsets 
    my ($max_line, $max_col) = (0, 0);
 
    my $delim = $self->delim;
@@ -277,8 +287,8 @@ method _read_table () {
       }
 
       # Save the offset of the first line of the table
-      if (scalar @arr == 0) {
-         push @arr, $file_offset;
+      if (scalar @index == 0) {
+         push @index, $file_offset;
       }
 
       # Index the line
@@ -309,9 +319,9 @@ method _read_table () {
          }
       }
       $max_line++;
-      push @arr, @matches;
+      push @index, @matches;
    }
-   $self->_data(\@arr);
+   $self->_index(\@index);
    $self->_max_line($max_line);
    $self->_max_col($max_col);
 
@@ -339,7 +349,7 @@ method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
 
       # Retrieve the value if it is within the bounds of the table
       my $pos = ($line - 1) * $self->_max_col + $col - 1;
-      my $index = $self->_data;
+      my $index = $self->_index;
       my $offset = $index->[$pos];
       seek $self->_fh, $offset, 0;
       my $length = $index->[$pos+1] - $offset;
@@ -375,19 +385,19 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
    my $max_cols = $self->_max_col;
    my $new_max_cols = $col > $max_cols ? $col : $max_cols;
    my $pos = 0;
-   my $data = $self->_data;
+   my $values = $self->_values;
    while ($pos < $new_max_cols * $new_max_lines ) {
       $pos++;
-      my $cur_col  = ($pos - 1) % $new_max_cols + 1;
+      my $cur_col = ($pos - 1) % $new_max_cols + 1;
       if ($cur_col > $max_cols) {
          # Add a column in the table
-         splice @$data, $pos-1, 0, '';
+         splice @$values, $pos-1, 0, '';
          next;
       }
       my $cur_line = int( ($pos - 1) / $new_max_cols ) + 1;
       if ($cur_line > $max_lines) {
          # Add a line in the table
-         splice @$data, $pos-1, 0, ('')x$new_max_cols;
+         splice @$values, $pos-1, 0, ('')x$new_max_cols;
          $pos += ($new_max_cols - 1);
          next;
       }
@@ -399,7 +409,7 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
 
    # Set new value
    $pos = ($line - 1) * $new_max_cols + $col - 1;
-   $data->[$pos] = $value;
+   $values->[$pos] = $value;
 
    return 1;
 }
@@ -421,12 +431,12 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
 
 method _write_table () {
    my $delim    = $self->delim;
-   my $data     = $self->_data;
+   my $values   = $self->_values;
    my $max_cols = $self->_max_col;
    for my $line ( 1 .. $self->_max_line ) {
       my $start = ($line - 1) * $max_cols;
       my $end   =  $line      * $max_cols - 1;
-      $self->_print( join( $delim, @$data[$start..$end] ) . "\n" );
+      $self->_print( join( $delim, @$values[$start..$end] ) . "\n" );
    }
    $self->_was_written(1);
    return 1;
