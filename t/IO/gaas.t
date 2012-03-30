@@ -47,7 +47,7 @@ is $member->desc, 'Goatpox virus Pellor';
 is $community->get_rel_ab($member), 19.6094208626593;
 
 
-# Write GAAS format
+# Write GAAS format and re-read it
 
 $output_file = test_output_file();
 ok $out = Bio::Community::IO->new(
@@ -60,7 +60,7 @@ $out->close;
 ok $in = Bio::Community::IO->new(
    -file   => '<'.$output_file,
    -format => 'gaas',
- );
+);
 ok $community2 = $in->next_community;
 is $in->next_community, undef;
 $in->close;

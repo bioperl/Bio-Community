@@ -9,7 +9,7 @@ use_ok($_) for qw(
 
 my ($in, $out);
 
-my $file = 'table.txt';
+my $file = test_output_file();
 
 
 # Read linux tab-delimited file
