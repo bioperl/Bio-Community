@@ -19,6 +19,7 @@ ok $in = Bio::Community::IO->new(
 ), 'Read GAAS format';
 is $in->sort_members, -1;
 is $in->abundance_type, 'fraction';
+is $in->missing_string, 0;
 
 @methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
 for my $method (@methods) {

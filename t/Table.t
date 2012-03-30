@@ -223,6 +223,55 @@ $in->close;
 unlink $file;
 
 
+# Write and read file with specified string for missing abundance
+
+ok $out = t::TestTableRole->new(
+   -file           => '>'.$file,
+   -missing_string => 'n/a',
+), 'Write file with specified missing abundance string';
+is $out->missing_string, 'n/a';
+
+ok $out->_set_value(1, 1, 'Species');
+ok $out->_set_value(1, 2, 'gut');
+ok $out->_set_value(1, 3, 'soda_lake');
+ok $out->_set_value(2, 1, 'Streptococcus');
+ok $out->_set_value(2, 2,  241);
+ok $out->_set_value(2, 3,  334);
+ok $out->_set_value(3, 1, 'Goatpox_virus');
+#ok $out->_set_value(3, 2,  '"0"');
+ok $out->_set_value(3, 3,  1023.9);
+ok $out->_set_value(4, 1, 'Lumpy_skin_disease_virus');
+#ok $out->_set_value(4, 2, '');
+ok $out->_set_value(4, 3,  123);
+
+$out->close;
+
+ok $in = t::TestTableRole->new(
+   -file  => $file,
+), 'Read file with specified missing abundance string';
+is $in->_max_col, 3;
+is $in->_max_line, 4;
+
+is $in->_get_value(1, 1), 'Species';
+is $in->_get_value(1, 2), 'gut';
+is $in->_get_value(1, 3), 'soda_lake';
+is $in->_get_value(2, 1), 'Streptococcus';
+is $in->_get_value(2, 2),  241;
+is $in->_get_value(2, 3),  334;
+is $in->_get_value(3, 1), 'Goatpox_virus';
+is $in->_get_value(3, 2), 'n/a';
+is $in->_get_value(3, 3),  1023.9;
+is $in->_get_value(4, 1), 'Lumpy_skin_disease_virus';
+is $in->_get_value(4, 2), 'n/a';
+is $in->_get_value(4, 3),  123;
+
+is $in->_get_value(5, 1), undef;
+is $in->_get_value(1, 4), undef;
+
+$in->close;
+unlink $file;
+
+
 # Write and read table with a single line
 
 ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write single-line table';

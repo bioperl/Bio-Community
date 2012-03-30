@@ -89,6 +89,7 @@ with 'Bio::Community::Role::IO';
 
 our $default_sort_members   =  -1;        # sorted by decreasing abundance
 our $default_abundance_type = 'fraction'; # fractional number between 0 and 1
+our $default_missing_string =  0;         # empty members get a '0'
 
 
 method next_member {

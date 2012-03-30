@@ -314,9 +314,10 @@ has 'sort_members' => (
 
  Title   : abundance_type
  Usage   : $in->abundance_type();
- Function: When writing a community to a file, sort the community members based
-           on their abundance: 0 (off), 1 (by increasing abundance), -1 (by 
-           decreasing abundance). The default is specific to each driver used.
+ Function: When writing a community to a file, report the abundance as one of
+           three possible representations: a raw count, a percentage (0-100%) or
+           a fractional number (0-1). The default is specific to each driver
+           used.
  Args    : count, percentage or fraction
  Returns : count, percentage or fraction
 
@@ -331,6 +332,27 @@ has 'abundance_type' => (
    default => sub { return eval('$'.ref(shift).'::default_abundance_type') || 'percentage' },
 );
 
+
+=head2 missing_string
+
+ Title   : missing_string
+ Usage   : $in->missing_string();
+ Function: When writing a community to a file, specify what abundance string to
+           use for members that are not present in the community. The default is
+           specific to each driver used.
+ Args    : string e.g. '', '0', 'n/a', '-'
+ Returns : string
+
+=cut
+
+has 'missing_string' => (
+   is => 'ro',
+   isa => 'Str',
+   required => 0,
+   lazy => 1,
+   init_arg => '-missing_string',
+   default => sub { return eval('$'.ref(shift).'::default_missing_string') || 0 },
+);
 
 
 # Do not inline so that new() can be overridden

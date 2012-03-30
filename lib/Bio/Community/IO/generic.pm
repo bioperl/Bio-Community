@@ -74,6 +74,7 @@ with 'Bio::Community::Role::IO',
 #### sorting only effective for first community???
 our $default_sort_members   =  0;      # unsorted
 our $default_abundance_type = 'count'; # absolute count (positive integer)
+our $default_missing_string =  0;      # empty members get a '0'
 
 
 has '_line' => (
@@ -180,7 +181,7 @@ method write_member (Bio::Community::Member $member, Count $count) {
         $self->_set_value( $line, 1, $member->desc );
         $self->_id2line->{$id} = $line;
     }
-    $self->_set_value( $line, $self->_col, $count);
+    $self->_set_value($line, $self->_col, $count);
     $self->_line( $line + 1 );
     return 1;
 }

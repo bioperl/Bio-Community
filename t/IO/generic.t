@@ -19,6 +19,7 @@ ok $in = Bio::Community::IO->new(
 ), 'Read generic format';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
+is $in->missing_string, 0;
 
 @methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
 for my $method (@methods) {
@@ -63,6 +64,9 @@ is $community2->next_member, undef;
 # Write generic format
 
 $output_file = test_output_file();
+
+####
+$output_file = "test.txt";
 
 ok $out = Bio::Community::IO->new(
    -file   => '>'.$output_file,

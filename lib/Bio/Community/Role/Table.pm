@@ -46,8 +46,9 @@ role are also valid:
 
  Title   : delim
  Usage   : my $delim = $in->delim;
- Function: Get or set the delimiter, i.e. the characters that delimit the
-           columns of the table. The default is tab, "\t".
+ Function: When reading or writing a table, get or set the delimiter, i.e. the
+           characters that delimit the columns of the table. The default is the
+           tab character "\t".
  Args    : A string
  Returns : A string
 
@@ -67,9 +68,10 @@ has 'delim' => (
 
  Title   : start_line
  Usage   : my $line_num = $in->start_line;
- Function: Get or set the line number at which the table starts. The default is
-           1, i.e. the table starts at the beginning of the file. This option
-           is not used when writing a table, but see _write_table() for details.
+ Function: When reading a table, get or set the line number at which the table
+           starts. The default is 1, i.e. the table starts at the first line of
+           the file. This option is not used when writing a table, but see
+           _write_table() for details.
  Args    : A strictly positive number
  Returns : A strictly positive number
 
@@ -89,8 +91,9 @@ has 'start_line' => (
 
  Title   : end_line
  Usage   : my $line_num = $in->end_line;
- Function: Get or set the line number at which the table ends. If undef (the
-           default), the table ends at the last line of the file.
+ Function: When reading a table, get or set the line number at which the table
+           ends. If undef (the default), the table ends at the last line of the
+           file.
  Args    : A strictly positive number or undef
  Returns : A strictly positive number or undef
 
@@ -105,6 +108,27 @@ has 'end_line' => (
    lazy => 1,
 );
 
+
+=head2 missing_string
+
+ Title   : missing_string
+ Usage   : my $missing = $out->missing_string;
+ Function: When reading a table, get or set the line number at which the table
+           ends. If undef (the default), the table ends at the last line of the
+           file.
+ Args    : A string, e.g. '', '0', 'n/a', '-'
+ Returns : A string
+
+=cut
+
+has 'missing_string' => (
+   is => 'ro',
+   isa => 'Str',
+   required => 0,
+   init_arg => '-missing_string',
+   default => '0',
+   lazy => 1,
+);
 
 =head1 FEEDBACK
 
@@ -391,13 +415,13 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
       my $cur_col = ($pos - 1) % $new_max_cols + 1;
       if ($cur_col > $max_cols) {
          # Add a column in the table
-         splice @$values, $pos-1, 0, '';
+         splice @$values, $pos-1, 0, $self->missing_string;
          next;
       }
       my $cur_line = int( ($pos - 1) / $new_max_cols ) + 1;
       if ($cur_line > $max_lines) {
          # Add a line in the table
-         splice @$values, $pos-1, 0, ('')x$new_max_cols;
+         splice @$values, $pos-1, 0, ($self->missing_string)x$new_max_cols;
          $pos += ($new_max_cols - 1);
          next;
       }
