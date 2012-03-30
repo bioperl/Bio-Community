@@ -35,7 +35,7 @@ abundance (a decimal number) instead of the usual integers used for counts.
 
 =head1 CONSTRUCTOR
 
-No specific constructor
+See L<Bio::Community::IO>.
 
 =head1 FEEDBACK
 

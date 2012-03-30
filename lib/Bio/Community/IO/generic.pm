@@ -11,15 +11,28 @@
 =head1 NAME
 
 Bio::Community::IO::generic - Driver to read and write files containing communities
-in a generic site-by-species table format
+in a generic tab-delimited site-by-species table format
 
 =head1 SYNOPSIS
 
+   my $in = Bio::Community::IO->new( -file => 'gaas_compo.txt', -format => 'generic' );
+
+   # See Bio::Community::IO for more information
+
 =head1 DESCRIPTION
+
+This Bio::Community::IO driver handles files in a generic format. Multiple
+communities can be written in a file to generate a site-by-species table, where
+the entries are tab-delimited. Example
+
+  	site A	site B
+  species 1	321	94
+  species 2	0	58
+  species 3	47	26
 
 =head1 CONSTRUCTOR
 
-=head1 OBJECT METHODS
+See L<Bio::Community::IO>.
 
 =head1 FEEDBACK
 
