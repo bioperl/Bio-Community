@@ -73,11 +73,10 @@ ok $out->write_community($community);
 ok $out->write_community($community2);
 $out->close;
 
-
 ok $in = Bio::Community::IO->new(
    -file   => $output_file,
    -format => 'generic',
-);
+), 'Re-read generic format';
 
 ok $community = $in->next_community;
 ok $member = $community->next_member;

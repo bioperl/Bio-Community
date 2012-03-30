@@ -93,7 +93,7 @@ ok $out->_set_value(2, 3,  334);
 
 $out->close;
 
-ok $in = t::TestTableRole->new( -file => $file ), 'Read tab-delimited table';
+ok $in = t::TestTableRole->new( -file => $file ), 'Re-read tab-delimited table';
 is $in->delim, "\t";
 is $in->_max_col, 3;
 is $in->_max_line, 4;
@@ -146,7 +146,7 @@ ok $out->_set_value(2, 3,  334);
 
 $out->close;
 
-ok $in = t::TestTableRole->new( -file => $file ), 'Read tab-delimited table again';
+ok $in = t::TestTableRole->new( -file => $file ), 'Re-read tab-delimited table again';
 is $in->delim, "\t";
 is $in->_max_col, 3;
 is $in->_max_line, 4;
@@ -198,7 +198,7 @@ $out->close;
 ok $in = t::TestTableRole->new(
    -file  => $file,
    -delim => '  ',
-), 'Read double-space delimited table';
+), 'Re-read double-space delimited table';
 is $in->delim, '  ';
 is $in->_max_col, 3;
 is $in->_max_line, 4;
@@ -248,7 +248,7 @@ $out->close;
 
 ok $in = t::TestTableRole->new(
    -file  => $file,
-), 'Read file with specified missing abundance string';
+), 'Re-read file with specified missing abundance string';
 is $in->_max_col, 3;
 is $in->_max_line, 4;
 
@@ -283,7 +283,7 @@ ok $out->_set_value(1, 3, 'soda lake');
 
 $out->close;
 
-ok $in = t::TestTableRole->new( -file => $file ), 'Read single-line table';
+ok $in = t::TestTableRole->new( -file => $file ), 'Re-read single-line table';
 is $in->delim, "\t";
 is $in->_max_col, 3;
 is $in->_max_line, 1;
@@ -310,7 +310,7 @@ ok $out->_set_value(4, 1, 'Lumpy skin disease virus');
 
 $out->close;
 
-ok $in = t::TestTableRole->new( -file => $file ), 'Read single-column table';
+ok $in = t::TestTableRole->new( -file => $file ), 'Re-read single-column table';
 ok $in->_read_table;
 is $in->delim, "\t";
 is $in->_max_col, 1;
@@ -350,7 +350,7 @@ ok $in = t::TestTableRole->new(
    -file       => $file,
    -start_line => 2, 
    -end_line   => 3,
-), 'Read table that does not span the entire file';
+), 'Re-read table that does not span the entire file';
 is $in->delim, "\t";
 is $in->_max_col, 3;
 is $in->_max_line, 2;

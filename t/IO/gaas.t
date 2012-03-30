@@ -64,7 +64,7 @@ $out->close;
 ok $in = Bio::Community::IO->new(
    -file   => '<'.$output_file,
    -format => 'gaas',
-);
+), 'Re-read GAAS format';
 ok $community2 = $in->next_community;
 is $in->next_community, undef;
 $in->close;
