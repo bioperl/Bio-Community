@@ -39,13 +39,15 @@ accepts the following parameters:
 
 =head1 OBJECT METHODS
 
+####
+# other methods? -file? -fh?
+####
+
 =item format
 
 The format of the file: 'generic', 'gaas', 'qiime' or 'pyrotagger'.
 
 =back
-
-### other methods? -file? -fh?
 
 =head1 FEEDBACK
 

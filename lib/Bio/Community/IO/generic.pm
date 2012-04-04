@@ -10,8 +10,7 @@
 
 =head1 NAME
 
-Bio::Community::IO::generic - Driver to read and write files containing communities
-in a generic tab-delimited site-by-species table format
+Bio::Community::IO::generic - Driver to read and write files in a generic tab-delimited site-by-species table format
 
 =head1 SYNOPSIS
 
@@ -21,9 +20,9 @@ in a generic tab-delimited site-by-species table format
 
 =head1 DESCRIPTION
 
-This Bio::Community::IO driver handles files in a generic format. Multiple
-communities can be written in a file to generate a site-by-species table, where
-the entries are tab-delimited. Example
+This Bio::Community::IO driver reads and writes files in a generic format. Multiple
+communities can be written in a file to generate a site-by-species table (OTU
+table), in which the entries are tab-delimited. Example:
 
   	site A	site B
   species 1	321	94
@@ -130,6 +129,7 @@ has '_id2line' => (
    lazy => 1,
 );
 
+
 method _generate_members {
    # Make members from the first column
    my @members;
@@ -145,14 +145,6 @@ method _generate_members {
 
 
 method next_member {
-
-   # The first time, index the file and prepare members
-   #### should probably be moved to next_community_init
-   if (not $self->_has_members) {
-      $self->_generate_members();
-      $self->_col(2);
-   }
-
    my ($member, $count);
    my $line = $self->_line;
    while ( $line++ ) {
@@ -172,7 +164,12 @@ method next_member {
 
 
 method _next_community_init {
-   # Go to start of next column. Return name of new community
+   # Go to start of next column and return name of new community. The first time,
+   # generate all community members.
+   if (not $self->_has_members) {
+      $self->start_line(1);
+      $self->_generate_members();
+   }
    $self->_col( $self->_col + 1 );
    $self->_line( 1 );
    my $name = $self->_get_value(1, $self->_col);

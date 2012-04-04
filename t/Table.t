@@ -177,8 +177,8 @@ unlink $file;
 
 ok $out = t::TestTableRole->new(
    -file  => '>'.$file,
-   -delim => '  ',
 ), 'Write double-space delimited table';
+$out->delim('  ');
 
 ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(1, 2, 'gut');

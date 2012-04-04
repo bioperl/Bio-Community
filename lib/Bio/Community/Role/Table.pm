@@ -55,7 +55,7 @@ role are also valid:
 =cut
 
 has 'delim' => (
-   is => 'ro',
+   is => 'rw',
    isa => 'Str',
    required => 0,
    init_arg => '-delim',
@@ -78,7 +78,7 @@ has 'delim' => (
 =cut
 
 has 'start_line' => (
-   is => 'ro',
+   is => 'rw',
    isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => '-start_line',
@@ -100,7 +100,7 @@ has 'start_line' => (
 =cut
 
 has 'end_line' => (
-   is => 'ro',
+   is => 'rw',
    isa => 'Maybe[StrictlyPositiveInt]',
    required => 0,
    init_arg => '-end_line',
@@ -122,7 +122,7 @@ has 'end_line' => (
 =cut
 
 has 'missing_string' => (
-   is => 'ro',
+   is => 'rw',
    isa => 'Str',
    required => 0,
    init_arg => '-missing_string',
