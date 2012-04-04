@@ -116,18 +116,13 @@ extends 'Bio::Root::Root',
 
 
 # Overriding new... Is there a better alternative?
-### try:
-###    before 'new' => sub {};
-### or:
-###    after 'new' => sub {};
 sub new {
    my $class = shift;
    my $real_class = Scalar::Util::blessed($class) || $class;
 
    # These all come from the same base, Moose::Object, so this is fine
    my $params = $real_class->BUILDARGS(@_);
-
-   my $format = $params->{'-format'};
+   my $format = delete $params->{'-format'};
    if (not defined $format) {
       $real_class->throw("Error: No format was specified.");
    }
@@ -138,9 +133,9 @@ sub new {
    $class->throw("Module $real_class does not implement a community IO stream")
        unless $real_class->does('Bio::Community::Role::IO');
 
-   my $self = Class::MOP::Class->initialize($real_class)->new_object($params);
+   $params = $real_class->BUILDARGS(%$params);
 
-   $self->BUILD($params);
+   my $self = Class::MOP::Class->initialize($real_class)->new_object($params);
 
    return $self;
 }
