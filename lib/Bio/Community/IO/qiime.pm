@@ -121,6 +121,16 @@ has '_col' => (
 );
 
 
+has '_uses_taxo' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   init_arg => undef,
+   default => 0,
+   lazy => 1,
+);
+
+
 has '_members' => (
    is => 'rw',
    isa => 'ArrayRef[Bio::Community::Member]',
@@ -143,32 +153,28 @@ has '_id2line' => (
 
 
 method _generate_members {
-   # Make members from the first column
+   # Make members from the first column. Also, find out if they have a taxonomy.
+
+   # Are we using a taxonomy?
+   my $taxo_header = $self->_get_value(1, $self->_max_col);
+   my $uses_taxo = 0;
+   if ( (defined $taxo_header) && (lc $taxo_header eq 'consensus lineage') ) {
+      $uses_taxo = 1;
+      $self->_uses_taxo($uses_taxo);
+   }
+
+   # What are the members?
    my @members;
    my $col = 1;
-   my $line = 2; # first line of the table is a header
-
-   ####
-   print "GENERATING MEMBERS\n";
-   use Data::Dumper; print Dumper($self);
-   ####
-
-   while (my $id = $self->_get_value($line, $col)) {
-
-      ####
-      print "ID: $id\n";
-      ####
-
-      my $desc = $self->_get_value($line, $self->_max_col);
-      my $member = Bio::Community::Member->new( -id => $id, -desc => $desc );
+   my $line = 1; # first line of the table is a header
+   for my $line (2 .. $self->_max_line) {
+      my $id = $self->_get_value($line, $col);
+      my $member = Bio::Community::Member->new( -id => $id );
+      if ($uses_taxo) {
+         my $taxo = $self->_get_value($line, $self->_max_col);
+         $member->desc( $taxo );
+      }
       push @members, $member;
- 
-      ####
-      #use Data::Dumper;
-      #print Dumper($member);
-      ####
- 
-      $line++;
    }
    $self->_members(\@members);
 }
@@ -199,9 +205,17 @@ method _next_community_init {
    if (not $self->_has_members) {
       $self->_generate_members();
    }
-   $self->_col( $self->_col + 1 );
-   $self->_line( 1 );
-   my $name = $self->_get_value(1, $self->_col);
+   my $col  = $self->_col + 1;
+   my $line = 1;
+   my $name;
+   if ( $self->_uses_taxo && ($col == $self->_max_col) ) {
+      # At the taxonomy column. All communities were visited. Get out of the table
+      $col++;
+   } else {
+      $name = $self->_get_value($line, $col);
+   }
+   $self->_col( $col );
+   $self->_line( $line );
    return $name;
 }
 

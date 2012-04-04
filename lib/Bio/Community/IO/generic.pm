@@ -168,9 +168,11 @@ method _next_community_init {
    if (not $self->_has_members) {
       $self->_generate_members();
    }
-   $self->_col( $self->_col + 1 );
-   $self->_line( 1 );
-   my $name = $self->_get_value(1, $self->_col);
+   my $col  = $self->_col + 1;
+   my $line = 1;
+   my $name = $self->_get_value($line, $col);
+   $self->_col( $col );
+   $self->_line( $line );
    return $name;
 }
 

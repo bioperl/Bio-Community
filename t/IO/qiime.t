@@ -7,14 +7,14 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $member, $count);
+my ($in, $out, $output_file, $community, $community2, $community3, $member, $count);
 my (@communities, @methods);
 
 
-# Read QIIME format
+# Read QIIME file without taxonomy
 
 ok $in = Bio::Community::IO->new(
-   -file   => test_input_file('qiime_w_greengenes_taxo.txt'),
+   -file   => test_input_file('qiime_w_no_taxo.txt'),
    -format => 'qiime',
 ), 'Read QIIME format';
 isa_ok $in, 'Bio::Community::IO::qiime';
@@ -27,46 +27,121 @@ for my $method (@methods) {
    can_ok($in, $method) || diag "Method $method() not implemented";
 }
 
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, '20100302';
 
-####
-#use Data::Dumper;
-#print "IN: ".Dumper($in);
-####
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 1;
+is $community2->name, '20100304';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 3;
+is $community3->name, '20100823';
+
+is $in->next_community, undef;
+
+$in->close;
+
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 0;
+is $member->desc, '';
+is $community->get_count($member), 40;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 2;
+is $member->desc, '';
+is $community->get_count($member), 41;
+is $community->next_member, undef;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 1;
+is $member->desc, '';
+is $community2->next_member, undef;
+
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 1;
+is $member->desc, '';
+is $community3->get_count($member), 2;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 0;
+is $member->desc, '';
+is $community3->get_count($member), 76;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 2;
+is $member->desc, '';
+is $community3->get_count($member), 43;
+is $community3->next_member, undef;
+
+
+# Read QIIME file with GreenGenes taxonomy
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('qiime_w_greengenes_taxo.txt'),
+   -format => 'qiime',
+), 'Read QIIME format';
 
 ok $community = $in->next_community;
-###isa_ok $community, 'Bio::Community';
-###is $community->get_richness, 1;
-###is $community->name, 'gut';
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, '20100302';
 
-###ok $community2 = $in->next_community;
-###isa_ok $community2, 'Bio::Community';
-###is $community2->get_richness, 3;
-###is $community2->name, 'soda lake';
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 1;
+is $community2->name, '20100304';
 
-###is $in->next_community, undef;
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 3;
+is $community3->name, '20100823';
 
-###$in->close;
+is $in->next_community, undef;
 
-###ok $member = $community->next_member;
-###isa_ok $member, 'Bio::Community::Member';
-###is $member->desc, 'Streptococcus';
-###is $community->get_count($member), 241;
-###is $community->next_member, undef;
+$in->close;
 
-###ok $member = $community2->next_member;
-###isa_ok $member, 'Bio::Community::Member';
-###is $member->desc, 'Streptococcus';
-###is $community2->get_count($member), 334;
-###ok $member = $community2->next_member;
-###isa_ok $member, 'Bio::Community::Member';
-###is $member->desc, 'Lumpy skin disease virus';
-###is $community2->get_count($member), 123;
-###ok $member = $community2->next_member;
-###isa_ok $member, 'Bio::Community::Member';
-###is $member->desc, 'Goatpox virus';
-###is $community2->get_count($member), 1023.9;
-###is $community2->next_member, undef;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 0;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
+is $community->get_count($member), 40;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 2;
+is $member->desc, 'No blast hit';
+is $community->get_count($member), 41;
+is $community->next_member, undef;
 
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 1;
+is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__';
+is $community2->next_member, undef;
+
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 1;
+is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__';
+is $community3->get_count($member), 2;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 0;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
+is $community3->get_count($member), 76;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 2;
+is $member->desc, 'No blast hit';
+is $community3->get_count($member), 43;
+is $community3->next_member, undef;
 
 #### Write qiime format
 

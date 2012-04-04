@@ -129,7 +129,7 @@ my $last_id = 1;
 
 has id => (
    is => 'ro',
-   isa => 'StrictlyPositiveInt',
+   isa => 'Str',
    required => 0,
    init_arg => '-id',
    default => sub {

@@ -1,7 +1,5 @@
 # QIIME v1.3.0 OTU table
-#OTU ID	20100302	20100304	20100823	20100611	Consensus Lineage
-0	40	0	76	68	k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__
-1	0	0	0	1	k__Bacteria;p__Proteobacteria;c__Betaproteobacteria;o__Burkholderiales;f__Comamonadaceae;g__Variovorax;s__Variovorax paradoxus
-2	40	0	43	20	k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Oceanospirillales;f__Halomonadaceae;g__Candidatus Portiera;s__
-3	64	0	56	178	k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
-4	0	0	0	18	No blast hit
+#OTU ID	20100302	20100304	20100823	Consensus Lineage
+0	40	0	76	k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__
+1	0	142	2	k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
+2	41	0	43	No blast hit

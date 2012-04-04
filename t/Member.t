@@ -24,7 +24,13 @@ isa_ok $member, 'Bio::Community::Member';
 # Test ID
 
 ok $member = Bio::Community::Member->new( -id => 3 ), 'ID';
-is $member->id(), 3;
+is $member->id, 3;
+
+ok $member = Bio::Community::Member->new( -id => 0 );
+is $member->id, 0;
+
+ok $member = Bio::Community::Member->new( -id => 'asdf' );
+is $member->id, 'asdf';
 
 ok $member = Bio::Community::Member->new( );
 is $member->id, 2;
