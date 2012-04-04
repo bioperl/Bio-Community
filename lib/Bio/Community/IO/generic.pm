@@ -167,7 +167,6 @@ method _next_community_init {
    # Go to start of next column and return name of new community. The first time,
    # generate all community members.
    if (not $self->_has_members) {
-      $self->start_line(1);
       $self->_generate_members();
    }
    $self->_col( $self->_col + 1 );

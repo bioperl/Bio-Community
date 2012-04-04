@@ -78,7 +78,7 @@ has 'delim' => (
 =cut
 
 has 'start_line' => (
-   is => 'rw',
+   is => 'ro',
    isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => '-start_line',
@@ -100,7 +100,7 @@ has 'start_line' => (
 =cut
 
 has 'end_line' => (
-   is => 'rw',
+   is => 'ro',
    isa => 'Maybe[StrictlyPositiveInt]',
    required => 0,
    init_arg => '-end_line',
@@ -122,7 +122,7 @@ has 'end_line' => (
 =cut
 
 has 'missing_string' => (
-   is => 'rw',
+   is => 'ro',
    isa => 'Str',
    required => 0,
    init_arg => '-missing_string',
@@ -215,7 +215,7 @@ has '_max_col' => (
 
 method BUILD {
    # After object constructed with new(), index table if filehandle is readable
-   if ($self->mode eq 'r') {   
+   if ($self->mode eq 'r') {
       $self->_read_table;
    }
 }

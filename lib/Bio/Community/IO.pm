@@ -131,7 +131,7 @@ sub new {
    if (not defined $format) {
       $real_class->throw("Error: No format was specified.");
    }
-   
+
    # Use the real driver class here
    $real_class = __PACKAGE__.'::'.$format;
    Class::MOP::load_class($real_class);
