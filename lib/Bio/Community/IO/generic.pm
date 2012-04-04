@@ -134,11 +134,10 @@ method _generate_members {
    # Make members from the first column
    my @members;
    my $col = 1;
-   my $line = 2; # first line is a header
-   while (my $value = $self->_get_value($line, $col)) {
+   for my $line (2 .. $self->_max_line) {
+      my $value = $self->_get_value($line, $col);
       my $member = Bio::Community::Member->new( -desc => $value );
       push @members, $member;
-      $line++;
    }
    $self->_members(\@members);
 }
