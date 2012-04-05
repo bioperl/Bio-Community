@@ -153,6 +153,7 @@ method next_member {
       last if not defined $count;
       # Skip members with no abundance / abundance of 0
       next if not $count;
+      next if $count == 0;
       # Get the member itself
       $member = $self->_members->[$line - 2];
       last;
