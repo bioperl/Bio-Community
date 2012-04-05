@@ -211,6 +211,48 @@ is $community3->get_count($member), 0.4;
 is $community3->next_member, undef;
 
 
+# Read QIIME file where a community has no members and a member is not present
+# in any community
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('qiime_w_missing.txt'),
+   -format => 'qiime',
+), 'Read QIIME file with missing';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, '20100302';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 1;
+is $community2->name, '20100823';
+
+is $in->next_community, undef;
+
+$in->close;
+
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 0;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
+is $community->get_count($member), 40;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 2;
+is $member->desc, 'No blast hit';
+is $community->get_count($member), 41;
+is $community->next_member, undef;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 2;
+is $member->desc, 'No blast hit';
+is $community2->get_count($member), 76;
+is $community2->next_member, undef;
+
+
 #### Write qiime format
 
 ###$output_file = test_output_file();

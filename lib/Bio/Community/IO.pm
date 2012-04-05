@@ -180,9 +180,14 @@ method next_member {
 
 method next_community {
    my $community;
-   # Initialize driver for next community and set community name
-   my $name = $self->_next_community_init;
-   if (defined $name) {
+   while ( 1 ) { # Skip communities with no members
+
+      # Initialize driver for next community and set community name
+      my $name = $self->_next_community_init;
+
+      # All communities have been read
+      last if not defined $name;
+
       # Create a new community object
       $community = Bio::Community->new( -name => $name );
       # Populate the community with members
@@ -191,20 +196,31 @@ method next_community {
          $community->add_member($member, $count);
       }
       $self->_next_community_finish;
+
+      if ($community->get_richness > 0) {
+         last;
+      } else {
+         $community = undef;
+      }
+
    }
+
    # Community is undef if all communities have been seen
    return $community;
 }
+
 
 method _next_community_init {
    # Driver-side method to initialize new community and return its name
    $self->throw_not_implemented;
 }
 
+
 method _next_community_finish {
    # Driver-side method to finalize a community
    $self->throw_not_implemented;
 }
+
 
 =head2 write_member
 
@@ -261,15 +277,18 @@ method write_community (Bio::Community $community) {
    return 1;
 }
 
+
 method _write_community_init (Bio::Community $community) {
    # Driver-side method to initialize writing a community
    $self->throw_not_implemented;
 }
 
+
 method _write_community_finish (Bio::Community $community) {
    # Driver-side method to finalize writing a community
    $self->throw_not_implemented;
 }
+
 
 method _process_member (Bio::Community::Member $member, Bio::Community $community) {
    my $ab_value;
