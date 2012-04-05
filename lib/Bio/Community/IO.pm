@@ -179,19 +179,21 @@ method next_member {
 =cut
 
 method next_community {
-   # Create a new community object
-   my $community = Bio::Community->new( );
+   my $community;
    # Initialize driver for next community and set community name
    my $name = $self->_next_community_init;
-   $community->name($name) if $name;
-   # Populate the community with members
-   while ( my ($member, $count) = $self->next_member ) {
-      last if not defined $member; # All members have been read
-      $community->add_member($member, $count);
+   if (defined $name) {
+      # Create a new community object
+      $community = Bio::Community->new( -name => $name );
+      # Populate the community with members
+      while ( my ($member, $count) = $self->next_member ) {
+         last if not defined $member; # All members have been read
+         $community->add_member($member, $count);
+      }
+      $self->_next_community_finish;
    }
-   $self->_next_community_finish;
-   # If we are at the last community (richness 0), return undef
-   return $community->get_richness > 0 ? $community : undef;
+   # Community is undef if all communities have been seen
+   return $community;
 }
 
 method _next_community_init {

@@ -240,8 +240,8 @@ method next_member {
 
 
 method _next_community_init {
-   # Go to start of next column and return name of new community. The first time,
-   # generate all community members.
+   # Go to start of next column and return name of new community or undef.
+   # The first time, initialize the read process by generating all community members.
    if (not $self->_has_members) {
       $self->_generate_members();
    }

@@ -92,6 +92,16 @@ our $default_abundance_type = 'fraction'; # fractional number between 0 and 1
 our $default_missing_string =  0;         # empty members get a '0'
 
 
+has '_count' => (
+   is => 'rw',
+   isa => 'PositiveInt',
+   required => 0,
+   init_arg => undef,
+   default => 0,
+   lazy => 1,
+);
+
+
 method next_member {
    # Read next line
    my $line;
@@ -121,7 +131,14 @@ method next_member {
 
 
 method _next_community_init {
-   return 1;
+   my $count = $self->_count;
+   $count++;
+   if ($count <= 1) {
+      $self->_count($count);
+      return 1;
+   } else {
+      return undef;
+   }
 }
 
 
