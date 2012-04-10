@@ -146,6 +146,47 @@ is $community3->get_count($member), 43;
 is $community3->next_member, undef;
 
 
+# Write QIIME file with GreenGenes taxonomy
+
+### $output_file = test_output_file();
+$output_file = 'test.txt';
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'qiime',
+), 'Write QIIME format with taxonomy';
+ok $out->write_community($community);
+ok $out->write_community($community2);
+ok $out->write_community($community3);
+$out->close;
+
+###ok $in = Bio::Community::IO->new(
+###   -file   => $output_file,
+###   -format => 'qiime',
+###), 'Re-read QIIME format';
+
+###ok $community = $in->next_community;
+###ok $member = $community->next_member;
+###is $member->desc, 'Streptococcus';
+###is $community->get_count($member), 241;
+###is $community->next_member, undef;
+
+###ok $community2 = $in->next_community;
+###ok $member = $community2->next_member;
+###is $member->desc, 'Goatpox virus';
+###is $community2->get_count($member), 1023.9;
+###ok $member = $community2->next_member;
+###is $member->desc, 'Streptococcus';
+###is $community2->get_count($member), 334;
+###ok $member = $community2->next_member;
+###is $member->desc, 'Lumpy skin disease virus';
+###is $community2->get_count($member), 123;
+###is $community2->next_member, undef;
+
+###is $in->next_community, undef;
+
+###$in->close;
+
+
 # Read QIIME file where a community has no members and a member is not present
 # in any community
 

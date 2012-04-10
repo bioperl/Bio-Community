@@ -120,6 +120,30 @@ sub BUILDARGS {
 };
 
 
+before 'close' => sub {
+   # Add taxonomy (desc) if available
+   my ($self) = @_;
+   my $col = $self->_col + 1;
+   my $descs = $self->_line2desc;
+   if (scalar keys $descs) {
+      $self->_set_value(1, $col, 'Consensus Lineage');
+      while ( my ($line, $desc) = each %$descs ) {
+         $self->_set_value($line, $col, $desc);
+      }
+   }
+};
+
+
+has '_num_communities' => (
+   is => 'rw',
+   isa => 'PositiveInt',
+   required => 0,
+   init_arg => undef,
+   default => 0,
+   lazy => 1,
+);
+
+
 has '_line' => (
    is => 'rw',
    isa => 'PositiveInt',
@@ -164,6 +188,16 @@ has '_members' => (
 has '_id2line' => (
    is => 'rw',
    isa => 'HashRef[String]',
+   required => 0,
+   init_arg => undef,
+   default => sub { {} },
+   lazy => 1,
+);
+
+
+has '_line2desc' => (
+   is => 'rw',
+   isa => 'HashRef[PositiveInt]',
    required => 0,
    init_arg => undef,
    default => sub { {} },
@@ -255,28 +289,46 @@ method _next_community_finish {
 
 
 method write_member (Bio::Community::Member $member, Count $count) {
-###    my $id   = $member->id;
-###    my $line = $self->_id2line->{$id};
-###    if (not defined $line) {
-###        # This member has not been written previously for another community
-###        $line = $self->_line;
-###        $self->_set_value( $line, 1, $member->desc );
-###        $self->_id2line->{$id} = $line;
-###    }
-###    $self->_set_value($line, $self->_col, $count);
-###    $self->_line( $line + 1 );
+    my $id   = $member->id;
+    my $line = $self->_id2line->{$id};
+    if (not defined $line) {
+        # This member has not been written previously for another community
+        $line = $self->_line;
+        $self->_set_value( $line, 1, $member->id );
+        $self->_id2line->{$id} = $line;
+    }
+    if ( $member->desc) {
+       # We'll have to write the description (taxonomy) if it is given
+       $self->_line2desc->{$line} = $member->desc;
+    }
+    $self->_set_value($line, $self->_col, $count);
+    $self->_line( $line + 1 );
     return 1;
 }
 
 
 method _write_community_init (Bio::Community $community) {
+   # If first community, write QIIME headers
+   my $num_communities = $self->_num_communities;
+   if ($num_communities == 0) {
+      $self->_write_headers;
+   }
+   $num_communities++;
+   $self->_num_communities($num_communities);
+
    # Write header for that community
-###   my $line = 1;
-###   my $col  = $self->_col + 1;
-###   $self->_set_value($line, $col, $community->name);
-###   $self->_line( $line + 1);
-###   $self->_col( $col );
+   my $line = 1;
+   my $col  = $self->_col + 1;
+   $self->_set_value($line, $col, $community->name);
+   $self->_line( $line + 1);
+   $self->_col( $col );
    return 1;
+}
+
+
+method _write_headers () {
+   $self->_print("# QIIME v1.3.0 OTU table\n");
+   $self->_set_value(1, 1, '#OTU ID');
 }
 
 
