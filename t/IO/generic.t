@@ -7,7 +7,7 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $member, $count);
+my ($in, $out, $output_file, $community, $community2, $community3, $member, $count);
 my (@communities, @methods);
 
 
@@ -101,6 +101,146 @@ is $in->next_community, undef;
 
 $in->close;
 
+
+# Read QIIME summarized OTU table (Silva taxonomy)
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('qiime_w_silva_taxo_L2.txt'),
+   -format => 'generic',
+), 'Read summarized QIIME file';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 3;
+is $community->name, 'FI.5m';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 2;
+is $community2->name, 'RI.5m';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 3;
+is $community3->name, 'TR.5m';
+
+is $in->next_community, undef;
+
+$in->close;
+
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $community->get_count($member), 0.2142857143;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Archaea;Euryarchaeota';
+is $community->get_count($member), 0.2342192691;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $community->get_count($member), 0.5514950166;
+is $community->next_member, undef;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $community2->get_count($member), 0.9536354057;
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $community2->get_count($member), 0.0463645943;
+is $community2->next_member, undef;
+
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $community3->get_count($member), 0.0195488722;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Archaea;Euryarchaeota';
+is $community3->get_count($member), 0.4;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $community3->get_count($member), 0.5804511278;
+is $community3->next_member, undef;
+
+
+# Write QIIME summarized OTU table
+
+$output_file = test_output_file();
+
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'generic',
+), 'Write summarized QIIME file';
+ok $out->write_community($community);
+ok $out->write_community($community2);
+ok $out->write_community($community3);
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+   -format => 'generic',
+), 'Re-read summarized QIIME file';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 3;
+is $community->name, 'FI.5m';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 2;
+is $community2->name, 'RI.5m';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 3;
+is $community3->name, 'TR.5m';
+
+is $in->next_community, undef;
+
+$in->close;
+
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $community->get_count($member), 0.2142857143;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $community->get_count($member), 0.5514950166;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Archaea;Euryarchaeota';
+is $community->get_count($member), 0.2342192691;
+is $community->next_member, undef;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $community2->get_count($member), 0.9536354057;
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $community2->get_count($member), 0.0463645943;
+is $community2->next_member, undef;
+
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $community3->get_count($member), 0.0195488722;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $community3->get_count($member), 0.5804511278;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Archaea;Euryarchaeota';
+is $community3->get_count($member), 0.4;
+is $community3->next_member, undef;
 
 done_testing();
 

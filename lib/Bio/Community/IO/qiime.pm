@@ -41,13 +41,16 @@ The same OTU table with assignments to the GreenGenes taxonomy:
   2	0	230	110	k__Bacteria;p__Cyanobacteria;c__;o__Oscillatoriales;f__;g__Trichodesmium;s__Trichodesmium erythraeum
   3	0	30	80	k__Bacteria;p__Acidobacteria;c__Solibacteres;o__Solibacterales;f__Solibacteraceae;g__Candidatus Solibacter;s__
 
-The same OTU table summarized at the phylum level and numbers indicating relative abundance (not counts):
+QIIME also provides OTU tables summarized at the phylum level, with relative
+abundance instead of counts:
 
-  # QIIME v1.3.0 OTU table
   Taxon	soil	marine	freshwater
   k__Bacteria;p__Acidobacteria	0.0	0.1016949153	0.4210526316
   k__Bacteria;p__Cyanobacteria	0.2307692308	0.8169491525	0.5789473684
   k__Bacteria;p__TM6	0.7692307692	0.0813559322	0.0
+
+B<Note>: These tables have to be read and written using the Bio::Community::IO::generic
+module, B<not> with Bio::Community::IO::qiime.
 
 =head1 CONSTRUCTOR
 
@@ -171,28 +174,18 @@ has '_id2line' => (
 method _generate_members {
    # Make members from the first column. Also, find out if they have a taxonomy.
 
-   # Is the table summarized? And which column contains the taxonomy (if any)?
+   # Does the last column contain the taxonomy?
    my $first_col_header = $self->_get_value(1, 1);
-   my $is_summarized;
    my $taxo_col;
-   if ($first_col_header =~ m/taxon/i) {
-      $is_summarized = 1;
-      $taxo_col = 1;
-   } elsif ($first_col_header =~ m/OTU ID/i) {
-      $is_summarized = 0;
+   if ($first_col_header =~ m/OTU ID/i) {
       my $last_col_header = $self->_get_value(1, $self->_max_col);
       if ( (defined $last_col_header) && ($last_col_header =~ m/consensus lineage/i) ) {
          $taxo_col = $self->_max_col;
          $self->_skip_last_col(1);
       }
    } else {
-      if ($taxo_col == $self->_max_col) {
-         $is_summarized = 0;
-      } else {
-         $is_summarized = 1;
-      }
       $self->warn("Could not recognize the headers of the QIIME OTU table, but ".
-         "guessing that the table is ".(not($is_summarized) && 'not ')."summarized.\n");
+         "assuming that a valid table was provided\n");
    }
 
    # What are the members?
@@ -202,12 +195,8 @@ method _generate_members {
    for my $line (2 .. $self->_max_line) {
       my $member;
       # Get OTU ID if possible
-      if (not $is_summarized) {
-         my $otu_id = $self->_get_value($line, $col);
-         $member = Bio::Community::Member->new( -id => $otu_id );
-      } else {
-         $member = Bio::Community::Member->new( ); # No OTU ID
-      }
+      my $otu_id = $self->_get_value($line, $col);
+      $member = Bio::Community::Member->new( -id => $otu_id );
       # Get taxonomic assignment if possible
       if (defined $taxo_col) {
          my $taxo = $self->_get_value($line, $taxo_col);

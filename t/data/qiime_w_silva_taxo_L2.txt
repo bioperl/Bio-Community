@@ -1,4 +1,3 @@
-# QIIME v1.3.0 OTU table
 Taxon	FI.5m	RI.5m	TR.5m
 Archaea;Euryarchaeota	0.2342192691	0.0	0.4
 Eukaryota;Viridiplantae	0.2142857143	0.9536354057	0.0195488722
