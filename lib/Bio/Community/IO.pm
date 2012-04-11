@@ -267,7 +267,7 @@ method write_community (Bio::Community $community) {
          $rank++;
       }
    } elsif ($sort_members == 0) {
-      while (my $member = $community->next_member) {
+      while ( my $member = $community->next_member) {
          $self->_process_member($member, $community);
       }
    } else {

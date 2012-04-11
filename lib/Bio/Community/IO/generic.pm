@@ -188,7 +188,7 @@ method write_member (Bio::Community::Member $member, Count $count) {
     my $line = $self->_id2line->{$id};
     if (not defined $line) {
         # This member has not been written previously for another community
-        $line = $self->_line;
+        $line = $self->_max_line + 1;
         $self->_set_value( $line, 1, $member->desc );
         $self->_id2line->{$id} = $line;
     }
