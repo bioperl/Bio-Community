@@ -97,10 +97,15 @@ subtype 'AbundanceType'
    => where { $_ =~ m/^(count|percentage|fraction)$/ }
    => message { "This only accepts 'count', 'percentage', or 'fraction', but got '$_'" };
 
-
 # Rank: a strictly positive integer
 subtype 'AbundanceRank'
    => as 'StrictlyPositiveInt';
+
+# Type of distance: 1-norm, 2-norm, euclidean, p-norm, infinity-norm, unifrac
+subtype 'DistanceType'
+   => as 'Str'
+   => where { $_ =~ m/^(1-norm|2-norm|euclidean|p-norm|infinity-norm|unifrac)$/ }
+   => message { "This only accepts '1-norm', '2-norm', 'euclidean', 'p-norm', 'infinity-norm' or 'unifrac', but got '$_'" };
 
 
 __PACKAGE__->meta->make_immutable;
