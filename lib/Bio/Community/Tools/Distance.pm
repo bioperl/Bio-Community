@@ -25,11 +25,13 @@ Bio::Community::Tools::Distance - Calculate the distance separating communities
 
 =head1 DESCRIPTION
 
-Calculate the distance (difference) between communities.
+Calculate the distance between two communities. The more different communities
+are, the larger the distance between them. Thus, these distance metrics can also
+be considered a measure of beta-diversity.
 
-Several types of distance are available: 1-norm, 2-norm, ... They consider the
-communities as a n-dimensional space, where n is the total number of unique
-community members across the communities.
+Several types of distance are available: 1-norm, 2-norm (euclidean), and
+infinity-norm. They consider the communities as a n-dimensional space, where n
+is the total number of unique community members across the communities.
 
 Note that the distance is based on the relative abundance and is hence affected
 by weights you assigned to the community members. See the get_rel_ab() method in

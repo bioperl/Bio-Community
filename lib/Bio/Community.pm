@@ -36,17 +36,6 @@ Bio::Community - A biological community
 A Bio::Community is composed of Bio::Community::Member objects at a specified
 abundance.
 
-=head1 CONSTRUCTOR
-
-=head2 Bio::Community->new()
-
-   my $community = Bio::Community::Community->new();
-
-The new() class method constructs a new Bio::Community::Member object and
-accepts the following parameters:
-
-=head1 OBJECT METHODS
-
 =head1 FEEDBACK
 
 =head2 Mailing Lists
@@ -93,7 +82,7 @@ methods. Internal methods are usually preceded with a _
  Title   : new
  Function: Create a new Bio::Community object
  Usage   : my $community = Bio::Community->new( ... );
- Args    : 
+ Args    : -name and -use_weights, see below...
  Returns : a new Bio::Community object
 
 =cut
