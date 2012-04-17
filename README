@@ -25,6 +25,7 @@ This module requires these other modules and libraries:
   Moose::Util::TypeConstraints
   MooseX::NonMoose
   MooseX::Method::Signatures
+  Test::Number::Delta
 
 COPYRIGHT AND LICENCE
 

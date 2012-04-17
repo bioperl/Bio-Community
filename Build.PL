@@ -21,10 +21,13 @@ my $build = Module::Build->new(
     requires             => {
                              'perl'                         => '5.10.0',
                              'Bio::Root::Version'           => '1.006902',
-                             'Moose'                        => 0,
-                             'Moose::Util::TypeConstraints' => 0,
-                             'MooseX::NonMoose'             => 0,
-                             'MooseX::Method::Signatures'   => 0,
+                             'Moose'                        =>  0,
+                             'Moose::Util::TypeConstraints' =>  0,
+                             'MooseX::NonMoose'             =>  0,
+                             'MooseX::Method::Signatures'   =>  0,
+                            },
+    build_requires       => {
+                             'Test::Number::Delta'          =>  0,
                             },
     recursive_test_files => 1,
     dynamic_config       => 1,
