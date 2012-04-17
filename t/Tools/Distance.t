@@ -60,6 +60,22 @@ delta_ok Bio::Community::Tools::Distance->new( -communities => [$community1, $co
 delta_ok Bio::Community::Tools::Distance->new( -communities => [$community1, $community2], -type => 'infinity-norm' )->get_distance, 69.2307692307692;
 
 
+# Communities with no shared members
+
+$community1 = Bio::Community->new( );
+$community1->add_member( Bio::Community::Member->new(-id => 1), 10 );
+$community1->add_member( Bio::Community::Member->new(-id => 2), 30 );
+$community1->add_member( Bio::Community::Member->new(-id => 3), 90 );
+
+$community2 = Bio::Community->new( );
+$community2->add_member( Bio::Community::Member->new(-id => 4), 50 );
+$community2->add_member( Bio::Community::Member->new(-id => 5), 50 );
+$community2->add_member( Bio::Community::Member->new(-id => 6), 50 );
+
+delta_ok Bio::Community::Tools::Distance->new( -communities => [$community1, $community2], -type => '2-norm' )->get_distance, 93.3699561847853, 'Communities with no shared members';
+delta_ok Bio::Community::Tools::Distance->new( -communities => [$community1, $community2], -type => '1-norm' )->get_distance, 200.000;
+delta_ok Bio::Community::Tools::Distance->new( -communities => [$community1, $community2], -type => 'infinity-norm' )->get_distance, 69.2307692307692;
+
 
 
 
