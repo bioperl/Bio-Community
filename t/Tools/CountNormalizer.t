@@ -12,7 +12,7 @@ use_ok($_) for qw(
 my ($normalizer, $community1, $community2, $average, $representative, $member1,
    $member2, $member3, $member4, $member5, $member6);
 
-my $epsilon = 8;
+my $epsilon = 12;
 
 # Community with 1500 counts
 $community1 = Bio::Community->new( -name => 'community1' );
@@ -43,13 +43,14 @@ isa_ok $normalizer, 'Bio::Community::Tools::CountNormalizer';
 # Normalizer with specified settings
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
    -communities => [ $community1, $community2 ],
-   -repetitions => 20,
+   -repetitions => 10,
    -sample_size => 1000,
 );
 is scalar(@{$normalizer->get_average_communities}), 2;
 is scalar(@{$normalizer->get_representative_communities}), 2;
 
-is $normalizer->repetitions, 20;
+is $normalizer->repetitions, 10;
+isnt $normalizer->threshold, 0.1;
 is $normalizer->sample_size, 1000;
 
 $average = $normalizer->get_average_communities->[0];
@@ -61,6 +62,15 @@ delta_within $average->get_count($member3), 200, $epsilon;
 delta_within $average->get_count($member4), 200, $epsilon;
 delta_within $average->get_count($member5), 200, $epsilon;
 
+$representative = $normalizer->get_representative_communities->[0];
+isa_ok $representative, 'Bio::Community';
+delta_ok $representative->total_count, 1000;
+delta_within $representative->get_count($member1), $average->get_count($member1), 1;
+delta_within $representative->get_count($member2), $average->get_count($member2), 1;
+delta_within $representative->get_count($member3), $average->get_count($member3), 1;
+delta_within $representative->get_count($member4), $average->get_count($member4), 1;
+delta_within $representative->get_count($member5), $average->get_count($member5), 1;
+
 $average = $normalizer->get_average_communities->[1];
 isa_ok $average, 'Bio::Community';
 delta_ok $average->total_count, 1000;
@@ -68,74 +78,105 @@ delta_within $average->get_count($member1), 360.6, $epsilon;
 delta_within $average->get_count($member3), 189.3, $epsilon;
 delta_within $average->get_count($member6), 450.1, $epsilon;
 
-###
-use Data::Dumper;
-print Dumper($average);
-###
-
-$representative = $normalizer->get_representative_communities->[0];
-isa_ok $representative, 'Bio::Community';
-delta_ok $representative->total_count, 1000;
-delta_ok $representative->get_count($member1), int( $representative->get_count($member1) );
-delta_ok $representative->get_count($member2), int( $representative->get_count($member2) );
-delta_ok $representative->get_count($member3), int( $representative->get_count($member3) );
-delta_ok $representative->get_count($member4), int( $representative->get_count($member4) );
-delta_ok $representative->get_count($member5), int( $representative->get_count($member5) );
-
 $representative = $normalizer->get_representative_communities->[1];
 isa_ok $representative, 'Bio::Community';
 delta_ok $representative->total_count, 1000;
-delta_ok $representative->get_count($member1), int( $representative->get_count($member1) );
-delta_ok $representative->get_count($member3), int( $representative->get_count($member3) );
-delta_ok $representative->get_count($member6), int( $representative->get_count($member6) );
+delta_within $representative->get_count($member1), $representative->get_count($member1), 1;
+delta_within $representative->get_count($member3), $representative->get_count($member3), 1;
+delta_within $representative->get_count($member6), $representative->get_count($member6), 1;
 
 
-# Normalizer with automatic repetitions
+# Normalizer with manually specified threshold
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
    -communities => [ $community1, $community2 ],
-   #-repetitions => , # do repetitions until average does not change anymore
+   -threshold   => 1E-1,
    -sample_size => 1000,
 );
 is scalar(@{$normalizer->get_average_communities}), 2;
 is scalar(@{$normalizer->get_representative_communities}), 2;
 
-is $normalizer->repetitions, 20;
+cmp_ok $normalizer->repetitions, '>=', 3;
+is $normalizer->threshold, 0.1;
 is $normalizer->sample_size, 1000;
 
-###$average = $normalizer->get_average_communities->[0];
-###isa_ok $average, 'Bio::Community';
-###delta_ok $average->total_count, 1500;
-###delta_within $average->get_count($member1), 200, $epsilon;
-###delta_within $average->get_count($member2), 200, $epsilon;
-###delta_within $average->get_count($member3), 200, $epsilon;
-###delta_within $average->get_count($member4), 200, $epsilon;
-###delta_within $average->get_count($member5), 200, $epsilon;
+$average = $normalizer->get_average_communities->[0];
+isa_ok $average, 'Bio::Community';
+delta_ok $average->total_count, 1000;
+delta_within $average->get_count($member1), 200, $epsilon;
+delta_within $average->get_count($member2), 200, $epsilon;
+delta_within $average->get_count($member3), 200, $epsilon;
+delta_within $average->get_count($member4), 200, $epsilon;
+delta_within $average->get_count($member5), 200, $epsilon;
 
-###$average = $normalizer->get_average_communities->[1];
-###isa_ok $average, 'Bio::Community';
-###delta_ok $average->total_count, 1000;
-###delta_within $average->get_count($member1), 360.6, $epsilon;
-###delta_within $average->get_count($member3), 189.3, $epsilon;
-###delta_within $average->get_count($member6), 450.1, $epsilon;
+$representative = $normalizer->get_representative_communities->[0];
+isa_ok $representative, 'Bio::Community';
+delta_ok $representative->total_count, 1000;
+delta_within $representative->get_count($member1), $average->get_count($member1), 1;
+delta_within $representative->get_count($member2), $average->get_count($member2), 1;
+delta_within $representative->get_count($member3), $average->get_count($member3), 1;
+delta_within $representative->get_count($member4), $average->get_count($member4), 1;
+delta_within $representative->get_count($member5), $average->get_count($member5), 1;
 
-###$representative = $normalizer->get_representative_communities->[0];
-###isa_ok $representative, 'Bio::Community';
-###delta_ok $representative->total_count, 1000;
-###delta_ok $representative->get_count($member1), int( $representative->get_count($member1) );
-###delta_ok $representative->get_count($member2), int( $representative->get_count($member2) );
-###delta_ok $representative->get_count($member3), int( $representative->get_count($member3) );
-###delta_ok $representative->get_count($member4), int( $representative->get_count($member4) );
-###delta_ok $representative->get_count($member5), int( $representative->get_count($member5) );
+$average = $normalizer->get_average_communities->[1];
+isa_ok $average, 'Bio::Community';
+delta_ok $average->total_count, 1000;
+delta_within $average->get_count($member1), 360.6, $epsilon;
+delta_within $average->get_count($member3), 189.3, $epsilon;
+delta_within $average->get_count($member6), 450.1, $epsilon;
 
-###$representative = $normalizer->get_representative_communities->[1];
-###isa_ok $representative, 'Bio::Community';
-###delta_ok $representative->total_count, 1000;
-###delta_ok $representative->get_count($member1), int( $representative->get_count($member1) );
-###delta_ok $representative->get_count($member3), int( $representative->get_count($member3) );
-###delta_ok $representative->get_count($member6), int( $representative->get_count($member6) );
+$representative = $normalizer->get_representative_communities->[1];
+isa_ok $representative, 'Bio::Community';
+delta_ok $representative->total_count, 1000;
+delta_within $representative->get_count($member1), $average->get_count($member1), 1;
+delta_within $representative->get_count($member3), $average->get_count($member3), 1;
+delta_within $representative->get_count($member6), $average->get_count($member6), 1;
 
 
-# Normalizer with automatic sample size
+# Normalizer with automatic sample size and repetitions overriding threshold
+ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+   -communities => [ $community1, $community2 ],
+   -threshold   => 1E-1,
+   -repetitions => 10,
+);
+is scalar(@{$normalizer->get_average_communities}), 2;
+is scalar(@{$normalizer->get_representative_communities}), 2;
+
+is $normalizer->repetitions, 10;
+isnt $normalizer->threshold, 0.1;
+is $normalizer->sample_size, 1500;
+
+$average = $normalizer->get_average_communities->[0];
+isa_ok $average, 'Bio::Community';
+delta_ok $average->total_count, 1500;
+delta_within $average->get_count($member1), 300, $epsilon;
+delta_within $average->get_count($member2), 300, $epsilon;
+delta_within $average->get_count($member3), 300, $epsilon;
+delta_within $average->get_count($member4), 300, $epsilon;
+delta_within $average->get_count($member5), 300, $epsilon;
+
+$representative = $normalizer->get_representative_communities->[0];
+isa_ok $representative, 'Bio::Community';
+delta_ok $representative->total_count, 1500;
+delta_within $representative->get_count($member1), $average->get_count($member1), 1;
+delta_within $representative->get_count($member2), $average->get_count($member2), 1;
+delta_within $representative->get_count($member3), $average->get_count($member3), 1;
+delta_within $representative->get_count($member4), $average->get_count($member4), 1;
+delta_within $representative->get_count($member5), $average->get_count($member5), 1;
+
+$average = $normalizer->get_average_communities->[1];
+isa_ok $average, 'Bio::Community';
+delta_ok $average->total_count, 1500;
+delta_within $average->get_count($member1), 540.9, $epsilon;
+delta_within $average->get_count($member3), 283.9, $epsilon;
+delta_within $average->get_count($member6), 675.2, $epsilon;
+
+$representative = $normalizer->get_representative_communities->[1];
+isa_ok $representative, 'Bio::Community';
+delta_ok $representative->total_count, 1500;
+delta_within $representative->get_count($member1), $average->get_count($member1), 1;
+delta_within $representative->get_count($member3), $average->get_count($member3), 1;
+delta_within $representative->get_count($member6), $average->get_count($member6), 1;
+
 
 # special case where repetitions = 0
 

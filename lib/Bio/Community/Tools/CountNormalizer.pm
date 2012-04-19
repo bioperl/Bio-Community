@@ -19,6 +19,7 @@ Bio::Community::Tools::CountNormalizer - Normalize communities by count
      -communities => [ $community1, $community2 ],
      -sample_size => # default is minimum community size
      -repetitions => # default is automatic
+     -threshold   =>
 
   );
 
@@ -122,37 +123,13 @@ has communities => (
 );
 
 
-=head2 repetitions
-
- Title   : repetitions
- Function: Get/set the number of bootstrap repetitions to perform. If not
-           specified, the default is to keep iterating until the average
-           community does not change significantly anymore. After several
-           communities have been normalized by count without specifying the
-           number of repetitions, the minimum number of repetitions done on the
-           communities can be accessed using this method.
- Usage   : my $repetitions = $normalizer->repetitions;
- Args    : positive integer for the number of repetitions
- Returns : positive integer for the (minimum) number of repetitions
-
-=cut
-
-has repetitions => (
-   is => 'rw',
-   isa => 'Maybe[PositiveInt]',
-   required => 0, 
-   default => undef,
-   lazy => 1,
-   init_arg => '-repetitions',
-);
-
-
 =head2 sample_size
 
  Title   : sample_size
  Function: Get/set the sample size, i.e. the number of members to pick randomly
            at each iteration. It has to be smaller than the total count of the
-           smallest community or an error will be generated.
+           smallest community or an error will be generated. If the sample size
+           is omitted, it defaults to the total_count() of the smallest community.
  Usage   : my $sample_size = $normalizer->sample_size;
  Args    : positive integer for the sample size
  Returns : positive integer for the sample size
@@ -166,6 +143,60 @@ has sample_size => (
    default => undef,
    lazy => 1,
    init_arg => '-sample_size',
+);
+
+
+=head2 threshold
+
+ Title   : threshold
+ Function: Get/set the threshold. While iterating, when the distance between the
+           average community and the average community at the previous iteration
+           decreases below this threshold, the bootstrapping is stopped. By
+           default, the threshold is 1e-5. The repetitions() method provides an
+           alternative way to specify when to stop the computation. After
+           communities have been normalized using the repetitions() method
+           instead of the threshold() method, the distance between the last two
+           average communities repetitions can be accessed using the threshold()
+           method.
+ Usage   : my $repetitions = $normalizer->repetitions;
+ Args    : positive integer for the number of repetitions
+ Returns : positive integer for the (minimum) number of repetitions
+
+=cut
+
+has threshold => (
+   is => 'rw',
+   isa => 'Maybe[PositiveNum]',
+   required => 0, 
+   default => 1E-5,
+   lazy => 1,
+   init_arg => '-threshold',
+);
+
+
+=head2 repetitions
+
+ Title   : repetitions
+ Function: Get/set the number of bootstrap repetitions to perform. If specified,
+           instead of relying on the threshold() to determine when to stop
+           repeating the bootstrap process, perform an arbitrary number of
+           repetitions. After communities have been normalized by count using
+           threshold() method, the number of repetitions actually done can be
+           accessed using this method.
+ Usage   : my $repetitions = $normalizer->repetitions;
+ Args    : positive integer for the number of repetitions
+ Returns : positive integer for the (minimum) number of repetitions
+
+=cut
+
+has repetitions => (
+   is => 'rw',
+   isa => 'Maybe[PositiveInt]',
+   required => 0, 
+   default => undef,
+   lazy => 1,
+   init_arg => '-repetitions',
+   predicate => '_has_repetitions',
 );
 
 
@@ -253,24 +284,21 @@ method _count_normalize () {
    # Bootstrap now
    my $average_communities = [];
    my $min_repetitions;
+   my $max_threshold;
    for my $community ( @{$self->communities} ) {
-
-      ####
-      print "Processing community $community\n";
-      ####
-
-      my $average;
-      if ($community->total_count == $sample_size) {
-         # nothing to normalize, 
-         #### $average = clone
+      my ($average, $repetitions, $dist);
+      if ($community->total_count == $sample_size) {         
+         ($average, $repetitions, $dist) = ($community->clone, 0, 0); # Nothing to normalize
+         $repetitions = 0;
+         $dist = 0;
       } else {
-         ($average, my $repetitions) = $self->_bootstrap($community);
-         ####
-         print "   repetitions: $repetitions\n";
-         ####
-         if ( (not defined $min_repetitions) || ($repetitions < $min_repetitions) ) {
-            $min_repetitions = $repetitions;
-         }
+         ($average, $repetitions, $dist) = $self->_bootstrap($community);
+      }
+      if ( (not defined $min_repetitions) || ($repetitions < $min_repetitions) ) {
+         $min_repetitions = $repetitions;
+      }
+      if ( (not defined $max_threshold) || ($dist > $max_threshold) ) {
+         $max_threshold = $dist;
       }
       push @$average_communities, $average;
    }
@@ -278,9 +306,12 @@ method _count_normalize () {
 
    ####
    print "min_repetitions = $min_repetitions\n";
+   print "max_threshold   = $max_threshold\n";
    ####
 
-   if (defined $min_repetitions) {
+   if ($self->_has_repetitions) {
+      $self->threshold($max_threshold);
+   } else {
       $self->repetitions($min_repetitions);
    }
 
@@ -291,42 +322,59 @@ method _count_normalize () {
 method _bootstrap (Bio::Community $community) {
    # Re-sample a community many times and report the average community
 
-   my $threshold = 1E-6; ###
-
-   my $sample_size = $self->sample_size;
+   my $threshold   = $self->threshold();
+   my $sample_size = $self->sample_size();
    my $repetitions = $self->repetitions();
    my $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
 
    my $overall = Bio::Community->new( -name => 'average' );
-   my $prev_overall = undef;
+   my $prev_overall = Bio::Community->new();
    my $iteration = 0;
+   my $dist;
    while (1) {
       $iteration++;
       my $random = $sampler->get_rand_community($sample_size);
       $overall = $self->_add( $overall, $random );
 
+      ### divide here??
+
       # Exit conditions
       if (not defined $repetitions) {
-         if (defined $prev_overall) {
-            my $dist = Bio::Community::Tools::Distance->new(
+         $dist = Bio::Community::Tools::Distance->new(
                -type        => 'euclidean',
                -communities => [$overall, $prev_overall],
-            )->get_distance;
-            last if $dist < $threshold;
-         }
-         $prev_overall = $overall; ### will probably need to clone here
+         )->get_distance;
+
+         ####
+         print "$iteration\t$dist\n";
+         ####
+
+         last if $dist < $threshold;
+         $prev_overall = $overall->clone;
       } else {
+
+         ####
+         print "$iteration\n";
+         ####
+
          last if $iteration >= $repetitions;
       }
+   }
+
+   if (defined $repetitions) {
+      $dist = Bio::Community::Tools::Distance->new(
+            -type        => 'euclidean',
+            -communities => [$overall, $prev_overall],
+      )->get_distance;
    }
 
    my $average = $self->_divide($overall, $iteration);
 
    ####
-   print "   ...did $iteration repetitions...\n";
+   #print "   ...did $iteration repetitions...\n";
    ####
 
-   return $overall, $iteration;
+   return $overall, $iteration, $dist;
 }
 
 

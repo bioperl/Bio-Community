@@ -18,6 +18,9 @@ my $build = Module::Build->new(
 #                                             'repository' => 'git@github.com:bioperl/Bio-Community.git',
 #                                            },
 #                            },
+    build_requires       => {
+                             'Test::Number::Delta'          =>  0,
+                            },
     requires             => {
                              'perl'                         => '5.10.0',
                              'Bio::Root::Version'           => '1.006902',
@@ -26,8 +29,9 @@ my $build = Module::Build->new(
                              'MooseX::NonMoose'             =>  0,
                              'MooseX::Method::Signatures'   =>  0,
                             },
-    build_requires       => {
-                             'Test::Number::Delta'          =>  0,
+    recommends           => {
+                              # Clone Bio::Community objects through the Bio::Root::clone() method
+                             'Clone'                        => 0,
                             },
     recursive_test_files => 1,
     dynamic_config       => 1,
