@@ -33,8 +33,10 @@ Bio::Community - A biological community
 
 =head1 DESCRIPTION
 
-A Bio::Community is composed of Bio::Community::Member objects at a specified
-abundance.
+The Bio::Community module represent communities of biological organisms. It is
+composed of Bio::Community::Member objects at a specified abundance. Each member
+can represent a species (e.g. an elephant, a bacterium) or a proxy for a species,
+such as a DNA sequence.
 
 =head1 FEEDBACK
 
@@ -341,9 +343,10 @@ method get_member_by_id (Int $member_id) {
 =head2 get_member_by_rank
 
  Title   : get_member_by_rank
- Function: Fetch a member based on its abundance rank
+ Function: Fetch a member based on its abundance rank. A smaller rank corresponds
+           to a larger relative abundance.
  Usage   : my $member = $community->get_member_by_rank(1);
- Args    : positive integer for the member rank
+ Args    : strictly positive integer for the member rank
  Returns : a Bio::Community::Member object or undef if member was not found
 
 =cut
@@ -471,10 +474,7 @@ method _calc_ranks {
 
    # 1/ Get abundance of all members and sort them
    my $members = [ $self->all_members ];
-   my $rel_abs = [ ];
-   for my $member (@$members) {
-      push @$rel_abs, $self->get_rel_ab($member);
-   }
+   my $rel_abs = [ map { $self->get_rel_ab($_) } @$members ];
 
    # 2/ Save ranks in an array
    ($rel_abs, $members) = _two_array_sort($rel_abs, $members);

@@ -60,22 +60,22 @@ use namespace::autoclean;
 subtype 'PositiveNum'
    => as 'Num'
    => where { $_ >= 0 }
-   => message { "Only positive numbers accepted, but got '$_'" };
+   => message { "Only positive numbers accepted, but got '".($_||'')."'" };
 
 subtype 'StrictlyPositiveNum'
    => as 'PositiveNum'
    => where { $_ > 0 }
-   => message { "Only strictly positive numbers accepted, but got '$_'" };
+   => message { "Only strictly positive numbers accepted, but got '".($_||'')."'" };
 
 subtype 'PositiveInt'
    => as 'Int'
    => where { $_ >= 0 }
-   => message { "Only positive integers accepted, but got '$_'" };
+   => message { "Only positive integers accepted, but got '".($_||'')."'" };
 
 subtype 'StrictlyPositiveInt'
    => as 'PositiveInt'
    => where { $_ > 0 }
-   => message { "Only strictly positive integers accepted, but got '$_'" };
+   => message { "Only strictly positive integers accepted, but got '".($_||'')."'" };
 
 
 # A Count should be a positive integer but to make things easier. We sometimes
@@ -88,14 +88,14 @@ subtype 'Count'
 subtype 'NumericSort'
    => as 'Int'
    => where { ($_ >= -1) && ($_ <= 1) }
-   => message { "This only accepts 0 (off), 1 (increasing) or -1 (decreasing), but got '$_'" };
+   => message { "This only accepts 0 (off), 1 (increasing) or -1 (decreasing), but got '".($_||'')."'" };
 
 
 # Type of abundance: count, percentage, fraction
 subtype 'AbundanceType'
    => as 'Str'
    => where { $_ =~ m/^(count|percentage|fraction)$/ }
-   => message { "This only accepts 'count', 'percentage', or 'fraction', but got '$_'" };
+   => message { "This only accepts 'count', 'percentage', or 'fraction', but got '".($_||'')."'" };
 
 # Rank: a strictly positive integer
 subtype 'AbundanceRank'

@@ -26,15 +26,6 @@ Bio::Community::Tools::Sampler - Sample organisms according to their abundance
 
 Pick individuals at random from a community
 
-=head1 CONSTRUCTOR
-
-=head2 Bio::Community::Tools::Sampler->new()
-
-   my $member = Bio::Community::Member->new();
-
-The new() class method constructs a new Bio::Community::Tools::Sampler object and
-accepts the following parameters:
-
 =head1 OBJECT METHODS
 
 =head1 FEEDBACK
@@ -83,7 +74,7 @@ methods. Internal methods are usually preceded with a _
  Title   : new
  Function: Create a new Bio::Community::Tool::Sampler object
  Usage   : my $sampler = Bio::Community::Tool::Sampler->new( );
- Args    : 
+ Args    : -community (see below)
  Returns : a new Bio::Community::Tools::Sampler object
 
 =cut
@@ -149,7 +140,7 @@ has _members => (
 =head2 get_rand_member
 
  Title   : get_rand_member
- Function: Get a random member from a community
+ Function: Get a random member from a community (sample with replacement).
  Usage   : my $member = $sampler->get_rand_member();
  Args    : None
  Returns : A Bio::Community::Member object
@@ -164,12 +155,14 @@ method get_rand_member () {
    return ${$self->_members}[$index];
 }
 
+### TODO: option to sample without replacement!
+
 
 =head2 get_rand_community
 
  Title   : get_rand_community
  Function: Create a community from random members of a community
- Usage   : my $ = $sampler->get_rand_member();
+ Usage   : my $community = $sampler->get_rand_community(1000);
  Args    : Number of members
  Returns : A Bio::Community object
 

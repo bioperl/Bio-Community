@@ -139,6 +139,7 @@ has type => (
 =cut
 
 ####after new => sub { # prevents inlining
+#### or maybe try BUILD
 method get_distance () {
    my $dist;
    my $type = $self->type;
