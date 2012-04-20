@@ -12,9 +12,11 @@ use_ok($_) for qw(
 my ($normalizer, $community1, $community2, $average, $representative, $member1,
    $member2, $member3, $member4, $member5, $member6);
 
-my $epsilon = 12;
+my $epsilon = 15;
+
 
 # Community with 1500 counts
+
 $community1 = Bio::Community->new( -name => 'community1' );
 $member1 = Bio::Community::Member->new( -id => 1 );
 $member2 = Bio::Community::Member->new( -id => 2 );
@@ -27,7 +29,9 @@ $community1->add_member( $member3, 300);
 $community1->add_member( $member4, 300);
 $community1->add_member( $member5, 300);
 
+
 # Community with 5585 counts
+
 $community2 = Bio::Community->new( -name => 'community1' );
 $member1 = Bio::Community::Member->new( -id => 1 );
 $member3 = Bio::Community::Member->new( -id => 3 );
@@ -36,11 +40,15 @@ $community2->add_member( $member1, 2014);
 $community2->add_member( $member3, 1057);
 $community2->add_member( $member6, 2514);
 
+
 # Basic normalizer object
+
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
 isa_ok $normalizer, 'Bio::Community::Tools::CountNormalizer';
 
+
 # Normalizer with specified settings
+
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
    -communities => [ $community1, $community2 ],
    -repetitions => 10,
@@ -51,6 +59,7 @@ is scalar(@{$normalizer->get_representative_communities}), 2;
 
 is $normalizer->repetitions, 10;
 isnt $normalizer->threshold, 0.1;
+cmp_ok $normalizer->threshold, '<', 1;
 is $normalizer->sample_size, 1000;
 
 $average = $normalizer->get_average_communities->[0];
@@ -87,6 +96,7 @@ delta_within $representative->get_count($member6), $representative->get_count($m
 
 
 # Normalizer with manually specified threshold
+
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
    -communities => [ $community1, $community2 ],
    -threshold   => 1E-1,
@@ -133,6 +143,7 @@ delta_within $representative->get_count($member6), $average->get_count($member6)
 
 
 # Normalizer with automatic sample size and repetitions overriding threshold
+
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
    -communities => [ $community1, $community2 ],
    -threshold   => 1E-1,
@@ -143,6 +154,7 @@ is scalar(@{$normalizer->get_representative_communities}), 2;
 
 is $normalizer->repetitions, 10;
 isnt $normalizer->threshold, 0.1;
+cmp_ok $normalizer->threshold, '<', 1;
 is $normalizer->sample_size, 1500;
 
 $average = $normalizer->get_average_communities->[0];
@@ -178,9 +190,16 @@ delta_within $representative->get_count($member3), $average->get_count($member3)
 delta_within $representative->get_count($member6), $average->get_count($member6), 1;
 
 
-# special case where repetitions = 0
+# Special case where repetitions = 0
 
-# Test with some weights
+##ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+##   -communities => [ $community1, $community2 ],
+##   -threshold   => 1E-1,
+##   -repetitions => 0,
+##);
+
+
+### Test with some weights
 
 
 ##                 '_counts' => {

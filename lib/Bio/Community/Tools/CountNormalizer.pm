@@ -98,6 +98,7 @@ use MooseX::Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Tools::Sampler;
 use Bio::Community::Tools::Distance;
+use POSIX;
 use List::Util qw(min);
 
 extends 'Bio::Root::Root';
@@ -196,7 +197,6 @@ has repetitions => (
    default => undef,
    lazy => 1,
    init_arg => '-repetitions',
-   predicate => '_has_repetitions',
 );
 
 
@@ -283,36 +283,37 @@ method _count_normalize () {
 
    # Bootstrap now
    my $average_communities = [];
-   my $min_repetitions;
-   my $max_threshold;
+   my $min_repetitions = POSIX::DBL_MAX;
+   my $max_threshold = 0;
    for my $community ( @{$self->communities} ) {
       my ($average, $repetitions, $dist);
       if ($community->total_count == $sample_size) {         
-         ($average, $repetitions, $dist) = ($community->clone, 0, 0); # Nothing to normalize
-         $repetitions = 0;
-         $dist = 0;
+         ($average, $repetitions, $dist) = ($community->clone, undef, undef);
       } else {
          ($average, $repetitions, $dist) = $self->_bootstrap($community);
       }
-      if ( (not defined $min_repetitions) || ($repetitions < $min_repetitions) ) {
-         $min_repetitions = $repetitions;
+
+      if (defined $self->repetitions) {
+         $max_threshold = $dist if (defined $dist) && ($dist > $max_threshold);
+      } else {
+         $min_repetitions = $repetitions if (defined $repetitions) && ($repetitions < $min_repetitions);
       }
-      if ( (not defined $max_threshold) || ($dist > $max_threshold) ) {
-         $max_threshold = $dist;
-      }
+
       push @$average_communities, $average;
    }
    $self->_set_average_communities($average_communities);
 
-   ####
-   print "min_repetitions = $min_repetitions\n";
-   print "max_threshold   = $max_threshold\n";
-   ####
-
-   if ($self->_has_repetitions) {
+   if (defined $self->repetitions) {
       $self->threshold($max_threshold);
+      ####
+      print "set max_threshold to $max_threshold\n";
+      ####
    } else {
       $self->repetitions($min_repetitions);
+      ####
+      print "set min_repetitions to $min_repetitions\n";
+      ####
+
    }
 
    return 1;
@@ -332,46 +333,42 @@ method _bootstrap (Bio::Community $community) {
    my $iteration = 0;
    my $dist;
    while (1) {
+
+      # Get a random community and add it to the overall community
       $iteration++;
       my $random = $sampler->get_rand_community($sample_size);
       $overall = $self->_add( $overall, $random );
 
       ### divide here??
 
-      # Exit conditions
       if (not defined $repetitions) {
+         # Exit if distance with last average community is small
          $dist = Bio::Community::Tools::Distance->new(
                -type        => 'euclidean',
                -communities => [$overall, $prev_overall],
          )->get_distance;
-
-         ####
-         print "$iteration\t$dist\n";
-         ####
-
          last if $dist < $threshold;
          $prev_overall = $overall->clone;
       } else {
-
-         ####
-         print "$iteration\n";
-         ####
-
-         last if $iteration >= $repetitions;
+         # Exit if all repetitions have been done
+         if ($iteration == $repetitions - 1) {
+            $prev_overall = $overall->clone;
+         } elsif ($iteration >= $repetitions) {
+            $dist = Bio::Community::Tools::Distance->new(
+                  -type        => 'euclidean',
+                  -communities => [$overall, $prev_overall],
+            )->get_distance;
+            last;
+         }
       }
-   }
 
-   if (defined $repetitions) {
-      $dist = Bio::Community::Tools::Distance->new(
-            -type        => 'euclidean',
-            -communities => [$overall, $prev_overall],
-      )->get_distance;
    }
 
    my $average = $self->_divide($overall, $iteration);
 
    ####
-   #print "   ...did $iteration repetitions...\n";
+   print "Effective repetitions: $iteration\n";
+   print "Effective threshold  : $dist\n";
    ####
 
    return $overall, $iteration, $dist;
