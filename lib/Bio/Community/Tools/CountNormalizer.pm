@@ -248,13 +248,16 @@ has representative_communities => (
    lazy => 1,
    reader => 'get_representative_communities',
    writer => '_set_representative_communities',
+   predicate => '_has_representative_communities',
 );
 
 before get_representative_communities => sub {
    my ($self) = @_;
-   my $averages = $self->get_average_communities;
-   my $representatives = [ map { $self->_calc_representative($_) } @$averages ];
-   $self->_set_representative_communities($representatives);
+   if (not $self->_has_representative_communities) {
+      my $averages = $self->get_average_communities; 
+      my $representatives = [ map { $self->_calc_representative($_) } @$averages ];
+      $self->_set_representative_communities($representatives);
+   }
    return 1;
 };
 
@@ -306,12 +309,12 @@ method _count_normalize () {
    if (defined $self->repetitions) {
       $self->threshold($max_threshold);
       ####
-      print "set max_threshold to $max_threshold\n";
+      #print "set max_threshold to $max_threshold\n";
       ####
    } else {
       $self->repetitions($min_repetitions);
       ####
-      print "set min_repetitions to $min_repetitions\n";
+      #print "set min_repetitions to $min_repetitions\n";
       ####
 
    }
@@ -367,8 +370,8 @@ method _bootstrap (Bio::Community $community) {
    my $average = $self->_divide($overall, $iteration);
 
    ####
-   print "Effective repetitions: $iteration\n";
-   print "Effective threshold  : $dist\n";
+   #print "Effective repetitions: $iteration\n";
+   #print "Effective threshold  : $dist\n";
    ####
 
    return $overall, $iteration, $dist;
@@ -406,27 +409,54 @@ method _calc_representative(Bio::Community $community) {
    # 
    my $cur_counts = 0;
    my $target_counts = $community->total_count;
+   $target_counts =  int( $target_counts + 0.5 ); # round counts like 999.9 to 1000
+
    my $representative = Bio::Community->new( -name => 'representative' );
-   for my $i (0 .. scalar @$members - 1) {
+   my $max_idx = scalar @$members - 1;
+   for my $i (0 .. $max_idx) {
       my $member = $members->[$i];
       my $count  = $counts->[$i];
+
+      ####
+      print "member ".$member->id.": $count\n";
+      ####
+
       # Round the count
       my $new_count = int($count + 0.5);
+
       # Increment or decrement the new count if need be
       if ($cur_counts + $new_count > $target_counts) {
+         ####
+         print "   decrement... $cur_counts + $new_count > $target_counts\n";
+         ####
          $new_count--;
       } elsif ($cur_counts + $new_count < $target_counts) {
-         if ($new_count == 0) {
+         if ($i == $max_idx) {
+            ####
+            print "   increment...\n";
+            ####
             $new_count++;
          }
       }
+
       # Add member to the community
+
+      ####
+      print "   -> $new_count\n";
+      ##print "member ".$member->id.": $count -> $new_count\n";
+      ####
+
       $representative->add_member( $member, $new_count );
       $cur_counts += $new_count;
       if ($cur_counts == $target_counts) {
          last;
       }
    }
+
+   ####
+   print "total_count: ".$representative->total_count."\n\n";
+   ####
+
    return $representative;
 }
 
