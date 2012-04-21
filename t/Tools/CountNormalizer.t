@@ -244,6 +244,84 @@ delta_within $representative->get_count($member3), $representative->get_count($m
 delta_within $representative->get_count($member6), $representative->get_count($member6), $epsilon2;
 
 
+### Normalizer with sample that should exclude some members from representative
+
+##ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+##   -communities => [ $community1, $community2 ],
+##   -repetitions => 50,
+##   -sample_size => 4,
+##);
+##is scalar(@{$normalizer->get_average_communities}), 2;
+##is scalar(@{$normalizer->get_representative_communities}), 2;
+
+##is $normalizer->repetitions, 50;
+##isnt $normalizer->threshold, 0.1;
+##cmp_ok $normalizer->threshold, '<', 10;
+##is $normalizer->sample_size, 4;
+
+##$average = $normalizer->get_average_communities->[0];
+##isa_ok $average, 'Bio::Community';
+##delta_ok $average->total_count, 4;
+##delta_ok $average->get_richness, 5;
+##delta_within $average->get_count($member1), 0.803, $epsilon3;
+##delta_within $average->get_count($member2), 0.800, $epsilon3;
+##delta_within $average->get_count($member3), 0.800, $epsilon3;
+##delta_within $average->get_count($member4), 0.800, $epsilon3;
+##delta_within $average->get_count($member5), 0.797, $epsilon3;
+
+##$representative = $normalizer->get_representative_communities->[0];
+##isa_ok $representative, 'Bio::Community';
+##delta_ok $representative->total_count, 4;
+##cmp_ok $representative->get_richness, '<=', 4; # statistically, one member should disappear
+##delta_within $representative->get_count($member1), $average->get_count($member1), $epsilon2;
+##delta_within $representative->get_count($member2), $average->get_count($member2), $epsilon2;
+##delta_within $representative->get_count($member3), $average->get_count($member3), $epsilon2;
+##delta_within $representative->get_count($member4), $average->get_count($member4), $epsilon2;
+##delta_within $representative->get_count($member5), $average->get_count($member5), $epsilon2;
+
+##$average = $normalizer->get_average_communities->[1];
+##isa_ok $average, 'Bio::Community';
+##delta_ok $average->total_count, 4;
+##delta_ok $average->get_richness, 3;
+##delta_within $average->get_count($member1), 1.44 , $epsilon3;
+##delta_within $average->get_count($member3), 0.757, $epsilon3;
+##delta_within $average->get_count($member6), 1.801, $epsilon3;
+
+##$representative = $normalizer->get_representative_communities->[1];
+##isa_ok $representative, 'Bio::Community';
+##delta_ok $representative->total_count, 4;
+##cmp_ok $representative->get_richness, '<=', 3;
+##delta_within $representative->get_count($member1), $representative->get_count($member1), $epsilon2;
+##delta_within $representative->get_count($member3), $representative->get_count($member3), $epsilon2;
+##delta_within $representative->get_count($member6), $representative->get_count($member6), $epsilon2;
+
+
+# Test taking the representative of a specific average community
+
+ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
+
+$average = Bio::Community->new( -name => 'average' );
+$average->add_member( $member1, 1.471);
+$average->add_member( $member2, 1.040);
+$average->add_member( $member3, 0.246);
+$average->add_member( $member4, 0.243);
+
+delta_ok $average->get_richness, 4;
+delta_ok $average->total_count, 3;
+
+ok $representative = $normalizer->_calc_representative($average);
+
+delta_ok $representative->total_count, 3;
+delta_ok $representative->get_richness, 3;
+delta_ok $representative->get_count($member1), 1;
+delta_ok $representative->get_count($member2), 1;
+delta_ok $representative->get_count($member3), 1;
+delta_ok $representative->get_count($member4), 0;
+
+
+
+
+
 # Special case where repetitions = 0
 
 ##ok $normalizer = Bio::Community::Tools::CountNormalizer->new(

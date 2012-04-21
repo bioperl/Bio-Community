@@ -401,61 +401,58 @@ method _divide (Bio::Community $community, StrictlyPositiveInt $divisor) {
 
 
 method _calc_representative(Bio::Community $community) {
+
+   #### Investigate having Bio::Community::get_rank() do its ranking on either
+   #### rel_ab() or count(). This would mean that we don't need to sort the
+   #### members in the below code.
+
    # Sort members by decreasing count
    my $members = [ $community->all_members ];
-   my $counts  = [ map { $community->get_count($_) } @$members ];
-   ($counts, $members) = Bio::Community::_two_array_sort($counts, $members);
+   my $count   = [ map { $community->get_count($_) } @$members ];
+   ($count, $members) = Bio::Community::_two_array_sort($count, $members);
 
-   # 
-   my $cur_counts = 0;
-   my $target_counts = $community->total_count;
-   $target_counts =  int( $target_counts + 0.5 ); # round counts like 999.9 to 1000
+   # Round the member count and add them into a new, representative community
+   my $cur_count = 0;
+   my $target_count = $community->total_count;
+   $target_count =  int( $target_count + 0.5 ); # round count like 999.9 to 1000
 
    my $representative = Bio::Community->new( -name => 'representative' );
    my $max_idx = scalar @$members - 1;
    for my $i (0 .. $max_idx) {
       my $member = $members->[$i];
-      my $count  = $counts->[$i];
-
-      ####
-      print "member ".$member->id.": $count\n";
-      ####
-
-      # Round the count
-      my $new_count = int($count + 0.5);
-
-      # Increment or decrement the new count if need be
-      if ($cur_counts + $new_count > $target_counts) {
-         ####
-         print "   decrement... $cur_counts + $new_count > $target_counts\n";
-         ####
-         $new_count--;
-      } elsif ($cur_counts + $new_count < $target_counts) {
-         if ($i == $max_idx) {
-            ####
-            print "   increment...\n";
-            ####
-            $new_count++;
-         }
-      }
-
+      my $new_count = int($count->[$i] + 0.5);
+      last if $new_count == 0;
       # Add member to the community
-
-      ####
-      print "   -> $new_count\n";
-      ##print "member ".$member->id.": $count -> $new_count\n";
-      ####
-
       $representative->add_member( $member, $new_count );
-      $cur_counts += $new_count;
-      if ($cur_counts == $target_counts) {
-         last;
-      }
+      $cur_count += $new_count;
+      last if $cur_count >= $target_count;
    }
 
-   ####
-   print "total_count: ".$representative->total_count."\n\n";
-   ####
+   # Adjust the last count
+   if ($cur_count != $target_count) {
+      if ($cur_count == $target_count + 1) {
+         # Total count too large by 1. Decrease the count of the least abundant member
+         $representative->remove_member($members->[-1], 1);
+      } elsif ($cur_count == $target_count - 1) {
+         # Total count too small by 1. Increment the count of the appropriate member
+         # For an average community with a tail with counts 2.3, 1.3, 1.2, we want
+         # to increment the count if the member with count 1.3 (not the last one,
+         # with abundance 1.2)
+         my $i = $max_idx;
+         my $next_member_count = $representative->get_count($members->[$i]);
+         my $diff = 1;
+         while ( $diff != 0 ) {
+            last if $i - 1 <= 0;
+            my $prev_member_count = $representative->get_count($members->[$i-1]);
+            $diff = $prev_member_count - $next_member_count;
+            $i--;
+            $next_member_count = $prev_member_count;
+         }
+         $representative->add_member($members->[$i], 1);
+      } else {
+         $self->throw("Internal problem. Inexpected current count of $target_count");
+      }
+   }
 
    return $representative;
 }
