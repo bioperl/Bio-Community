@@ -104,7 +104,7 @@ extends 'Bio::Root::Root';
 
 
 =head2 name
-   
+
  Title   : name
  Function: Get or set the name of the community
  Usage   : $community->name('ocean sample 3');
@@ -192,23 +192,43 @@ has _counts => (
 );
 
 
-has _ranks_hash => (
+has _ranks_hash_weighted => (
    is => 'rw',
    isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
-   clearer => '_clear_ranks_hash',
+   clearer => '_clear_ranks_hash_weighted',
 );
 
 
-has _ranks_arr => (
+has _ranks_arr_weighted => (
    is => 'rw',
    isa => 'ArrayRef',
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
-   clearer => '_clear_ranks_arr',
+   clearer => '_clear_ranks_arr_weighted',
+);
+
+
+has _ranks_hash_unweighted => (
+   is => 'rw',
+   isa => 'HashRef',
+   lazy => 1,
+   default => sub{ {} },
+   init_arg => undef,
+   clearer => '_clear_ranks_hash_unweighted',
+);
+
+
+has _ranks_arr_unweighted => (
+   is => 'rw',
+   isa => 'ArrayRef',
+   lazy => 1,
+   default => sub{ [] },
+   init_arg => undef,
+   clearer => '_clear_ranks_arr_unweighted',
 );
 
 
@@ -352,11 +372,17 @@ method get_member_by_id (Int $member_id) {
 =cut
 
 method get_member_by_rank (AbundanceRank $rank) {
-   if ( scalar @{$self->_ranks_arr} == 0 ) {
-      # Calculate the ranks unless they already exist
+   if ( $self->use_weights && scalar @{$self->_ranks_arr_weighted} == 0 ) {
+      # Calculate the relative abundance ranks unless they already exist
       $self->_calc_ranks();
    }
-   return $self->_ranks_arr->[$rank-1];
+   if ( not $self->use_weights && scalar @{$self->_ranks_arr_unweighted} == 0 ) {
+      # Calculate the count ranks unless they already exist
+      $self->_calc_ranks();
+   }
+   my $member = $self->use_weights ? $self->_ranks_arr_weighted->[$rank-1] :
+                                     $self->_ranks_arr_unweighted->[$rank-1];
+   return $member;
 }
 
 
@@ -384,8 +410,9 @@ method get_member_by_rank (AbundanceRank $rank) {
 method get_richness {
    if (not defined $self->_richness) {
 
-      # Try to calculate the richness from the abundance ranks first
-      my $num_members = scalar @{$self->_ranks_arr};
+      # Try to calculate the richness from the abundance ranks if available
+      my $num_members = scalar( @{$self->_ranks_arr_weighted}   ) ||
+                        scalar( @{$self->_ranks_arr_unweighted} ) ;
       
       # If rank abundance are not available, calculate richness manually
       if ($num_members == 0) {
@@ -460,11 +487,19 @@ method get_rel_ab (Bio::Community::Member $member) {
 
 method get_rank (Bio::Community::Member $member) {
    my $member_id = $member->id;
-   if ( $self->get_member_by_id($member_id) && scalar @{$self->_ranks_arr} == 0 ) {
-      # Calculate the ranks if the member exists and the ranks do not already exist
-      $self->_calc_ranks();
+   if ( $self->get_member_by_id($member_id) ) { # If the member exists
+      if ($self->use_weights && scalar @{$self->_ranks_arr_weighted} == 0 ) {
+         # Calculate relative abundance based ranks if ranks do not already exist
+         $self->_calc_ranks();
+      }
+      if (not $self->use_weights && scalar @{$self->_ranks_arr_unweighted} == 0 ) {
+         # Calculate relative abundance based ranks if ranks do not already exist
+         $self->_calc_ranks();
+      }
    }
-   return $self->_ranks_hash->{$member->id} || undef;
+   my $rank = $self->use_weights ? $self->_ranks_hash_weighted->{$member->id} :
+                                   $self->_ranks_hash_unweighted->{$member->id};
+   return $rank || undef;
 }
 
 
@@ -478,12 +513,21 @@ method _calc_ranks {
 
    # 2/ Save ranks in an array
    ($rel_abs, $members) = _two_array_sort($rel_abs, $members);
-   $self->_ranks_arr( $members );
+   my $weighted = $self->use_weights;
+   if ($weighted) {
+      $self->_ranks_arr_weighted( $members );
+   } else {
+      $self->_ranks_arr_unweighted( $members );
+   }
 
    # 3/ Save ranks in a hash
    for my $rank (1 .. scalar @$members) {
       my $member = $$members[$rank-1];
-      $self->_ranks_hash->{$member->id} = $rank;
+      if ($weighted) {
+         $self->_ranks_hash_weighted->{$member->id} = $rank;
+      } else {
+         $self->_ranks_hash_unweighted->{$member->id} = $rank;
+      }
    }
 
    return 1;
@@ -492,8 +536,10 @@ method _calc_ranks {
 
 method _has_changed {
    # Re-initialize some attributes when the community has changed
-   $self->_clear_ranks_hash();
-   $self->_clear_ranks_arr();
+   $self->_clear_ranks_hash_weighted();
+   $self->_clear_ranks_arr_weighted();
+   $self->_clear_ranks_hash_unweighted();
+   $self->_clear_ranks_arr_unweighted();
    $self->_clear_richness();
    $self->_clear_members_iterator();
    return 1;

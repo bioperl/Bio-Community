@@ -343,7 +343,7 @@ has 'sort_members' => (
 
 has 'abundance_type' => (
    is => 'ro',
-   isa => 'AbundanceType',
+   isa => 'AbundanceRepr',
    required => 0,
    lazy => 1,
    init_arg => '-abundance_type',

@@ -91,8 +91,8 @@ subtype 'NumericSort'
    => message { "This only accepts 0 (off), 1 (increasing) or -1 (decreasing), but got '".($_||'')."'" };
 
 
-# Type of abundance: count, percentage, fraction
-subtype 'AbundanceType'
+# Abundance representation: count, percentage, fraction
+subtype 'AbundanceRepr'
    => as 'Str'
    => where { $_ =~ m/^(count|percentage|fraction)$/ }
    => message { "This only accepts 'count', 'percentage', or 'fraction', but got '".($_||'')."'" };

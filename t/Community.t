@@ -23,7 +23,7 @@ isa_ok $community, 'Bio::Community';
 $community = Bio::Community->new();
 is $community->total_count, 0;
 
-$member1 = Bio::Community::Member->new( -weights => [2] );
+$member1 = Bio::Community::Member->new( -weights => [3] );
 ok $community->add_member( $member1 );
 is $community->total_count, 1;
 
@@ -31,7 +31,7 @@ $member2 = Bio::Community::Member->new();
 ok $community->add_member( $member2, 23 );
 is $community->total_count, 24;
 
-$member3 = Bio::Community::Member->new( -weights => [1,3] );
+$member3 = Bio::Community::Member->new( -weights => [2,7] );
 ok $community->add_member( $member3, 4 );
 is $community->total_count, 28;
 
@@ -118,8 +118,10 @@ is $community->use_weights, 1;
 for my $member ($community->all_members) {
    $rel_abs{$member->id} = $community->get_rel_ab($member);
 }
-is_deeply \%rel_abs, { 1 => 27.2727272727273, 3 => 72.7272727272728 };
+is_deeply \%rel_abs, { 1 => 53.846153846154, 3 => 46.1538461538463 };
 
+is $community->get_member_by_rank(1), $member1;
+is $community->get_member_by_rank(2), $member3;
 
 done_testing();
 
