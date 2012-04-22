@@ -254,7 +254,7 @@ has representative_communities => (
 before get_representative_communities => sub {
    my ($self) = @_;
    if (not $self->_has_representative_communities) {
-      my $averages = $self->get_average_communities; 
+      my $averages = $self->get_average_communities;
       my $representatives = [ map { $self->_calc_representative($_) } @$averages ];
       $self->_set_representative_communities($representatives);
    }
@@ -264,6 +264,7 @@ before get_representative_communities => sub {
 
 method _count_normalize () {
    # Normalize communties by total count
+
    # Sanity check
    my $communities = $self->communities;
    if (scalar @$communities == 0) {
@@ -308,15 +309,8 @@ method _count_normalize () {
 
    if (defined $self->repetitions) {
       $self->threshold($max_threshold);
-      ####
-      #print "set max_threshold to $max_threshold\n";
-      ####
    } else {
       $self->repetitions($min_repetitions);
-      ####
-      #print "set min_repetitions to $min_repetitions\n";
-      ####
-
    }
 
    return 1;
@@ -325,12 +319,10 @@ method _count_normalize () {
 
 method _bootstrap (Bio::Community $community) {
    # Re-sample a community many times and report the average community
-
    my $threshold   = $self->threshold();
    my $sample_size = $self->sample_size();
    my $repetitions = $self->repetitions();
    my $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
-
    my $overall = Bio::Community->new( -name => 'average' );
    my $prev_overall = Bio::Community->new();
    my $iteration = 0;
@@ -350,9 +342,19 @@ method _bootstrap (Bio::Community $community) {
                -type        => 'euclidean',
                -communities => [$overall, $prev_overall],
          )->get_distance;
+
+         ####
+         print "iteration $iteration -> $dist\n";
+         ####
+
          last if $dist < $threshold;
          $prev_overall = $overall->clone;
       } else {
+
+         ####
+         print "iteration $iteration...\n";
+         ####
+
          # Exit if all repetitions have been done
          if ($iteration == $repetitions - 1) {
             $prev_overall = $overall->clone;
@@ -367,12 +369,11 @@ method _bootstrap (Bio::Community $community) {
 
    }
 
-   my $average = $self->_divide($overall, $iteration);
+   ####
+   print "\n";
+   ####
 
-   ####
-   #print "Effective repetitions: $iteration\n";
-   #print "Effective threshold  : $dist\n";
-   ####
+   my $average = $self->_divide($overall, $iteration);
 
    return $overall, $iteration, $dist;
 }
@@ -401,57 +402,58 @@ method _divide (Bio::Community $community, StrictlyPositiveInt $divisor) {
 
 
 method _calc_representative(Bio::Community $community) {
-
-   #### Investigate having Bio::Community::get_rank() do its ranking on either
-   #### rel_ab() or count(). This would mean that we don't need to sort the
-   #### members in the below code.
-
-   # Sort members by decreasing count
-   my $members = [ $community->all_members ];
-   my $count   = [ map { $community->get_count($_) } @$members ];
-   ($count, $members) = Bio::Community::_two_array_sort($count, $members);
-
    # Round the member count and add them into a new, representative community
    my $cur_count = 0;
    my $target_count = $community->total_count;
    $target_count =  int( $target_count + 0.5 ); # round count like 999.9 to 1000
 
    my $representative = Bio::Community->new( -name => 'representative' );
-   my $max_idx = scalar @$members - 1;
-   for my $i (0 .. $max_idx) {
-      my $member = $members->[$i];
-      my $new_count = int($count->[$i] + 0.5);
-      last if $new_count == 0;
+   my $richness = 0;
+
+   while (my $member = $community->next_member) {
+      $richness++;
+      my $count = $community->get_count($member);
+      my $new_count = int( $count + 0.5 );
+
+      next if $new_count == 0; ##### are we sure that this is fine?
+
       # Add member to the community
       $representative->add_member( $member, $new_count );
       $cur_count += $new_count;
-      last if $cur_count >= $target_count;
    }
 
    # Adjust the last count
    if ($cur_count != $target_count) {
+
+      # Get unweighted ranks (same as ranked by count)
+      my $prev_weighted = $community->use_weights;
+      $community->use_weights(0);
+
       if ($cur_count == $target_count + 1) {
          # Total count too large by 1. Decrease the count of the least abundant member
-         $representative->remove_member($members->[-1], 1);
+         my $last_member = $community->get_member_by_rank($richness);
+         $representative->remove_member($last_member, 1);
       } elsif ($cur_count == $target_count - 1) {
          # Total count too small by 1. Increment the count of the appropriate member
          # For an average community with a tail with counts 2.3, 1.3, 1.2, we want
          # to increment the count if the member with count 1.3 (not the last one,
          # with abundance 1.2)
-         my $i = $max_idx;
-         my $next_member_count = $representative->get_count($members->[$i]);
-         my $diff = 1;
-         while ( $diff != 0 ) {
-            last if $i - 1 <= 0;
-            my $prev_member_count = $representative->get_count($members->[$i-1]);
-            $diff = $prev_member_count - $next_member_count;
-            $i--;
+         my $rank = $richness;
+         my $next_member_count = $community->get_count( $community->get_member_by_rank($rank) );
+         for ( $rank = $richness - 1; $rank >= 1; $rank--) {
+            my $prev_member_count = $community->get_count( $community->get_member_by_rank($rank) );
+            my $diff = int( $prev_member_count + 0.5) - int( $next_member_count + 0.5 );
+            last if $diff != 0;
             $next_member_count = $prev_member_count;
          }
-         $representative->add_member($members->[$i], 1);
+         my $member_to_increment = $community->get_member_by_rank($rank + 1);
+         $representative->add_member($member_to_increment, 1);
       } else {
          $self->throw("Internal problem. Inexpected current count of $target_count");
       }
+
+      $community->use_weights($prev_weighted);
+
    }
 
    return $representative;
