@@ -34,7 +34,7 @@ infinity-norm. They consider the communities as a n-dimensional space, where n
 is the total number of unique community members across the communities.
 
 Note that the distance is based on the relative abundance and is hence affected
-by weights you assigned to the community members. See the get_rel_ab() method in
+by weights assigned to the community members. See the get_rel_ab() method in
 L<Bio::Community>.
 
 =head1 FEEDBACK
@@ -131,7 +131,8 @@ has type => (
 =head2 get_distance
 
  Title   : get_distance
- Function: Calculate the distance between the communities
+ Function: Calculate the distance between the communities based on the relative
+           abundance of the members.
  Usage   : my $distance = $obj->get_distance;
  Args    : none
  Returns : a number for the distance

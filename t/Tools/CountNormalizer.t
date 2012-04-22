@@ -34,7 +34,7 @@ $community1->add_member( $member5, 299);
 
 # Community with 5585 counts
 
-$community2 = Bio::Community->new( -name => 'community1' );
+$community2 = Bio::Community->new( -name => 'community2' );
 $member6 = Bio::Community::Member->new( -id => 6 );
 $community2->add_member( $member1, 2014);
 $community2->add_member( $member3, 1057);
@@ -387,111 +387,71 @@ delta_ok $representative->get_count($member3), 1;
 delta_ok $representative->get_count($member4), 0;
 
 
-#### Using weights should yield same results since we operate on counts (not relative abundance)
+# Using weights should yield same results since we operate on counts (not relative abundance)
 
-######$member1->weights( [  8 ] );
-######$member2->weights( [  3 ] );
-######$member3->weights( [ 15 ] );
-######$member4->weights( [  7 ] );
-######$member5->weights( [  2 ] );
-######$member6->weights( [ 10 ] );
+$community1 = Bio::Community->new( -name => 'community1' );
+$member1 = Bio::Community::Member->new( -id => 1, -weights => [8] );
+$member2 = Bio::Community::Member->new( -id => 2, -weights => [3] );
+$member3 = Bio::Community::Member->new( -id => 3, -weights => [15] );
+$member4 = Bio::Community::Member->new( -id => 4, -weights => [7] );
+$member5 = Bio::Community::Member->new( -id => 5, -weights => [2] );
+$community1->add_member( $member1, 301);
+$community1->add_member( $member2, 300);
+$community1->add_member( $member3, 300);
+$community1->add_member( $member4, 300);
+$community1->add_member( $member5, 299);
 
-###$community1 = Bio::Community->new( -name => 'community1' );
-###$member1 = Bio::Community::Member->new( -id => 1, -weights => [8] );
-###$member2 = Bio::Community::Member->new( -id => 2, -weights => [8] );
-###$member3 = Bio::Community::Member->new( -id => 3, -weights => [8] );
-###$member4 = Bio::Community::Member->new( -id => 4, -weights => [8] );
-###$member5 = Bio::Community::Member->new( -id => 5, -weights => [8] );
-###$community1->add_member( $member1, 301);
-###$community1->add_member( $member2, 300);
-###$community1->add_member( $member3, 300);
-###$community1->add_member( $member4, 300);
-###$community1->add_member( $member5, 299);
+$community2 = Bio::Community->new( -name => 'community2' );
+$member6 = Bio::Community::Member->new( -id => 10 );
+$community2->add_member( $member1, 2014);
+$community2->add_member( $member3, 1057);
+$community2->add_member( $member6, 2514);
 
-###$community2 = Bio::Community->new( -name => 'community1' );
-###$member1 = Bio::Community::Member->new( -id => 1 );
-###$member3 = Bio::Community::Member->new( -id => 3 );
-###$member6 = Bio::Community::Member->new( -id => 6 );
-###$community2->add_member( $member1, 2014);
-###$community2->add_member( $member3, 1057);
-###$community2->add_member( $member6, 2514);
+ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+   -communities => [ $community1, $community2 ],
+   -repetitions => 10,
+   -sample_size => 1000,
+);
 
+is scalar(@{$normalizer->get_average_communities}), 2;
+is scalar(@{$normalizer->get_representative_communities}), 2;
 
-###ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
-###   -communities => [ $community1, $community2 ],
-###   -repetitions => 10,
-###   -sample_size => 1000,
-###);
+is $normalizer->repetitions, 10;
+isnt $normalizer->threshold, 0.1;
+cmp_ok $normalizer->threshold, '<', 1;
+is $normalizer->sample_size, 1000;
 
-#######
-###use Data::Dumper;
-###print Dumper($community1);
-#######
+$average = $normalizer->get_average_communities->[0];
+isa_ok $average, 'Bio::Community';
+delta_ok $average->total_count, 1000;
+delta_within $average->get_count($member1), 200.7, $epsilon1;
+delta_within $average->get_count($member2), 200.0, $epsilon1;
+delta_within $average->get_count($member3), 200.0, $epsilon1;
+delta_within $average->get_count($member4), 200.0, $epsilon1;
+delta_within $average->get_count($member5), 199.3, $epsilon1;
 
+$representative = $normalizer->get_representative_communities->[0];
+isa_ok $representative, 'Bio::Community';
+delta_ok $representative->total_count, 1000;
+delta_within $representative->get_count($member1), $average->get_count($member1), $epsilon2;
+delta_within $representative->get_count($member2), $average->get_count($member2), $epsilon2;
+delta_within $representative->get_count($member3), $average->get_count($member3), $epsilon2;
+delta_within $representative->get_count($member4), $average->get_count($member4), $epsilon2;
+delta_within $representative->get_count($member5), $average->get_count($member5), $epsilon2;
 
-###is scalar(@{$normalizer->get_average_communities}), 2;
-###is scalar(@{$normalizer->get_representative_communities}), 2;
+$average = $normalizer->get_average_communities->[1];
+isa_ok $average, 'Bio::Community';
+delta_ok $average->total_count, 1000;
+delta_within $average->get_count($member1), 360.6, $epsilon1;
+delta_within $average->get_count($member3), 189.3, $epsilon1;
+delta_within $average->get_count($member6), 450.1, $epsilon1;
 
-###is $normalizer->repetitions, 10;
-###isnt $normalizer->threshold, 0.1;
-###cmp_ok $normalizer->threshold, '<', 1;
-###is $normalizer->sample_size, 1000;
-
-###$average = $normalizer->get_average_communities->[0];
-###isa_ok $average, 'Bio::Community';
-###delta_ok $average->total_count, 1000;
-###delta_within $average->get_count($member1), 200.7, $epsilon1;
-###delta_within $average->get_count($member2), 200.0, $epsilon1;
-###delta_within $average->get_count($member3), 200.0, $epsilon1;
-###delta_within $average->get_count($member4), 200.0, $epsilon1;
-###delta_within $average->get_count($member5), 199.3, $epsilon1;
-
-###$representative = $normalizer->get_representative_communities->[0];
-###isa_ok $representative, 'Bio::Community';
-###delta_ok $representative->total_count, 1000;
-###delta_within $representative->get_count($member1), $average->get_count($member1), $epsilon2;
-###delta_within $representative->get_count($member2), $average->get_count($member2), $epsilon2;
-###delta_within $representative->get_count($member3), $average->get_count($member3), $epsilon2;
-###delta_within $representative->get_count($member4), $average->get_count($member4), $epsilon2;
-###delta_within $representative->get_count($member5), $average->get_count($member5), $epsilon2;
-
-###$average = $normalizer->get_average_communities->[1];
-###isa_ok $average, 'Bio::Community';
-###delta_ok $average->total_count, 1000;
-###delta_within $average->get_count($member1), 360.6, $epsilon1;
-###delta_within $average->get_count($member3), 189.3, $epsilon1;
-###delta_within $average->get_count($member6), 450.1, $epsilon1;
-
-###$representative = $normalizer->get_representative_communities->[1];
-###isa_ok $representative, 'Bio::Community';
-###delta_ok $representative->total_count, 1000;
-###delta_within $representative->get_count($member1), $representative->get_count($member1), $epsilon2;
-###delta_within $representative->get_count($member3), $representative->get_count($member3), $epsilon2;
-###delta_within $representative->get_count($member6), $representative->get_count($member6), $epsilon2;
-
-
-
-
-
-# Special case where repetitions = 0
-
-##ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
-##   -communities => [ $community1, $community2 ],
-##   -threshold   => 1E-1,
-##   -repetitions => 0,
-##);
-
-
-### try a community where richness is decreased when going from average to representative
-
-### Test with some weights
-
-
-##                 '_counts' => {
-##                                '6' => '454.65',
-##                                '1' => '357.25',
-##                                '3' => '188.1'
-## after taking the representative, I get 999 counts instead of 1000
+$representative = $normalizer->get_representative_communities->[1];
+isa_ok $representative, 'Bio::Community';
+delta_ok $representative->total_count, 1000;
+delta_within $representative->get_count($member1), $representative->get_count($member1), $epsilon2;
+delta_within $representative->get_count($member3), $representative->get_count($member3), $epsilon2;
+delta_within $representative->get_count($member6), $representative->get_count($member6), $epsilon2;
 
 
 done_testing();

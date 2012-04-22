@@ -15,13 +15,17 @@ Bio::Community::Tools::CountNormalizer - Normalize communities by count
 
   use Bio::Community::Tools::CountNormalizer;
 
+  # Normalize a community by repeatedly taking 1,000 random members
   my $normalizer = Bio::Community::Tools::CountNormalizer->new(
-     -communities => [ $community1, $community2 ],
-     -sample_size => # default is minimum community size
-     -repetitions => # default is automatic
-     -threshold   =>
-
+     -communities => [ $community ],
+     -sample_size => 1000,
+     -threshold   => 0.001, # When to stop iterating. Could specify repetions instead
   );
+
+  my $average_community = $normalizer->get_average_communities->[0];
+
+  # Round counts and remove members with abundance between 0 and 0.5
+  my $representative_community = $normalizer->get_representative_communities->[0];
 
 =head1 DESCRIPTION
 
@@ -323,12 +327,16 @@ method _bootstrap (Bio::Community $community) {
    my $sample_size = $self->sample_size();
    my $repetitions = $self->repetitions();
 
-   ####
-   # set $community->use_weights to 0 here.
-   ####
-
+  # Set 'use_weights' to sample from counts (similar to unweighted relative abundances)
+   my $use_weights = $community->use_weights;
+   $community->use_weights(0);
    my $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
-   my $overall = Bio::Community->new( -name => 'average' );
+
+   my $overall = Bio::Community->new(
+      -name        => 'average',
+      -use_weights => $use_weights,
+   );
+
    my $prev_overall = Bio::Community->new();
    my $iteration = 0;
    my $dist;
@@ -339,7 +347,9 @@ method _bootstrap (Bio::Community $community) {
       my $random = $sampler->get_rand_community($sample_size);
       $overall = $self->_add( $overall, $random );
 
-      ### divide here??
+      # We could divide here, but since the distance is based on the relative
+      # abundance, not the counts, it would be the same. Hence, only divide at
+      # the end
 
       if (not defined $repetitions) {
          # Exit if distance with last average community is small
@@ -347,19 +357,9 @@ method _bootstrap (Bio::Community $community) {
                -type        => 'euclidean',
                -communities => [$overall, $prev_overall],
          )->get_distance;
-
-         ####
-         print "iteration $iteration -> $dist\n";
-         ####
-
          last if $dist < $threshold;
          $prev_overall = $overall->clone;
       } else {
-
-         ####
-         print "iteration $iteration...\n";
-         ####
-
          # Exit if all repetitions have been done
          if ($iteration == $repetitions - 1) {
             $prev_overall = $overall->clone;
@@ -374,10 +374,7 @@ method _bootstrap (Bio::Community $community) {
 
    }
 
-   ####
-   print "\n";
-   ####
-
+   $community->use_weights($use_weights);
    my $average = $self->_divide($overall, $iteration);
 
    return $overall, $iteration, $dist;
@@ -411,7 +408,10 @@ method _calc_representative(Bio::Community $average) {
    # Round the member count and add them into a new, representative community
    my $cur_count = 0;
    my $target_count = int( $average->total_count + 0.5 ); # round count like 999.9 to 1000
-   my $representative = Bio::Community->new( -name => 'representative' );
+   my $representative = Bio::Community->new(
+      -name        => 'representative',
+      -use_weights => $average->use_weights,
+   );
    my $richness = 0;
    while (my $member = $average->next_member) {
       $richness++;
@@ -425,10 +425,6 @@ method _calc_representative(Bio::Community $average) {
 
    # Adjust the last count
    if ($cur_count != $target_count) {
-
-      # Get unweighted ranks (same as ranked by count)
-      ###my $prev_weighted = $average->use_weights;
-      ###$average->use_weights(0);
 
       if ($cur_count == $target_count + 1) {
          # Total count too large by 1. Decrease the count of the least abundant member
@@ -452,8 +448,6 @@ method _calc_representative(Bio::Community $average) {
       } else {
          $self->throw("Internal problem. Inexpected current count of $target_count");
       }
-
-      ###$average->use_weights($prev_weighted);
 
    }
 
