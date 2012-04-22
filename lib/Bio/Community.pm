@@ -19,7 +19,7 @@ Bio::Community - A biological community
   $community->add_member( $member1 );    # add 1 of this type of Bio::Community::Member
   $community->add_member( $member2, 3 ); # add 3 of this member
 
-  print "There are ".$community->total_count." members in the community\n";
+  print "There are ".$community->get_total_count." members in the community\n";
   print "The total diversity is ".$community->richness." species\n";
 
   while (my $member = $community->next_member) {
@@ -146,11 +146,11 @@ has use_weights => (
 );
 
 
-=head2 total_count
+=head2 get_total_count
 
- Title   : total_count
+ Title   : get_total_count
  Function: Get the total number of members in the community
- Usage   : $community->total_count();
+ Usage   : $community->get_total_count();
  Args    : none
  Returns : integer
 
@@ -162,6 +162,7 @@ has total_count => (
    lazy => 1,
    default => 0,
    init_arg => undef,
+   reader => 'get_total_count',
    writer => '_set_total_count',
 );
 
@@ -267,7 +268,7 @@ method add_member ( Bio::Community::Member $member, Count $count = 1 ) {
    my $member_id = $member->id;
    $self->_counts->{$member_id} += $count;
    $self->_members->{$member_id} = $member;
-   $self->_set_total_count( $self->total_count + $count );
+   $self->_set_total_count( $self->get_total_count + $count );
    $self->_weighted_count( $self->_weighted_count + $count / _prod(@{$member->weights}) );
    $self->_has_changed;
    return 1;
@@ -301,7 +302,7 @@ method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
       delete $counts->{$member_id};
       delete $self->_members->{$member_id};
    }
-   $self->_set_total_count( $self->total_count - $count );
+   $self->_set_total_count( $self->get_total_count - $count );
    $self->_weighted_count( $self->_weighted_count - $count / _prod(@{$member->weights}) );
    $self->_has_changed;
    return 1;
@@ -463,7 +464,7 @@ method get_rel_ab (Bio::Community::Member $member) {
      $weighted_count = $self->_weighted_count;
   } else {
      $weight = 1;
-     $weighted_count = $self->total_count;
+     $weighted_count = $self->get_total_count;
   }
   if ($weighted_count != 0) {
      $rel_ab = $self->get_count($member) * 100 / ($weight * $weighted_count);

@@ -134,7 +134,7 @@ has communities => (
  Function: Get/set the sample size, i.e. the number of members to pick randomly
            at each iteration. It has to be smaller than the total count of the
            smallest community or an error will be generated. If the sample size
-           is omitted, it defaults to the total_count() of the smallest community.
+           is omitted, it defaults to the get_total_count() of the smallest community.
  Usage   : my $sample_size = $normalizer->sample_size;
  Args    : positive integer for the sample size
  Returns : positive integer for the sample size
@@ -276,7 +276,7 @@ method _count_normalize () {
    }
 
    # Get or set sample size
-   my $min = min( map {$_->total_count} @$communities );
+   my $min = min( map {$_->get_total_count} @$communities );
    my $sample_size = $self->sample_size;
    if (not defined $sample_size) { 
       # Set sample size to smallest community size
@@ -295,7 +295,7 @@ method _count_normalize () {
    my $max_threshold = 0;
    for my $community ( @{$self->communities} ) {
       my ($average, $repetitions, $dist);
-      if ($community->total_count == $sample_size) {         
+      if ($community->get_total_count == $sample_size) {         
          ($average, $repetitions, $dist) = ($community->clone, undef, undef);
       } else {
          ($average, $repetitions, $dist) = $self->_bootstrap($community);
@@ -407,7 +407,7 @@ method _calc_representative(Bio::Community $average) {
 
    # Round the member count and add them into a new, representative community
    my $cur_count = 0;
-   my $target_count = int( $average->total_count + 0.5 ); # round count like 999.9 to 1000
+   my $target_count = int( $average->get_total_count + 0.5 ); # round count like 999.9 to 1000
    my $representative = Bio::Community->new(
       -name        => 'representative',
       -use_weights => $average->use_weights,
