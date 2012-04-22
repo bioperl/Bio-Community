@@ -5,8 +5,7 @@
 # Copyright Florent Angly <florent.angly@gmail.com>
 #
 # You may distribute this module under the same terms as perl itself
-#
-# POD documentation - main docs before the code
+
 
 =head1 NAME
 
@@ -372,11 +371,11 @@ method get_member_by_id (Int $member_id) {
 =cut
 
 method get_member_by_rank (AbundanceRank $rank) {
-   if ( $self->use_weights && scalar @{$self->_ranks_arr_weighted} == 0 ) {
+   if ( $self->use_weights && (scalar @{$self->_ranks_arr_weighted} == 0) ) {
       # Calculate the relative abundance ranks unless they already exist
       $self->_calc_ranks();
    }
-   if ( not $self->use_weights && scalar @{$self->_ranks_arr_unweighted} == 0 ) {
+   if ( (not $self->use_weights) && (scalar @{$self->_ranks_arr_unweighted} == 0) ) {
       # Calculate the count ranks unless they already exist
       $self->_calc_ranks();
    }
@@ -488,18 +487,18 @@ method get_rel_ab (Bio::Community::Member $member) {
 method get_rank (Bio::Community::Member $member) {
    my $member_id = $member->id;
    if ( $self->get_member_by_id($member_id) ) { # If the member exists
-      if ($self->use_weights && scalar @{$self->_ranks_arr_weighted} == 0 ) {
+      if ( $self->use_weights && (scalar @{$self->_ranks_arr_weighted} == 0) ) {
          # Calculate relative abundance based ranks if ranks do not already exist
          $self->_calc_ranks();
       }
-      if (not $self->use_weights && scalar @{$self->_ranks_arr_unweighted} == 0 ) {
+      if ( (not $self->use_weights) && (scalar @{$self->_ranks_arr_unweighted} == 0) ) {
          # Calculate relative abundance based ranks if ranks do not already exist
          $self->_calc_ranks();
       }
    }
    my $rank = $self->use_weights ? $self->_ranks_hash_weighted->{$member->id} :
                                    $self->_ranks_hash_unweighted->{$member->id};
-   return $rank || undef;
+   return $rank;
 }
 
 
@@ -522,7 +521,7 @@ method _calc_ranks {
 
    # 3/ Save ranks in a hash
    for my $rank (1 .. scalar @$members) {
-      my $member = $$members[$rank-1];
+      my $member = $members->[$rank-1];
       if ($weighted) {
          $self->_ranks_hash_weighted->{$member->id} = $rank;
       } else {
