@@ -128,7 +128,8 @@ has name => (
  Function: Set whether or not relative abundance should be normalized by taking
            into accout the weights of the different members (e.g. genome length,
            gene copy number). Refer to the Bio::Community::Member->weights()
-           method for more details
+           method for more details. The default is to use the weights that have
+           given to community members.
  Usage   : $community->use_weights(1);
  Args    : boolean
  Returns : boolean
@@ -139,7 +140,7 @@ has use_weights => (
    is => 'rw',
    isa => 'Bool',
    lazy => 1,
-   default => 0,
+   default => 1,
    init_arg => '-use_weights',
    trigger => \&_has_changed,
 );
