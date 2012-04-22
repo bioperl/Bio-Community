@@ -400,7 +400,7 @@ method get_member_by_rank (AbundanceRank $rank) {
 =head2 get_richness
    
  Title   : get_richness
- Function: Report the community richness or number of different types of members
+ Function: Report the community richness or number of different types of members.
  Usage   : my $richness = $community->get_richness();
  Args    : none
  Returns : integer for the richness

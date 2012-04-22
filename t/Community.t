@@ -123,6 +123,7 @@ is_deeply \%rel_abs, { 1 => 53.846153846154, 3 => 46.1538461538463 };
 is $community->get_member_by_rank(1), $member1;
 is $community->get_member_by_rank(2), $member3;
 
+
 done_testing();
 
 exit;
