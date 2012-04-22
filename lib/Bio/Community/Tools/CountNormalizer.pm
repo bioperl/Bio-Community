@@ -322,6 +322,11 @@ method _bootstrap (Bio::Community $community) {
    my $threshold   = $self->threshold();
    my $sample_size = $self->sample_size();
    my $repetitions = $self->repetitions();
+
+   ####
+   # set $community->use_weights to 0 here.
+   ####
+
    my $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
    my $overall = Bio::Community->new( -name => 'average' );
    my $prev_overall = Bio::Community->new();
@@ -401,23 +406,19 @@ method _divide (Bio::Community $community, StrictlyPositiveInt $divisor) {
 }
 
 
-method _calc_representative(Bio::Community $community) {
+method _calc_representative(Bio::Community $average) {
+
    # Round the member count and add them into a new, representative community
    my $cur_count = 0;
-   my $target_count = $community->total_count;
-   $target_count =  int( $target_count + 0.5 ); # round count like 999.9 to 1000
-
+   my $target_count = int( $average->total_count + 0.5 ); # round count like 999.9 to 1000
    my $representative = Bio::Community->new( -name => 'representative' );
    my $richness = 0;
-
-   while (my $member = $community->next_member) {
+   while (my $member = $average->next_member) {
       $richness++;
-      my $count = $community->get_count($member);
+      # Add member and count to the community
+      my $count = $average->get_count($member);
       my $new_count = int( $count + 0.5 );
-
-      next if $new_count == 0; ##### are we sure that this is fine?
-
-      # Add member to the community
+      next if $new_count == 0;
       $representative->add_member( $member, $new_count );
       $cur_count += $new_count;
    }
@@ -426,12 +427,12 @@ method _calc_representative(Bio::Community $community) {
    if ($cur_count != $target_count) {
 
       # Get unweighted ranks (same as ranked by count)
-      my $prev_weighted = $community->use_weights;
-      $community->use_weights(0);
+      ###my $prev_weighted = $average->use_weights;
+      ###$average->use_weights(0);
 
       if ($cur_count == $target_count + 1) {
          # Total count too large by 1. Decrease the count of the least abundant member
-         my $last_member = $community->get_member_by_rank($richness);
+         my $last_member = $average->get_member_by_rank($richness);
          $representative->remove_member($last_member, 1);
       } elsif ($cur_count == $target_count - 1) {
          # Total count too small by 1. Increment the count of the appropriate member
@@ -439,20 +440,20 @@ method _calc_representative(Bio::Community $community) {
          # to increment the count if the member with count 1.3 (not the last one,
          # with abundance 1.2)
          my $rank = $richness;
-         my $next_member_count = $community->get_count( $community->get_member_by_rank($rank) );
+         my $next_member_count = $average->get_count( $average->get_member_by_rank($rank) );
          for ( $rank = $richness - 1; $rank >= 1; $rank--) {
-            my $prev_member_count = $community->get_count( $community->get_member_by_rank($rank) );
+            my $prev_member_count = $average->get_count( $average->get_member_by_rank($rank) );
             my $diff = int( $prev_member_count + 0.5) - int( $next_member_count + 0.5 );
             last if $diff != 0;
             $next_member_count = $prev_member_count;
          }
-         my $member_to_increment = $community->get_member_by_rank($rank + 1);
+         my $member_to_increment = $average->get_member_by_rank($rank + 1);
          $representative->add_member($member_to_increment, 1);
       } else {
          $self->throw("Internal problem. Inexpected current count of $target_count");
       }
 
-      $community->use_weights($prev_weighted);
+      ###$average->use_weights($prev_weighted);
 
    }
 
