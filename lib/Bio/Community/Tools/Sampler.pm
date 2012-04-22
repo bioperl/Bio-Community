@@ -23,7 +23,11 @@ Bio::Community::Tools::Sampler - Sample organisms according to their abundance
 
 =head1 DESCRIPTION
 
-Pick individuals at random from a community
+Pick individuals at random (without replacement) from a community.
+
+Note that the sampling is done based on relative abundances, and is hence
+affected by weights. If you need to sample based on counts instead, simply set
+$community->use_weights(0), before using Bio::Community::Tools::Sampler.
 
 =head1 OBJECT METHODS
 
@@ -153,8 +157,6 @@ method get_rand_member () {
    my $index = first {$rand_pick < $$cdf[$_+1]} (0 .. scalar @$cdf - 2);
    return ${$self->_members}[$index];
 }
-
-### TODO: option to sample without replacement!
 
 
 =head2 get_rand_community
