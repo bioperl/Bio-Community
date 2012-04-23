@@ -118,9 +118,9 @@ has communities => (
            along with all other members that are less than 1% in all the
            communities.
  Usage   : $summarizer->group('<', 1);
- Args    : * the type of numeric comparison, '<', '<=', '==', '>=', '>'
+ Args    : * the type of numeric comparison, '<', '<=', '>=', '>'
            * the relative abundance threshold (in %)
- Returns : * the type of numeric comparison, '<', '<=', '==', '>=', '>'
+ Returns : * the type of numeric comparison, '<', '<=', '>=', '>'
            * the relative abundance threshold (in %)
 
 =cut
@@ -179,18 +179,14 @@ method _group_by_relative_abundance (ArrayRef[Bio::Community::Member] $members, 
    my $thresh   = $params->[1] || $self->throw("No grouping threshold was provided.");
    my $operator = $params->[0] || $self->throw("No comparison operator was provided.");
    my $cmp;
-   if ( $operator eq '<' ) {
-      $cmp = sub { $_[0] < $_[1] };
+   if      ($operator eq '<' ) {
+      $cmp =  sub { $_[0] < $_[1] };
    } elsif ($operator eq '<=' ) {
-      $cmp = sub { $_[0] <= $_[1] };
-   } elsif ($operator eq '==' ) {
-      $cmp = sub { $_[0] == $_[1] };
-   } elsif ($operator eq '!=' ) {
-      $cmp = sub { $_[0] != $_[1] };
+      $cmp =  sub { $_[0] <= $_[1] };
    } elsif ($operator eq '>=' ) {
-      $cmp = sub { $_[0] >= $_[1] };
+      $cmp =  sub { $_[0] >= $_[1] };
    } elsif ($operator eq '>' ) {
-      $cmp = sub { $_[0] > $_[1] };
+      $cmp =  sub { $_[0] > $_[1] };
    } else {
       $self->throw("Invalid comparison operator provided, '$operator'.");
    }
@@ -202,12 +198,12 @@ method _group_by_relative_abundance (ArrayRef[Bio::Community::Member] $members, 
    for my $member ( @$members ) {
 
       # Should this member be grouped?
-      my $member_to_group = 0;
+      my $member_to_group = 1;
       my $rel_abs = [ map { $_->get_rel_ab($member) } @$communities ];
       for my $rel_ab (@$rel_abs) {
-         if ( &$cmp($rel_ab, $thresh) ) {
-            # Put this guy in a group
-            $member_to_group++;
+         if ( not &$cmp($rel_ab, $thresh) ) {
+            # Do not put this guy in a group
+            $member_to_group--;
             last;
          }
       }
