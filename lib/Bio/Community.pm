@@ -95,7 +95,6 @@ use Moose;
 use MooseX::NonMoose;
 use MooseX::Method::Signatures;
 use namespace::autoclean;
-
 use Bio::Community::Member;
 
 

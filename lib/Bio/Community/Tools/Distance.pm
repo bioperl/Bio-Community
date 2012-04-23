@@ -5,8 +5,6 @@
 # Copyright Florent Angly <florent.angly@gmail.com>
 #
 # You may distribute this module under the same terms as perl itself
-#
-# POD documentation - main docs before the code
 
 
 =head1 NAME

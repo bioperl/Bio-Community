@@ -26,6 +26,7 @@ $community->add_member( $member2, 1);
 $community->add_member( $member3, 1);
 
 ok $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
+isa_ok $sampler, 'Bio::Community::Tools::Sampler';
 
 $count = 100;
 for (1 .. $count) {
