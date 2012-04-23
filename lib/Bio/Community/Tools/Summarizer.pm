@@ -15,7 +15,12 @@ Bio::Community::Tools::Summarizer - Create a summary of a community
 
   use Bio::Community::Tools::Summarizer;
 
-  my $community = Bio::Community::Tools::Summarizer->new( ... )->get_summary;
+  # Group community members less than 1% into a single group
+  my $summarizer = Bio::Community::Tools::Summarizer->new(
+     -communities => [$community1, $community2],
+     -group       => ['<', 1],
+  );
+  my $summarized_communities = $summarizer->get_summaries;
 
 =head1 DESCRIPTION
 
@@ -155,7 +160,9 @@ method get_summaries {
    }
 
    # Create fresh community objects to hold the summaries
-   my $summaries = [ map { Bio::Community->new( -name => $_->name.' summarized') } @$communities ];
+   my $summaries = [
+      map { Bio::Community->new( -name => $_->name.' summarized') } @$communities
+   ];
 
    my $members = $self->_get_all_members($communities);
 
@@ -164,7 +171,8 @@ method get_summaries {
    # Then group members
    my $grouping_params = $self->group;
    if (defined $self->group) {
-      $summaries = $self->_group_by_relative_abundance($members, $communities, $summaries, $grouping_params);
+      $summaries = $self->_group_by_relative_abundance($members, $communities,
+         $summaries, $grouping_params);
    }
 
    ### Finally summarize by taxonomy TODO
@@ -173,7 +181,11 @@ method get_summaries {
 };
 
 
-method _group_by_relative_abundance (ArrayRef[Bio::Community::Member] $members, ArrayRef[Bio::Community] $communities, ArrayRef[Bio::Community] $summaries, ArrayRef[Str] $params) {
+method _group_by_relative_abundance (
+   ArrayRef[Bio::Community::Member] $members,
+   ArrayRef[Bio::Community] $communities, ArrayRef[Bio::Community] $summaries,
+   ArrayRef[Str] $params 
+) {
 
    # Get grouping parameters
    my $thresh   = $params->[1] || $self->throw("No grouping threshold was provided.");

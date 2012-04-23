@@ -154,10 +154,6 @@ ok $summaries = $summarizer->get_summaries;
 is scalar @$summaries, 1;
 
 $summary = $summaries->[0];
-
-use Data::Dumper;
-print Dumper($summary);
-
 ok $group = get_group($summary);
 delta_ok $summary->get_count($member1), 1;
 delta_ok $summary->get_count($member2), 0;
@@ -167,8 +163,8 @@ delta_ok $summary->get_count($group  ), 99;
 # Test >= operators
 
 $community1 = Bio::Community->new();
-$community1->add_member( $member1,  2 );
-$community1->add_member( $member2, 98 );
+$community1->add_member( $member1,  1 );
+$community1->add_member( $member2, 99 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
@@ -189,8 +185,7 @@ delta_ok $summary->get_count($group  ), 99;
 sub get_group {
    my ($community) = @_;
    my $group;
-   for my $member ($community->next_member) {
-      print "member ".$member." (".$member->desc.")\n";
+   while (my $member = $community->next_member) {
       if ($member->desc =~ m/other/i) {
          $group = $member;
          last;
@@ -198,6 +193,8 @@ sub get_group {
    }
    return $group;
 }
+
+
 
 done_testing();
 
