@@ -100,7 +100,7 @@ use MooseX::NonMoose;
 use MooseX::Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Tools::Sampler;
-use Bio::Community::Tools::Distance;
+use Bio::Community::Tools::Ruler;
 use POSIX;
 use List::Util qw(min);
 
@@ -346,7 +346,7 @@ method _bootstrap (Bio::Community $community) {
 
       if (not defined $repetitions) {
          # Exit if distance with last average community is small
-         $dist = Bio::Community::Tools::Distance->new(
+         $dist = Bio::Community::Tools::Ruler->new(
                -type        => 'euclidean',
                -communities => [$overall, $prev_overall],
          )->get_distance;
@@ -357,7 +357,7 @@ method _bootstrap (Bio::Community $community) {
          if ($iteration == $repetitions - 1) {
             $prev_overall = $overall->clone;
          } elsif ($iteration >= $repetitions) {
-            $dist = Bio::Community::Tools::Distance->new(
+            $dist = Bio::Community::Tools::Ruler->new(
                   -type        => 'euclidean',
                   -communities => [$overall, $prev_overall],
             )->get_distance;

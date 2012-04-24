@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::Tools::Distance
+# BioPerl module for Bio::Community::Tools::Ruler
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -9,17 +9,17 @@
 
 =head1 NAME
 
-Bio::Community::Tools::Distance - Calculate the distance separating communities
+Bio::Community::Tools::Ruler - Calculate the distance separating communities
 
 =head1 SYNOPSIS
 
-  use Bio::Community::Tools::Distance;
+  use Bio::Community::Tools::Ruler;
 
-  my $obj = Bio::Community::Tools::Distance->new(
+  my $ruler = Bio::Community::Tools::Ruler->new(
      -communities => [ $community1, $community2 ],
      -type        => 'euclidean',
   );
-  my $distance = $obj->get_distance;
+  my $distance = $ruler->get_distance;
 
 =head1 DESCRIPTION
 
@@ -78,8 +78,8 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Function: Create a new Bio::Community::Tool::Sampler object
- Usage   : my $obj = Bio::Community::Tools::Distance->new(
+ Function: Create a new Bio::Community::Tool::Ruler object
+ Usage   : my $ruler = Bio::Community::Tools::Ruler->new(
               -communities => [ $community1, $community2 ],
               -type        => 'euclidean',
            );
@@ -89,14 +89,14 @@ methods. Internal methods are usually preceded with a _
            -type
               The type of distance to use: 1-norm, 2-norm (euclidean), or
               infinity-norm.
- Returns : a Bio::Community::Tools::Distance object
+ Returns : a Bio::Community::Tools::Ruler object
 
 =cut
 
 #### TODO: unifrac distance
 
 
-package Bio::Community::Tools::Distance;
+package Bio::Community::Tools::Ruler;
 
 use Moose;
 use MooseX::NonMoose;
@@ -129,7 +129,7 @@ has type => (
 
  Function: Calculate the distance between the communities based on the relative
            abundance of the members.
- Usage   : my $distance = $obj->get_distance;
+ Usage   : my $distance = $ruler->get_distance;
  Args    : none
  Returns : a number for the distance
 
