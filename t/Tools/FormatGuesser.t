@@ -1,200 +1,120 @@
 use strict;
 use warnings;
 use Bio::Root::Test;
-###use Test::Number::Delta;
-###use Bio::Community::Member;
-###use Bio::Community;
 
 use_ok($_) for qw(
     Bio::Community::Tools::FormatGuesser
 );
 
 
-my ($guesser);
-###, $member1, $member2, $member3, $member4, $member5, $community1,
-###   $community2, $summaries, $summary, $group);
+my ($guesser, $text, $fh, $file);
 
 
 # Bare object
 
-ok $guesser = Bio::Community::Tools::FormatGuesser->new(), 'Bare object';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new(), 'bare object';
 isa_ok $guesser, 'Bio::Community::Tools::FormatGuesser';
 
 
-#### Test with multiple communities
+# Test mixed input
 
-###$member1 = Bio::Community::Member->new( -desc => 'A' );
-###$member2 = Bio::Community::Member->new( -desc => 'B' );
-###$member3 = Bio::Community::Member->new( -desc => 'C' );
-###$member4 = Bio::Community::Member->new( -desc => 'D' );
-###$member5 = Bio::Community::Member->new( -desc => 'E' );
+$text = <<EOF;
+{
+    "id":null,
+    "format": "Biological Observation Matrix 0.9.1-dev",
+    "format_url": "http://biom-format.org",
+    "type": "OTU table",
+    "generated_by": "QIIME revision 1.4.0-dev",
+    "date": "2011-12-19T19:00:00",
+EOF
 
-###$community1 = Bio::Community->new();
-###$community1->add_member( $member1, 1 );
-###$community1->add_member( $member2, 95);
-###$community1->add_member( $member3, 1 );
-###$community1->add_member( $member4, 3 );
+open $fh, '<', test_input_file('qiime_w_greengenes_taxo.txt');
 
-###$community2 = Bio::Community->new( -name => 'grassland' );
-###$community2->add_member( $member1, 8 );
-###$community2->add_member( $member2, 90);
-###$community2->add_member( $member3, 1 );
-###$community2->add_member( $member5, 1 );
+$file = test_input_file('gaas_compo.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new(
+   -file => $file, # gaas
+   -text => $text, # biom
+   -fh   => $fh,   # qiime
+), 'mixed input';
+is $guesser->file, $file;
+is $guesser->text, $text;
+is $guesser->fh, $fh;
 
-###ok $summarizer = Bio::Community::Tools::Summarizer->new(
-###   -communities => [$community1, $community2],
-###   -group       => ['<', 2],
-###), 'Multiple communities';
+is $guesser->guess, 'biom';
 
-###is_deeply $summarizer->communities, [$community1, $community2];
-###is_deeply $summarizer->group, ['<', 2];
+close $fh;
 
-###ok $summaries = $summarizer->get_summaries;
-###is scalar @$summaries, 2;
+# Test input text
 
-###$summary = $summaries->[0];
-
-###$group = get_group($summary);
-###isa_ok $group, 'Bio::Community::Member';
-###is $group->desc, 'Other < 2 %';
-
-###is $summary->name, 'Unnamed community summarized';
-###delta_ok $summary->get_count($member1), 1;
-###delta_ok $summary->get_count($member2), 95;
-###delta_ok $summary->get_count($member3), 0;
-###delta_ok $summary->get_count($member4), 3;
-###delta_ok $summary->get_count($member5), 0;
-###delta_ok $summary->get_count($group)  , 1;
-
-###$summary = $summaries->[1];
-###is $summary->name, 'grassland summarized';
-###delta_ok $summary->get_count($member1), 8;
-###delta_ok $summary->get_count($member2), 90;
-###delta_ok $summary->get_count($member3), 0;
-###delta_ok $summary->get_count($member4), 0;
-###delta_ok $summary->get_count($member5), 0;
-###delta_ok $summary->get_count($group)  , 2;
-
-###$summary = $summaries->[0];
+ok $guesser = Bio::Community::Tools::FormatGuesser->new(), 'text input';
+ok $guesser->text($text);
+is $guesser->guess, 'biom';
 
 
-#### Test community where nothing is to be grouped.
+# Test input filehandle
 
-###$community1 = Bio::Community->new();
-###$community1->add_member( $member1, 100 );
-
-###ok $summarizer = Bio::Community::Tools::Summarizer->new(
-###   -communities => [$community1],
-###   -group       => ['<', 2],
-###), 'No grouping';
-
-###ok $summaries = $summarizer->get_summaries;
-###is scalar @$summaries, 1;
-
-###$summary = $summaries->[0];
-###delta_ok $summary->get_count($member1), 100;
-
-###$group = get_group($summary);
-###is $group, undef;
+open $fh, '<', test_input_file('biom_minimal_sparse.biom');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -fh => $fh ), 'filehandle input';
+is $guesser->fh, $fh;
+is $guesser->guess, 'biom';
+close $fh;
 
 
-#### Test <= operators
+# Test biom input file
 
-###$community1 = Bio::Community->new();
-###$community1->add_member( $member1,  2 );
-###$community1->add_member( $member2, 98 );
-
-###ok $summarizer = Bio::Community::Tools::Summarizer->new(
-###   -communities => [$community1],
-###   -group       => ['<=', 2],
-###), "Operator '<='";
-
-###ok $summaries = $summarizer->get_summaries;
-###is scalar @$summaries, 1;
-
-###$summary = $summaries->[0];
-###ok $group = get_group($summary);
-###delta_ok $summary->get_count($member1), 0;
-###delta_ok $summary->get_count($member2), 98;
-###delta_ok $summary->get_count($group  ), 2;
+$file = test_input_file('biom_minimal_sparse.biom');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'biom file';
+is $guesser->file, $file;
+is $guesser->guess, 'biom';
 
 
-#### Test < operators
+# Test generic input file
 
-###$community1 = Bio::Community->new();
-###$community1->add_member( $member1,  1 );
-###$community1->add_member( $member2, 99 );
+$file = test_input_file('generic_table.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'generic file';
+is $guesser->file, $file;
+is $guesser->guess, 'generic';
 
-###ok $summarizer = Bio::Community::Tools::Summarizer->new(
-###   -communities => [$community1],
-###   -group       => ['<', 2],
-###), "Operator '<'";
-
-###ok $summaries = $summarizer->get_summaries;
-###is scalar @$summaries, 1;
-
-###$summary = $summaries->[0];
-###ok $group = get_group($summary);
-###delta_ok $summary->get_count($member1), 0;
-###delta_ok $summary->get_count($member2), 99;
-###delta_ok $summary->get_count($group  ), 1;
+$file = test_input_file('qiime_w_silva_taxo_L2.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'generic file';
+is $guesser->file, $file;
+is $guesser->guess, 'generic';
 
 
-#### Test > operators
+# Test gaas input file
 
-###$community1 = Bio::Community->new();
-###$community1->add_member( $member1,  1 );
-###$community1->add_member( $member2, 99 );
-
-###ok $summarizer = Bio::Community::Tools::Summarizer->new(
-###   -communities => [$community1],
-###   -group       => ['>', 2],
-###), "Operator '>'";
-
-###ok $summaries = $summarizer->get_summaries;
-###is scalar @$summaries, 1;
-
-###$summary = $summaries->[0];
-###ok $group = get_group($summary);
-###delta_ok $summary->get_count($member1), 1;
-###delta_ok $summary->get_count($member2), 0;
-###delta_ok $summary->get_count($group  ), 99;
+$file = test_input_file('gaas_compo.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'gaas file';
+is $guesser->file, $file;
+is $guesser->guess, 'gaas';
 
 
-#### Test >= operators
+# Test qiime input file
 
-###$community1 = Bio::Community->new();
-###$community1->add_member( $member1,  1 );
-###$community1->add_member( $member2, 99 );
+$file = test_input_file('qiime_w_no_taxo.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'qiime file';
+is $guesser->file, $file;
+is $guesser->guess, 'qiime';
 
-###ok $summarizer = Bio::Community::Tools::Summarizer->new(
-###   -communities => [$community1],
-###   -group       => ['>=', 2],
-###), "Operator '>='";
-
-###ok $summaries = $summarizer->get_summaries;
-###is scalar @$summaries, 1;
-
-###$summary = $summaries->[0];
-###ok $group = get_group($summary);
-###delta_ok $summary->get_count($member1), 1;
-###delta_ok $summary->get_count($member2), 0;
-###delta_ok $summary->get_count($group  ), 99;
+$file = test_input_file('qiime_w_greengenes_taxo.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'qiime file';
+is $guesser->file, $file;
+is $guesser->guess, 'qiime';
 
 
+# Test unknown format
 
-###sub get_group {
-###   my ($community) = @_;
-###   my $group;
-###   while (my $member = $community->next_member) {
-###      if ($member->desc =~ m/other/i) {
-###         $group = $member;
-###         last;
-###      }
-###   }
-###   return $group;
-###}
+$file = test_input_file('lorem_ipsum.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'unknown file';
+is $guesser->file, $file;
+is $guesser->guess, undef;
 
+# Test empty format
+
+$text = '';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -text => $text ), 'empty text';
+is $guesser->text, $text;
+is $guesser->guess, undef;
 
 
 done_testing();

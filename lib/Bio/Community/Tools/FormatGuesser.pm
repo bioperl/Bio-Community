@@ -94,6 +94,10 @@ web:
 
 Email florent.angly@gmail.com
 
+This module was inspired and based on the Bio::Tools::GuessSeqFormat module
+written by Andreas Kähäri <andreas.kahari@ebi.ac.uk> and contributors. Thanks to
+them!
+
 =head1 APPENDIX
 
 The rest of the documentation details each of the object
@@ -121,6 +125,15 @@ use namespace::autoclean;
 extends 'Bio::Root::Root';
 
 
+my %formats = (
+   biom    => \&_possibly_biom    ,
+   gaas    => \&_possibly_gaas    ,
+   generic => \&_possibly_generic ,
+   qiime   => \&_possibly_qiime   ,
+
+);
+
+
 =head2 file
 
  Usage   : my $file = $guesser->file;
@@ -137,6 +150,7 @@ has 'file' => (
    lazy => 1,
    default => undef,
    init_arg => '-file',
+   predicate => '_has_file',
 );
 
 
@@ -155,7 +169,8 @@ has 'fh' => (
    required => 0,
    lazy => 1,
    default => undef,
-   init_arg => '-file',
+   init_arg => '-fh',
+   predicate => '_has_fh',
 );
 
 
@@ -170,14 +185,14 @@ has 'fh' => (
 
 =cut
 
-has 'fh' => (
+has 'text' => (
    is => 'rw',
-   isa => 'FileHandle',
+   isa => 'Str',
    required => 0,
    lazy => 1,
    default => undef,
-   init_arg => '-file',
-#   predicate => '-file',
+   init_arg => '-text',
+   predicate => '_has_text',
 );
 
 
@@ -193,30 +208,160 @@ has 'fh' => (
 method guess {
    my $format;
 
-###   my @lines;
-###   if (defined $self->{-text}) {
-###      # Break the text into separate lines.
-###      @lines = split /\n/, $self->{-text};
-###   } elsif (defined $self->{-file}) {
-###        # If given a filename, open the file.
-###        open($fh, $self->{-file}) or
-###            $self->throw("Can not open '$self->{-file}' for reading: $!");
-###    } elsif (defined $self->{-fh}) {
-###        # If given a filehandle, figure out if it's a plain GLOB
-###        # or a IO::Handle which is seekable.  In the case of a
-###        # GLOB, we'll assume it's seekable.  Get the current
-###        # position in the stream.
-###        $fh = $self->{-fh};
-###        if (ref $fh eq 'GLOB') {
-###            $start_pos = tell($fh);
-###        } elsif (UNIVERSAL::isa($fh, 'IO::Seekable')) {
-###            $start_pos = $fh->getpos();
-###        }
-###    }
+   # Prepare input
+   my $fh;
+   my $original_pos;
+   my @lines;
+   if ($self->_has_text) {
+      # Break the text into separate lines.
+      @lines = split /\n/, $self->text;
+   } elsif ($self->_has_file) {
+      # If given a filename, open the file.
+      my $file = $self->file;
+      open $fh, '<', $file or $self->throw("Could not read file '$file': $!");
+   } elsif ($self->_has_fh) {
+      $fh = $self->fh;
+      $original_pos = tell($fh);
+   } else {
+      $self->throw('Need to provide -file, -fh or -text');
+   }
 
-   return $$format;
+   # Read lines and try to attribute format
+   my $line_num = 0;
+   while (1) {
+      $format = undef;
+
+      # Read next line. Exit if no lines left
+      $line_num++;
+      my $line;
+      if ($fh) {
+         $line = <$fh>;
+      } else {
+         $line = shift @lines;
+      }
+      last if not defined $line;
+
+      # Skip white and empty lines.      
+      next if $line =~ /^\s*$/;
+
+      # Try every possible format
+      my $matches = 0;
+      my ($test_format, $test_function);
+      while ( ($test_format, $test_function) = each (%formats) ) {
+         if ( &$test_function($line, $line_num) ) {
+            $matches++;
+            $format = $test_format;
+         }
+      }
+
+      # Exit if there was a match to only one format
+      if ($matches == 1) {
+         last;
+      }
+
+   }
+
+   # Cleanup
+   if (not $self->_has_text) {
+      if ($self->_has_file) {
+         # Close the file that we opened
+         close $fh;
+      } elsif ($self->_has_fh) {
+         # Reset cursor to original location
+         seek($fh, $original_pos, 0)
+            or $self->throw("Could not reset the cursor to its original position: $!");
+      }
+   }
+
+   return $format;
 }
 
+
+sub _possibly_biom {
+   my ($line, $line_num) = @_;
+   # Example:
+   # {
+   #  "id":null,
+   #  "format": "Biological Observation Matrix 0.9.1-dev",
+   #  "format_url": "http://biom-format.org",
+   #  ...
+   my $ok = 0;
+   if ($line_num == 1) {
+      if ($line =~ m/^{/) {
+         $ok = 1;
+      }
+   } else {
+      if ( ($line =~ m/"\S+":/) || 
+           ($line =~ m/Biological Observation Matrix/) ) {
+         $ok = 1;
+      }
+   }
+   return $ok;
+}
+
+
+sub _possibly_generic {
+   my ($line, $line_num) = @_;
+   # Example:
+   # Species	gut	soda lake
+   # Streptococcus	241	334
+   # ...
+   my $ok = 0;
+   my @fields = split /\t/, $line;
+   if (scalar @fields >= 2) {
+      if ($line_num == 1) {
+        $ok = 1 if $line !~ m/^#/; #### don't like this... too restrictive
+      } else {
+        $ok = 1;
+      }
+   }
+   return $ok;
+}
+
+
+sub _possibly_gaas {
+   my ($line, $line_num) = @_;
+   # Example:
+   # # tax_name	tax_id	rel_abund
+   # Streptococcus pyogenes phage 315.1	198538	0.791035649011735
+   # ...
+   my $ok = 0;
+   my @fields = split /\t/, $line;
+   if (scalar @fields == 3) {
+      if ($line_num == 1) {
+        $ok = 1 if $line =~ m/^#/; ### second string is an integer third a float
+      } else {
+        $ok = 1;
+      }
+   }
+   return $ok;
+}
+
+
+sub _possibly_qiime {
+   my ($line, $line_num) = @_;
+   # Example:
+   # # QIIME v1.3.0 OTU table
+   # #OTU ID	20100302	20100304	20100823
+   # 0	40	0	76
+   # 1	0	142	2
+   my $ok = 0;
+   if ($line_num == 1) {
+      if ($line =~ m/^# QIIME/) {
+         $ok = 1;
+      }
+   } else {
+      my @fields = split /\t/, $line;
+      if (scalar @fields >= 2) {
+         if ($line_num == 2) {
+            $ok = 1 if $line =~ m/^#/;
+         } else {
+            $ok = 1;
+         }
+      }
+   }
+   return $ok;
+}
 
 
 __PACKAGE__->meta->make_immutable;
