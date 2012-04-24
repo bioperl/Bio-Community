@@ -1,3 +1,88 @@
+# BioPerl module for Bio::Community::Role::Table
+#
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
+#
+# Copyright Florent Angly <florent.angly@gmail.com>
+#
+# You may distribute this module under the same terms as perl itself
+
+
+=head1 NAME
+
+Bio::Community::Role::Table - Role to read/write data tables and provide random
+access to their cells
+
+=head1 SYNOPSIS
+
+  package My::Package;
+
+  use Moose;
+  extends 'Bio::Root::IO';
+  with 'Bio::Community::Role::Table';
+
+  # Use the new(), _read_table(), _get_value(), _set_value() and _write_table()
+  # methods as needed
+  # ...
+
+  1;
+
+=head1 DESCRIPTION
+
+This role implements methods to read and write file structured as a table
+containing rows and columns. When reading a table from a file, an index is kept
+to provide random-access to any cell of the table. When writing a table to a file,
+cell data can also be given in any order. It is kept in memory until the file is
+written to disk.
+
+Objects are constructed with the new() method. Since Table-consuming classes
+must inherit from Bio::Root::IO, all Bio::Root::IO options are accepted, e.g.
+-file, -fh, -string, -flush, etc. Other constructors are detailed in the
+L<APPENDIX>.
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this
+and other Bioperl modules. Send your comments and suggestions preferably
+to one of the Bioperl mailing lists.
+
+Your participation is much appreciated.
+
+  bioperl-l@bioperl.org                  - General discussion
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+
+=head2 Support 
+
+Please direct usage questions or support issues to the mailing list:
+
+I<bioperl-l@bioperl.org>
+
+rather than to the module maintainer directly. Many experienced and 
+reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem 
+with code and data examples if at all possible.
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
+
+  http://bugzilla.open-bio.org/
+
+=head1 AUTHOR - Florent Angly
+
+Email florent.angly@gmail.com
+
+=head1 APPENDIX
+
+The rest of the documentation details each of the object
+methods. Internal methods are usually preceded with a _
+
+=cut
+
+
 package Bio::Community::Role::Table;
 
 use Moose::Role;
@@ -11,36 +96,6 @@ requires '_fh',
          '_readline',
          '_print';
 
-
-=head1 NAME
-
-Bio::Community::Role::Table - Role to read/write data tables and provide random
-access to their cells
-
-=head1 SYNOPSIS
-
-   package My::Class;
-   use Moose;
-   extends 'Bio::Root::IO';
-   with 'Bio::Community::Role::Table';
-   # Use the new(), _read_table(), _get_value(), _set_value() and _write_table()
-   # methods as needed
-   1;
-
-=head1 DESCRIPTION
-
-This role implements methods to read and write file structured as a table
-containing rows and columns. The consuming class must inherit from Bio::Root::IO.
-When reading a table from a file, an index is kept to provide random-access to
-any cell of the table. When writing a table to a file, cell data can also be
-given in any order. It is kept in memory until the file is written to disk.
-
-=head1 CONSTRUCTORS
-
-Objects are constructed with the new() method. Since Table-consuming classes
-must inherit from Bio::Root::IO, all Bio::Root::IO options are accepted, e.g.
--file, -fh, -string, -flush, etc. The following options specific to the Table
-role are also valid:
 
 =head2 delim
 
@@ -130,48 +185,6 @@ has 'missing_string' => (
    lazy => 1,
 );
 
-=head1 FEEDBACK
-
-=head2 Mailing Lists
-
-User feedback is an integral part of the evolution of this
-and other Bioperl modules. Send your comments and suggestions preferably
-to one of the Bioperl mailing lists.
-
-Your participation is much appreciated.
-
-  bioperl-l@bioperl.org                  - General discussion
-  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
-
-=head2 Support 
-
-Please direct usage questions or support issues to the mailing list:
-
-I<bioperl-l@bioperl.org>
-
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
-with code and data examples if at all possible.
-
-=head2 Reporting Bugs
-
-Report bugs to the Bioperl bug tracking system to help us keep track
-the bugs and their resolution.  Bug reports can be submitted via the
-web:
-
-  http://bugzilla.open-bio.org/
-
-=head1 AUTHOR - Florent Angly
-
-Email florent.angly@gmail.com
-
-=head1 APPENDIX
-
-The rest of the documentation details the methods available. Since this class is
-not meant to be used directly, but rather consumed by another class, its methods
-should not be directly accessed by users but by developers, and are thus preceded
-with a _
 
 =head2 _max_line
 
