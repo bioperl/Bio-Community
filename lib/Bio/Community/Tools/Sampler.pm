@@ -74,7 +74,6 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Title   : new
  Function: Create a new Bio::Community::Tool::Sampler object
  Usage   : my $sampler = Bio::Community::Tool::Sampler->new( );
  Args    : -community (see below)
@@ -105,7 +104,6 @@ method BUILD {
 
 =head2 community
 
- Title   : community
  Function: Get or set the community to sample from
  Usage   : my $community = $sampler->community();
  Args    : a Bio::Community object
@@ -142,7 +140,6 @@ has _members => (
 
 =head2 get_rand_member
 
- Title   : get_rand_member
  Function: Get a random member from a community (sample with replacement).
  Usage   : my $member = $sampler->get_rand_member();
  Args    : None
@@ -161,7 +158,6 @@ method get_rand_member () {
 
 =head2 get_rand_community
 
- Title   : get_rand_community
  Function: Create a community from random members of a community
  Usage   : my $community = $sampler->get_rand_community(1000);
  Args    : Number of members

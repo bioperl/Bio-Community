@@ -91,7 +91,6 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Title   : new
  Function: Create a new Bio::Community::IO object
  Usage   : my $member = Bio::Community::IO->new( );
  Args    : 
@@ -149,7 +148,6 @@ sub BUILD {
 
 =head2 next_member
 
- Title   : next_member
  Usage   : my ($member, $count) = $in->next_member;
  Function: Get the next member from the community and its abundance. This function
            is provided by a driver specific to each file format.
@@ -167,7 +165,6 @@ method next_member {
 
 =head2 next_community
 
- Title   : next_community
  Usage   : my $community = $in->next_community;
  Function: Get the next community.
  Args    : None
@@ -223,7 +220,6 @@ method _next_community_finish {
 
 =head2 write_member
 
- Title   : write_member
  Usage   : $in->write_member($member, $abundance);
  Function: Write the next member from the community and its count or relative
            abundance. This function is provided by a driver specific to each file
@@ -241,7 +237,6 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 =head2 write_community
 
- Title   : write_community
  Usage   : $in->write_community($community);
  Function: Write the next community.
  Args    : A Bio::Community object
@@ -307,7 +302,6 @@ method _process_member (Bio::Community::Member $member, Bio::Community $communit
 
 =head2 sort_members
 
- Title   : sort_members
  Usage   : $in->sort_members();
  Function: When writing a community to a file, sort the community members based
            on their abundance: 0 (off), 1 (by increasing abundance), -1 (by 
@@ -329,7 +323,6 @@ has 'sort_members' => (
 
 =head2 abundance_type
 
- Title   : abundance_type
  Usage   : $in->abundance_type();
  Function: When writing a community to a file, report the abundance as one of
            three possible representations: a raw count, a percentage (0-100%) or
@@ -352,7 +345,6 @@ has 'abundance_type' => (
 
 =head2 missing_string
 
- Title   : missing_string
  Usage   : $in->missing_string();
  Function: When writing a community to a file, specify what abundance string to
            use for members that are not present in the community. The default is

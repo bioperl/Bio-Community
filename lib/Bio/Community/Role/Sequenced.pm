@@ -80,7 +80,6 @@ use namespace::autoclean;
 
 =head2 seqs
 
- Title   : seqs
  Usage   : my $seqs = $member->seqs();
  Function: Get or set some sequences for this object.
  Args    : An arrayref of Bio::SeqI objects

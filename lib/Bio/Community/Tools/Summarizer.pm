@@ -69,7 +69,6 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Title   : new
  Function: Create a new Bio::Community::Tool::Summarizer object
  Usage   : my $summarizer = Bio::Community::Tools::Summarizer->new(
               -communities => [ $community1, $community2 ],
@@ -94,7 +93,6 @@ extends 'Bio::Root::Root';
 
 =head2 communities
 
- Title   : communities
  Function: Get/set the communities to summarize.
  Usage   : my $communities = $summarizer->get_communities;
  Args    : an arrayref of Bio::Community objects
@@ -114,7 +112,6 @@ has communities => (
 
 =head2 group
 
- Title   : group
  Function: Get/set the relative abundance threshold to group members together.
            Example: You provide multiple communities and specify to group
            members with a relative abundance less than 1%. If member A is at
@@ -144,7 +141,6 @@ has group => (
 
 =head2 get_summaries
 
- Title   : get_summaries
  Function: Summarize the communities and return an arrayref of fresh communities.
  Usage   : my $summaries = $summarizer->get_summary;
  Args    : none

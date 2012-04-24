@@ -80,7 +80,6 @@ use namespace::autoclean;
 
 =head2 desc
 
- Title   : desc
  Usage   : my $description = $member->desc();
  Function: Get or set a description for this object.
  Args    : A string

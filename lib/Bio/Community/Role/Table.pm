@@ -99,7 +99,6 @@ requires '_fh',
 
 =head2 delim
 
- Title   : delim
  Usage   : my $delim = $in->delim;
  Function: When reading or writing a table, get or set the delimiter, i.e. the
            characters that delimit the columns of the table. The default is the
@@ -121,7 +120,6 @@ has 'delim' => (
 
 =head2 start_line
 
- Title   : start_line
  Usage   : my $line_num = $in->start_line;
  Function: When reading a table, get or set the line number at which the table
            starts. The default is 1, i.e. the table starts at the first line of
@@ -144,7 +142,6 @@ has 'start_line' => (
 
 =head2 end_line
 
- Title   : end_line
  Usage   : my $line_num = $in->end_line;
  Function: When reading a table, get or set the line number at which the table
            ends. If undef (the default), the table ends at the last line of the
@@ -166,7 +163,6 @@ has 'end_line' => (
 
 =head2 missing_string
 
- Title   : missing_string
  Usage   : my $missing = $out->missing_string;
  Function: When reading a table, get or set the line number at which the table
            ends. If undef (the default), the table ends at the last line of the
@@ -188,7 +184,6 @@ has 'missing_string' => (
 
 =head2 _max_line
 
- Title   : _max_line
  Usage   : my $num_lines = $in->_max_line;
  Function: Get the number of lines in the table
  Args    : None
@@ -208,7 +203,6 @@ has '_max_line' => (
 
 =head2 _max_col
 
- Title   : _max_col
  Usage   : my $num_cols = $in->_max_col;
  Function: Get the number of columns in the table
  Args    : None
@@ -279,7 +273,6 @@ has '_was_written' => (
 
 =head2 _read_table
 
- Title   : _read_table
  Usage   : $in->_read_table;
  Function: Read the table in the file and index the position of its cells.
  Args    : None
@@ -368,7 +361,6 @@ method _read_table () {
 
 =head2 _get_value
 
- Title   : _get_value
  Usage   : my $value = $in->_get_value(1, 3);
  Function: Get the value of the cell given its position in the table (line and
            column).
@@ -404,7 +396,6 @@ method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
 
 =head2 _set_value
 
- Title   : _set_value
  Usage   : $out->_set_value(1, 3, $value);
  Function: Set the element at the given line and column of the table.
  Args    : A strictly positive integer for the line
@@ -454,7 +445,6 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
 
 =head2 _write_table
 
- Title   : _write_table
  Usage   : $out->_write_table;
  Function: Write the content of the cells in the table to a file. This method is
            called automatically when the filehandle is closed: $out->close;

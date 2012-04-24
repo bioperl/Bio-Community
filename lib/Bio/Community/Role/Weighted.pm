@@ -79,7 +79,6 @@ use namespace::autoclean;
 
 =head2 weights
 
- Title   : weights
  Usage   : my $weights = $member->weights();
  Function: Get or set some weights for this object. Weights represent how biased
            the sampling of this organism is. For example, when random shotgun

@@ -78,7 +78,6 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Title   : new
  Function: Create a new Bio::Community::Tool::Sampler object
  Usage   : my $obj = Bio::Community::Tools::Distance->new(
               -communities => [ $community1, $community2 ],
@@ -128,7 +127,6 @@ has type => (
 
 =head2 get_distance
 
- Title   : get_distance
  Function: Calculate the distance between the communities based on the relative
            abundance of the members.
  Usage   : my $distance = $obj->get_distance;

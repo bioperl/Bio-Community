@@ -85,7 +85,6 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Title   : new
  Function: Create a new Bio::Community::Tool::CountNormalizer object
  Usage   : my $normalizer = Bio::Community::Tool::CountNormalizer->new( );
  Args    : -communities, -repetitions, -sample_size. See details below.
@@ -110,7 +109,6 @@ extends 'Bio::Root::Root';
 
 =head2 communities
 
- Title   : communities
  Function: Get/set the communities to normalize.
  Usage   : my $communities = $normalizer->communities;
  Args    : arrayref of Bio::Community objects or nothing
@@ -130,7 +128,6 @@ has communities => (
 
 =head2 sample_size
 
- Title   : sample_size
  Function: Get/set the sample size, i.e. the number of members to pick randomly
            at each iteration. It has to be smaller than the total count of the
            smallest community or an error will be generated. If the sample size
@@ -153,7 +150,6 @@ has sample_size => (
 
 =head2 threshold
 
- Title   : threshold
  Function: Get/set the threshold. While iterating, when the distance between the
            average community and the average community at the previous iteration
            decreases below this threshold, the bootstrapping is stopped. By
@@ -181,7 +177,6 @@ has threshold => (
 
 =head2 repetitions
 
- Title   : repetitions
  Function: Get/set the number of bootstrap repetitions to perform. If specified,
            instead of relying on the threshold() to determine when to stop
            repeating the bootstrap process, perform an arbitrary number of
@@ -206,7 +201,6 @@ has repetitions => (
 
 =head2 get_average_communities
 
- Title   : get_average_communities
  Function: Calculate the average communities. Each normalized community returned
            corresponds to the equivalent community in the input.
  Usage   : my $communities = $normalizer->get_average_communities;
@@ -235,7 +229,6 @@ before get_average_communities => sub {
 
 =head2 get_representative_communities
 
- Title   : get_representative_communities
  Function: Calculate the representative communities. Each normalized community
            returned corresponds to the equivalent community in the input.
  Usage   : my $communities = $normalizer->get_representative_communities;

@@ -79,7 +79,6 @@ use namespace::autoclean;
 
 =head2 taxon
 
- Title   : taxon
  Usage   : my $taxon = $member->taxon();
  Function: Get or set a taxon (or species) for this object.
  Args    : A Bio::Taxon object

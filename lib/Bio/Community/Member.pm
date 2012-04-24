@@ -88,7 +88,6 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Title   : new
  Function: Create a new Bio::Community::Member object
  Usage   : my $member = Bio::Community::Member->new( );
  Args    : 
@@ -118,7 +117,6 @@ my $last_id = 1;
 
 =head2 id
 
- Title   : id
  Function: 
  Usage   : 
  Args    : 

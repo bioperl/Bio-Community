@@ -80,7 +80,6 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Title   : new
  Function: Create a new Bio::Community object
  Usage   : my $community = Bio::Community->new( ... );
  Args    : -name and -use_weights, see below...
@@ -103,7 +102,6 @@ extends 'Bio::Root::Root';
 
 =head2 name
 
- Title   : name
  Function: Get or set the name of the community
  Usage   : $community->name('ocean sample 3');
            my $name = $community->name();
@@ -123,7 +121,6 @@ has name => (
 
 =head2 use_weights
 
- Title   : use_weights
  Function: Set whether or not relative abundance should be normalized by taking
            into accout the weights of the different members (e.g. genome length,
            gene copy number). Refer to the Bio::Community::Member->weights()
@@ -147,7 +144,6 @@ has use_weights => (
 
 =head2 get_total_count
 
- Title   : get_total_count
  Function: Get the total number of members in the community
  Usage   : $community->get_total_count();
  Args    : none
@@ -254,7 +250,6 @@ has _members_iterator => (
 
 =head2 add_member
 
- Title   : add_member
  Function: Add members to a community
  Usage   : $community->add_member($member, 3);
  Args    : * a Bio::Community::Member to add
@@ -276,7 +271,6 @@ method add_member ( Bio::Community::Member $member, Count $count = 1 ) {
 
 =head2 remove_member
 
- Title   : remove_member
  Function: remove members from a community
  Usage   : $community->remove_member($member, 3);
  Args    : * a Bio::Community::Member to remove
@@ -310,7 +304,6 @@ method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
 
 =head2 next_member
 
- Title   : next_member
  Function: Access the next member in a community (in no specific order). Be
            warned that each time you change the community, this iterator has to
            start again from scratch!
@@ -331,7 +324,6 @@ method next_member {
 
 =head2 all_members
 
- Title   : all_members
  Function: Generate a list of all members in a community.
  Usage   : my @members = $community->all_members();
  Args    : none
@@ -347,7 +339,6 @@ method all_members {
 
 =head2 get_member_by_id
 
- Title   : get_member_by_id
  Function: Fetch a member based on its ID
  Usage   : my $member = $community->get_member_by_id(3);
  Args    : integer for the member ID
@@ -362,7 +353,6 @@ method get_member_by_id (Int $member_id) {
 
 =head2 get_member_by_rank
 
- Title   : get_member_by_rank
  Function: Fetch a member based on its abundance rank. A smaller rank corresponds
            to a larger relative abundance.
  Usage   : my $member = $community->get_member_by_rank(1);
@@ -398,8 +388,7 @@ method get_member_by_rank (AbundanceRank $rank) {
 
 
 =head2 get_richness
-   
- Title   : get_richness
+
  Function: Report the community richness or number of different types of members.
  Usage   : my $richness = $community->get_richness();
  Args    : none
@@ -430,7 +419,6 @@ method get_richness {
 
 =head2 get_count
 
- Title   : get_count
  Function: Fetch the abundance or count of a member
  Usage   : my $count = $community->get_count($member);
  Args    : a Bio::Community::Member object
@@ -446,7 +434,6 @@ method get_count (Bio::Community::Member $member) {
 
 =head2 get_rel_ab
 
- Title   : get_rel_ab
  Function: Determine the relative abundance (in percent) of a member in the
            community.
  Usage   : my $rel_ab = $community->get_rel_ab($member);
@@ -474,7 +461,6 @@ method get_rel_ab (Bio::Community::Member $member) {
 
 =head2 get_rank
 
- Title   : get_rank
  Function: Determine the abundance rank of a member in the community. The
            organism with the highest relative abundance has rank 1, the second-
            most abundant has rank 2, etc.
