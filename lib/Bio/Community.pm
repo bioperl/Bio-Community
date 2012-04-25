@@ -327,17 +327,33 @@ method next_member {
  Function: Generate a list of all members in the community. Given more communities
            as arguments, generate a list of all members in all the communities.
            Every member appears only once in that list, even if the member is
-           present in multiple communities.
- Usage   : my @members = $community->get_all_members();
-           my @members = $community->get_all_members($other_community);
- Args    : additional Bio::Community objects
+           present in multiple communities. 
+ Usage   : # Single community
+           my @members = $community->get_all_members();
+           # Several communities
+           my @members = $community1->get_all_members([$community2]);
+           # ... or equivalently
+           my @members = $community1->get_all_members([$community1, $community2]);
+ Args    : an arrayref of Bio::Community objects
  Returns : an arrayref of Bio::Community::Member objects
 
 =cut
 
 method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
-   my $communities = [$self, @$other_communities];
-   
+
+   # Prepend $self to list of communities if it is not already in there
+   my $communities = $other_communities;
+   my $add_self = 1;
+   for my $community (@$communities) {
+      if ($community == $self) {
+         $add_self = 0;
+         last;
+      }
+   }
+   if ($add_self) {
+      unshift @$communities, $self;
+   }
+
    # Get all members in a hash
    my $all_members = {};
    for my $community (@$communities) {
@@ -422,7 +438,7 @@ method get_richness {
       
       # If rank abundance are not available, calculate richness manually
       if ($num_members == 0) {
-         while ($self->next_member) {
+         while ($self->next_member) {  #### problematic
             $num_members++;
          }
       }

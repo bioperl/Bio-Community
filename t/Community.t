@@ -151,6 +151,16 @@ ok exists $members{$member3};
 ok exists $members{$member4};
 ok exists $members{$member5};
 
+ok @members = @{$community2->get_all_members([$community, $community2, $community3])};
+is scalar(@members), 5;
+
+%members = map { $_ => undef } @members;
+ok exists $members{$member1};
+ok exists $members{$member2};
+ok exists $members{$member3};
+ok exists $members{$member4};
+ok exists $members{$member5};
+
 
 done_testing();
 
