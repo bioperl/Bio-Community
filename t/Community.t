@@ -60,7 +60,7 @@ is_deeply [sort keys %ids], [1, 2, 3];
 is $community->get_richness, 3;
 
 %ids = ();
-ok @members = $community->all_members;
+ok @members = $community->get_all_members;
 for my $member (@members) {
    isa_ok $member, 'Bio::Community::Member';
    $ids{$member->id} = undef;
@@ -81,7 +81,7 @@ is $community->get_count($member2), 0;
 
 @members = ();
 %ids = ();
-ok @members = $community->all_members;
+ok @members = $community->get_all_members;
 for my $member (@members) {
    $ids{$member->id} = undef;
 }
@@ -107,7 +107,7 @@ is $community->get_member_by_rank(1), $member3;
 is $community->get_member_by_rank(2), $member1;
 is $community->get_member_by_rank(3), undef;
 
-for my $member ($community->all_members) {
+for my $member ($community->get_all_members) {
    $rel_abs{$member->id} = $community->get_rel_ab($member);
 }
 is_deeply \%rel_abs, { 1 => 20, 3 => 80 };
@@ -115,7 +115,7 @@ is_deeply \%rel_abs, { 1 => 20, 3 => 80 };
 ok $community->use_weights(1);
 is $community->use_weights, 1;
 
-for my $member ($community->all_members) {
+for my $member ($community->get_all_members) {
    $rel_abs{$member->id} = $community->get_rel_ab($member);
 }
 is_deeply \%rel_abs, { 1 => 53.846153846154, 3 => 46.1538461538463 };

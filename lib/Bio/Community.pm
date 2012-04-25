@@ -322,19 +322,41 @@ method next_member {
 }
 
 
-=head2 all_members
+=head2 get_all_members
 
- Function: Generate a list of all members in a community.
- Usage   : my @members = $community->all_members();
- Args    : none
+ Function: Generate a list of all members in the community. Given more communities
+           as arguments, generate a list of all members in all the communities.
+           Every member appears only once in that list, even if the member is
+           present in multiple communities.
+ Usage   : my @members = $community->get_all_members();
+           my @members = $community->get_all_members($other_community);
+ Args    : additional Bio::Community objects
  Returns : an array of Bio::Community::Member objects
 
 =cut
 
-method all_members {
+method get_all_members {
    my @members = values %{$self->_members};
    return @members;
 }
+
+
+##method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
+##   my $communities = [$self, @$other_communities];
+
+##   # Get all members in a hash
+##   my $all_members = {};
+##   for my $community (@$communities) {
+##      while (my $member = $community->next_member) {
+##         $all_members->{$member} = $member;
+##      }
+##   }
+
+##   # Convert member hash to an array
+##   $all_members = [values %$all_members];
+
+##   return @$all_members; ### arrayref? array?
+##}
 
 
 =head2 get_member_by_id
@@ -494,7 +516,7 @@ method _calc_ranks {
    # and as an array.
 
    # 1/ Get abundance of all members and sort them
-   my $members = [ $self->all_members ];
+   my $members = [ $self->get_all_members ];
    my $rel_abs = [ map { $self->get_rel_ab($_) } @$members ];
 
    # 2/ Save ranks in an array
