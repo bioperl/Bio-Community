@@ -211,9 +211,9 @@ method _generate_members {
    my $first_col_header = $self->_get_value(1, 1);
    my $taxo_col;
    if ($first_col_header =~ m/OTU ID/i) {
-      my $last_col_header = $self->_get_value(1, $self->_max_col);
+      my $last_col_header = $self->_get_value(1, $self->_get_max_col);
       if ( (defined $last_col_header) && ($last_col_header =~ m/consensus lineage/i) ) {
-         $taxo_col = $self->_max_col;
+         $taxo_col = $self->_get_max_col;
          $self->_skip_last_col(1);
       }
    } else {
@@ -225,7 +225,7 @@ method _generate_members {
    my @members;
    my $col = 1;
    my $line = 1; # first line of the table is a header
-   for my $line (2 .. $self->_max_line) {
+   for my $line (2 .. $self->_get_max_line) {
       my $member;
       # Get OTU ID if possible
       my $otu_id = $self->_get_value($line, $col);
@@ -270,7 +270,7 @@ method _next_community_init {
    my $col  = $self->_col + 1;
    my $line = 1;
    my $name;
-   if ( $self->_skip_last_col && ($col == $self->_max_col) ) {
+   if ( $self->_skip_last_col && ($col == $self->_get_max_col) ) {
       # At the taxonomy column. All communities were visited. Get out of the table
       $col++;
    } else {
@@ -292,7 +292,7 @@ method write_member (Bio::Community::Member $member, Count $count) {
     my $line = $self->_id2line->{$id};
     if (not defined $line) {
         # This member has not been written previously for another community
-        $line = $self->_max_line + 1;
+        $line = $self->_get_max_line + 1;
         $self->_set_value( $line, 1, $member->id );
         $self->_id2line->{$id} = $line;
     }

@@ -19,8 +19,8 @@ ok $in = t::TestTableRole->new(
    -file => test_input_file('table.txt'),
 ), 'Read linux table';
 is $in->delim, "\t";
-is $in->_max_col, 3;
-is $in->_max_line, 4;
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
 is $in->_get_value(1, 2), 'gut';
@@ -49,8 +49,8 @@ ok $in = t::TestTableRole->new(
    -file => test_input_file('table_win32.txt'),
 ), 'Read win32 table';
 is $in->delim, "\t";
-is $in->_max_col, 3;
-is $in->_max_line, 4;
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
 is $in->_get_value(1, 2), 'gut';
@@ -75,8 +75,8 @@ $in->close;
 
 ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write tab-delimited table';
 is $out->delim, "\t";
-is $out->_max_col, 1;
-is $out->_max_line, 1;
+is $out->_get_max_col, 1;
+is $out->_get_max_line, 1;
 
 ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(1, 2, 'gut');
@@ -95,8 +95,8 @@ $out->close;
 
 ok $in = t::TestTableRole->new( -file => $file ), 'Re-read tab-delimited table';
 is $in->delim, "\t";
-is $in->_max_col, 3;
-is $in->_max_line, 4;
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
 is $in->_get_value(1, 2), 'gut';
@@ -128,8 +128,8 @@ unlink $file;
 
 ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write tab-delimited table again';
 is $out->delim, "\t";
-is $out->_max_col, 1;
-is $out->_max_line, 1;
+is $out->_get_max_col, 1;
+is $out->_get_max_line, 1;
 
 ok $out->_set_value(2, 2,  241);
 ok $out->_set_value(1, 2, 'gut');
@@ -148,8 +148,8 @@ $out->close;
 
 ok $in = t::TestTableRole->new( -file => $file ), 'Re-read tab-delimited table again';
 is $in->delim, "\t";
-is $in->_max_col, 3;
-is $in->_max_line, 4;
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
 is $in->_get_value(1, 2), 'gut';
@@ -200,8 +200,8 @@ ok $in = t::TestTableRole->new(
    -delim => '  ',
 ), 'Re-read double-space delimited table';
 is $in->delim, '  ';
-is $in->_max_col, 3;
-is $in->_max_line, 4;
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
 is $in->_get_value(1, 2), 'gut';
@@ -249,8 +249,8 @@ $out->close;
 ok $in = t::TestTableRole->new(
    -file  => $file,
 ), 'Re-read file with specified missing abundance string';
-is $in->_max_col, 3;
-is $in->_max_line, 4;
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
 is $in->_get_value(1, 2), 'gut';
@@ -285,8 +285,8 @@ $out->close;
 
 ok $in = t::TestTableRole->new( -file => $file ), 'Re-read single-line table';
 is $in->delim, "\t";
-is $in->_max_col, 3;
-is $in->_max_line, 1;
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 1;
 
 is $in->_get_value(1, 3), 'soda lake';
 is $in->_get_value(1, 1), 'Species';
@@ -313,8 +313,8 @@ $out->close;
 ok $in = t::TestTableRole->new( -file => $file ), 'Re-read single-column table';
 ok $in->_read_table;
 is $in->delim, "\t";
-is $in->_max_col, 1;
-is $in->_max_line, 4;
+is $in->_get_max_col, 1;
+is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
 is $in->_get_value(2, 1), 'Streptococcus';
@@ -352,8 +352,8 @@ ok $in = t::TestTableRole->new(
    -end_line   => 3,
 ), 'Re-read table that does not span the entire file';
 is $in->delim, "\t";
-is $in->_max_col, 3;
-is $in->_max_line, 2;
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 2;
 
 is $in->_get_value(1, 1), 'Streptococcus';
 is $in->_get_value(1, 2),  241;

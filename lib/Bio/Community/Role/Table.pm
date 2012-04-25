@@ -182,16 +182,16 @@ has 'missing_string' => (
 );
 
 
-=head2 _max_line
+=head2 _get_max_line
 
- Usage   : my $num_lines = $in->_max_line;
+ Usage   : my $num_lines = $in->_get_max_line;
  Function: Get the number of lines in the table
  Args    : None
  Returns : Strictly positive integer
 
 =cut
 
-has '_max_line' => (
+has '_get_max_line' => (
    is => 'rw',
    isa => 'StrictlyPositiveInt',
    required => 0,
@@ -201,16 +201,16 @@ has '_max_line' => (
 );
 
 
-=head2 _max_col
+=head2 _get_max_col
 
- Usage   : my $num_cols = $in->_max_col;
+ Usage   : my $num_cols = $in->_get_max_col;
  Function: Get the number of columns in the table
  Args    : None
  Returns : Strictly positive integer
 
 =cut
 
-has '_max_col' => (
+has '_get_max_col' => (
    is => 'rw',
    isa => 'StrictlyPositiveInt',
    required => 0,
@@ -352,8 +352,8 @@ method _read_table () {
       push @index, @matches;
    }
    $self->_index(\@index);
-   $self->_max_line($max_line);
-   $self->_max_col($max_col);
+   $self->_get_max_line($max_line);
+   $self->_get_max_col($max_col);
 
    return 1;
 }
@@ -374,10 +374,10 @@ method _read_table () {
 
 method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
    my $val;
-   if ( ($line <= $self->_max_line) && ($col <= $self->_max_col) ) {
+   if ( ($line <= $self->_get_max_line) && ($col <= $self->_get_max_col) ) {
 
       # Retrieve the value if it is within the bounds of the table
-      my $pos = ($line - 1) * $self->_max_col + $col - 1;
+      my $pos = ($line - 1) * $self->_get_max_col + $col - 1;
       my $index = $self->_index;
       my $offset = $index->[$pos];
       seek $self->_fh, $offset, 0;
@@ -408,9 +408,9 @@ method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
 method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) {
 
    # Extend table
-   my $max_lines = $self->_max_line;
+   my $max_lines = $self->_get_max_line;
    my $new_max_lines = $line > $max_lines ? $line : $max_lines;
-   my $max_cols = $self->_max_col;
+   my $max_cols = $self->_get_max_col;
    my $new_max_cols = $col > $max_cols ? $col : $max_cols;
    my $pos = 0;
    my $values = $self->_values;
@@ -432,8 +432,8 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
    }
 
    # Update table dimensions
-   $self->_max_line($new_max_lines);
-   $self->_max_col($new_max_cols);
+   $self->_get_max_line($new_max_lines);
+   $self->_get_max_col($new_max_cols);
 
    # Set new value
    $pos = ($line - 1) * $new_max_cols + $col - 1;
@@ -459,8 +459,8 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
 method _write_table () {
    my $delim    = $self->delim;
    my $values   = $self->_values;
-   my $max_cols = $self->_max_col;
-   for my $line ( 1 .. $self->_max_line ) {
+   my $max_cols = $self->_get_max_col;
+   for my $line ( 1 .. $self->_get_max_line ) {
       my $start = ($line - 1) * $max_cols;
       my $end   =  $line      * $max_cols - 1;
       $self->_print( join( $delim, @$values[$start..$end] ) . "\n" );

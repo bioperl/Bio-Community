@@ -133,7 +133,7 @@ method _generate_members {
    # Make members from the first column
    my @members;
    my $col = 1;
-   for my $line (2 .. $self->_max_line) {
+   for my $line (2 .. $self->_get_max_line) {
       my $value = $self->_get_value($line, $col);
       my $member = Bio::Community::Member->new( -desc => $value );
       push @members, $member;
@@ -187,7 +187,7 @@ method write_member (Bio::Community::Member $member, Count $count) {
     my $line = $self->_id2line->{$id};
     if (not defined $line) {
         # This member has not been written previously for another community
-        $line = $self->_max_line + 1;
+        $line = $self->_get_max_line + 1;
         $self->_set_value( $line, 1, $member->desc );
         $self->_id2line->{$id} = $line;
     }
