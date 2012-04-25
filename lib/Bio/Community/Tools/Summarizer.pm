@@ -160,7 +160,8 @@ method get_summaries {
       map { Bio::Community->new( -name => $_->name.' summarized') } @$communities
    ];
 
-   my $members = $self->_get_all_members($communities);
+   my $members = $communities->[0]->get_all_members($communities);
+
 
    ### First filter out members TODO
 
@@ -243,24 +244,6 @@ method _group_by_relative_abundance (
    }
 
    return $summaries;
-}
-
-
-method _get_all_members (ArrayRef[Bio::Community] $communities) {
-   # Get an arrayref of all the members of the given communities
-
-   # Get all members in a hash
-   my $all_members = {};
-   for my $community (@$communities) {
-      while (my $member = $community->next_member) {
-         $all_members->{$member} = $member;
-      }
-   }
-
-   # Convert member hash to an array
-   $all_members = [values %$all_members];
-
-   return $all_members;
 }
 
 
