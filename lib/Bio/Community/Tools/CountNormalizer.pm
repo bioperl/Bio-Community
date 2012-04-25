@@ -376,7 +376,7 @@ method _bootstrap (Bio::Community $community) {
 
 method _add (Bio::Community $existing, Bio::Community $new) {
    # Add a new community to an existing one
-   while (my $member = $new->next_member) {
+   while ( my $member = $new->next_member('_add_ite') ) {
       my $count = $new->get_count($member);
       $existing->add_member( $member, $count );
    }
@@ -386,7 +386,7 @@ method _add (Bio::Community $existing, Bio::Community $new) {
 
 method _divide (Bio::Community $community, StrictlyPositiveInt $divisor) {
    # Divide the counts in a community
-   while (my $member = $community->next_member) {
+   while ( my $member = $community->next_member('_divide_ite') ) {
       my $count     = $community->get_count($member);
       my $new_count = $count / $divisor;
       my $diff = $count - $new_count;
@@ -406,7 +406,7 @@ method _calc_representative(Bio::Community $average) {
       -use_weights => $average->use_weights,
    );
    my $richness = 0;
-   while (my $member = $average->next_member) {
+   while ( my $member = $average->next_member('_calc_representative_ite') ) {
       $richness++;
       # Add member and count to the community
       my $count = $average->get_count($member);

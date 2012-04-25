@@ -47,9 +47,9 @@ is $community->get_rank($member2), 1;
 is $community->get_rank($member3), 2;
 is $community->get_rank($member1), 3;
 
-is $community->get_member_by_rank(1), $member2;
-is $community->get_member_by_rank(2), $member3;
-is $community->get_member_by_rank(3), $member1;
+is $community->get_member_by_rank(1)->id, 2;
+is $community->get_member_by_rank(2)->id, 3;
+is $community->get_member_by_rank(3)->id, 1;
 is $community->get_member_by_rank(4), undef;
 
 while (my $member = $community->next_member) {
@@ -104,8 +104,8 @@ is $community->get_rank($member3), 1;
 is $community->get_rank($member1), 2;
 is $community->get_rank($member2), undef;
 
-is $community->get_member_by_rank(1), $member3;
-is $community->get_member_by_rank(2), $member1;
+is $community->get_member_by_rank(1)->id, 3;
+is $community->get_member_by_rank(2)->id, 1;
 is $community->get_member_by_rank(3), undef;
 
 for my $member (@{$community->get_all_members}) {
@@ -121,8 +121,8 @@ for my $member (@{$community->get_all_members}) {
 }
 is_deeply \%rel_abs, { 1 => 53.846153846154, 3 => 46.1538461538463 };
 
-is $community->get_member_by_rank(1), $member1;
-is $community->get_member_by_rank(2), $member3;
+is $community->get_member_by_rank(1)->id, 1;
+is $community->get_member_by_rank(2)->id, 3;
 
 
 # Get all the members from multiple communities
@@ -163,12 +163,12 @@ ok exists $members{$member4->id};
 ok exists $members{$member5->id};
 
 
-# Nested next_member loops
+# Named iterators
 
 $iters = 0;
-while (my $memberA = $community->next_member) {
+while (my $memberA = $community->next_member('iterA')) {
    last if $iters >= 30; # prevent infinite loops
-   while (my $memberB = $community->next_member) {
+   while (my $memberB = $community->next_member('iterB')) {
       $iters++;
       last if $iters >= 30;
    }

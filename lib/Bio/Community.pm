@@ -307,30 +307,33 @@ method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
 
  Function: Access the next member in a community (in no specific order). Be
            warned that each time you change the community, this iterator has to
-           start again from the beginning! Each line of code that calls
-           next_member() is given a new iterator to prevent interference
- Usage   : my $member = $community->next_member();
- Args    : none
+           start again from the beginning! By default, a single iterator is
+           created. However, if you need several independent iterators, simply
+           provide an arbitrary iterator name.
+ Usage   : # Get members through the default iterator
+           my $member = $community->next_member();
+           # Get members through an independent, named iterator
+           my $member = $community->next_member('other_ite');           
+ Args    : an optional name to give to the iterator (must not start with '_')
  Returns : a Bio::Community::Member object
 
 =cut
 
-method next_member {
+method next_member ( Str $iter_name = 'default' ) {
    my $iters = $self->_members_iterator;
 
-   # Create an separate iterator for each line of code that calls next_member()
+   # Create a named iterator
    my $iter;
-   my $caller = join ' ', caller;
-   if (not exists $iters->{$caller}) {
+   if (not exists $iters->{$iter_name}) {
       # Create new iterator
       $iter = iterate(
          { workers => 0 },
          sub { return $_[1]; }, # i.e. my ($id, $member) = @_; return $member;
          $self->_members
       );
-      $iters->{$caller} = $iter;
+      $iters->{$iter_name} = $iter;
    } else {
-      $iter = $iters->{$caller};
+      $iter = $iters->{$iter_name};
    }
 
    # Get next member from iterator
@@ -338,14 +341,12 @@ method next_member {
 
    # Delete iterator when done
    if (not defined $member) { 
-      delete $iters->{$caller};
+      delete $iters->{$iter_name};
    }
 
    $self->_members_iterator($iters);
    return $member;
 }
-
-
 
 
 =head2 get_all_members
@@ -385,8 +386,8 @@ method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
    # Get all members in a hash
    my $all_members = {};
    for my $community (@$communities) {
-      #####while (my $member = $community->next_member) {
-      for my $member( values %{$community->_members} ) {
+      while (my $member = $community->next_member('_get_all_member_ite')) {
+      #####for my $member( values %{$community->_members} ) {
          $all_members->{$member->id} = $member; # members are defined by their ID
       }
    }
@@ -466,7 +467,8 @@ method get_richness {
       
       # If rank abundance are not available, calculate richness manually
       if ($num_members == 0) {
-         while ($self->next_member) {  #### problematic
+         while ($self->next_member('_get_richness_ite')) {  #### problematic
+         ####while (my $member = $self->next_member('_get_richness_ite')) {
             $num_members++;
          }
       }

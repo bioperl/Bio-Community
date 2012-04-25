@@ -179,7 +179,7 @@ method _calc_cdf () {
 
    my @cdf = (0);
    my @members = ();
-   while (my $member = $community->next_member) {
+   while ( my $member = $community->next_member('_calc_cdf_ite') ) {
       my $rank = $community->get_rank($member);
       $members[$rank-1] = $member;
       my $rel_ab = $community->get_rel_ab($member);

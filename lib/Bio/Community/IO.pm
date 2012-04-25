@@ -198,7 +198,7 @@ method next_community {
       # Create a new community object
       $community = Bio::Community->new( -name => $name );
       # Populate the community with members
-      while ( my ($member, $count) = $self->next_member ) {
+      while ( my ($member, $count) = $self->next_member('_next_community_ite') ) {
          last if not defined $member; # All members have been read
          $community->add_member($member, $count);
       }
@@ -272,7 +272,7 @@ method write_community (Bio::Community $community) {
          $rank++;
       }
    } elsif ($sort_members == 0) {
-      while ( my $member = $community->next_member) {
+      while ( my $member = $community->next_member('_write_community_ite') ) {
          $self->_process_member($member, $community);
       }
    } else {
