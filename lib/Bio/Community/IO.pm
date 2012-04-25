@@ -107,6 +107,7 @@ use namespace::autoclean;
 use MooseX::Method::Signatures;
 use Bio::Community;
 use Bio::Community::Types;
+use Bio::Community::Tools::FormatGuesser;
 
 extends 'Bio::Root::Root',
         'Bio::Root::IO';
@@ -122,7 +123,17 @@ sub new {
    my $params = $real_class->BUILDARGS(@_);
    my $format = delete $params->{'-format'};
    if (not defined $format) {
-      $real_class->throw("Error: No format was specified.");
+      # Try to guess format
+      my $guesser = Bio::Community::Tools::FormatGuesser->new();
+      if ($params->{'-file'}) {
+         $guesser->file( $params->{'-file'} );
+      } elsif ($params->{'-fh'}) {
+         $guesser->fh( $params->{'-fh'} );
+      }
+      $format = $guesser->guess;
+   }
+   if (not defined $format) {
+      $real_class->throw("Error: Could not automatically detect input format.");
    }
 
    # Use the real driver class here

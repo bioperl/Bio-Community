@@ -11,6 +11,14 @@ my ($in, $out, $output_file, $community, $community2, $community3, $member, $cou
 my (@communities, @methods);
 
 
+# Automatic format detection
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('generic_table.txt'),
+), 'Format detection';
+is $in->format, 'generic';
+
+
 # Read generic format
 
 ok $in = Bio::Community::IO->new(

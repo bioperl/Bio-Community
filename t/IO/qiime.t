@@ -11,6 +11,14 @@ my ($in, $out, $output_file, $community, $community2, $community3, $member, $cou
 my (@communities, @methods);
 
 
+# Automatic format detection
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('qiime_w_no_taxo.txt'),
+), 'Format detection';
+is $in->format, 'qiime';
+
+
 # Read QIIME file without taxonomy
 
 ok $in = Bio::Community::IO->new(

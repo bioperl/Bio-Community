@@ -11,6 +11,14 @@ my ($in, $out, $output_file, $community, $community2, $member, $count);
 my (@communities, @methods);
 
 
+# Automatic format detection
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('gaas_compo.txt'),
+), 'Format detection';
+is $in->format, 'gaas';
+
+
 # Read GAAS format
 
 ok $in = Bio::Community::IO->new(
