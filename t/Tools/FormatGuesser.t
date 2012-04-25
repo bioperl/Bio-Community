@@ -7,7 +7,7 @@ use_ok($_) for qw(
 );
 
 
-my ($guesser, $text, $fh, $file);
+my ($guesser, $text, $fh, $file, $line);
 
 
 # Bare object
@@ -57,6 +57,9 @@ open $fh, '<', test_input_file('biom_minimal_sparse.biom');
 ok $guesser = Bio::Community::Tools::FormatGuesser->new( -fh => $fh ), 'filehandle input';
 is $guesser->fh, $fh;
 is $guesser->guess, 'biom';
+$line = <$fh>;
+chomp $line;
+is $line, '{', 'filehandle was rewinded';
 close $fh;
 
 
