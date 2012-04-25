@@ -133,33 +133,33 @@ ok $community->add_member($member3);
 
 ok $community2 = Bio::Community->new();
 ok $community2->add_member($member3);
-ok $member4 = Bio::Community::Member->new();
+ok $member4 = Bio::Community::Member->new( -id => 'asdf' );
 ok $community2->add_member($member4);
 
 ok $community3 = Bio::Community->new();
-ok $community3->add_member($member1);
+ok $community3->add_member( Bio::Community::Member->new( -id => 3) );
 ok $member5 = Bio::Community::Member->new();
 ok $community3->add_member($member5);
 
 ok @members = @{$community2->get_all_members([$community, $community3])};
 is scalar(@members), 5;
 
-%members = map { $_ => undef } @members;
-ok exists $members{$member1};
-ok exists $members{$member2};
-ok exists $members{$member3};
-ok exists $members{$member4};
-ok exists $members{$member5};
+%members = map { $_->id => undef } @members;
+ok exists $members{$member1->id};
+ok exists $members{$member2->id};
+ok exists $members{$member3->id};
+ok exists $members{$member4->id};
+ok exists $members{$member5->id};
 
 ok @members = @{$community2->get_all_members([$community, $community2, $community3])};
 is scalar(@members), 5;
 
-%members = map { $_ => undef } @members;
-ok exists $members{$member1};
-ok exists $members{$member2};
-ok exists $members{$member3};
-ok exists $members{$member4};
-ok exists $members{$member5};
+%members = map { $_->id => undef } @members;
+ok exists $members{$member1->id};
+ok exists $members{$member2->id};
+ok exists $members{$member3->id};
+ok exists $members{$member4->id};
+ok exists $members{$member5->id};
 
 
 done_testing();

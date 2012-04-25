@@ -325,14 +325,16 @@ method next_member {
 =head2 get_all_members
 
  Function: Generate a list of all members in the community. Given more communities
-           as arguments, generate a list of all members in all the communities.
-           Every member appears only once in that list, even if the member is
-           present in multiple communities. 
+           as arguments, generate a list of all members in all the communities,
+           including the "caller" community. Every member appears only once in
+           that list, even if the member is present in multiple communities
+           (remember that the only thing that defines if members are identical
+           is their ID).
  Usage   : # Single community
            my @members = $community->get_all_members();
-           # Several communities
+           # Several communities (community1 and community2)
            my @members = $community1->get_all_members([$community2]);
-           # ... or equivalently
+           # Or equivalently, for community1 and community2
            my @members = $community1->get_all_members([$community1, $community2]);
  Args    : an arrayref of Bio::Community objects
  Returns : an arrayref of Bio::Community::Member objects
@@ -359,7 +361,7 @@ method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
    for my $community (@$communities) {
       #####while (my $member = $community->next_member) {
       for my $member( values %{$community->_members} ) {
-         $all_members->{$member} = $member;
+         $all_members->{$member->id} = $member; # members are defined by their ID
       }
    }
 

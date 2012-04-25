@@ -156,22 +156,15 @@ method get_distance () {
 method _pnorm (PositiveNum $power) {
    # Calculate the p-norm. If power is 1, this is the 1-norm. If power is 2,
    # this is the 2-norm.
-   my ($community1, $community2) = @{$self->communities};
+   my $communities = $self->communities;
+   my $community1  = $communities->[0];
+   my $community2  = $communities->[1];
+   my $all_members = $community1->get_all_members($communities);
    my $sumdiff = 0;
-   # 1/ Process members of community 1
-   while (my $member = $community1->next_member) {
+   for my $member (@$all_members) {
       my $abundance1 = $community1->get_rel_ab($member);
       my $abundance2 = $community2->get_rel_ab($member);
       $sumdiff += ( abs($abundance1 - $abundance2) )**$power;
-   }
-   # 2/ Process members unique to community 2
-   while (my $member = $community2->next_member) {
-      next if $community1->get_rel_ab($member);
-      my $abundance2 = $community2->get_rel_ab($member);
-      # Abundance 1 is 0, so we simplify:
-      #    $sumdiff += ( abs($abundance1 - $abundance2) )**$power;
-      # to:
-      $sumdiff += $abundance2**$power
    }
    my $dist = $sumdiff ** (1/$power);
    return $dist;
@@ -180,25 +173,15 @@ method _pnorm (PositiveNum $power) {
 
 method _infnorm () {
    # Calculate the infinity-norm.
-   my ($community1, $community2) = @{$self->communities};
+   my $communities = $self->communities;
+   my $community1  = $communities->[0];
+   my $community2  = $communities->[1];
+   my $all_members = $community1->get_all_members($communities);
    my $dist = 0;
-   # 1/ Process members of community 1
-   while (my $member = $community1->next_member) {
+   for my $member (@$all_members) {
       my $abundance1 = $community1->get_rel_ab($member);
       my $abundance2 = $community2->get_rel_ab($member);
       my $diff = abs($abundance1 - $abundance2);
-      if ($diff > $dist) {
-         $dist = $diff;
-      }
-   }
-   # 2/ Process members unique to community 2
-   while (my $member = $community2->next_member) {
-      next if $community1->get_rel_ab($member);
-      my $abundance2 = $community2->get_rel_ab($member);
-      # Abundance 1 is 0, so we simplify:
-      #    my $diff = abs($abundance1 - $abundance2);
-      # to:
-      my $diff = $abundance2;
       if ($diff > $dist) {
          $dist = $diff;
       }
