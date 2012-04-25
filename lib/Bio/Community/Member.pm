@@ -40,8 +40,17 @@ accepts the following parameters:
 =item id
 
 The identifier for this community member. An ID is necessary and sufficient to
-identify a community member. But additional information can be attached to a
+identify a community member, but additional information can be attached to a
 member.
+
+  my $obj1 = Bio::Community::Member->new( -id => 153 );
+  my $obj2 = $obj1;
+  my $obj3 = Bio::Community::Member->new( -id => 153 );
+  my $obj4 = Bio::Community::Member->new( -id => 6123 );
+  my $obj5 = Bio::Community::Member->new( ); # automatically assigned ID
+
+In the above example, $obj1, $obj2 and $obj3 represent the same member, while
+$obj4 represents a different member, and $obj5 yet another member.
 
 =back
 
