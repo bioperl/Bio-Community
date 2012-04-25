@@ -331,13 +331,13 @@ method next_member {
  Usage   : my @members = $community->get_all_members();
            my @members = $community->get_all_members($other_community);
  Args    : additional Bio::Community objects
- Returns : an array of Bio::Community::Member objects
+ Returns : an arrayref of Bio::Community::Member objects
 
 =cut
 
 method get_all_members {
-   my @members = values %{$self->_members};
-   return @members;
+   my $members = [ values %{$self->_members} ];
+   return $members;
 }
 
 
@@ -516,7 +516,7 @@ method _calc_ranks {
    # and as an array.
 
    # 1/ Get abundance of all members and sort them
-   my $members = [ $self->get_all_members ];
+   my $members = $self->get_all_members;
    my $rel_abs = [ map { $self->get_rel_ab($_) } @$members ];
 
    # 2/ Save ranks in an array
