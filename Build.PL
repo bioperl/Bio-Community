@@ -28,6 +28,7 @@ my $build = Module::Build->new(
                              'Moose::Util::TypeConstraints' =>  0,
                              'MooseX::NonMoose'             =>  0,
                              'MooseX::Method::Signatures'   =>  0,
+                             'Parallel::Iterator'           =>  0,
                             },
     recommends           => {
                               # Clone Bio::Community objects through the Bio::Root::clone() method

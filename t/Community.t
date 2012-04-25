@@ -8,7 +8,8 @@ use_ok($_) for qw(
     Bio::Community
 );
 
-my ($community, $community2, $community3, $member1, $member2, $member3, $member4, $member5);
+my ($community, $community2, $community3, $member1, $member2, $member3, $member4,
+   $member5, $iters);
 my (%ids, %rel_abs, %members);
 my  @members;
 
@@ -160,6 +161,19 @@ ok exists $members{$member2->id};
 ok exists $members{$member3->id};
 ok exists $members{$member4->id};
 ok exists $members{$member5->id};
+
+
+# Nested next_member loops
+
+$iters = 0;
+while (my $memberA = $community->next_member) {
+   last if $iters >= 30; # prevent infinite loops
+   while (my $memberB = $community->next_member) {
+      $iters++;
+      last if $iters >= 30;
+   }
+}
+is $iters, 9; # 3 members * 3 members
 
 
 done_testing();

@@ -95,6 +95,7 @@ use MooseX::NonMoose;
 use MooseX::Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Member;
+use Parallel::Iterator qw( iterate );
 
 
 extends 'Bio::Root::Root';
@@ -306,7 +307,8 @@ method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
 
  Function: Access the next member in a community (in no specific order). Be
            warned that each time you change the community, this iterator has to
-           start again from scratch!
+           start again from the beginning! Each line of code that calls
+           next_member() is given a new iterator to prevent interference
  Usage   : my $member = $community->next_member();
  Args    : none
  Returns : a Bio::Community::Member object
@@ -314,12 +316,36 @@ method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
 =cut
 
 method next_member {
-   if (not defined $self->_members_iterator) {
-      $self->_members_iterator($self->_members);
+   my $iters = $self->_members_iterator;
+
+   # Create an separate iterator for each line of code that calls next_member()
+   my $iter;
+   my $caller = join ' ', caller;
+   if (not exists $iters->{$caller}) {
+      # Create new iterator
+      $iter = iterate(
+         { workers => 0 },
+         sub { return $_[1]; }, # i.e. my ($id, $member) = @_; return $member;
+         $self->_members
+      );
+      $iters->{$caller} = $iter;
+   } else {
+      $iter = $iters->{$caller};
    }
-   my (undef, $member) = each %{$self->_members_iterator};
+
+   # Get next member from iterator
+   my $member = $iter->();
+
+   # Delete iterator when done
+   if (not defined $member) { 
+      delete $iters->{$caller};
+   }
+
+   $self->_members_iterator($iters);
    return $member;
 }
+
+
 
 
 =head2 get_all_members
