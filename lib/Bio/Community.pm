@@ -139,7 +139,7 @@ has use_weights => (
    lazy => 1,
    default => 1,
    init_arg => '-use_weights',
-   trigger => \&_has_changed,
+   trigger => \&_has_changed,  ### not needed??
 );
 
 
@@ -387,8 +387,8 @@ method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
    my $all_members = {};
    for my $community (@$communities) {
       while (my $member = $community->next_member('_get_all_member_ite')) {
-      #####for my $member( values %{$community->_members} ) {
-         $all_members->{$member->id} = $member; # members are defined by their ID
+         # Members are defined by their ID
+         $all_members->{$member->id} = $member; 
       }
    }
 
@@ -467,8 +467,7 @@ method get_richness {
       
       # If rank abundance are not available, calculate richness manually
       if ($num_members == 0) {
-         while ($self->next_member('_get_richness_ite')) {  #### problematic
-         ####while (my $member = $self->next_member('_get_richness_ite')) {
+         while ($self->next_member('_get_richness_ite')) {
             $num_members++;
          }
       }

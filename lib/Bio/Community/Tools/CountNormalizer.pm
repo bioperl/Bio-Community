@@ -330,6 +330,8 @@ method _bootstrap (Bio::Community $community) {
       -use_weights => $use_weights,
    );
 
+   my $members = $community->get_all_members;
+
    my $prev_overall = Bio::Community->new();
    my $iteration = 0;
    my $dist;
@@ -338,7 +340,7 @@ method _bootstrap (Bio::Community $community) {
       # Get a random community and add it to the overall community
       $iteration++;
       my $random = $sampler->get_rand_community($sample_size);
-      $overall = $self->_add( $overall, $random );
+      $overall = $self->_add( $overall, $random, $members );
 
       # We could divide here, but since the distance is based on the relative
       # abundance, not the counts, it would be the same. Hence, only divide at
@@ -368,15 +370,15 @@ method _bootstrap (Bio::Community $community) {
    }
 
    $community->use_weights($use_weights);
-   my $average = $self->_divide($overall, $iteration);
+   my $average = $self->_divide( $overall, $iteration, $members );
 
    return $overall, $iteration, $dist;
 }
 
 
-method _add (Bio::Community $existing, Bio::Community $new) {
+method _add (Bio::Community $existing, Bio::Community $new, $members) {
    # Add a new community to an existing one
-   while ( my $member = $new->next_member('_add_ite') ) {
+   for my $member (@$members) {
       my $count = $new->get_count($member);
       $existing->add_member( $member, $count );
    }
@@ -384,9 +386,9 @@ method _add (Bio::Community $existing, Bio::Community $new) {
 }
 
 
-method _divide (Bio::Community $community, StrictlyPositiveInt $divisor) {
+method _divide (Bio::Community $community, StrictlyPositiveInt $divisor, $members) {
    # Divide the counts in a community
-   while ( my $member = $community->next_member('_divide_ite') ) {
+   for my $member (@$members) {
       my $count     = $community->get_count($member);
       my $new_count = $count / $divisor;
       my $diff = $count - $new_count;
