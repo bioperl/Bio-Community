@@ -8,8 +8,8 @@ use_ok($_) for qw(
     Bio::Community
 );
 
-my ($community, $member1, $member2, $member3);
-my (%ids, %rel_abs);
+my ($community, $community2, $community3, $member1, $member2, $member3, $member4, $member5);
+my (%ids, %rel_abs, %members);
 my  @members;
 
 
@@ -122,6 +122,34 @@ is_deeply \%rel_abs, { 1 => 53.846153846154, 3 => 46.1538461538463 };
 
 is $community->get_member_by_rank(1), $member1;
 is $community->get_member_by_rank(2), $member3;
+
+
+# Get all the members from multiple communities
+
+ok $community = Bio::Community->new();
+ok $community->add_member($member1);
+ok $community->add_member($member2);
+ok $community->add_member($member3);
+
+ok $community2 = Bio::Community->new();
+ok $community2->add_member($member3);
+ok $member4 = Bio::Community::Member->new();
+ok $community2->add_member($member4);
+
+ok $community3 = Bio::Community->new();
+ok $community3->add_member($member1);
+ok $member5 = Bio::Community::Member->new();
+ok $community3->add_member($member5);
+
+ok @members = @{$community2->get_all_members([$community, $community3])};
+is scalar(@members), 5;
+
+%members = map { $_ => undef } @members;
+ok exists $members{$member1};
+ok exists $members{$member2};
+ok exists $members{$member3};
+ok exists $members{$member4};
+ok exists $members{$member5};
 
 
 done_testing();

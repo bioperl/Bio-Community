@@ -172,7 +172,7 @@ has _weighted_count => (
 
 has _members => (
    is => 'rw',
-   isa => 'HashRef',
+   isa => 'HashRef', ### be more specific
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -181,7 +181,7 @@ has _members => (
 
 has _counts => (
    is => 'rw',
-   isa => 'HashRef',
+   isa => 'HashRef', ### be more specific
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -190,7 +190,7 @@ has _counts => (
 
 has _ranks_hash_weighted => (
    is => 'rw',
-   isa => 'HashRef',
+   isa => 'HashRef', ### be more specific
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -200,7 +200,7 @@ has _ranks_hash_weighted => (
 
 has _ranks_arr_weighted => (
    is => 'rw',
-   isa => 'ArrayRef',
+   isa => 'ArrayRef', ### be more specific
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
@@ -210,7 +210,7 @@ has _ranks_arr_weighted => (
 
 has _ranks_hash_unweighted => (
    is => 'rw',
-   isa => 'HashRef',
+   isa => 'HashRef', ### be more specific
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -220,7 +220,7 @@ has _ranks_hash_unweighted => (
 
 has _ranks_arr_unweighted => (
    is => 'rw',
-   isa => 'ArrayRef',
+   isa => 'ArrayRef', ### be more specific
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
@@ -240,7 +240,7 @@ has _richness => (
 
 has _members_iterator => (
    is => 'rw',
-   isa => 'Maybe[HashRef]',
+   isa => 'Maybe[HashRef]', ### be more specific
    lazy => 1,
    default => undef,
    init_arg => undef,
@@ -335,28 +335,23 @@ method next_member {
 
 =cut
 
-method get_all_members {
-   my $members = [ values %{$self->_members} ];
-   return $members;
+method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
+   my $communities = [$self, @$other_communities];
+   
+   # Get all members in a hash
+   my $all_members = {};
+   for my $community (@$communities) {
+      #####while (my $member = $community->next_member) {
+      for my $member( values %{$community->_members} ) {
+         $all_members->{$member} = $member;
+      }
+   }
+
+   # Convert member hash to an array
+   $all_members = [values %$all_members];
+
+   return $all_members;
 }
-
-
-##method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
-##   my $communities = [$self, @$other_communities];
-
-##   # Get all members in a hash
-##   my $all_members = {};
-##   for my $community (@$communities) {
-##      while (my $member = $community->next_member) {
-##         $all_members->{$member} = $member;
-##      }
-##   }
-
-##   # Convert member hash to an array
-##   $all_members = [values %$all_members];
-
-##   return @$all_members; ### arrayref? array?
-##}
 
 
 =head2 get_member_by_id
