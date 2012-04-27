@@ -123,6 +123,7 @@ method next_member {
 
    ##### TODO:handle things differently if GAAS used a taxonomy file
    my $member = Bio::Community::Member->new( -desc => $name );
+   $self->_attach_weights($member);
 
    # Note that a relative abundance is returned, not a count
    return $member, $rel_ab;

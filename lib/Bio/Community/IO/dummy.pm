@@ -97,6 +97,8 @@ has 'dummy' => (
 
 method next_member {
    my ($member, $count);
+   # Somehow read and create a member here...
+   $self->_attach_weights($member);
    return $member, $count;
 }
 

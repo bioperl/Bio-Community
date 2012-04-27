@@ -25,26 +25,8 @@ Bio::Community::IO - Read and write files that describe communities
 =head1 DESCRIPTION
 
 A Bio::Community::IO object implement methods to read and write communities in
-formats used by popular programs such as GAAS, QIIME, Pyrotagger.
-
-=head1 CONSTRUCTOR
-
-=head2 Bio::Community::IO->new()
-
-   my $in = Bio::Community::IO->new( );
-
-The new() class method constructs a new Bio::Community::Member object and
-accepts the following parameters:
-
-=head1 OBJECT METHODS
-
-####
-# other methods? -file? -fh?
-####
-
-=item format
-
-The format of the file: 'generic', 'gaas', 'qiime' or 'pyrotagger'.
+formats used by popular programs such as GAAS and QIIME, or as generic tab-
+separated tables.
 
 =back
 
@@ -92,8 +74,17 @@ methods. Internal methods are usually preceded with a _
 =head2 new
 
  Function: Create a new Bio::Community::IO object
- Usage   : my $member = Bio::Community::IO->new( );
- Args    : 
+ Usage   : my $member = Bio::Community::IO->new( -file => 'community.txt' );
+ Args    : -file   : Path of a community file
+           -format : Format of the file: 'generic', 'gaas', 'qiime'. This is
+                    optional because in most cases, the format can be
+                    automatically detected.
+           -weights: Arrayref of files that contains weights
+
+#### IMPLEMENT WEIGHT READING!
+
+           See Bio::Root::IO for other accepted constructors, like -fh.
+
  Returns : A Bio::Community::IO object
 
 =cut
@@ -161,7 +152,8 @@ sub BUILD {
 
  Usage   : my ($member, $count) = $in->next_member;
  Function: Get the next member from the community and its abundance. This function
-           is provided by a driver specific to each file format.
+           relies on the _next_member method provided by a driver specific to
+           fille format requested.
  Args    : None
  Returns : An array containing:
              A Bio::Community::Member object (or undef)
@@ -373,6 +365,117 @@ has 'missing_string' => (
    init_arg => '-missing_string',
    default => sub { return eval('$'.ref(shift).'::default_missing_string') || 0 },
 );
+
+
+=head2 weight_files
+
+ Usage   : $in->weight_files();
+ Function: Specify files containing weights to assign to the community members.
+           Each type of file can contain a different type of weight to add.
+ Args    : arrayref of file names
+ Returns : arrayref of file names
+
+=cut
+
+has 'weight_files' => (
+   is => 'rw',
+   isa => 'ArrayRef[Str]',
+   required => 0,
+   lazy => 1,
+   default => sub { [] },
+   init_arg => '-weight_files',
+   trigger => \&_read_weights,
+);
+
+
+has '_weights' => (
+   is => 'rw',
+   isa => 'ArrayRef[HashRef[Num]]',
+   required => 0,
+   lazy => 1,
+   default => sub { [] },
+   predicate => '_has_weights',
+);
+
+
+has '_average_weights' => (
+   is => 'rw',
+   isa => 'ArrayRef[Num]',
+   required => 0,
+   lazy => 1,
+   default => sub { [] },
+   predicate => '_has_average_weights',
+);
+
+
+method _read_weights {
+   my $files = $self->weight_files;
+   my $all_weights = [];
+   my $average_weights = [];
+   for my $file (@$files) {
+      my $average = 0;
+      my $num = 0;
+      my $file_weights = {};
+      open my $in, '<', $file or $self->throw("Could not open file '$file': $!");
+      while (my $line = <$in>) {
+         next if $line =~ m/^#/;
+         next if $line =~ m/^\s*$/;
+         chomp $line;
+         my ($id, $weight) = (split '\t', $line)[0..1];
+         $file_weights->{$id} = $weight;
+         $average += $weight;
+         $num++;
+      }
+      close $in;
+      push @$all_weights, $file_weights;
+      $average /= $num if $num > 0;
+      push @$average_weights, $average;
+   }
+   $self->_weights( $all_weights );
+   $self->_average_weights( $average_weights );
+   return 1;
+}
+
+
+=head2 _attach_weights
+
+ Usage   : $in->_attach_weights($member);
+ Function: Once a member has been created, a driver can should call this method
+           to attach the proper weights (read from the user-provided weight
+           files) to a member. If no member is provided, this method will not
+           complain and will do nothing.
+ Args    : a Bio::Community::Member or nothing
+ Returns : 1 for success
+
+=cut
+
+method _attach_weights (Maybe[Bio::Community::Member] $member) {
+
+   ####
+   # weight assignment method: 1, average, taxonomy
+   ####
+
+   # Once we have a member, attach weights to it
+   if ( defined($member) && $self->_has_weights ) {
+      my $weights;
+      for my $weight_type (@{$self->_weights}) {
+         my $weight;
+         my $desc = $member->desc;
+         if ($desc && exists($weight_type->{$desc}) ) {
+            $weight = $weight_type->{$desc};
+         } else {
+            $weight = 1;
+            ####
+            # use 1, or average, or by taonomy
+            ####
+         }
+         push @$weights, $weight;
+      }
+
+      $member->weights($weights);
+   }
+   return 1;
+}
 
 
 # Do not inline so that new() can be overridden

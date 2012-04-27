@@ -257,6 +257,7 @@ method next_member {
       last;
    }
    $self->_line($line);
+   $self->_attach_weights($member);
    return $member, $count;
 }
 
