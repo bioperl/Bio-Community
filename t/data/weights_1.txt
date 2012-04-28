@@ -1,0 +1,5 @@
+#desc	weight
+Streptococcus	1
+Goatpox virus	3
+Lumpy skin disease virus	0.1
+

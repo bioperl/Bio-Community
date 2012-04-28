@@ -36,7 +36,7 @@ is $in->dummy, 'this is a test';
 $in->close;
 
 
-# -weight_files is tested in t/IO/generic.t
+# -weight_files is tested in t/IO/weights.t
 
 done_testing();
 

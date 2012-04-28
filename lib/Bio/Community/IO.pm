@@ -437,6 +437,28 @@ method _read_weights {
 }
 
 
+=head2 weight_assign
+
+ Usage   : $in->weight_assign();
+ Function: Specify what weight to assign to to members for which no weight is
+           specified in the provided weight file:
+            * $num      : the weight provided as argument
+            * 'average' : the average weight in the weight file
+ Args    : 'average' or a number
+ Returns : 'average' or a number
+
+=cut
+
+has 'weight_assign' => (
+   is => 'rw',
+   isa => 'WeightAssignType',
+   required => 0,
+   lazy => 1,
+   default => 'average',
+   init_arg => '-weight_assign',
+);
+
+
 =head2 _attach_weights
 
  Usage   : $in->_attach_weights($member);
@@ -450,28 +472,29 @@ method _read_weights {
 =cut
 
 method _attach_weights (Maybe[Bio::Community::Member] $member) {
-
-   ####
-   # weight assignment method: 1, average, taxonomy
-   ####
-
    # Once we have a member, attach weights to it
    if ( defined($member) && $self->_has_weights ) {
       my $weights;
-      for my $weight_type (@{$self->_weights}) {
+      for my $i (0 .. scalar @{$self->_weights} - 1) {
          my $weight;
+         my $weight_type = $self->_weights->[$i];
          my $desc = $member->desc;
          if ($desc && exists($weight_type->{$desc}) ) {
+            # This member has a weight
             $weight = $weight_type->{$desc};
          } else {
-            $weight = 1;
-            ####
-            # use 1, or average, or by taonomy
-            ####
+            # This member has no weight, provide an alternative weight
+            my $assign = $self->weight_assign; 
+            if ($assign eq 'average') {
+               # Use the average weight in the weight file
+               $weight = $self->_average_weights->[$i];
+            } else {
+               # Use an arbitrary weight
+               $weight = $assign;
+            }
          }
          push @$weights, $weight;
       }
-
       $member->weights($weights);
    }
    return 1;

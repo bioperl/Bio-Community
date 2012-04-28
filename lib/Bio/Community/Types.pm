@@ -106,6 +106,12 @@ subtype 'DistanceType'
    => where { $_ =~ m/^(1-norm|2-norm|euclidean|p-norm|infinity-norm|unifrac)$/ }
    => message { "This only accepts '1-norm', '2-norm', 'euclidean', 'p-norm', 'infinity-norm' or 'unifrac', but got '$_'" };
 
+# Weight assignment method: a number, 'average', 'median', 'taxonomy'
+subtype 'WeightAssignType'
+   => as 'Str'
+   => where { ($_ =~ m/^(average)$/) || ($_ * 2) }
+   => message { "This only accepts 'average' or a number, but got '$_'" };
+;
 
 __PACKAGE__->meta->make_immutable;
 
