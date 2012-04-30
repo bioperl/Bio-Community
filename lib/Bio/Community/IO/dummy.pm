@@ -75,6 +75,7 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
 
 
+our $multiple_communities   =  0;      # the format supports one community per file
 our $default_sort_members   =  0;      # members not sorted by abundance
 our $default_abundance      = 'count'; # report raw counts
 our $default_missing_string = '-';     # empty members represented as '-'

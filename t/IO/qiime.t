@@ -29,6 +29,7 @@ isa_ok $in, 'Bio::Community::IO::qiime';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
+is $in->multiple_communities, 1;
 
 @methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
 for my $method (@methods) {

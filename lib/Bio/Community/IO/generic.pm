@@ -82,6 +82,8 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO',
      'Bio::Community::Role::Table';
 
+
+our $multiple_communities   =  1;      # format supports several communities per file
 #### sorting only effective for first community???
 our $default_sort_members   =  0;      # unsorted
 our $default_abundance_type = 'count'; # absolute count (positive integer)

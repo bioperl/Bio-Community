@@ -25,7 +25,9 @@ Bio::Community::Role::IO - Role for IO layer
 =head1 DESCRIPTION
 
 This role is an IO layer to read and write community files. The only thing it
-does is define methods that the role-consuming class must implement.
+does is define methods that the role-consuming class must implement. In practice,
+this role is should be used by all the IO drivers in the Bio::Community::IO::*
+namespace.
 
 Input methods: next_member, next_community, _next_community_init, _next_community_finish
 Output methods: write_member, write_community, _write_community_init, _write_community_finish, sort_members
@@ -81,14 +83,24 @@ use namespace::autoclean;
 
 # TODO: POD that describes each method and its inputs and outputs
 
-requires 'next_member',
-         'next_community',
-         '_next_community_init',
-         '_next_community_finish',
-         'write_member',
-         'write_community',
-         '_write_community_init',
-         '_write_community_finish',
-         'sort_members';
+requires
+   # Methods implemented by the Bio::Community::IO::* drivers
+   'next_member',
+   'next_community',
+   '_next_community_init',
+   '_next_community_finish',
+   'write_member',
+   'write_community',
+   '_write_community_init',
+   '_write_community_finish',
+   # Methods implemented by the Bio::Community::IO (that the drivers inherit from)
+   'sort_members',
+   'abundance_type',
+   'missing_string',
+   'multiple_communities',
+   'weight_files',
+   'weight_assign',
+;
+
 
 1;

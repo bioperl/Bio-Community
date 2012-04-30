@@ -367,6 +367,25 @@ has 'missing_string' => (
 );
 
 
+=head2 multiple_communities
+
+ Usage   : $in->multiple_communities();
+ Function: Return whether or not the file format can represent multiple
+           communities in a single file           
+ Args    : 0 or 1
+ Returns : 0 or 1
+
+=cut
+
+has 'multiple_communities' => (
+   is => 'ro',
+   isa => 'Bool',
+   required => 0,
+   lazy => 1,
+   default => sub { return eval('$'.ref(shift).'::multiple_communities') || 0 },
+);
+
+
 =head2 weight_files
 
  Usage   : $in->weight_files();
@@ -462,7 +481,7 @@ has 'weight_assign' => (
 =head2 _attach_weights
 
  Usage   : $in->_attach_weights($member);
- Function: Once a member has been created, a driver can should call this method
+ Function: Once a member has been created, a driver should call this method
            to attach the proper weights (read from the user-provided weight
            files) to a member. If no member is provided, this method will not
            complain and will do nothing.
