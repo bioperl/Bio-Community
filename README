@@ -4,8 +4,8 @@ Bio-Community version 0.01
 THIS MODULE IS IN EARLY DEVELOPMENT STAGE! VERY LITTLE IS USEABLE RIGHT NOW AND
 IT IS PROBABLY BUG-RIDDEN!
 
-Bio::Community is a BioPerl-based module to represent and manipulate communities
-of biological organisms. 
+Bio::Community is a set of BioPerl modules to represent and manipulate communities
+of biological organisms.
 
 
 INSTALLATION
