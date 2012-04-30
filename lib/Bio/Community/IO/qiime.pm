@@ -325,6 +325,7 @@ method _write_community_init (Bio::Community $community) {
 
 
 method _write_headers {
+   $self->_print("# QIIME v1.3.0 OTU table\n");
    $self->_set_value(1, 1, '#OTU ID');
 }
 
