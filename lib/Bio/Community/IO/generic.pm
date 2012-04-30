@@ -90,6 +90,16 @@ our $default_abundance_type = 'count'; # absolute count (positive integer)
 our $default_missing_string =  0;      # empty members get a '0'
 
 
+has '_first_community' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   init_arg => undef,
+   default => 1,
+   lazy => 1,
+);
+
+
 has '_line' => (
    is => 'rw',
    isa => 'PositiveInt',
@@ -201,6 +211,11 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 
 method _write_community_init (Bio::Community $community) {
+   # If first community, write first column header
+   if ($self->_first_community) {
+      $self->_write_headers;
+      $self->_first_community(0);
+   }
    # Write header for that community
    my $line = 1;
    my $col  = $self->_col + 1;
@@ -208,6 +223,11 @@ method _write_community_init (Bio::Community $community) {
    $self->_line( $line + 1);
    $self->_col( $col );
    return 1;
+}
+
+
+method _write_headers {
+   $self->_set_value(1, 1, 'Species');
 }
 
 

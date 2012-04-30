@@ -85,15 +85,15 @@ use namespace::autoclean;
 
 requires
    # Methods implemented by the Bio::Community::IO::* drivers
-   'next_member',
-   'next_community',
    '_next_community_init',
    '_next_community_finish',
-   'write_member',
-   'write_community',
    '_write_community_init',
    '_write_community_finish',
    # Methods implemented by the Bio::Community::IO (that the drivers inherit from)
+   'next_member',
+   'next_community',
+   'write_member',
+   'write_community',
    'sort_members',
    'abundance_type',
    'missing_string',

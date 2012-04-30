@@ -134,12 +134,12 @@ before 'close' => sub {
 };
 
 
-has '_num_communities' => (
+has '_first_community' => (
    is => 'rw',
-   isa => 'PositiveInt',
+   isa => 'Bool',
    required => 0,
    init_arg => undef,
-   default => 0,
+   default => 1,
    lazy => 1,
 );
 
@@ -309,14 +309,11 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 
 method _write_community_init (Bio::Community $community) {
-   # If first community, write QIIME headers
-   my $num_communities = $self->_num_communities;
-   if ($num_communities == 0) {
+   # If first community, write first column header
+   if ($self->_first_community) {
       $self->_write_headers;
+      $self->_first_community(0);
    }
-   $num_communities++;
-   $self->_num_communities($num_communities);
-
    # Write header for that community
    my $line = 1;
    my $col  = $self->_col + 1;
@@ -327,8 +324,7 @@ method _write_community_init (Bio::Community $community) {
 }
 
 
-method _write_headers () {
-   $self->_print("# QIIME v1.3.0 OTU table\n");
+method _write_headers {
    $self->_set_value(1, 1, '#OTU ID');
 }
 
