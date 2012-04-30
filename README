@@ -5,7 +5,8 @@ THIS MODULE IS IN EARLY DEVELOPMENT STAGE! VERY LITTLE IS USEABLE RIGHT NOW AND
 IT IS PROBABLY BUG-RIDDEN!
 
 Bio::Community is a BioPerl-based module to represent and manipulate communities
-of organisms. 
+of biological organisms. 
+
 
 INSTALLATION
 
@@ -15,6 +16,7 @@ To install this module type the following:
    ./Build
    ./Build test
    ./Build install
+
 
 DEPENDENCIES
 
@@ -27,6 +29,11 @@ This module requires these other modules and libraries:
   MooseX::Method::Signatures
   Parallel::Iterator
   Test::Number::Delta
+
+These other modules are strongly recommended:
+ 
+  Clone
+
 
 COPYRIGHT AND LICENCE
 

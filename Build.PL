@@ -9,7 +9,7 @@ my $build = Module::Build->new(
     dist_version         => '0.01',
     module_name          => 'Bio::Community',
     dist_author          => 'BioPerl Team <bioperl-l@bioperl.org>',
-    dist_abstract        => 'Bio::Community - Represent and manipulate communities of organisms',
+    dist_abstract        => 'Bio::Community - Represent and manipulate communities of biological organisms',
     license              => 'perl',
     recursive_test_files => 1,
     create_license       => 1,
@@ -34,6 +34,10 @@ my $build = Module::Build->new(
                               # Clone Bio::Community objects through the Bio::Root::clone() method
                              'Clone'                        => 0,
                             },
+    script_files         => [
+                             'scripts/bp_community_bootstrap.pl',
+                             'scripts/bp_community_convert.pl',
+                            ],
     recursive_test_files => 1,
     dynamic_config       => 1,
 );
