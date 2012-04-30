@@ -54,21 +54,21 @@ $in->close;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Streptococcus';
-is $community->get_count($member), 241;
+delta_ok $community->get_count($member), 241;
 is $community->next_member, undef;
 
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Streptococcus';
-is $community2->get_count($member), 334;
+delta_ok $community2->get_count($member), 334;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Lumpy skin disease virus';
-is $community2->get_count($member), 123;
+delta_ok $community2->get_count($member), 123;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Goatpox virus';
-is $community2->get_count($member), 1023.9;
+delta_ok $community2->get_count($member), 1023.9;
 is $community2->next_member, undef;
 
 
@@ -92,19 +92,19 @@ ok $in = Bio::Community::IO->new(
 ok $community = $in->next_community;
 ok $member = $community->next_member;
 is $member->desc, 'Streptococcus';
-is $community->get_count($member), 241;
+delta_ok $community->get_count($member), 241;
 is $community->next_member, undef;
 
 ok $community2 = $in->next_community;
 ok $member = $community2->next_member;
 is $member->desc, 'Goatpox virus';
-is $community2->get_count($member), 1023.9;
+delta_ok $community2->get_count($member), 1023.9;
 ok $member = $community2->next_member;
 is $member->desc, 'Streptococcus';
-is $community2->get_count($member), 334;
+delta_ok $community2->get_count($member), 334;
 ok $member = $community2->next_member;
 is $member->desc, 'Lumpy skin disease virus';
-is $community2->get_count($member), 123;
+delta_ok $community2->get_count($member), 123;
 is $community2->next_member, undef;
 
 is $in->next_community, undef;
@@ -141,39 +141,39 @@ $in->close;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
-is $community->get_count($member), 0.2142857143;
+delta_ok $community->get_count($member), 0.2142857143;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Archaea;Euryarchaeota';
-is $community->get_count($member), 0.2342192691;
+delta_ok $community->get_count($member), 0.2342192691;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
-is $community->get_count($member), 0.5514950166;
+delta_ok $community->get_count($member), 0.5514950166;
 is $community->next_member, undef;
 
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
-is $community2->get_count($member), 0.9536354057;
+delta_ok $community2->get_count($member), 0.9536354057;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
-is $community2->get_count($member), 0.0463645943;
+delta_ok $community2->get_count($member), 0.0463645943;
 is $community2->next_member, undef;
 
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
-is $community3->get_count($member), 0.0195488722;
+delta_ok $community3->get_count($member), 0.0195488722;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Archaea;Euryarchaeota';
-is $community3->get_count($member), 0.4;
+delta_ok $community3->get_count($member), 0.4;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
-is $community3->get_count($member), 0.5804511278;
+delta_ok $community3->get_count($member), 0.5804511278;
 is $community3->next_member, undef;
 
 
@@ -217,39 +217,39 @@ $in->close;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
-is $community->get_count($member), 0.2142857143;
+delta_ok $community->get_count($member), 0.2142857143;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
-is $community->get_count($member), 0.5514950166;
+delta_ok $community->get_count($member), 0.5514950166;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Archaea;Euryarchaeota';
-is $community->get_count($member), 0.2342192691;
+delta_ok $community->get_count($member), 0.2342192691;
 is $community->next_member, undef;
 
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
-is $community2->get_count($member), 0.9536354057;
+delta_ok $community2->get_count($member), 0.9536354057;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
-is $community2->get_count($member), 0.0463645943;
+delta_ok $community2->get_count($member), 0.0463645943;
 is $community2->next_member, undef;
 
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
-is $community3->get_count($member), 0.0195488722;
+delta_ok $community3->get_count($member), 0.0195488722;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
-is $community3->get_count($member), 0.5804511278;
+delta_ok $community3->get_count($member), 0.5804511278;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Archaea;Euryarchaeota';
-is $community3->get_count($member), 0.4;
+delta_ok $community3->get_count($member), 0.4;
 is $community3->next_member, undef;
 
 

@@ -30,7 +30,6 @@ file. Here is an example of QIIME OTU table file:
   2	0	230	110
   3	0	30	80
 
-
 The same OTU table with assignments to the GreenGenes taxonomy:
 
   # QIIME v1.3.0 OTU table
@@ -39,6 +38,10 @@ The same OTU table with assignments to the GreenGenes taxonomy:
   1	10	24	0	k__Bacteria;p__TM6;c__;o__;f__;g__;s__
   2	0	230	110	k__Bacteria;p__Cyanobacteria;c__;o__Oscillatoriales;f__;g__Trichodesmium;s__Trichodesmium erythraeum
   3	0	30	80	k__Bacteria;p__Acidobacteria;c__Solibacteres;o__Solibacterales;f__Solibacteraceae;g__Candidatus Solibacter;s__
+
+For each Bio::Community::Member $member generated from a QIIME file, $member->id()
+contains the OTU ID, while $member->desc() holds the content of the consensus
+lineage field.
 
 QIIME also provides OTU tables summarized at the phylum level, with relative
 abundance instead of counts:

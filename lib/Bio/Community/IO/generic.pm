@@ -23,10 +23,15 @@ This Bio::Community::IO driver reads and writes files in a generic format. Multi
 communities can be written in a file to generate a site-by-species table (OTU
 table), in which the entries are tab-delimited. Example:
 
-  	site A	site B
+  Species	site A	site B
   species 1	321	94
   species 2	0	58
   species 3	47	26
+
+For each Bio::Community::Member $member generated from a generic site-by-species
+file, $member->desc() contains the content of the species field. Since the
+generic format does not specify a member ID, one is automatically generated
+and can be retrieved using $member->id().
 
 =head1 CONSTRUCTOR
 

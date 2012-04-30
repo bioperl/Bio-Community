@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Bio::Root::Test;
+use Test::Number::Delta;
 
 use_ok($_) for qw(
     Bio::Community::IO
@@ -49,16 +50,17 @@ is $community->get_richness, 3;
 
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Streptococcus pyogenes phage 315.1';
-is $community->get_rel_ab($member), 79.1035649011735;
+is $member->desc, 'Goatpox virus Pellor';
+delta_ok $community->get_rel_ab($member), 19.6094208626593;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Lumpy skin disease virus NI-2490';
-is $community->get_rel_ab($member), 1.28701423616715;
+delta_ok $community->get_rel_ab($member), 1.28701423616715;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Goatpox virus Pellor';
-is $community->get_rel_ab($member), 19.6094208626593;
+is $member->desc, 'Streptococcus pyogenes phage 315.1';
+delta_ok $community->get_rel_ab($member), 79.1035649011735;
+is $member = $community->next_member, undef;
 
 
 # Write GAAS format and re-read it
@@ -81,16 +83,17 @@ $in->close;
 
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Goatpox virus Pellor';
+delta_ok $community2->get_rel_ab($member), 19.6094208626593;
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Lumpy skin disease virus NI-2490';
-is $community2->get_rel_ab($member), 1.28701423616715;
+delta_ok $community2->get_rel_ab($member), 1.28701423616715;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Streptococcus pyogenes phage 315.1';
-is $community2->get_rel_ab($member), 79.1035649011735;
-ok $member = $community2->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Goatpox virus Pellor';
-is $community2->get_rel_ab($member), 19.6094208626593;
+delta_ok $community2->get_rel_ab($member), 79.1035649011735;
+is $member = $community2->next_member, undef;
 
 
 done_testing();

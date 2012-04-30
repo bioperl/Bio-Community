@@ -441,7 +441,7 @@ method _calc_representative(Bio::Community $average) {
          my $member_to_increment = $average->get_member_by_rank($rank + 1);
          $representative->add_member($member_to_increment, 1);
       } else {
-         $self->throw("Internal problem. Inexpected current count of $target_count");
+         $self->throw("Internal problem. Unexpected current count of $cur_count");
       }
 
    }
