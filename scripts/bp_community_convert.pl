@@ -21,9 +21,9 @@ bp_community_convert - Convert files of communities from one format to another
 
 =head1 SYNOPSIS
 
-  bp_community_convert -input_files   my_communities.qiime \
-                       -output_format qiime                \
-                       -output_prefix converted_communities
+  bp_community_convert -input_files   my_communities.qiime     \
+                       -output_format generic                  \
+                       -output_prefix my_converted_communities
 
 =head1 DESCRIPTION
 
