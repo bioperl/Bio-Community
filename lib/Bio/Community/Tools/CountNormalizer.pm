@@ -279,7 +279,7 @@ before get_representative_communities => sub {
 };
 
 
-method _count_normalize () {
+method _count_normalize {
    # Normalize communties by total count
 
    # Sanity check
@@ -301,6 +301,9 @@ method _count_normalize () {
             " than the smaller community ($min counts)");
       }
    }
+   if ($self->verbose) {
+      print "Bootstrap sample size: $sample_size\n";
+   }
 
    # Bootstrap now
    my $average_communities = [];
@@ -313,7 +316,10 @@ method _count_normalize () {
       } else {
          ($average, $repetitions, $dist) = $self->_bootstrap($community);
       }
-
+      my $name = $community->name;
+      $name .= ' ' if $name;
+      $name .= 'average';
+      $average->name($name);
       if (defined $self->repetitions) {
          $max_threshold = $dist if (defined $dist) && ($dist > $max_threshold);
       } else {
@@ -340,13 +346,12 @@ method _bootstrap (Bio::Community $community) {
    my $sample_size = $self->sample_size();
    my $repetitions = $self->repetitions();
 
-  # Set 'use_weights' to sample from counts (similar to unweighted relative abundances)
+   # Set 'use_weights' to sample from counts (similar to unweighted relative abundances)
    my $use_weights = $community->use_weights;
    $community->use_weights(0);
    my $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
 
    my $overall = Bio::Community->new(
-      -name        => 'average',
       -use_weights => $use_weights,
    );
 
@@ -438,10 +443,17 @@ method _calc_representative(Bio::Community $average) {
    # Round the member count and add them into a new, representative community
    my $cur_count = 0;
    my $target_count = int( $average->get_total_count + 0.5 ); # round count like 999.9 to 1000
+
+   my $name = $average->name;
+   $name =~ s/\s*average$//;
+   $name .= ' ' if $name;
+   $name .= 'representative';
+
    my $representative = Bio::Community->new(
-      -name        => 'representative',
+      -name        => $name,
       -use_weights => $average->use_weights,
    );
+
    my $richness = 0;
    while ( my $member = $average->next_member('_calc_representative_ite') ) {
       $richness++;
