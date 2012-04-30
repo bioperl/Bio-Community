@@ -303,9 +303,9 @@ method _read_table () {
    while (my $line = $self->_readline(-raw => 1)) {
 
       # Count line length
-      $line =~ m/([\r\n]?\n)$/;
-      my $num_eol_chars = length($1);
-      my $line_length = length( $line );
+      $line =~ m/([\r\n]?\n)$/; # last line may not match
+      my $num_eol_chars = length($1||'');
+      my $line_length = length $line;
 
       # Do not index the line if it is before or after the table
       if ($. < $start_line) {
