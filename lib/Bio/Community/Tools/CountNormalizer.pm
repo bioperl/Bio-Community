@@ -37,7 +37,7 @@ by sampling artefacts. When comparing two identical communities, one for which
 community will appear less diverse. A solution is to repeatedly bootstrap the
 larger communities by taking 1,000 random members from it.
 
-This module uses Bio::Community::Sampler to take random member from communities
+This module uses L<Bio::Community::Sampler> to take random member from communities
 and normalize them by their number of counts. After all random repetitions have
 been performed, average communities or representative communities are returned.
 These communities all have the same number of counts.
@@ -109,7 +109,7 @@ extends 'Bio::Root::Root';
 
 =head2 communities
 
- Function: Get/set the communities to normalize.
+ Function: Get or set the communities to normalize.
  Usage   : my $communities = $normalizer->communities;
  Args    : arrayref of Bio::Community objects or nothing
  Returns : arrayref of Bio::Community objects
@@ -128,7 +128,7 @@ has communities => (
 
 =head2 sample_size
 
- Function: Get/set the sample size, i.e. the number of members to pick randomly
+ Function: Get or set the sample size, i.e. the number of members to pick randomly
            at each iteration. It has to be smaller than the total count of the
            smallest community or an error will be generated. If the sample size
            is omitted, it defaults to the get_total_count() of the smallest community.
@@ -150,7 +150,7 @@ has sample_size => (
 
 =head2 threshold
 
- Function: Get/set the threshold. While iterating, when the distance between the
+ Function: Get or set the threshold. While iterating, when the distance between the
            average community and the average community at the previous iteration
            decreases below this threshold, the bootstrapping is stopped. By
            default, the threshold is 1e-5. The repetitions() method provides an
@@ -177,7 +177,7 @@ has threshold => (
 
 =head2 repetitions
 
- Function: Get/set the number of bootstrap repetitions to perform. If specified,
+ Function: Get or set the number of bootstrap repetitions to perform. If specified,
            instead of relying on the threshold() to determine when to stop
            repeating the bootstrap process, perform an arbitrary number of
            repetitions. After communities have been normalized by count using
@@ -196,6 +196,26 @@ has repetitions => (
    default => undef,
    lazy => 1,
    init_arg => '-repetitions',
+);
+
+
+=head2 verbose
+
+ Function: Get or set verbose mode. In verbose mode, the current number of
+           iterations (and distance if a threshold is used) is displayed.
+ Usage   : $normalizer->verbose(1);
+ Args    : 0 or 1
+ Returns : 0 or 1
+
+=cut
+
+has verbose => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0, 
+   default => 0,
+   lazy => 1,
+   init_arg => '-verbose',
 );
 
 
@@ -332,6 +352,11 @@ method _bootstrap (Bio::Community $community) {
 
    my $members = $community->get_all_members;
 
+   my $verbose = $self->verbose;
+   if ($verbose) {
+      print "Community '".$community->name."'\n";
+   }
+
    my $prev_overall = Bio::Community->new();
    my $iteration = 0;
    my $dist;
@@ -352,10 +377,16 @@ method _bootstrap (Bio::Community $community) {
                -type        => 'euclidean',
                -communities => [$overall, $prev_overall],
          )->get_distance;
+         if ($verbose) {
+            print "   iteration $iteration, distance $dist\n";
+         }
          last if $dist < $threshold;
          $prev_overall = $overall->clone;
       } else {
          # Exit if all repetitions have been done
+         if ($verbose) {
+            print "   iteration $iteration\n";
+         }
          if ($iteration == $repetitions - 1) {
             $prev_overall = $overall->clone;
          } elsif ($iteration >= $repetitions) {
@@ -367,6 +398,10 @@ method _bootstrap (Bio::Community $community) {
          }
       }
 
+   }
+
+   if ($verbose) {
+      print "\n";
    }
 
    $community->use_weights($use_weights);

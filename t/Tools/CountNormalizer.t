@@ -53,6 +53,7 @@ ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
    -communities => [ $community1, $community2 ],
    -repetitions => 10,
    -sample_size => 1000,
+   -verbose     => 1,
 );
 
 is scalar(@{$normalizer->get_average_communities}), 2;
@@ -62,6 +63,7 @@ is $normalizer->repetitions, 10;
 isnt $normalizer->threshold, 0.1;
 cmp_ok $normalizer->threshold, '<', 1;
 is $normalizer->sample_size, 1000;
+is $normalizer->verbose, 1;
 
 $average = $normalizer->get_average_communities->[0];
 isa_ok $average, 'Bio::Community';
