@@ -113,9 +113,31 @@ has 'delim' => (
    isa => 'Str',
    required => 0,
    init_arg => '-delim',
-   default => "\t",
    lazy => 1,
+   default => "\t",
+   trigger => \&_build_re,
 );
+
+
+has '_re' => (
+   is => 'rw',
+   #isa => 'RegexpRef',
+   required => 0,
+   init_arg => '-delim',
+   lazy => 1,
+   builder => '_build_re',
+);
+
+
+sub _build_re {
+   # Build regular expression to clean table cell values, i.e. remove newline chars
+   # and delimiters
+   my ($self) = @_;
+   my $delim = $self->delim;
+   my $re = qr/(?:\r|\n|$delim)/;
+   # ...not qr/[\r\n$delim]/ because $delim can have several characters
+   $self->_re( $re );
+}
 
 
 =head2 start_line
@@ -135,8 +157,8 @@ has 'start_line' => (
    isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => '-start_line',
-   default => 1,
    lazy => 1,
+   default => 1,
 );
 
 
@@ -156,8 +178,8 @@ has 'end_line' => (
    isa => 'Maybe[StrictlyPositiveInt]',
    required => 0,
    init_arg => '-end_line',
-   default => undef,
    lazy => 1,
+   default => undef,
 );
 
 
@@ -177,8 +199,8 @@ has 'missing_string' => (
    isa => 'Str',
    required => 0,
    init_arg => '-missing_string',
-   default => '0',
    lazy => 1,
+   default => '0',
 );
 
 
@@ -196,8 +218,8 @@ has '_max_line' => (
    isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => undef,
-   default => 1,
    lazy => 1,
+   default => 1,
    reader => '_get_max_line',
    writer => '_set_max_line',
 );
@@ -217,8 +239,8 @@ has '_max_col' => (
    isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => undef,
-   default => 1,
    lazy => 1,
+   default => 1,
    reader => '_get_max_col',
    writer => '_set_max_col',
 );
@@ -249,8 +271,8 @@ has '_index' => (
    isa => 'ArrayRef', # really an ArrayRef[PositiveInt] but keep it light
    required => 0,
    init_arg => undef,
-   default => sub { [] },
    lazy => 1,
+   default => sub { [] },
    predicate => '_has_index',
 );
 
@@ -261,8 +283,8 @@ has '_values' => (
    isa => 'ArrayRef', # really an ArrayRef[Str] but keep it light
    required => 0,
    init_arg => undef,
-   default => sub { [''] },
    lazy => 1,
+   default => sub { [''] },
 );
 
 
@@ -271,8 +293,8 @@ has '_was_written' => (
    isa => 'Bool',
    required => 0,
    init_arg => undef,
-   default => 0,
    lazy => 1,
+   default => 0,
 );
 
 
@@ -377,29 +399,25 @@ method _read_table () {
 
 =cut
 
+
 #method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) { # too costly
 method _get_value ($line, $col) {
    my $val;
    if ( ($line <= $self->_get_max_line) && ($col <= $self->_get_max_col) ) {
 
-   ###my $max_cols = $self->_get_max_col; # not really faster
-   ###if ( ($col <= $max_cols) && ($line <= $self->_get_max_line) ) {
-
       # Retrieve the value if it is within the bounds of the table
       my $pos = ($line - 1) * $self->_get_max_col + $col - 1;
-      my $index = $self->_index;
-      my $offset = $index->[$pos];
+      my $offset = $self->_index->[$pos];
       seek $self->_fh, $offset, 0;
-      my $length = $index->[$pos+1] - $offset;
-      read $self->_fh, $val, $length or
-         $self->throw("Error: Could not read $length chars from offset $offset\n$!\n");
+      read $self->_fh, $val, $self->_index->[$pos+1] - $offset  or
+         $self->throw("Error: Could not read from filehandle at offset $offset: $!\n");
 
-      # Clean up delimiters and end of line characters
+      # Clean up delimiters and end of line characters using precompiled regexp
 
-      my $delim = $self->delim;
-      $val =~ s/[\r\n$delim]//g;
+      my $re = $self->_re;
+      $val =~ s/$re//g;
 
-      ###$val =~ s/[\r\n${\$self->delim}]//g; # not really any faster
+      ### how about using better offset and length instead of doing a regexp?
 
    }
    return $val;
@@ -420,10 +438,12 @@ method _get_value ($line, $col) {
 #method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) { # too costly
 method _set_value ($line, $col, $value) {
 
+   #### try _index array preallocation?
+
    my $pos = 0;
    my $values = $self->_values;
    my $max_lines = $self->_get_max_line;
-   my $max_cols = $self->_get_max_col;
+   my $max_cols  = $self->_get_max_col;
 
    # Extend table with columns if needed
    if ($col > $max_cols) {
