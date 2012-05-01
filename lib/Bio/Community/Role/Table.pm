@@ -191,13 +191,15 @@ has 'missing_string' => (
 
 =cut
 
-has '_get_max_line' => (
+has '_max_line' => (
    is => 'rw',
    isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => undef,
    default => 1,
    lazy => 1,
+   reader => '_get_max_line',
+   writer => '_set_max_line',
 );
 
 
@@ -210,13 +212,15 @@ has '_get_max_line' => (
 
 =cut
 
-has '_get_max_col' => (
+has '_max_col' => (
    is => 'rw',
    isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => undef,
    default => 1,
    lazy => 1,
+   reader => '_get_max_col',
+   writer => '_set_max_col',
 );
 
 
@@ -352,8 +356,8 @@ method _read_table () {
       push @index, @matches;
    }
    $self->_index(\@index);
-   $self->_get_max_line($max_line);
-   $self->_get_max_col($max_col);
+   $self->_set_max_line($max_line);
+   $self->_set_max_col($max_col);
 
    return 1;
 }
@@ -432,8 +436,8 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
    }
 
    # Update table dimensions
-   $self->_get_max_line($new_max_lines);
-   $self->_get_max_col($new_max_cols);
+   $self->_set_max_line($new_max_lines);
+   $self->_set_max_col($new_max_cols);
 
    # Set new value
    $pos = ($line - 1) * $new_max_cols + $col - 1;
