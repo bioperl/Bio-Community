@@ -413,9 +413,9 @@ method _get_value ($line, $col) {
          $self->throw("Error: Could not read from filehandle at offset $offset: $!\n");
 
       # Clean up delimiters and end of line characters using precompiled regexp
-
       my $re = $self->_re;
       $val =~ s/$re//g;
+      ###$val =~ s/${\$self->_re}//g;
 
       ### how about using better offset and length instead of doing a regexp?
 
@@ -448,11 +448,12 @@ method _set_value ($line, $col, $value) {
    # Extend table with columns if needed
    if ($col > $max_cols) {
       my $new_max_cols = $col;
-      my $diff = $new_max_cols - $max_cols;
+      my $max_idx = $new_max_cols * $max_lines - 1;
+      my @padding = ($self->missing_string) x ($new_max_cols - $max_cols);
       for ( my $idx  = $max_cols;
-               $idx  < $new_max_cols * $max_lines;
-               $idx += $new_max_cols               ) {
-         splice @$values, $idx, 0, ($self->missing_string)x$diff;
+               $idx <= $max_idx;
+               $idx += $new_max_cols ) {
+         splice @$values, $idx, 0, @padding;
       }
       $max_cols = $new_max_cols;
       $self->_set_max_col($new_max_cols);
@@ -461,10 +462,12 @@ method _set_value ($line, $col, $value) {
    # Extend table with lines if needed
    if ($line > $max_lines) {
       my $new_max_lines = $line;
+      my $max_idx = $max_cols * $new_max_lines - 1;
+      my @padding = ($self->missing_string) x $max_cols;
       for ( my $idx  = $max_cols * $max_lines;
-               $idx  < $max_cols * $new_max_lines;
-               $idx += $max_cols                   ) {
-         splice @$values, $idx, 0, ($self->missing_string)x$max_cols;
+               $idx <= $max_idx;
+               $idx += $max_cols ) {
+         splice @$values, $idx, 0, @padding;
       }
       $max_lines = $new_max_lines;
       $self->_set_max_line($new_max_lines);
