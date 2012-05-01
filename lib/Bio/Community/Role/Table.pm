@@ -419,14 +419,11 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
    # Extend table with columns if needed
    if ($col > $max_cols) {
       my $new_max_cols = $col;
-      while ($pos < $new_max_cols * $max_lines ) {
-         $pos++;
-         my $cur_col = ($pos - 1) % $new_max_cols + 1;
-         if ($cur_col > $max_cols) {
-            # Add a column in the table
-            splice @$values, $pos-1, 0, $self->missing_string;
-            next;
-         }
+      my $diff = $new_max_cols - $max_cols;
+      for ( my $idx  = $max_cols;
+               $idx  < $new_max_cols * $max_lines;
+               $idx += $new_max_cols              ) {
+         splice @$values, $idx, 0, ($self->missing_string)x$diff;
       }
       $max_cols = $new_max_cols;
       $self->_set_max_col($new_max_cols);
@@ -435,15 +432,10 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
    # Extend table with lines if needed
    if ($line > $max_lines) {
       my $new_max_lines = $line;
-      while ($pos < $max_cols * $new_max_lines ) {
-         $pos++;
-         my $cur_line = int( ($pos - 1) / $max_cols ) + 1;
-         if ($cur_line > $max_lines) {
-            # Add a line in the table
-            splice @$values, $pos-1, 0, ($self->missing_string)x$max_cols;
-            $pos += ($max_cols - 1);
-            next;
-         }
+      for ( my $idx  = $max_cols * $max_lines;
+               $idx  < $max_cols * $new_max_lines;
+               $idx += $max_cols                  ) {
+         splice @$values, $idx, 0, ($self->missing_string)x$max_cols;
       }
       $max_lines = $new_max_lines;
       $self->_set_max_line($new_max_lines);
