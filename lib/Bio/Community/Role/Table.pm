@@ -86,7 +86,8 @@ methods. Internal methods are usually preceded with a _
 package Bio::Community::Role::Table;
 
 use Moose::Role;
-use MooseX::Method::Signatures;
+###use MooseX::Method::Signatures;
+use Method::Signatures;
 use namespace::autoclean;
 use Fcntl;
 
@@ -224,7 +225,8 @@ has '_max_col' => (
 );
 
 
-method BUILD {
+sub BUILD {
+   my $self = shift;
    # After object constructed with new(), index table if filehandle is readable
    if ($self->mode eq 'r') {
       $self->_read_table;
@@ -246,6 +248,7 @@ before 'close' =>  sub {
 has '_index' => (
    is => 'rw',
    isa => 'ArrayRef[PositiveInt]',
+   ###isa => 'ArrayRef',
    required => 0,
    init_arg => undef,
    default => sub { [] },
@@ -258,6 +261,7 @@ has '_index' => (
 has '_values' => (
    is => 'rw',
    isa => 'ArrayRef[Str]',
+   ###isa => 'ArrayRef',
    required => 0,
    init_arg => undef,
    default => sub { [''] },
@@ -380,6 +384,9 @@ method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
    my $val;
    if ( ($line <= $self->_get_max_line) && ($col <= $self->_get_max_col) ) {
 
+   ###my $max_cols = $self->_get_max_col; # not really faster
+   ###if ( ($col <= $max_cols) && ($line <= $self->_get_max_line) ) {
+
       # Retrieve the value if it is within the bounds of the table
       my $pos = ($line - 1) * $self->_get_max_col + $col - 1;
       my $index = $self->_index;
@@ -390,8 +397,11 @@ method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
          $self->throw("Error: Could not read $length chars from offset $offset\n$!\n");
 
       # Clean up delimiters and end of line characters
+
       my $delim = $self->delim;
       $val =~ s/[\r\n$delim]//g;
+
+      ###$val =~ s/[\r\n${\$self->delim}]//g; # not really any faster
 
    }
    return $val;
@@ -422,7 +432,7 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
       my $diff = $new_max_cols - $max_cols;
       for ( my $idx  = $max_cols;
                $idx  < $new_max_cols * $max_lines;
-               $idx += $new_max_cols              ) {
+               $idx += $new_max_cols               ) {
          splice @$values, $idx, 0, ($self->missing_string)x$diff;
       }
       $max_cols = $new_max_cols;
@@ -434,7 +444,7 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
       my $new_max_lines = $line;
       for ( my $idx  = $max_cols * $max_lines;
                $idx  < $max_cols * $new_max_lines;
-               $idx += $max_cols                  ) {
+               $idx += $max_cols                   ) {
          splice @$values, $idx, 0, ($self->missing_string)x$max_cols;
       }
       $max_lines = $new_max_lines;
@@ -462,7 +472,7 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
 
 =cut
 
-method _write_table () {
+method _write_table {
    my $delim    = $self->delim;
    my $values   = $self->_values;
    my $max_cols = $self->_get_max_col;
