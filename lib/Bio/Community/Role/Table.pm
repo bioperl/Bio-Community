@@ -86,7 +86,6 @@ methods. Internal methods are usually preceded with a _
 package Bio::Community::Role::Table;
 
 use Moose::Role;
-###use MooseX::Method::Signatures;
 use Method::Signatures;
 use namespace::autoclean;
 use Fcntl;
@@ -247,8 +246,7 @@ before 'close' =>  sub {
 # Index of the location of the cells (when reading a table)
 has '_index' => (
    is => 'rw',
-   isa => 'ArrayRef[PositiveInt]',
-   ###isa => 'ArrayRef',
+   isa => 'ArrayRef', # really an ArrayRef[PositiveInt] but keep it light
    required => 0,
    init_arg => undef,
    default => sub { [] },
@@ -260,8 +258,7 @@ has '_index' => (
 # Value contained in the table cells (when writing a table)
 has '_values' => (
    is => 'rw',
-   isa => 'ArrayRef[Str]',
-   ###isa => 'ArrayRef',
+   isa => 'ArrayRef', # really an ArrayRef[Str] but keep it light
    required => 0,
    init_arg => undef,
    default => sub { [''] },
@@ -380,7 +377,8 @@ method _read_table () {
 
 =cut
 
-method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
+#method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) { # too costly
+method _get_value ($line, $col) {
    my $val;
    if ( ($line <= $self->_get_max_line) && ($col <= $self->_get_max_col) ) {
 
@@ -419,7 +417,8 @@ method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
 
 =cut
 
-method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) {
+#method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) { # too costly
+method _set_value ($line, $col, $value) {
 
    my $pos = 0;
    my $values = $self->_values;
