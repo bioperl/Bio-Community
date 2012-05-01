@@ -22,7 +22,8 @@ bp_community_bootstrap - Perform bootstrapping to normalize community compositio
 
 =head1 SYNOPSIS
 
-  bp_community_bootstrap XXX
+  bp_community_bootstrap -input_files   my_communities.generic   \
+                         -output_prefix my_converted_communities
 
 =head1 DESCRIPTION
 
@@ -75,7 +76,7 @@ the specified threshold.
 
 =for Euclid:
    dist_threshold.type: +num
-   dist_threshold.default: 1e-5
+   dist_threshold.default: 1e-4
 
 =item -nr <num_repetitions> | -num_repetitions <num_repetitions>
 
@@ -163,10 +164,6 @@ sub bootstrap {
 
    # Bootstrap and write average communities
    my $out_communities = $normalizer->get_average_communities;
-
-   ###print "Performed ".$normalizer->repetitions." repetitions.\n";
-   ###print "Final distance was <= ".$normalizer->threshold."\n";
-
    write_communities($out_communities, $output_prefix, $format, 'average');
 
    # Calculate and write representative communities
