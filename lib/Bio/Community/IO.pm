@@ -398,7 +398,7 @@ has 'multiple_communities' => (
 
 has 'weight_files' => (
    is => 'rw',
-   isa => 'ArrayRef[Str]',
+   isa => 'ArrayRef', # ArrayRef[Str] but keep it light
    required => 0,
    lazy => 1,
    default => sub { [] },
@@ -409,7 +409,7 @@ has 'weight_files' => (
 
 has '_weights' => (
    is => 'rw',
-   isa => 'ArrayRef', # ArrayRef[HashRef[Num]], but keep it lean
+   isa => 'ArrayRef', # ArrayRef[HashRef[Num]], but keep it light
    required => 0,
    lazy => 1,
    default => sub { [] },
@@ -419,7 +419,7 @@ has '_weights' => (
 
 has '_average_weights' => (
    is => 'rw',
-   isa => 'ArrayRef[Num]',
+   isa => 'ArrayRef', # ArrayRef[Num] but keep it light
    required => 0,
    lazy => 1,
    default => sub { [] },
