@@ -91,7 +91,7 @@ package Bio::Community::IO;
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use Bio::Community;
 use Bio::Community::Types;
 use Bio::Community::Tools::FormatGuesser;
@@ -186,7 +186,7 @@ method next_community {
       # Create a new community object
       $community = Bio::Community->new( -name => $name );
       # Populate the community with members
-      while ( my ($member, $count) = $self->next_member('_next_community_ite') ) {
+      while ( my ($member, $count) = $self->next_member() ) {
          last if not defined $member; # All members have been read
          $community->add_member($member, $count);
       }
@@ -283,7 +283,8 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
-method _process_member (Bio::Community::Member $member, Bio::Community $community) {
+#method _process_member (Bio::Community::Member $member, Bio::Community $community) {
+method _process_member ($member, $community) {
    my $ab_value;
    my $ab_type = $self->abundance_type;
    if ($ab_type eq 'count') {
@@ -408,7 +409,7 @@ has 'weight_files' => (
 
 has '_weights' => (
    is => 'rw',
-   isa => 'ArrayRef[HashRef[Num]]',
+   isa => 'ArrayRef', # ArrayRef[HashRef[Num]], but keep it lean
    required => 0,
    lazy => 1,
    default => sub { [] },
@@ -426,7 +427,7 @@ has '_average_weights' => (
 );
 
 
-method _read_weights {
+method _read_weights ($args) {
    my $files = $self->weight_files;
    my $all_weights = [];
    my $average_weights = [];

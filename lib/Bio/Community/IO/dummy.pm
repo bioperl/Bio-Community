@@ -69,7 +69,7 @@ package Bio::Community::IO::dummy;
 
 use Moose;
 use namespace::autoclean;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 
 extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';

@@ -84,7 +84,7 @@ package Bio::Community::IO::gaas;
 
 use Moose;
 use namespace::autoclean;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use Bio::Community::Member;
 
 extends 'Bio::Community::IO';

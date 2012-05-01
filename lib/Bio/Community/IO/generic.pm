@@ -79,7 +79,7 @@ Email florent.angly@gmail.com
 package Bio::Community::IO::generic;
 
 use Moose;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Member;
 
@@ -127,7 +127,7 @@ has '_col' => (
 
 has '_members' => (
    is => 'rw',
-   isa => 'ArrayRef[Bio::Community::Member]',
+   isa => 'ArrayRef', # ArrayRef[Bio::Community::Member] but keep it lean
    required => 0,
    init_arg => undef,
    default => sub { [] },
@@ -138,7 +138,7 @@ has '_members' => (
 
 has '_id2line' => (
    is => 'rw',
-   isa => 'HashRef[String]',
+   isa => 'HashRef', # HashRef[String] but keep it lean
    required => 0,
    init_arg => undef,
    default => sub { {} },
