@@ -77,8 +77,8 @@ methods. Internal methods are usually preceded with a _
  Usage   : my $member = Bio::Community::IO->new( -file => 'community.txt' );
  Args    : -file   : Path of a community file
            -format : Format of the file: 'generic', 'gaas', 'qiime'. This is
-                    optional because in most cases, the format can be
-                    automatically detected.
+                     optional because in most cases, the format can be
+                     automatically detected.
            -weights: Arrayref of files that contains weights
            See Bio::Root::IO for other accepted constructors, like -fh.
  Returns : A Bio::Community::IO object
