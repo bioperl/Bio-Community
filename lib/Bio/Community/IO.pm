@@ -80,11 +80,7 @@ methods. Internal methods are usually preceded with a _
                     optional because in most cases, the format can be
                     automatically detected.
            -weights: Arrayref of files that contains weights
-
-#### IMPLEMENT WEIGHT READING!
-
            See Bio::Root::IO for other accepted constructors, like -fh.
-
  Returns : A Bio::Community::IO object
 
 =cut
@@ -391,6 +387,9 @@ has 'multiple_communities' => (
  Usage   : $in->weight_files();
  Function: Specify files containing weights to assign to the community members.
            Each type of file can contain a different type of weight to add.
+           The file should contain two tab-delimited columns: the first one
+           should contain the description of the member, and the second one the
+           weight to assign to this member.
  Args    : arrayref of file names
  Returns : arrayref of file names
 
