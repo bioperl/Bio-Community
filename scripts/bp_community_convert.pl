@@ -119,6 +119,7 @@ sub convert {
    # Read input communities
    my @communities;
    for my $input_file (@$input_files) {
+      print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new( -file => $input_file );
       while (my $community = $in->next_community) {
          push @communities, $community;
