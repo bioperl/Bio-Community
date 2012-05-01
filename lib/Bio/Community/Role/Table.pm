@@ -411,29 +411,15 @@ method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
 
 method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) {
 
-   # Extend table if necessary
-
    my $pos = 0;
    my $values = $self->_values;
-
    my $max_lines = $self->_get_max_line;
    my $max_cols = $self->_get_max_col;
 
-   my $new_max_lines = $max_lines;
-   my $new_max_cols  = $max_cols;
-
-   my $extend = 0;
-   if ($line > $max_lines) {
-      $new_max_lines = $line;
-      $extend = 1;
-   }
+   # Extend table with columns if needed
    if ($col > $max_cols) {
-      $new_max_cols = $col;
-      $extend = 1;
-   }
-
-   if ( $extend ) {
-      while ($pos < $new_max_cols * $new_max_lines ) {
+      my $new_max_cols = $col;
+      while ($pos < $new_max_cols * $max_lines ) {
          $pos++;
          my $cur_col = ($pos - 1) % $new_max_cols + 1;
          if ($cur_col > $max_cols) {
@@ -441,23 +427,30 @@ method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) 
             splice @$values, $pos-1, 0, $self->missing_string;
             next;
          }
-         my $cur_line = int( ($pos - 1) / $new_max_cols ) + 1;
-         if ($cur_line > $max_lines) {
-            # Add a line in the table
-            splice @$values, $pos-1, 0, ($self->missing_string)x$new_max_cols;
-            $pos += ($new_max_cols - 1);
-            next;
-         }
       }
-
-      # Update table dimensions
-      $self->_set_max_line($new_max_lines);
+      $max_cols = $new_max_cols;
       $self->_set_max_col($new_max_cols);
    }
 
+   # Extend table with lines if needed
+   if ($line > $max_lines) {
+      my $new_max_lines = $line;
+      while ($pos < $max_cols * $new_max_lines ) {
+         $pos++;
+         my $cur_line = int( ($pos - 1) / $max_cols ) + 1;
+         if ($cur_line > $max_lines) {
+            # Add a line in the table
+            splice @$values, $pos-1, 0, ($self->missing_string)x$max_cols;
+            $pos += ($max_cols - 1);
+            next;
+         }
+      }
+      $max_lines = $new_max_lines;
+      $self->_set_max_line($new_max_lines);
+   }
 
    # Set new value
-   $pos = ($line - 1) * $new_max_cols + $col - 1;
+   $pos = ($line - 1) * $max_cols + $col - 1;
    $values->[$pos] = $value;
 
    return 1;
