@@ -85,7 +85,7 @@ package Bio::Community::Tools::Summarizer;
 
 use Moose;
 use MooseX::NonMoose;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use namespace::autoclean;
 
 extends 'Bio::Root::Root';
@@ -105,7 +105,7 @@ has communities => (
    isa => 'ArrayRef[Bio::Community]',
    required => 0,
    lazy => 1,
-   default => sub{ [] },
+   default => sub { [] },
    init_arg => '-communities',
 );
 
@@ -129,9 +129,7 @@ has communities => (
 
 has group => (
    is => 'rw',
-   isa => 'ArrayRef[Str]',
-   ### hot to specify a different type for first and second element of arrayref?
-   ###   ArrayRef[Str, Num]
+   isa => 'ArrayRef', # how to specify ArrayRef[Str, Num]?
    required => 0,
    lazy => 1,
    default => undef,

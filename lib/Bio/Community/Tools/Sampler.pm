@@ -86,7 +86,7 @@ package Bio::Community::Tools::Sampler;
 
 use Moose;
 use MooseX::NonMoose;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use namespace::autoclean;
 use List::Util qw( first );
 use Bio::Community;
@@ -94,7 +94,7 @@ use Bio::Community;
 extends 'Bio::Root::Root';
 
 
-method BUILD {
+method BUILD ($args) {
    # Prepare the CDF that we will be sampling from after new()
    my ($cdf, $members) = $self->_calc_cdf();
    $self->_cdf( $cdf );
@@ -122,7 +122,7 @@ has community => (
 
 has _cdf => (
    is => 'rw',
-   isa => 'ArrayRef[PositiveNum]',
+   isa => 'ArrayRef', # ArrayRef[PositiveNum]
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
@@ -131,7 +131,7 @@ has _cdf => (
 
 has _members => (
    is => 'rw',
-   isa => 'ArrayRef[Bio::Community::Member]',
+   isa => 'ArrayRef', # ArrayRef[Bio::Community::Member]
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
@@ -147,7 +147,7 @@ has _members => (
 
 =cut
 
-method get_rand_member () {
+method get_rand_member {
    # Pick a random member based on the community's cdf
    my $cdf = $self->_cdf;
    my $rand_pick = rand();
@@ -172,7 +172,7 @@ method get_rand_community ( StrictlyPositiveInt $total_count = 1 ) {
 }
 
 
-method _calc_cdf () {
+method _calc_cdf {
    # Sort the members of the community by decreasing rank and calculate the
    # cumulative density function of their relative abundance
    my $community = $self->community;

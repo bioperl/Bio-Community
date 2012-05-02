@@ -28,7 +28,6 @@ my $build = Module::Build->new(
                              'Moose'                        =>  0,
                              'Moose::Util::TypeConstraints' =>  0,
                              'MooseX::NonMoose'             =>  0,
-                             'MooseX::Method::Signatures'   =>  0,
                              'Parallel::Iterator'           =>  0,
                             },
     recommends           => {

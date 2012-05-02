@@ -100,7 +100,7 @@ package Bio::Community::Tools::Ruler;
 
 use Moose;
 use MooseX::NonMoose;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use namespace::autoclean;
 
 extends 'Bio::Root::Root';
@@ -137,7 +137,7 @@ has type => (
 
 ####after new => sub { # prevents inlining
 #### or maybe try BUILD
-method get_distance () {
+method get_distance {
    my $dist;
    my $type = $self->type;
    if ($type eq '1-norm') {

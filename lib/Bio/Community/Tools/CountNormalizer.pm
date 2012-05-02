@@ -97,7 +97,7 @@ package Bio::Community::Tools::CountNormalizer;
 
 use Moose;
 use MooseX::NonMoose;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Tools::Sampler;
 use Bio::Community::Tools::Ruler;
@@ -231,7 +231,7 @@ has verbose => (
 
 has average_communities => (
    is => 'rw',
-   isa => 'ArrayRef[Bio::Community]',
+   isa => 'ArrayRef', # ArrayRef[Bio::Community]
    required => 0,
    default => sub { [] },
    lazy => 1,
@@ -259,7 +259,7 @@ before get_average_communities => sub {
 
 has representative_communities => (
    is => 'rw',
-   isa => 'ArrayRef[Bio::Community]',
+   isa => 'ArrayRef', # ArrayRef[Bio::Community]
    required => 0,
    default => sub { [] },
    lazy => 1,
@@ -416,7 +416,8 @@ method _bootstrap (Bio::Community $community) {
 }
 
 
-method _add (Bio::Community $existing, Bio::Community $new, $members) {
+#method _add (Bio::Community $existing, Bio::Community $new, $members) {
+method _add ($existing, $new, $members) { # keep it lean
    # Add a new community to an existing one
    for my $member (@$members) {
       my $count = $new->get_count($member);
@@ -439,7 +440,6 @@ method _divide (Bio::Community $community, StrictlyPositiveInt $divisor, $member
 
 
 method _calc_representative(Bio::Community $average) {
-
    # Round the member count and add them into a new, representative community
    my $cur_count = 0;
    my $target_count = int( $average->get_total_count + 0.5 ); # round count like 999.9 to 1000

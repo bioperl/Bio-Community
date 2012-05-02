@@ -110,7 +110,7 @@ package Bio::Community::Member;
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use Bio::Community::Types;
 
 extends 'Bio::Root::Root';
@@ -151,7 +151,7 @@ after id => sub {
    $ids{$self->{id}} = undef;
 };
 
-method BUILD {
+method BUILD ($args) {
    # Ensure that a default ID is assigned if needed after object construction
    $self->id;
 }

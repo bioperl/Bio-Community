@@ -119,7 +119,7 @@ package Bio::Community::Tools::FormatGuesser;
 
 use Moose;
 use MooseX::NonMoose;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use namespace::autoclean;
 
 extends 'Bio::Root::Root';

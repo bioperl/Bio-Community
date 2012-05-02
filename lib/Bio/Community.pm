@@ -92,7 +92,7 @@ package Bio::Community;
 
 use Moose;
 use MooseX::NonMoose;
-use MooseX::Method::Signatures;
+use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Member;
 use Parallel::Iterator qw( iterate );
@@ -139,7 +139,6 @@ has use_weights => (
    lazy => 1,
    default => 1,
    init_arg => '-use_weights',
-   trigger => \&_has_changed,  ### not needed??
 );
 
 
@@ -173,7 +172,7 @@ has _weighted_count => (
 
 has _members => (
    is => 'rw',
-   isa => 'HashRef', ### be more specific
+   isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -182,7 +181,7 @@ has _members => (
 
 has _counts => (
    is => 'rw',
-   isa => 'HashRef', ### be more specific
+   isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -191,7 +190,7 @@ has _counts => (
 
 has _ranks_hash_weighted => (
    is => 'rw',
-   isa => 'HashRef', ### be more specific
+   isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -201,7 +200,7 @@ has _ranks_hash_weighted => (
 
 has _ranks_arr_weighted => (
    is => 'rw',
-   isa => 'ArrayRef', ### be more specific
+   isa => 'ArrayRef',
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
@@ -211,7 +210,7 @@ has _ranks_arr_weighted => (
 
 has _ranks_hash_unweighted => (
    is => 'rw',
-   isa => 'HashRef', ### be more specific
+   isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -221,7 +220,7 @@ has _ranks_hash_unweighted => (
 
 has _ranks_arr_unweighted => (
    is => 'rw',
-   isa => 'ArrayRef', ### be more specific
+   isa => 'ArrayRef',
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
@@ -241,7 +240,7 @@ has _richness => (
 
 has _members_iterator => (
    is => 'rw',
-   isa => 'Maybe[HashRef]', ### be more specific
+   isa => 'Maybe[HashRef]',
    lazy => 1,
    default => undef,
    init_arg => undef,
@@ -319,7 +318,7 @@ method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
 
 =cut
 
-method next_member ( Str $iter_name = 'default' ) {
+method next_member ( $iter_name = 'default' ) {
    my $iters = $self->_members_iterator;
 
    # Create a named iterator
@@ -368,7 +367,8 @@ method next_member ( Str $iter_name = 'default' ) {
 
 =cut
 
-method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
+#method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
+method get_all_members ( $other_communities = [] ) {
 
    # Prepend $self to list of communities if it is not already in there
    my $communities = $other_communities;
