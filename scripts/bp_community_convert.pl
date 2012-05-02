@@ -68,6 +68,22 @@ table), qiime or gaas. Default: output_format.default
    output_format.type: string
    output_format.default: 'generic'
 
+=item -in <include_names>... | -include_names <include_names>...
+
+If names of communities are specified, only these communities will be
+included in the output file.
+
+=for Euclid:
+   include_names.type: string
+
+=item -en <exclude_names>... | -exclude_names <exclude_names>...
+
+If names of communities are specified, these communities will be excluded from
+the output file.
+
+=for Euclid:
+   exclude_names.type: string
+
 =back
 
 =head1 FEEDBACK
@@ -109,12 +125,31 @@ Email florent.angly@gmail.com
 =cut
 
 
-convert( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'output_format'} );
+convert( $ARGV{'input_files'}  , $ARGV{'output_prefix'}, $ARGV{'output_format'},
+         $ARGV{'include_names'}, $ARGV{'exclude_names'} );
+
 exit;
 
 
 sub convert {
-   my ($input_files, $output_prefix, $output_format) = @_;
+   my ($input_files, $output_prefix, $output_format, $include_names, $exclude_names) = @_;
+
+   # Prepare communities to include or exclude 
+   my $nof_includes = 0;
+   my %includes;
+   if (defined $include_names) {
+      $nof_includes = scalar @$include_names;
+      %includes = map { $_ => undef } @$include_names;
+   }
+   my %excludes;
+   if (defined $exclude_names) {
+      %excludes = map { $_ => undef } @$exclude_names;
+   }
+   while ( my ($include, undef) = each %includes ) {
+      if (exists $excludes{$include}) {
+         die "Error: Cannot request to include and exclude community '$include' at the same time\n";
+      }
+   }
 
    # Read input communities
    my @communities;
@@ -122,7 +157,18 @@ sub convert {
       print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new( -file => $input_file );
       while (my $community = $in->next_community) {
-         push @communities, $community;
+         my $name = $community->name;
+         if ( $nof_includes > 0 ) {
+            # Only include specifically requested communities
+            if ( exists $includes{$name} ) {
+               push @communities, $community;
+            }
+         } else {
+            if ( not exists $excludes{$name} ) {
+               push @communities, $community;
+
+            } # else it is specifically excluded
+         }
       }
       $in->close;
    }
