@@ -165,7 +165,8 @@ method next_member {
 =head2 next_community
 
  Usage   : my $community = $in->next_community;
- Function: Get the next community.
+ Function: Get the next community. Note that communities without members are
+           skipped.
  Args    : None
  Returns : A Bio::Community object
              or
