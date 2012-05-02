@@ -121,9 +121,8 @@ has 'delim' => (
 
 has '_re' => (
    is => 'rw',
-   #isa => 'RegexpRef',
+   isa => 'RegexpRef',
    required => 0,
-   init_arg => '-delim',
    lazy => 1,
    builder => '_build_re',
 );
