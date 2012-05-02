@@ -163,14 +163,17 @@ method _generate_members {
 method next_member {
    my ($member, $count);
    my $line = $self->_line;
-   while ($line++) {
-      # Get the abundance of the member
+   while ( $line++ ) {
+      # Get the abundance of the member (undef if out-of-bounds)
       $count = $self->_get_value($line, $self->_col);
-      last if not defined $count; # out of table bounds
-      next if not $count; # skip counts of 0
+      # No more members for this community.
+      last if not defined $count;
+      # Skip members with no abundance
+      next if not $count;  # e.g. ''
+      next if $count == 0; # e.g. 0.0
       # Get the member itself
       $member = $self->_members->[$line - 2];
-      $self->_line( $line );
+      $self->_line($line);
       last;
    }
    return $member, $count;
