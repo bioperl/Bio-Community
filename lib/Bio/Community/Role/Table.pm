@@ -115,28 +115,17 @@ has 'delim' => (
    init_arg => '-delim',
    lazy => 1,
    default => "\t",
-   trigger => \&_build_re,
 );
 
 
-has '_re' => (
+# New lines can be: \n, \r\n, ... Record number of newline chars here
+has '_num_eol_chars' => (
    is => 'rw',
-   isa => 'RegexpRef',
+   isa => 'PositiveInt',
    required => 0,
    lazy => 1,
-   builder => '_build_re',
+   default => 0,
 );
-
-
-sub _build_re {
-   # Build regular expression to clean table cell values, i.e. remove newline chars
-   # and delimiters
-   my ($self) = @_;
-   my $delim = $self->delim;
-   my $re = qr/(?:\r|\n|$delim)/;
-   # ...not qr/[\r\n$delim]/ because $delim can have several characters
-   $self->_re( $re );
-}
 
 
 =head2 start_line
@@ -326,11 +315,18 @@ method _read_table () {
    my $delim_length = length $delim;
 
    my $file_offset = 0;
+   my $num_eol_chars;
+
    while (my $line = $self->_readline(-raw => 1)) {
 
-      # Count line length
-      $line =~ m/([\r\n]?\n)$/; # last line may not match
-      my $num_eol_chars = length($1||'');
+      ####
+      if (not defined $num_eol_chars) {
+         # Count line length
+         $line =~ m/([\r\n]?\n)$/; # last line may not match
+         $num_eol_chars = length($1||'');
+      }
+      ####
+
       my $line_length = length $line;
 
       # Do not index the line if it is before or after the table
@@ -377,6 +373,8 @@ method _read_table () {
       $max_line++;
       push @index, @matches;
    }
+
+   $self->_num_eol_chars( $num_eol_chars );
    $self->_index(\@index);
    $self->_set_max_line($max_line);
    $self->_set_max_col($max_col);
@@ -394,7 +392,7 @@ method _read_table () {
            A strictly positive integer for the column
  Returns : A string for the value of the table at the given line and column
              or
-           undef if line or column were out-of-bounds
+           undef if line or column was out-of-bounds
 
 =cut
 
@@ -403,22 +401,31 @@ method _read_table () {
 sub _get_value { # this function is called a lot, keep it lean
    my ($self, $line, $col) = @_;
    my $val;
-   if ( ($line <= $self->_get_max_line) && ($col <= $self->_get_max_col) ) {
+   my $max_col = $self->_get_max_col;
+   if ( ($line <= $self->_get_max_line) && ($col <= $max_col) ) {
 
       # Retrieve the value if it is within the bounds of the table
-      my $pos = ($line - 1) * $self->_get_max_col + $col - 1;
+      my $pos = ($line - 1) * $max_col + $col - 1;
       my $offset = $self->_index->[$pos];
+
+      # Adjust offset
+      if ( $pos % $max_col ) {
+         # For columns (except first one), account for prepended delimiter
+         my $delim_len = length $self->delim;
+         $offset += $delim_len;
+      } else {
+         if ($pos) {
+            # For lines (except first one), account for preprended new line chars
+            $offset += $self->_num_eol_chars;
+         }
+      }
+
+      # Read value
       seek $self->_fh, $offset, 0;
-      read $self->_fh, $val, $self->_index->[$pos+1] - $offset  or
-         $self->throw("Error: Could not read from filehandle at offset $offset: $!\n");
-
-      # Clean up delimiters and end of line characters using precompiled regexp
-      my $re = $self->_re;
-      $val =~ s/$re//g;
-      ###$val =~ s/${\$self->_re}//g;
-
-      ### how about using better offset and length instead of doing a regexp?
-      ### or maybe 2 anchored regexps, one for the front and one for the back
+      read $self->_fh, $val, $self->_index->[$pos+1] - $offset;
+      if ($!) {
+         $self->throw("Could not read from filehandle at offset $offset: $!\n");
+      }
 
    }
    return $val;
@@ -511,5 +518,3 @@ method _write_table {
 
 
 1;
-
-
