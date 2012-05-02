@@ -312,7 +312,7 @@ sub _possibly_generic {
       if ($line_num == 1) {
         $ok = 1 if $line !~ m/^#/; #### don't like this... too restrictive
       } else {
-        $ok = 1;
+        $ok = 1 if $line !~ m/^#/;
       }
    }
    return $ok;
@@ -331,7 +331,7 @@ sub _possibly_gaas {
       if ($line_num == 1) {
         $ok = 1 if $line =~ m/^#/; ### second string is an integer third a float
       } else {
-        $ok = 1;
+        $ok = 1 if $line !~ m/^#/;
       }
    }
    return $ok;
@@ -347,7 +347,7 @@ sub _possibly_qiime {
    # 1	0	142	2
    my $ok = 0;
    if ($line_num == 1) {
-      if ($line =~ m/^# QIIME/) {
+      if ($line =~ m/^#\s*QIIME/) {
          $ok = 1;
       }
    } else {
