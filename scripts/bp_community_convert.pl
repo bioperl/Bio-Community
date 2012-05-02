@@ -173,33 +173,37 @@ sub convert {
       $in->close;
    }
 
-   # Write output communities
-   my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
-   my $num = 0;
-   my $out;
-   my $output_file;
-   for my $community (@communities) {
-      if (not defined $out) {
-         if ($multiple_communities) {
-            $output_file = $output_prefix.'.'.$output_format;
-         } else {
-            $num++;
-            $output_file = $output_prefix.'_'.$num.'.'.$output_format;
+   if (scalar @communities == 0) {
+      warn "Warning: No communities to write\n";
+   } else {
+      # Write output communities
+      my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
+      my $num = 0;
+      my $out;
+      my $output_file;
+      for my $community (@communities) {
+         if (not defined $out) {
+            if ($multiple_communities) {
+               $output_file = $output_prefix.'.'.$output_format;
+            } else {
+              $num++;
+               $output_file = $output_prefix.'_'.$num.'.'.$output_format;
+            }
+            $out = Bio::Community::IO->new(
+               -format => $output_format,
+               -file   => '>'.$output_file,
+            );
          }
-         $out = Bio::Community::IO->new(
-            -format => $output_format,
-            -file   => '>'.$output_file,
-         );
+         print "Writing community '".$community->name."' to file '$output_file'\n";
+         $out->write_community($community);
+         if (not $multiple_communities) {
+            $out->close;
+            $out = undef;
+         }
       }
-      print "Writing community '".$community->name."' to file '$output_file'\n";
-      $out->write_community($community);
-      if (not $multiple_communities) {
+      if (defined $out) {
          $out->close;
-         $out = undef;
       }
-   }
-   if (defined $out) {
-      $out->close;
    }
 
    return 1;
