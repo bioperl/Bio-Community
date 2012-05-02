@@ -400,8 +400,9 @@ method _read_table () {
 =cut
 
 
-#method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) { # too costly
-method _get_value ($line, $col) {
+#method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
+sub _get_value { # this function is called a lot, keep it lean
+   my ($self, $line, $col) = @_;
    my $val;
    if ( ($line <= $self->_get_max_line) && ($col <= $self->_get_max_col) ) {
 
@@ -435,8 +436,9 @@ method _get_value ($line, $col) {
 
 =cut
 
-#method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) { # too costly
-method _set_value ($line, $col, $value) {
+#method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) {
+sub _set_value {  # this function is called a lot, keep it lean
+   my ($self, $line, $col, $value) = @_;
 
    #### try _index array preallocation?
 
