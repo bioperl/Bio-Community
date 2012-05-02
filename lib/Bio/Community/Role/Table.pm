@@ -419,6 +419,7 @@ sub _get_value { # this function is called a lot, keep it lean
       ###$val =~ s/${\$self->_re}//g;
 
       ### how about using better offset and length instead of doing a regexp?
+      ### or maybe 2 anchored regexps, one for the front and one for the back
 
    }
    return $val;

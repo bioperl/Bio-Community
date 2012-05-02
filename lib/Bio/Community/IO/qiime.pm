@@ -239,6 +239,7 @@ method _generate_members {
          my $taxo = $self->_get_value($line, $taxo_col);
          $member->desc( $taxo );
       }
+      $self->_attach_weights($member);
       push @members, $member;
    }
    $self->_members(\@members);
@@ -248,20 +249,16 @@ method _generate_members {
 method next_member {
    my ($member, $count);
    my $line = $self->_line;
-   while ( $line++ ) {
-      # Get the abundance of the member (undef if out-of-bounds)
+   while ($line++) {
+      # Get the abundance of the member
       $count = $self->_get_value($line, $self->_col);
-      # No more members for this community.
-      last if not defined $count;
-      # Skip members with no abundance / abundance of 0
-      next if not $count;
-      next if $count == 0;
+      last if not defined $count; # out of table bounds
+      next if not $count; # skip counts of 0
       # Get the member itself
       $member = $self->_members->[$line - 2];
+      $self->_line( $line );
       last;
    }
-   $self->_line($line);
-   $self->_attach_weights($member);
    return $member, $count;
 }
 

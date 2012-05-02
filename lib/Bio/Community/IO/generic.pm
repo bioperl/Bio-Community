@@ -153,6 +153,7 @@ method _generate_members {
    for my $line (2 .. $self->_get_max_line) {
       my $value = $self->_get_value($line, $col);
       my $member = Bio::Community::Member->new( -desc => $value );
+      $self->_attach_weights($member);
       push @members, $member;
    }
    $self->_members(\@members);
@@ -162,23 +163,18 @@ method _generate_members {
 method next_member {
    my ($member, $count);
    my $line = $self->_line;
-   while ( $line++ ) {
-      # Get the abundance of the member (undef if out-of-bounds)
+   while ($line++) {
+      # Get the abundance of the member
       $count = $self->_get_value($line, $self->_col);
-      # No more members for this community.
-      last if not defined $count;
-      # Skip members with no abundance / abundance of 0
-      next if not $count;
-      next if $count == 0;
+      last if not defined $count; # out of table bounds
+      next if not $count; # skip counts of 0
       # Get the member itself
       $member = $self->_members->[$line - 2];
+      $self->_line( $line );
       last;
    }
-   $self->_line($line);
-   $self->_attach_weights($member);
    return $member, $count;
 }
-
 
 method _next_community_init {
    # Go to start of next column and return name of new community. The first time,
@@ -221,9 +217,20 @@ method _write_community_init (Bio::Community $community) {
       $self->_write_headers;
       $self->_first_community(0);
    }
-   # Write header for that community
-   my $line = 1;
+
+
    my $col  = $self->_col + 1;
+   my $line = 1;
+
+   ####
+   # Try to extend the table now if needed
+   #$line = $community->get_richness;
+   #if ($line > $self->_get_max_line) {
+   #   $self->_set_value( $line , $col, $self->missing_string );
+   #}
+   ####
+
+   # Write header for that community
    $self->_set_value($line, $col, $community->name);
    $self->_line( $line + 1);
    $self->_col( $col );
