@@ -76,7 +76,7 @@ the specified threshold.
 
 =for Euclid:
    dist_threshold.type: +num
-   dist_threshold.default: 1e-4
+   dist_threshold.default: 1e-3
 
 =item -nr <num_repetitions> | -num_repetitions <num_repetitions>
 

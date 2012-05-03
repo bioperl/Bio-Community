@@ -169,7 +169,7 @@ has threshold => (
    is => 'rw',
    isa => 'Maybe[PositiveNum]',
    required => 0, 
-   default => 1E-4, # it may not be possible to reach < 1e-4 for simplistic communities
+   default => 1E-3, # it may not be possible to reach < 1e-4 for simplistic communities
    lazy => 1,
    init_arg => '-threshold',
 );
@@ -298,11 +298,16 @@ method _count_normalize {
    } else {
       if ($sample_size > $min) {
          $self->throw("Was given a sample size of $sample_size which is larger".
-            " than the smaller community ($min counts)");
+            " than the smallest community ($min counts)");
       }
    }
    if ($self->verbose) {
       print "Bootstrap sample size: $sample_size\n";
+      if ($self->repetitions) {
+         print "Bootstrap number of repetitions: ".$self->repetitions."\n";
+      } else {
+         print "Bootstrap distance threshold: ".$self->threshold."\n";
+      }
    }
 
    # Bootstrap now
@@ -333,6 +338,9 @@ method _count_normalize {
    if (defined $self->repetitions) {
       $self->threshold($max_threshold);
    } else {
+      if ($min_repetitions == POSIX::DBL_MAX) {
+         $min_repetitions = 0;
+      }
       $self->repetitions($min_repetitions);
    }
 
