@@ -153,7 +153,7 @@ has use_weights => (
 
 has total_count => (
    is => 'ro',
-   isa => 'PositiveNum',
+   #isa => 'PositiveNum', # too costly for an internal method
    lazy => 1,
    default => 0,
    init_arg => undef,
@@ -164,7 +164,7 @@ has total_count => (
 
 has _weighted_count => (
    is => 'rw',
-   isa => 'PositiveNum',
+   #isa => 'PositiveNum', # too costly for an internal method
    lazy => 1,
    default => 0,
    init_arg => undef,

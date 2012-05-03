@@ -168,16 +168,32 @@ method get_rand_member {
 
  Function: Create a community from random members of a community
  Usage   : my $community = $sampler->get_rand_community(1000);
- Args    : Number of members
+ Args    : Number of members (strictly positive integer)
  Returns : A Bio::Community object
 
 =cut
 
 method get_rand_community ( StrictlyPositiveInt $total_count = 1 ) {
-   my $community = Bio::Community->new();
+   # Adding random members 1 by 1 in a communty is slow. Generate all the members
+   # first. Then add them all at once to a community.
+
+   # 1/ Generate all random members
+   my $members = {};
+   my $counts  = {};
    for (1 .. $total_count) {
-      $community->add_member( $self->get_rand_member );
+      my $member = $self->get_rand_member;
+      my $id = $member->id;
+      $members->{$id} = $member;
+      $counts->{$id}++;
    }
+
+   # 2/ Add all members in a community object
+   my $community = Bio::Community->new();
+   while (my ($id, $member) = each %$members) {
+      my $count = $counts->{$id};
+      $community->add_member( $member, $count );
+   }
+   
    return $community;
 }
 
