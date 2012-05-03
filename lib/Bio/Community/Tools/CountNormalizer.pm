@@ -477,9 +477,19 @@ method _calc_representative(Bio::Community $average) {
    if ($cur_count != $target_count) {
 
       if ($cur_count == $target_count + 1) {
-         # Total count too large by 1. Decrease the count of the least abundant member
-         my $last_member = $average->get_member_by_rank($richness);
-         $representative->remove_member($last_member, 1);
+         # Total count too large by 1. Decrease the count of the least abundant
+         # member of the average community that is also present in the
+         # representative community
+         my $rank = $richness;
+         while (1) {
+            my $member = $average->get_member_by_rank($rank);
+            if ( $representative->get_count($member) ) {
+               $representative->remove_member($member, 1);
+               last;
+            }
+            $rank--;            
+         }
+
       } elsif ($cur_count == $target_count - 1) {
          # Total count too small by 1. Increment the count of the appropriate member
          # For an average community with a tail with counts 2.3, 1.3, 1.2, we want
@@ -495,6 +505,7 @@ method _calc_representative(Bio::Community $average) {
          }
          my $member_to_increment = $average->get_member_by_rank($rank + 1);
          $representative->add_member($member_to_increment, 1);
+
       } else {
          $self->throw("Internal problem. Unexpected current count of $cur_count");
       }
