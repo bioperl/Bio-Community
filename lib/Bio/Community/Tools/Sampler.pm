@@ -154,8 +154,8 @@ has _members => (
 method get_rand_member {
    # Pick a random member based on the community's cdf
    my $rand_pick = rand();
-   my $index = 1;
    my $cdf = $self->_cdf;
+   my $index = 1;
    while (1) {
       last if $rand_pick < $cdf->[$index];
       $index++;

@@ -134,26 +134,31 @@ my $last_id = 1;
 =cut
 
 has id => (
-   is => 'ro',
+   is => 'rw',
    isa => 'Str',
    required => 0,
    init_arg => '-id',
-   default => sub {
-         while (exists $ids{$last_id}) { $last_id++; };
-         return $last_id;
-      },
-   lazy => 1,
+   lazy => 0,
+   predicate => '_has_id',
+   trigger => \&_register_id,
 );
 
-after id => sub {
+
+sub _register_id {
    # Register ID after it has been assigned
    my $self = shift;
    $ids{$self->{id}} = undef;
 };
 
+
 method BUILD ($args) {
    # Ensure that a default ID is assigned if needed after object construction
-   $self->id;
+   if (not $self->_has_id) {
+      while (exists $ids{$last_id}) {
+         $last_id++;
+      }
+      $self->id($last_id);
+   }
 }
 
 
