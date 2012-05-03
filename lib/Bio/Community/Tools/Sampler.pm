@@ -91,6 +91,10 @@ use namespace::autoclean;
 use List::Util qw( first );
 use Bio::Community;
 
+####
+#use Math::Random::MT qw(srand rand);
+####
+
 extends 'Bio::Root::Root';
 
 
@@ -149,10 +153,14 @@ has _members => (
 
 method get_rand_member {
    # Pick a random member based on the community's cdf
-   my $cdf = $self->_cdf;
    my $rand_pick = rand();
-   my $index = first {$rand_pick < $$cdf[$_+1]} (0 .. scalar @$cdf - 2);
-   return ${$self->_members}[$index];
+   my $index = 1;
+   my $cdf = $self->_cdf;
+   while (1) {
+      last if $rand_pick < $cdf->[$index];
+      $index++;
+   }
+   return ${$self->_members}[$index-1];
 }
 
 
@@ -167,7 +175,9 @@ method get_rand_member {
 
 method get_rand_community ( StrictlyPositiveInt $total_count = 1 ) {
    my $community = Bio::Community->new();
-   $community->add_member( $self->get_rand_member ) for (1 .. $total_count);
+   for (1 .. $total_count) {
+      $community->add_member( $self->get_rand_member );
+   }
    return $community;
 }
 
