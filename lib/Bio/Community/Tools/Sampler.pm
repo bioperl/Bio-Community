@@ -155,12 +155,12 @@ method get_rand_member {
    # Pick a random member based on the community's cdf
    my $rand_pick = rand();
    my $cdf = $self->_cdf;
-   my $index = 1;
+   my $index = 0;
    while (1) {
       last if $rand_pick < $cdf->[$index];
       $index++;
    }
-   return ${$self->_members}[$index-1];
+   return ${$self->_members}[$index];
 }
 
 
@@ -203,13 +203,13 @@ method _calc_cdf {
    # cumulative density function of their relative abundance
    my $community = $self->community;
 
-   my @cdf = (0);
+   my @cdf;
    my @members = ();
    while ( my $member = $community->next_member('_calc_cdf_ite') ) {
       my $rank = $community->get_rank($member);
       $members[$rank-1] = $member;
       my $rel_ab = $community->get_rel_ab($member);
-      $cdf[$rank] = $rel_ab / 100;
+      $cdf[$rank-1] = $rel_ab / 100;
    }
 
    for my $i ( 1 .. scalar @cdf - 1 ) {
