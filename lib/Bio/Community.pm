@@ -153,7 +153,7 @@ has use_weights => (
 
 has total_count => (
    is => 'ro',
-   isa => 'Count', 
+   isa => 'PositiveNum',
    lazy => 1,
    default => 0,
    init_arg => undef,
@@ -161,9 +161,10 @@ has total_count => (
    writer => '_set_total_count',
 );
 
+
 has _weighted_count => (
    is => 'rw',
-   isa => 'Count',
+   isa => 'PositiveNum',
    lazy => 1,
    default => 0,
    init_arg => undef,
@@ -247,24 +248,33 @@ has _members_iterator => (
    clearer => '_clear_members_iterator',
 );
 
+has _has_changed => (
+   is => 'rw',
+   isa => 'Bool',
+   lazy => 1,
+   default => 0,
+   init_arg => undef,
+);
+
 
 =head2 add_member
 
  Function: Add members to a community
  Usage   : $community->add_member($member, 3);
  Args    : * a Bio::Community::Member to add
-           * how many of this member to add (default: 1)
+           * how many of this member to add (positive number, default: 1)
  Returns : 1 on success
 
 =cut
 
-method add_member ( Bio::Community::Member $member, Count $count = 1 ) {
+#method add_member ( Bio::Community::Member $member, Count $count = 1 ) {
+method add_member ( $member, $count = 1 ) {
    my $member_id = $member->id;
    $self->_counts->{$member_id} += $count;
    $self->_members->{$member_id} = $member;
    $self->_set_total_count( $self->get_total_count + $count );
-   $self->_weighted_count( $self->_weighted_count + $count / _prod(@{$member->weights}) );
-   $self->_has_changed;
+   $self->_weighted_count( $self->_weighted_count + $count / _prod($member->weights) );
+   $self->_has_changed(1);
    return 1;
 }
 
@@ -274,12 +284,13 @@ method add_member ( Bio::Community::Member $member, Count $count = 1 ) {
  Function: remove members from a community
  Usage   : $community->remove_member($member, 3);
  Args    : * a Bio::Community::Member to remove
-           * how many of this member to remove (default: 1)
+           * how many of this member to remove (positive number, default: 1)
  Returns : 1 on success
 
 =cut
 
-method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
+#method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
+method remove_member ( $member, $count = 1 ) {
    # Sanity checks
    my $member_id = $member->id;
    my $counts = $self->_counts;
@@ -296,8 +307,8 @@ method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
       delete $self->_members->{$member_id};
    }
    $self->_set_total_count( $self->get_total_count - $count );
-   $self->_weighted_count( $self->_weighted_count - $count / _prod(@{$member->weights}) );
-   $self->_has_changed;
+   $self->_weighted_count( $self->_weighted_count - $count / _prod($member->weights) );
+   $self->_has_changed(1);
    return 1;
 }
 
@@ -319,6 +330,8 @@ method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
 =cut
 
 method next_member ( $iter_name = 'default' ) {
+   $self->_reset if $self->_has_changed;
+
    my $iters = $self->_members_iterator;
 
    # Create a named iterator
@@ -424,6 +437,7 @@ method get_member_by_id (Int $member_id) {
 =cut
 
 method get_member_by_rank (AbundanceRank $rank) {
+   $self->_reset if $self->_has_changed;
    if ( $self->use_weights && (scalar @{$self->_ranks_arr_weighted} == 0) ) {
       # Calculate the relative abundance ranks unless they already exist
       $self->_calc_ranks();
@@ -438,15 +452,14 @@ method get_member_by_rank (AbundanceRank $rank) {
 }
 
 
-
 ####
 # TODO: get_member_by_rel_ab
 ####
 
+
 ####
 # TODO: get_member_by_count
 ####
-
 
 
 =head2 get_richness
@@ -459,6 +472,7 @@ method get_member_by_rank (AbundanceRank $rank) {
 =cut
 
 method get_richness {
+   $self->_reset if $self->_has_changed;
    if (not defined $self->_richness) {
 
       # Try to calculate the richness from the abundance ranks if available
@@ -489,7 +503,8 @@ method get_richness {
 
 =cut
 
-method get_count (Bio::Community::Member $member) {
+#method get_count (Bio::Community::Member $member) {
+method get_count ($member) {
    return $self->_counts->{$member->id} || 0;
 }
 
@@ -508,7 +523,7 @@ method get_rel_ab (Bio::Community::Member $member) {
   my $rel_ab = 0;
   my ($weight, $weighted_count);
   if ($self->use_weights) {
-     $weight = _prod( @{$member->weights} );
+     $weight = _prod($member->weights);
      $weighted_count = $self->_weighted_count;
   } else {
      $weight = 1;
@@ -534,6 +549,7 @@ method get_rel_ab (Bio::Community::Member $member) {
 =cut
 
 method get_rank (Bio::Community::Member $member) {
+   $self->_reset if $self->_has_changed;
    my $member_id = $member->id;
    if ( $self->get_member_by_id($member_id) ) { # If the member exists
       if ( $self->use_weights && (scalar @{$self->_ranks_arr_weighted} == 0) ) {
@@ -582,7 +598,7 @@ method _calc_ranks {
 }
 
 
-method _has_changed {
+method _reset {
    # Re-initialize some attributes when the community has changed
    $self->_clear_ranks_hash_weighted();
    $self->_clear_ranks_arr_weighted();
@@ -590,6 +606,7 @@ method _has_changed {
    $self->_clear_ranks_arr_unweighted();
    $self->_clear_richness();
    $self->_clear_members_iterator();
+   $self->_has_changed(0);
    return 1;
 }
 
@@ -612,9 +629,9 @@ sub _two_array_sort {
 
 sub _prod {
    # Calculate the product of the numbers in an array
-   my (@arr) = @_;
+   my ($arr) = @_;
    my $prod = 1;
-   $prod *= $_ for @arr;
+   $prod *= $_ for @$arr;
    return $prod;
 }
 
