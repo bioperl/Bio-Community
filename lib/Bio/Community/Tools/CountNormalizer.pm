@@ -463,51 +463,40 @@ method _calc_representative(Bio::Community $average) {
    );
 
    my $richness = 0;
+   my $deltas;
+   my $members;
    while ( my $member = $average->next_member('_calc_representative_ite') ) {
       $richness++;
       # Add member and count to the community
       my $count = $average->get_count($member);
       my $new_count = int( $count + 0.5 );
+      my $delta = $new_count - $count;
+      push @$deltas, $delta if $delta != 0;
+      push @$members, $member;
       next if $new_count == 0;
       $representative->add_member( $member, $new_count );
       $cur_count += $new_count;
    }
+   $cur_count = int( $cur_count + 0.5 );
 
    # Adjust the last count
    if ($cur_count != $target_count) {
 
-      if ($cur_count == $target_count + 1) {
-         # Total count too large by 1. Decrease the count of the least abundant
-         # member of the average community that is also present in the
-         # representative community
-         my $rank = $richness;
-         while (1) {
-            my $member = $average->get_member_by_rank($rank);
-            if ( $representative->get_count($member) ) {
-               $representative->remove_member($member, 1);
-               last;
-            }
-            $rank--;            
-         }
+      # Sort deltas numerically descending
+      ($deltas, $members) = Bio::Community::_two_array_sort($deltas, $members);
 
-      } elsif ($cur_count == $target_count - 1) {
-         # Total count too small by 1. Increment the count of the appropriate member
-         # For an average community with a tail with counts 2.3, 1.3, 1.2, we want
-         # to increment the count if the member with count 1.3 (not the last one,
-         # with abundance 1.2)
-         my $rank = $richness;
-         my $next_member_count = $average->get_count( $average->get_member_by_rank($rank) );
-         for ( $rank = $richness - 1; $rank >= 1; $rank--) {
-            my $prev_member_count = $average->get_count( $average->get_member_by_rank($rank) );
-            my $diff = int( $prev_member_count + 0.5) - int( $next_member_count + 0.5 );
-            last if $diff != 0;
-            $next_member_count = $prev_member_count;
-         }
-         my $member_to_increment = $average->get_member_by_rank($rank + 1);
-         $representative->add_member($member_to_increment, 1);
-
+      if ($cur_count < $target_count) {
+         # Total count too small! Increment members with smallest delta
+         do {
+            pop @$deltas;
+            $representative->add_member( pop(@$members), 1 );
+         } while ($representative->get_total_count < $target_count);
       } else {
-         $self->throw("Internal problem. Unexpected current count of $cur_count");
+         # Total count too large! Decrement members with largest delta
+         do {
+            shift @$deltas;
+            $representative->remove_member( shift(@$members), 1 );
+         } while ($representative->get_total_count > $target_count);
       }
 
    }
