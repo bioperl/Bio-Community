@@ -74,12 +74,17 @@ methods. Internal methods are usually preceded with a _
 =head2 new
 
  Function: Create a new Bio::Community::IO object
- Usage   : my $member = Bio::Community::IO->new( -file => 'community.txt' );
- Args    : -file   : Path of a community file
-           -format : Format of the file: 'generic', 'gaas', 'qiime'. This is
-                     optional because in most cases, the format can be
-                     automatically detected.
-           -weights: Arrayref of files that contains weights
+ Usage   : # Reading a file
+           my $member = Bio::Community::IO->new( -file => 'community.txt' );
+           # Writing a file
+           my $member = Bio::Community::IO->new( -file => '>community.txt', format => 'generic' );
+ Args    : -file   :  Path of a community file
+           -format :  Format of the file: 'generic', 'gaas', 'qiime'. This is
+                      optional when reading a community file because the format
+                      is automatically detected.
+           -weights:  Arrayref of files that contains weights to assign to members.
+           -taxonomy: Given a Bio::DB::Taxonomy object, try to place the community
+                      members in this taxonomy.
            See Bio::Root::IO for other accepted constructors, like -fh.
  Returns : A Bio::Community::IO object
 
@@ -387,11 +392,11 @@ has 'multiple_communities' => (
 =head2 weight_files
 
  Usage   : $in->weight_files();
- Function: Specify files containing weights to assign to the community members.
-           Each type of file can contain a different type of weight to add.
-           The file should contain two tab-delimited columns: the first one
-           should contain the description of the member, and the second one the
-           weight to assign to this member.
+ Function: When reading a community, specify files containing weights to assign
+           to the community members. Each type of file can contain a different
+           type of weight to add. The file should contain two tab-delimited
+           columns: the first one should contain the description of the member,
+           and the second one the weight to assign to this member.
  Args    : arrayref of file names
  Returns : arrayref of file names
 
@@ -460,8 +465,8 @@ method _read_weights ($args) {
 =head2 weight_assign
 
  Usage   : $in->weight_assign();
- Function: Specify what weight to assign to to members for which no weight is
-           specified in the provided weight file:
+ Function: When using weights, specify what value to assign to the members for
+           which no weight is specified in the provided weight file:
             * $num      : the weight provided as argument
             * 'average' : the average weight in the weight file
  Args    : 'average' or a number
@@ -519,6 +524,29 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
    }
    return 1;
 }
+
+
+=head2 taxonomy
+
+ Usage   : $in->taxonomy();
+ Function: When reading communities, try to place the community members on the
+           provided taxonomy (provided taxonomic assignments are specified in
+           the input. Make sure that you use the same taxonomy as in the
+           community to ensure that members can be placed. A warning is
+           issued for every member that fails to be placed.
+ Args    : Bio::DB::Taxonomy
+ Returns : Bio::DB::Taxonomy
+
+=cut
+
+has 'taxonomy' => (
+   is => 'rw',
+   isa => 'Maybe[Bio::DB::Taxonomy]',
+   required => 0,
+   lazy => 1,
+   default => undef,
+   init_arg => '-taxonomy',
+);
 
 
 # Do not inline so that new() can be overridden

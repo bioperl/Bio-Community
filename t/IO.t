@@ -28,7 +28,7 @@ is $in->sort_members, 0;
                next_community _next_community_init _next_community_finish
                write_community _write_community_init _write_community_finish
                sort_members abundance_type missing_string multiple_communities
-               weight_files weight_assign );
+               weight_files weight_assign taxonomy );
 
 for my $method (@methods) {
    can_ok($in, $method) || diag "Method $method() not implemented";
