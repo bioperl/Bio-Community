@@ -561,24 +561,32 @@ has 'taxonomy' => (
 
 =cut
 
-method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str) {
-   # Once we have a member, attach weights to it
-   # The taxonomy string can look like this:
-   # k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
+method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name) {
+   # Once we have a member, try to get where it belongs in the taxonomy.
+   # If $is_name is 0, $taxo_str should be a taxon ID. If $is_name is 1,
+   # $taxo_str should be a taxon name. The taxonomy string can look like this:
+   #    k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
    if ( defined($member) && $self->_has_taxonomy ) {
       my $taxon;
-      my $names = [split /;\s*/, $taxo_str];
-      while ( ($names->[-1] || '') =~ m/__$/) {
-         pop @$names;
-      }
-      my $name = $names->[-1];
-      if ( (not defined $name) || ($name eq '') ) {
-         $self->warn("Could not place '$taxo_str' in the given taxonomy");
-      } else {
-         my $taxon = $self->taxonomy->get_taxon( -name => $name );
-         if ($taxon) {
-            $member->taxon($taxon);
+
+      if ($is_name) {
+         my $name;
+         my $names = [split /;\s*/, $taxo_str];
+         while ( ($names->[-1] || '') =~ m/__$/) {
+            pop @$names;
          }
+         $name = $names->[-1];
+         if ( (not defined $name) || ($name eq '') ) {
+            $self->warn("Could not place '$taxo_str' in the given taxonomy");
+         } else {
+            $taxon = $self->taxonomy->get_taxon( -name => $name );
+         }
+      } else {
+         $taxon = $self->taxonomy->get_taxon( -taxonid => $taxo_str );
+      }
+
+      if ($taxon) {
+         $member->taxon($taxon);
       }
    }
    return 1;

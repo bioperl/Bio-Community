@@ -129,16 +129,17 @@ method next_member {
 
    # Parse and validate the line 
    chomp $line;
-   my ($name, $id, $rel_ab) = split "\t", $line;
+   my ($name, $taxid, $rel_ab) = split "\t", $line;
 
    if ( (not defined $name  ) ||
-        (not defined $id    ) ||
+        (not defined $taxid ) ||
         (not defined $rel_ab) ) {
       $self->throw("Error: The following line does not follow the GAAS format.\n-->$line<--\n");
    }
 
-   ##### TODO:handle things differently if GAAS used a taxonomy file
-   my $member = Bio::Community::Member->new( -id => $id, -desc => $name );
+   my $member = Bio::Community::Member->new( -id => $taxid, -desc => $name );
+   $self->_attach_taxon($member, $taxid, 0);
+   ### TODO:handle things differently if GAAS did not use a taxonomy file??
    $self->_attach_weights($member);
 
    # Note that a relative abundance is returned, not a count

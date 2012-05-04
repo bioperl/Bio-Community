@@ -238,7 +238,7 @@ method _generate_members {
       if (defined $taxo_col) {
          my $taxo_desc = $self->_get_value($line, $taxo_col);
          $member->desc( $taxo_desc );
-         $self->_attach_taxon($member, $taxo_desc);
+         $self->_attach_taxon($member, $taxo_desc, 1);
       }
       $self->_attach_weights($member);
       push @members, $member;
