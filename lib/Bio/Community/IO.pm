@@ -532,8 +532,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
  Function: When reading communities, try to place the community members on the
            provided taxonomy (provided taxonomic assignments are specified in
            the input. Make sure that you use the same taxonomy as in the
-           community to ensure that members can be placed. A warning is
-           issued for every member that fails to be placed.
+           community to ensure that members can be placed.
  Args    : Bio::DB::Taxonomy
  Returns : Bio::DB::Taxonomy
 
@@ -546,7 +545,44 @@ has 'taxonomy' => (
    lazy => 1,
    default => undef,
    init_arg => '-taxonomy',
+   predicate => '_has_taxonomy',
 );
+
+
+=head2 _attach_taxon
+
+ Usage   : $in->_attach_taxon($member, $taxonomy_string);
+ Function: Once a member has been created, a driver should call this method
+           to attach the proper taxon object to the member. If no member is
+           provided, this method will not complain and will do nothing.
+ Args    : a Bio::Community::Member or nothing
+           the taxonomic string
+ Returns : 1 for success
+
+=cut
+
+method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str) {
+   # Once we have a member, attach weights to it
+   # The taxonomy string can look like this:
+   # k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
+   if ( defined($member) && $self->_has_taxonomy ) {
+      my $taxon;
+      my $names = [split /;\s*/, $taxo_str];
+      while ( ($names->[-1] || '') =~ m/__$/) {
+         pop @$names;
+      }
+      my $name = $names->[-1];
+      if ( (not defined $name) || ($name eq '') ) {
+         $self->warn("Could not place '$taxo_str' in the given taxonomy");
+      } else {
+         my $taxon = $self->taxonomy->get_taxon( -name => $name );
+         if ($taxon) {
+            $member->taxon($taxon);
+         }
+      }
+   }
+   return 1;
+}
 
 
 # Do not inline so that new() can be overridden

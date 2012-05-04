@@ -236,8 +236,9 @@ method _generate_members {
       $member = Bio::Community::Member->new( -id => $otu_id );
       # Get taxonomic assignment if possible
       if (defined $taxo_col) {
-         my $taxo = $self->_get_value($line, $taxo_col);
-         $member->desc( $taxo );
+         my $taxo_desc = $self->_get_value($line, $taxo_col);
+         $member->desc( $taxo_desc );
+         $self->_attach_taxon($member, $taxo_desc);
       }
       $self->_attach_weights($member);
       push @members, $member;
