@@ -23,8 +23,8 @@ Bio::Community::Member - The basic constituent of a biological community
 
 =head1 DESCRIPTION
 
-A Bio::Community::Member represents an organism, individual, species or anything
-you like.
+A Bio::Community::Member represents an organism, individual, species, amplicon
+sequence, shotgun sequence or anything you like.
 
 =head1 CONSTRUCTOR
 
@@ -99,7 +99,7 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::Member object
  Usage   : my $member = Bio::Community::Member->new( );
- Args    : 
+ Args    : -id, -desc, -taxon, -seqs, -weights
  Returns : a new Bio::Community::Member object
 
 =cut
@@ -126,10 +126,11 @@ my $last_id = 1;
 
 =head2 id
 
- Function: 
- Usage   : 
- Args    : 
- Returns : 
+ Function: my $description = $member->id();
+ Usage   : Get or set the ID for the member. If an ID is not provided, a unique
+           ID is generated.
+ Args    : A string
+ Returns : A string
 
 =cut
 
@@ -160,6 +161,47 @@ method BUILD ($args) {
       $self->id($last_id);
    }
 }
+
+=head2 desc
+
+ Usage   : my $description = $member->desc();
+ Function: Get or set a description for this object.
+           See Bio::Community::Role::Described.
+ Args    : A string
+ Returns : A string
+
+=head2 taxon
+
+ Usage   : my $taxon = $member->taxon();
+ Function: Get or set a taxon (or species) for this object.
+           See Bio::Community::Role::Classified.
+ Args    : A Bio::Taxon object
+ Returns : A Bio::Taxon object
+
+=head2 seqs
+
+ Usage   : my $seqs = $member->seqs();
+ Function: Get or set some sequences for this object.
+           See Bio::Community::Role::Sequenced.
+ Args    : An arrayref of Bio::SeqI objects
+ Returns : An arrayref of Bio::SeqI objects
+
+=head2 weights
+
+ Usage   : my $weights = $member->weights();
+ Function: Get or set some weights for this object. Weights represent how biased
+           the sampling of this organism is. For example, when random shotgun
+           sequencing microorganisms in the environment, the relative abundance
+           of reads in the sequence library is not proportional to the relative
+           abundance of the genomes because larger genomes contribute
+           disproportionalely more reads than small genomes. In such a case, you
+           could set the weight to the length of the genome. See
+           Bio::Community::Role::Weighted. Also see get_count() and get_rel_ab()
+           in Bio::Community.
+ Args    : An arrayref of positive integers
+ Returns : An arrayref of positive integers
+
+=cut
 
 
 ####
