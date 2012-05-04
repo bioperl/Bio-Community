@@ -22,7 +22,7 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  BioPerl version >= 1.006902
+  BioPerl version > 1.006902 (as of May 2012, this means an unreleased development version)
   Method::Signatures
   Moose
   Moose::Util::TypeConstraints
