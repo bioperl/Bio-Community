@@ -2,13 +2,15 @@ use strict;
 use warnings;
 use Bio::Root::Test;
 use Test::Number::Delta;
+use Bio::DB::Taxonomy;
 
 use_ok($_) for qw(
     Bio::Community::IO
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $community3, $member, $count);
+my ($in, $out, $output_file, $community, $community2, $community3, $member,
+   $count, $taxonomy);
 my (@communities, @methods);
 
 
@@ -114,10 +116,19 @@ $in->close;
 
 # Read QIIME summarized OTU table (Silva taxonomy)
 
+## Need silva database to do that
+ok $taxonomy = Bio::DB::Taxonomy->new(
+   -source   => 'silva',
+   -taxofile => test_input_file('taxonomy', 'silva_SSURef_108_tax_silva_trunc.fasta'),
+);
+
 ok $in = Bio::Community::IO->new(
-   -file   => test_input_file('qiime_w_silva_taxo_L2.txt'),
-   -format => 'generic',
+   -file     => test_input_file('qiime_w_silva_taxo_L2.txt'),
+   -format   => 'generic',
+   -taxonomy => $taxonomy,
 ), 'Read summarized QIIME file';
+
+is $in->taxonomy, $taxonomy;
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
@@ -141,38 +152,46 @@ $in->close;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
+is $member->taxon->node_name, 'Viridiplantae';
 delta_ok $community->get_count($member), 0.2142857143;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Archaea;Euryarchaeota';
+is $member->taxon->node_name, 'Euryarchaeota';
 delta_ok $community->get_count($member), 0.2342192691;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
+is $member->taxon->node_name, 'Proteobacteria';
 delta_ok $community->get_count($member), 0.5514950166;
 is $community->next_member, undef;
 
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
+is $member->taxon->node_name, 'Viridiplantae';
 delta_ok $community2->get_count($member), 0.9536354057;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
+is $member->taxon->node_name, 'Proteobacteria';
 delta_ok $community2->get_count($member), 0.0463645943;
 is $community2->next_member, undef;
 
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Eukaryota;Viridiplantae';
+is $member->taxon->node_name, 'Viridiplantae';
 delta_ok $community3->get_count($member), 0.0195488722;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Archaea;Euryarchaeota';
+is $member->taxon->node_name, 'Euryarchaeota';
 delta_ok $community3->get_count($member), 0.4;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';
+is $member->taxon->node_name, 'Proteobacteria';
 delta_ok $community3->get_count($member), 0.5804511278;
 is $community3->next_member, undef;
 

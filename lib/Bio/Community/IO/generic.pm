@@ -153,6 +153,7 @@ method _generate_members {
    for my $line (2 .. $self->_get_max_line) {
       my $value = $self->_get_value($line, $col);
       my $member = Bio::Community::Member->new( -desc => $value );
+      $self->_attach_taxon($member, $value, 1);
       $self->_attach_weights($member);
       push @members, $member;
    }
