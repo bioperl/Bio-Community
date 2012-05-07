@@ -478,7 +478,7 @@ method get_richness {
       # Try to calculate the richness from the abundance ranks if available
       my $num_members = scalar( @{$self->_ranks_arr_weighted}   ) ||
                         scalar( @{$self->_ranks_arr_unweighted} ) ;
-      
+
       # If rank abundance are not available, calculate richness manually
       if ($num_members == 0) {
          while ($self->next_member('_get_richness_ite')) {

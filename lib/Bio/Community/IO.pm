@@ -545,7 +545,6 @@ has 'taxonomy' => (
    lazy => 1,
    default => undef,
    init_arg => '-taxonomy',
-   predicate => '_has_taxonomy',
 );
 
 
@@ -566,9 +565,8 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
    # If $is_name is 0, $taxo_str should be a taxon ID. If $is_name is 1,
    # $taxo_str should be a taxon name. The taxonomy string can look like this:
    #    k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
-   if ( defined($member) && $self->_has_taxonomy ) {
+   if ( defined($member) && (defined $self->taxonomy) ) {
       my $taxon;
-
       if ($is_name) {
          my $name;
          my $names = [split /;\s*/, $taxo_str];
