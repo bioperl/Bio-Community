@@ -66,8 +66,8 @@ cmp_ok( $rand_community->get_count($member1), '>=',  500 ); # should be 1000
 cmp_ok( $rand_community->get_count($member1), '<=', 1500 );
 cmp_ok( $rand_community->get_count($member2), '>=',   50 ); # should be  100
 cmp_ok( $rand_community->get_count($member2), '<=',  150 );
-cmp_ok( $rand_community->get_count($member3), '>=',    5 ); # should be   10
-cmp_ok( $rand_community->get_count($member3), '<=',   15 );
+cmp_ok( $rand_community->get_count($member3), '>=',    4 ); # should be   10
+cmp_ok( $rand_community->get_count($member3), '<=',   16 );
 
 
 done_testing();

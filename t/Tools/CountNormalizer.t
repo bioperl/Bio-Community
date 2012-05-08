@@ -16,8 +16,8 @@ my ($normalizer, $community1, $community2, $average, $representative,
    $member31, $member32, $member33, $member34, $member35, $member36, $member37, $member38, $member39, $member40,
    $member41, $member42, $member43);
 
-my $epsilon1 = 15;
-my $epsilon2 = 1.00000000001;
+my $epsilon1 = 20;
+my $epsilon2 = 1.5;
 my $epsilon3 = 0.4;
 
 
