@@ -116,7 +116,6 @@ $in->close;
 
 # Read QIIME summarized OTU table (Silva taxonomy)
 
-## Need silva database to do that
 ok $taxonomy = Bio::DB::Taxonomy->new(
    -source   => 'silva',
    -taxofile => test_input_file('taxonomy', 'silva_SSURef_108_tax_silva_trunc.fasta'),
@@ -126,7 +125,7 @@ ok $in = Bio::Community::IO->new(
    -file     => test_input_file('qiime_w_silva_taxo_L2.txt'),
    -format   => 'generic',
    -taxonomy => $taxonomy,
-), 'Read summarized QIIME file';
+), 'Read summarized QIIME file (Silva taxonomy)';
 
 is $in->taxonomy, $taxonomy;
 
@@ -188,6 +187,88 @@ isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Archaea;Euryarchaeota';
 is $member->taxon->node_name, 'Euryarchaeota';
 delta_ok $community3->get_count($member), 0.4;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $member->taxon->node_name, 'Proteobacteria';
+delta_ok $community3->get_count($member), 0.5804511278;
+is $community3->next_member, undef;
+
+
+# Read QIIME summarized OTU table (on-the-fly taxonomy)
+
+ok $taxonomy = Bio::DB::Taxonomy->new(
+   -source   => 'list',
+);
+
+ok $in = Bio::Community::IO->new(
+   -file     => test_input_file('qiime_w_silva_taxo_L2.txt'),
+   -format   => 'generic',
+   -taxonomy => $taxonomy,
+), 'Read summarized QIIME file (on-the-fly taxonomy)';
+
+is $in->taxonomy, $taxonomy;
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 3;
+is $community->name, 'FI.5m';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 2;
+is $community2->name, 'RI.5m';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 3;
+is $community3->name, 'TR.5m';
+
+is $in->next_community, undef;
+
+$in->close;
+
+is $taxonomy->get_num_taxa, 7; # 6 really, but 7 is ok.
+
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Archaea;Euryarchaeota';
+is $member->taxon->node_name, 'Euryarchaeota';
+delta_ok $community->get_count($member), 0.2342192691;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $member->taxon->node_name, 'Viridiplantae';
+delta_ok $community->get_count($member), 0.2142857143;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $member->taxon->node_name, 'Proteobacteria';
+delta_ok $community->get_count($member), 0.5514950166;
+is $community->next_member, undef;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $member->taxon->node_name, 'Viridiplantae';
+delta_ok $community2->get_count($member), 0.9536354057;
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Bacteria;Proteobacteria';
+is $member->taxon->node_name, 'Proteobacteria';
+delta_ok $community2->get_count($member), 0.0463645943;
+is $community2->next_member, undef;
+
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Archaea;Euryarchaeota';
+is $member->taxon->node_name, 'Euryarchaeota';
+delta_ok $community3->get_count($member), 0.4;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Eukaryota;Viridiplantae';
+is $member->taxon->node_name, 'Viridiplantae';
+delta_ok $community3->get_count($member), 0.0195488722;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Bacteria;Proteobacteria';

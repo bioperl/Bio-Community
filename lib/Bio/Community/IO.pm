@@ -536,11 +536,26 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
  Function: When reading communities, try to place the community members on the
            provided taxonomy (provided taxonomic assignments are specified in
            the input. Make sure that you use the same taxonomy as in the
-           community to ensure that members can be placed.
+           community file to ensure that members are placed.
            
-           ####
-           As a special case, ...
-           ####
+           As an alternative to using a full-fledged taxonomy, if you provide a
+           Bio::DB::Taxonomy::list object containing no taxa, the taxonomy will
+           be constructed on the fly from the taxonomic information provided in
+           the community file. The advantages are that you build an arbitrary
+           taxonomy, and this taxonomy contains only the taxa present in your
+           samples, which is fast and memory efficient. A drawback is that
+           unfortunately, you can only do this with community file formats that
+           report full lineages (e.g. the qiime and generic formats).
+
+           A basic curation is done on the taxonomy strings, so that a GreenGenes
+           lineage such as:
+              k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
+           becomes:
+              k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II
+           Or a Silva lineage such as:
+              Bacteria; Cyanobacteria; Chloroplast; uncultured; Other; Other
+           becomes:
+              Bacteria; Cyanobacteria; Chloroplast; uncultured
 
  Args    : Bio::DB::Taxonomy
  Returns : Bio::DB::Taxonomy
@@ -554,7 +569,25 @@ has 'taxonomy' => (
    lazy => 1,
    default => undef,
    init_arg => '-taxonomy',
+   trigger => \&_is_taxonomy_empty,
 );
+
+
+has '_onthefly_taxonomy' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   lazy => 1,
+   default => 0,
+);
+
+method _is_taxonomy_empty ($taxonomy) {
+   # If taxonomy object is a Bio::DB::Taxonomy and contains no taxa, mark that
+   # we'll need to build the taxonomy on the fly
+   if ( (ref $taxonomy eq 'Bio::DB::Taxonomy::list') && ($taxonomy->get_num_taxa == 0) ) {
+      $self->_onthefly_taxonomy(1);
+   }
+}
 
 
 =head2 _attach_taxon
@@ -570,21 +603,46 @@ has 'taxonomy' => (
 =cut
 
 method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name) {
-   # Once we have a member, try to get where it belongs in the taxonomy.
-   # If $is_name is 0, $taxo_str should be a taxon ID. If $is_name is 1,
-   # $taxo_str should be a taxon name. The taxonomy string can look like this:
-   #    k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
-   if ( defined($member) && (defined $self->taxonomy) ) {
+   # Given a Bio::DB::Taxonomy::list with no taxa, build a taxonomy on the fly
+   # with the provided member. Regardless of the given taxonomy object, place 
+   # the member place the member in the taxonomy. The taxonomy is defined by
+   # $taxo_str. If $is_name is 0, $taxo_str is used as a taxon ID. If $is_name
+   # is 1, $taxo_str should be a taxon name. The taxonomy can look like this:
+   # GreenGenes:
+   #   k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
+   # Silva:
+   #   Bacteria;Cyanobacteria;Chloroplast;uncultured;Other;Other
+   my $taxonomy = $self->taxonomy;
+   if ( defined($member) && defined($taxonomy) ) {
+
+      # First do some curation. Remove lineage tail elements that look like:
+      #    '', 'Other', 'No blast hit', 'g__', 's__', etc
+      my @names;
+      if ($is_name) {
+         @names = split /;\s*/, $taxo_str;
+         while ( my $elem = $names[-1] ) {
+            next if not defined $elem;
+            if ($elem =~ m/^(?:\S__|Other|No blast hit|)$/i) {
+               pop @names;
+            } else {
+               last;
+            }
+         }
+      }
+
+      # Then add lineage to taxonomy if desired
+      if ( $self->_onthefly_taxonomy && scalar @names > 0 ) {
+         # Adding the same lineage multiple times is not an issue...
+         $taxonomy->add_lineage( -names => \@names );
+      }
+
+      # Then find where the member belong in the taxonomy
       my $taxon;
       if ($is_name) {
          my $name;
-         my $names = [split /;\s*/, $taxo_str];
-         while ( ($names->[-1] || '') =~ m/__$/) {
-            pop @$names;
-         }
-         $name = $names->[-1];
+         $name = $names[-1];
          if ( (not defined $name) || ($name eq '') ) {
-            $self->warn("Could not place '$taxo_str' in the given taxonomy");
+            #$self->warn("Could not place '$taxo_str' in the given taxonomy");
          } else {
             $taxon = $self->taxonomy->get_taxon( -name => $name );
          }
@@ -592,6 +650,7 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
          $taxon = $self->taxonomy->get_taxon( -taxonid => $taxo_str );
       }
 
+      # Finally, if member could be placed, update its taxon information
       if ($taxon) {
          $member->taxon($taxon);
       }
