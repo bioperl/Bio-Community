@@ -77,14 +77,18 @@ methods. Internal methods are usually preceded with a _
  Usage   : # Reading a file
            my $member = Bio::Community::IO->new( -file => 'community.txt' );
            # Writing a file
-           my $member = Bio::Community::IO->new( -file => '>community.txt', format => 'generic' );
- Args    : -file   :  Path of a community file
-           -format :  Format of the file: 'generic', 'gaas', 'qiime'. This is
-                      optional when reading a community file because the format
-                      is automatically detected.
-           -weights:  Arrayref of files that contains weights to assign to members.
+           my $member = Bio::Community::IO->new( -file   => '>community.txt',
+                                                 -format => 'generic'         );
+ Args    : -file : Path of a community file. See file() in Bio::Root::IO.
+           -format : Format of the file: 'generic', 'gaas', 'qiime'. This is
+               optional when reading a community file because the format is
+               automatically detected. See format() in Bio::Root::IO.
+           -weight_files : Arrayref of files that contains weights to assign to
+               members. See weight_files().
+           -weight_assign : When using a files of weights, define what to do
+               for community members that do not have weights. See weight_assign();
            -taxonomy: Given a Bio::DB::Taxonomy object, try to place the community
-                      members in this taxonomy.
+               members in this taxonomy. See taxonomy().
            See Bio::Root::IO for other accepted constructors, like -fh.
  Returns : A Bio::Community::IO object
 
@@ -533,6 +537,11 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
            provided taxonomy (provided taxonomic assignments are specified in
            the input. Make sure that you use the same taxonomy as in the
            community to ensure that members can be placed.
+           
+           ####
+           As a special case, ...
+           ####
+
  Args    : Bio::DB::Taxonomy
  Returns : Bio::DB::Taxonomy
 
