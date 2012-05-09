@@ -255,8 +255,9 @@ method _group_by_relative_abundance (
 method _calc_group_weights ($community, $summary, $other_count) {
    my $other_weights;
    my $target_count = $community->_weighted_count;
-   if ($target_count != 100) {
-      $other_weights = [ $other_count  / ($target_count - $summary->_weighted_count) ];
+   my $current_count = $summary->_weighted_count;
+   if ( $target_count != 100 && ($target_count != $current_count) ) { # avoid division / 0
+      $other_weights = [ $other_count  / ($target_count - $current_count) ];
    } else {
       $other_weights = [ 1 ];
    }
