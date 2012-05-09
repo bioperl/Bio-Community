@@ -236,13 +236,21 @@ method _group_by_relative_abundance (
 
    # Create group if needed and add it to all communities
    if ($total_group_count > 0) {
+      my $group_id;
       for my $i (0 .. $nof_communities-1) {
          my $community = $communities->[$i];
          my $summary   = $summaries->[$i];
          my $count     = $group_count->[$i];
          # Create an 'Other' group for each community. Its weight is community-
          # specific to not upset the rank-abundance of non-grouped members.
-         my $group = Bio::Community::Member->new( -desc => "Other $operator $thresh %" );
+         my $group;
+         if ($group_id) {
+            $group = Bio::Community::Member->new( -id => $group_id );
+         } else {
+            $group = Bio::Community::Member->new( );
+            $group_id = $group->id;
+         }
+         $group->desc("Other $operator $thresh %");
          $group->weights( $self->_calc_group_weights($community, $summary, $count) );
          $summary->add_member($group, $count);
       }

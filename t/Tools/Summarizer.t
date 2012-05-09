@@ -11,7 +11,7 @@ use_ok($_) for qw(
 
 
 my ($summarizer, $member1, $member2, $member3, $member4, $member5, $community1,
-   $community2, $summaries, $summary, $group);
+   $community2, $summaries, $summary, $group, $id);
 
 
 # Bare object
@@ -56,6 +56,7 @@ $summary = $summaries->[0];
 $group = get_group($summary);
 isa_ok $group, 'Bio::Community::Member';
 is $group->desc, 'Other < 2 %';
+$id = $group->id;
 
 is $summary->name, 'Unnamed community summarized';
 delta_ok $summary->get_count($member1), 1;
@@ -67,6 +68,8 @@ delta_ok $summary->get_count($group)  , 1;
 
 $summary = $summaries->[1];
 $group = get_group($summary);
+is $group->id, $id; # different object because the weight is different,
+                          # but ID need to be the same
 is $summary->name, 'grassland summarized';
 delta_ok $summary->get_count($member1), 8;
 delta_ok $summary->get_count($member2), 90;
@@ -222,6 +225,7 @@ is scalar @$summaries, 2;
 
 $summary = $summaries->[0];
 $group = get_group($summary);
+$id = $group->id;
 is $summary->name, 'Unnamed community summarized';
 delta_ok $summary->get_rel_ab($member1), 95.9558824;
 delta_ok $summary->get_rel_ab($member2),  0.5514706;
@@ -231,6 +235,7 @@ delta_ok $summary->get_rel_ab($group)  ,  3.4926470;
 
 $summary = $summaries->[1];
 $group = get_group($summary);
+is $group->id, $id;
 is $summary->name, 'grassland summarized';
 delta_ok $summary->get_rel_ab($member1), 48.0000000;
 delta_ok $summary->get_rel_ab($member2), 24.0000000;
