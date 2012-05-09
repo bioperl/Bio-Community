@@ -399,8 +399,10 @@ has 'multiple_communities' => (
  Function: When reading a community, specify files containing weights to assign
            to the community members. Each type of file can contain a different
            type of weight to add. The file should contain two tab-delimited
-           columns: the first one should contain the description of the member,
-           and the second one the weight to assign to this member.
+           columns: the first one should contain the description of the member
+           (or the string representation of its taxonomic lineage, when using 
+           -weight_assign => 'ancestor'), and the second one the weight to
+           assign to this member.
  Args    : arrayref of file names
  Returns : arrayref of file names
 
@@ -470,9 +472,23 @@ method _read_weights ($args) {
 
  Usage   : $in->weight_assign();
  Function: When using weights, specify what value to assign to the members for
-           which no weight is specified in the provided weight file:
-            * $num      : the weight provided as argument
-            * 'average' : the average weight in the weight file
+           which no weight is found in the provided weight file:
+            * $num    : Check the member description against each file of 
+                        weights. If no weight is found, assign to the member
+                        the arbitrary weight provided as argument
+            * average : Check the member description against each file of
+                        weights. If no weight is found in a file, assign to the
+                        member the average weight in this file.
+            * ancestor: Provided the member have a taxonomic assignment, check
+                        the taxonomic lineage of this member against each file
+                        of weights. When no weight is found for this taxonomic
+                        lineage in a weight file, go up the taxonomic lineage
+                        of the member and assign to it the weight of the first
+                        ancestor that has a weight in the weights file. Fall
+                        back to the 'average' method if no taxonomic information
+                        is available for this member (for example a member with
+                        no BLAST hit), or if none of the ancestors have a
+                        specified weight.
  Args    : 'average' or a number
  Returns : 'average' or a number
 
@@ -504,23 +520,52 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
    # Once we have a member, attach weights to it
    if ( defined($member) && $self->_has_weights ) {
       my $weights;
+      my $assign_method = $self->weight_assign;
       for my $i (0 .. scalar @{$self->_weights} - 1) {
          my $weight;
          my $weight_type = $self->_weights->[$i];
-         my $desc = $member->desc;
-         if ($desc && exists($weight_type->{$desc}) ) {
-            # This member has a weight
-            $weight = $weight_type->{$desc};
-         } else {
-            # This member has no weight, provide an alternative weight
-            my $assign = $self->weight_assign; 
-            if ($assign eq 'average') {
-               # Use the average weight in the weight file
+         if ($assign_method eq 'ancestor') {
+
+            # Method based on member taxonomic lineage
+            my $taxon = $member->taxon;
+            my $lineage_arr = $self->_get_lineage_obj_arr($taxon);
+            my $lineage;
+            do {
+               $lineage = $self->_get_lineage_string($lineage_arr);
+               if (exists $weight_type->{$lineage}) {
+                  $weight = $weight_type->{$lineage};
+                  @$lineage_arr = (); # to exit loop
+               }
+            } while ( pop @$lineage_arr );
+            if (not defined $weight) {
+               # Fall back to average if it fails
                $weight = $self->_average_weights->[$i];
-            } else {
-               # Use an arbitrary weight
-               $weight = $assign;
+               #$lineage = $self->_get_lineage_string( $member->taxon );
+               #$self->warn("No weight found for member with ID '".$member->id.
+               #   "', description '".$member->desc."' and taxonomic lineage '".
+               #   "$lineage' or any of its ancestors. Using average weight from".
+               #   " file, $weight.");
             }
+
+         } else {
+
+            # Methods based on member description
+            my $desc = $member->desc;
+            if ( $desc && exists($weight_type->{$desc}) ) {
+               # This member has a weight
+               $weight = $weight_type->{$desc};
+            } else {
+               # This member has no weight, provide an alternative weight
+               my $assign = $self->weight_assign; 
+               if ($assign eq 'average') {
+                  # Use the average weight in the weight file
+                  $weight = $self->_average_weights->[$i];
+               } else {
+                  # Use an arbitrary weight
+                  $weight = $assign;
+               }
+            }
+
          }
          push @$weights, $weight;
       }
@@ -607,27 +652,14 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
    # with the provided member. Regardless of the given taxonomy object, place 
    # the member place the member in the taxonomy. The taxonomy is defined by
    # $taxo_str. If $is_name is 0, $taxo_str is used as a taxon ID. If $is_name
-   # is 1, $taxo_str should be a taxon name. The taxonomy can look like this:
-   # GreenGenes:
-   #   k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
-   # Silva:
-   #   Bacteria;Cyanobacteria;Chloroplast;uncultured;Other;Other
+   # is 1, $taxo_str should be a taxon name. See _get_lineage_arr();
    my $taxonomy = $self->taxonomy;
    if ( defined($member) && defined($taxonomy) ) {
 
-      # First do some curation. Remove lineage tail elements that look like:
-      #    '', 'Other', 'No blast hit', 'g__', 's__', etc
+      # First do some lineage curation
       my @names;
       if ($is_name) {
-         @names = split /;\s*/, $taxo_str;
-         while ( my $elem = $names[-1] ) {
-            next if not defined $elem;
-            if ($elem =~ m/^(?:\S__|Other|No blast hit|)$/i) {
-               pop @names;
-            } else {
-               last;
-            }
-         }
+         @names = @{$self->_get_lineage_name_arr($taxo_str)};
       }
 
       # Then add lineage to taxonomy if desired
@@ -656,6 +688,50 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
       }
    }
    return 1;
+}
+
+
+method _get_lineage_name_arr ($taxo_str) {
+   # Take a lineage string and put the taxa name into an arrayref. Also, remove
+   # lineage tail elements that look like:
+   #    '', 'Other', 'No blast hit', 'g__', 's__', etc
+   # from input strings that look like:
+   # GreenGenes:
+   #   k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
+   # Silva:
+   #   Bacteria;Cyanobacteria;Chloroplast;uncultured;Other;Other
+   my @names = split /;\s*/, $taxo_str;
+   while ( my $elem = $names[-1] ) {
+      next if not defined $elem;
+      if ($elem =~ m/^(?:\S__|Other|No blast hit|)$/i) {
+         pop @names;
+      } else {
+         last;
+      }
+   }
+   return \@names;
+}
+
+
+method _get_lineage_obj_arr ($taxon) {
+   # Take a taxon and return an arrayref of all its lineage, i.e. the taxon
+   # itself and all its ancestors
+   my @arr;
+   if ($taxon) {
+      @arr = ($taxon);
+      my $ancestor = $taxon;
+      while ( $ancestor = $ancestor->ancestor ) {
+         unshift @arr, $ancestor;   
+      }
+   }
+   return \@arr;
+}
+
+
+method _get_lineage_string ($lineage_arr) { 
+   # Take an arrayref of taxa names or taxa objects and return a full lineage string
+   my @names = map { ref $_ ? $_->node_name : $_ } @$lineage_arr;
+   return join ';', @names;
 }
 
 

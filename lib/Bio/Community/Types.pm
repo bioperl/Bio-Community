@@ -109,7 +109,7 @@ subtype 'DistanceType'
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 subtype 'WeightAssignType'
    => as 'Str'
-   => where { ($_ =~ m/^(average)$/) || ($_ * 2) }
+   => where { ($_ =~ m/^(average|ancestor)$/) || ($_ * 2) }
    => message { "This only accepts 'average' or a number, but got '$_'" };
 ;
 
