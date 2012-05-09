@@ -119,6 +119,9 @@ has communities => (
            communities and added as a new member with the desciption 'Other < 1%'
            along with all other members that are less than 1% in all the
            communities.
+           Note that when community members are weighted, the 'Other' group also
+           has to be weighted and its weight has to be calculated specifically
+           for each community.
  Usage   : $summarizer->group('<', 1);
  Args    : * the type of numeric comparison, '<', '<=', '>=', '>'
            * the relative abundance threshold (in %)
@@ -233,15 +236,31 @@ method _group_by_relative_abundance (
 
    # Create group if needed and add it to all communities
    if ($total_group_count > 0) {
-      my $group = Bio::Community::Member->new( -desc => "Other $operator $thresh %" );
       for my $i (0 .. $nof_communities-1) {
-         my $summary = $summaries->[$i];
-         my $count = $group_count->[$i];
+         my $community = $communities->[$i];
+         my $summary   = $summaries->[$i];
+         my $count     = $group_count->[$i];
+         # Create an 'Other' group for each community. Its weight is community-
+         # specific to not upset the rank-abundance of non-grouped members.
+         my $group = Bio::Community::Member->new( -desc => "Other $operator $thresh %" );
+         $group->weights( $self->_calc_group_weights($community, $summary, $count) );
          $summary->add_member($group, $count);
       }
    }
 
    return $summaries;
+}
+
+
+method _calc_group_weights ($community, $summary, $other_count) {
+   my $other_weights;
+   my $target_count = $community->_weighted_count;
+   if ($target_count != 100) {
+      $other_weights = [ $other_count  / ($target_count - $summary->_weighted_count) ];
+   } else {
+      $other_weights = [ 1 ];
+   }
+   return $other_weights ;
 }
 
 
