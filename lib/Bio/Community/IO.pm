@@ -86,7 +86,7 @@ methods. Internal methods are usually preceded with a _
            -weight_files : Arrayref of files that contains weights to assign to
                members. See weight_files().
            -weight_assign : When using a files of weights, define what to do
-               for community members that do not have weights. See weight_assign();
+               for community members that do not have weights. See weight_assign().
            -taxonomy: Given a Bio::DB::Taxonomy object, try to place the community
                members in this taxonomy. See taxonomy().
            See Bio::Root::IO for other accepted constructors, like -fh.
