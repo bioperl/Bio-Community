@@ -18,12 +18,14 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bp_community_bootstrap - Perform bootstrapping to normalize community composition by member count
+bp_community_bootstrap - Perform bootstrapping to normalize community composition
+by member count
 
 =head1 SYNOPSIS
 
   bp_community_bootstrap -input_files   my_communities.generic   \
-                         -output_prefix my_converted_communities
+                         -output_prefix my_converted_communities \
+                         -sample_size   1000
 
 =head1 DESCRIPTION
 
