@@ -179,11 +179,6 @@ sub summarize {
    # Summarize communities
    my $summarized_communities;
    if ($other_lt) {
-
-      ####
-      print "other_lt: $other_lt\n";
-      ####
-
       my $summarizer = Bio::Community::Tools::Summarizer->new(
          -communities => $communities,
          -group       => ['<', $other_lt],
