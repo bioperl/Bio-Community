@@ -203,7 +203,8 @@ method _group_by_relative_abundance (
 
 
    my $nof_communities = scalar @$communities;
-   my $group_count = [(0) x $nof_communities];
+   my $group_count  = [(0) x $nof_communities];
+   my $group_wcount = [(0) x $nof_communities]; # weighted count
    my $total_group_count = 0;
    for my $member ( @$members ) {
 
@@ -219,12 +220,13 @@ method _group_by_relative_abundance (
       }
 
       for my $i (0 .. $nof_communities-1) {
-         my $community = $communities->[$i];
-         my $count = $community->get_count($member);
+         my $rel_ab = $rel_abs->[$i];
+         my $count  = $communities->[$i]->get_count($member);
          if ($member_to_group) {
             # Will group member
-            $group_count->[$i] += $count;
             $total_group_count  += $count;
+            $group_count->[$i]  += $count;
+            $group_wcount->[$i] += $count / Bio::Community::_prod($member->weights);
          } else {
             # Add member as-is, ungrouped
             my $summary = $summaries->[$i];
@@ -238,9 +240,9 @@ method _group_by_relative_abundance (
    if ($total_group_count > 0) {
       my $group_id;
       for my $i (0 .. $nof_communities-1) {
-         my $community = $communities->[$i];
          my $summary   = $summaries->[$i];
          my $count     = $group_count->[$i];
+         my $wcount    = $group_wcount->[$i];
          # Create an 'Other' group for each community. Its weight is community-
          # specific to not upset the rank-abundance of non-grouped members.
          my $group;
@@ -251,7 +253,7 @@ method _group_by_relative_abundance (
             $group_id = $group->id;
          }
          $group->desc("Other $operator $thresh %");
-         $group->weights( $self->_calc_group_weights($community, $summary, $count) );
+         $group->weights( $self->_calc_weights($count, $wcount) );
          $summary->add_member($group, $count);
       }
    }
@@ -259,19 +261,9 @@ method _group_by_relative_abundance (
    return $summaries;
 }
 
-
-method _calc_group_weights ($community, $summary, $other_count) {
-   my $other_weights;
-   my $target_count = $community->_weighted_count;
-   my $current_count = $summary->_weighted_count;
-   if ( $target_count != 100 && ($target_count != $current_count) ) { # avoid division / 0
-      $other_weights = [ $other_count  / ($target_count - $current_count) ];
-   } else {
-      $other_weights = [ 1 ];
-   }
-   return $other_weights ;
+method _calc_weights ($count, $weighted_count) {
+   return [ $count / $weighted_count ];
 }
-
 
 __PACKAGE__->meta->make_immutable;
 
