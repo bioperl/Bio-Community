@@ -42,11 +42,11 @@ $community2->add_member( $member5, 1 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1, $community2],
-   -group       => ['<', 2],
+   -by_rel_ab   => ['<', 2],
 ), 'Multiple communities';
 
 is_deeply $summarizer->communities, [$community1, $community2];
-is_deeply $summarizer->group, ['<', 2];
+is_deeply $summarizer->by_rel_ab, ['<', 2];
 
 ok $summaries = $summarizer->get_summaries;
 is scalar @$summaries, 2;
@@ -88,7 +88,7 @@ $community1->add_member( $member1, 100 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
-   -group       => ['<', 2],
+   -by_rel_ab   => ['<', 2],
 ), 'No grouping';
 
 ok $summaries = $summarizer->get_summaries;
@@ -109,7 +109,7 @@ $community1->add_member( $member2, 98 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
-   -group       => ['<=', 2],
+   -by_rel_ab   => ['<=', 2],
 ), "Operator '<='";
 
 ok $summaries = $summarizer->get_summaries;
@@ -130,7 +130,7 @@ $community1->add_member( $member2, 99 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
-   -group       => ['<', 2],
+   -by_rel_ab   => ['<', 2],
 ), "Operator '<'";
 
 ok $summaries = $summarizer->get_summaries;
@@ -151,7 +151,7 @@ $community1->add_member( $member2, 99 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
-   -group       => ['>', 2],
+   -by_rel_ab   => ['>', 2],
 ), "Operator '>'";
 
 ok $summaries = $summarizer->get_summaries;
@@ -172,7 +172,7 @@ $community1->add_member( $member2, 99 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
-   -group       => ['>=', 2],
+   -by_rel_ab   => ['>=', 2],
 ), "Operator '>='";
 
 ok $summaries = $summarizer->get_summaries;
@@ -217,7 +217,7 @@ delta_ok $community2->get_rel_ab($member4), 12.0000000;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1, $community2],
-   -group       => ['<', 20],
+   -by_rel_ab   => ['<', 20],
 ), 'Multiple weighted communities';
 
 ok $summaries = $summarizer->get_summaries;
@@ -244,6 +244,67 @@ delta_ok $summary->get_rel_ab($member4), 0;
 delta_ok $summary->get_rel_ab($group)  , 28.0000000;
 
 $summary = $summaries->[0];
+
+
+# Taxonomic summary with multiple communities with weighted members
+
+#$member1 = Bio::Community::Member->new( -desc => 'A', -weights => [1] );
+#$member2 = Bio::Community::Member->new( -desc => 'B', -weights => [2] );
+#$member3 = Bio::Community::Member->new( -desc => 'C', -weights => [3] );
+#$member4 = Bio::Community::Member->new( -desc => 'D', -weights => [4] );
+
+#$community1 = Bio::Community->new();
+#$community1->add_member( $member1, 87 );
+#$community1->add_member( $member2,  1 );
+#$community1->add_member( $member3,  2 );
+#$community1->add_member( $member4, 10 );
+
+#$community2 = Bio::Community->new( -name => 'grassland' );
+#$community2->add_member( $member1, 25 );
+#$community2->add_member( $member2, 25 );
+#$community2->add_member( $member3, 25 );
+#$community2->add_member( $member4, 25 );
+
+#delta_ok $community1->get_rel_ab($member1), 95.9558824;
+#delta_ok $community1->get_rel_ab($member2),  0.5514706;
+#delta_ok $community1->get_rel_ab($member3),  0.7352941;
+#delta_ok $community1->get_rel_ab($member4),  2.7573529;
+
+#delta_ok $community2->get_rel_ab($member1), 48.0000000;
+#delta_ok $community2->get_rel_ab($member2), 24.0000000;
+#delta_ok $community2->get_rel_ab($member3), 16.0000000;
+#delta_ok $community2->get_rel_ab($member4), 12.0000000;
+
+
+#ok $summarizer = Bio::Community::Tools::Summarizer->new(
+#   -communities  => [$community1, $community2],
+#   -by_tax_level => 3,
+#), 'Multiple weighted communities';
+
+###ok $summaries = $summarizer->get_summaries;
+###is scalar @$summaries, 2;
+
+###$summary = $summaries->[0];
+###$group = get_group($summary);
+###$id = $group->id;
+###is $summary->name, 'Unnamed community summarized';
+###delta_ok $summary->get_rel_ab($member1), 95.9558824;
+###delta_ok $summary->get_rel_ab($member2),  0.5514706;
+###delta_ok $summary->get_rel_ab($member3),  0;
+###delta_ok $summary->get_rel_ab($member4),  0;
+###delta_ok $summary->get_rel_ab($group)  ,  3.4926470;
+
+###$summary = $summaries->[1];
+###$group = get_group($summary);
+###is $group->id, $id;
+###is $summary->name, 'grassland summarized';
+###delta_ok $summary->get_rel_ab($member1), 48.0000000;
+###delta_ok $summary->get_rel_ab($member2), 24.0000000;
+###delta_ok $summary->get_rel_ab($member3), 0;
+###delta_ok $summary->get_rel_ab($member4), 0;
+###delta_ok $summary->get_rel_ab($group)  , 28.0000000;
+
+###$summary = $summaries->[0];
 
 
 

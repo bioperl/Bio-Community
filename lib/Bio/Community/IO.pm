@@ -528,10 +528,10 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
 
             # Method based on member taxonomic lineage
             my $taxon = $member->taxon;
-            my $lineage_arr = $self->_get_lineage_obj_arr($taxon);
+            my $lineage_arr = _get_lineage_obj_arr($taxon);
             my $lineage;
             do {
-               $lineage = $self->_get_lineage_string($lineage_arr);
+               $lineage = _get_lineage_string($lineage_arr);
                if (exists $weight_type->{$lineage}) {
                   $weight = $weight_type->{$lineage};
                   @$lineage_arr = (); # to exit loop
@@ -540,7 +540,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
             if (not defined $weight) {
                # Fall back to average if it fails
                $weight = $self->_average_weights->[$i];
-               #$lineage = $self->_get_lineage_string( $member->taxon );
+               #$lineage = _get_lineage_string( $member->taxon );
                #$self->warn("No weight found for member with ID '".$member->id.
                #   "', description '".$member->desc."' and taxonomic lineage '".
                #   "$lineage' or any of its ancestors. Using average weight from".
@@ -659,7 +659,7 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
       # First do some lineage curation
       my @names;
       if ($is_name) {
-         @names = @{$self->_get_lineage_name_arr($taxo_str)};
+         @names = @{_get_lineage_name_arr($taxo_str)};
       }
 
       # Then add lineage to taxonomy if desired
@@ -691,7 +691,7 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
 }
 
 
-method _get_lineage_name_arr ($taxo_str) {
+sub _get_lineage_name_arr {
    # Take a lineage string and put the taxa name into an arrayref. Also, remove
    # lineage tail elements that look like:
    #    '', 'Other', 'No blast hit', 'g__', 's__', etc
@@ -700,6 +700,7 @@ method _get_lineage_name_arr ($taxo_str) {
    #   k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
    # Silva:
    #   Bacteria;Cyanobacteria;Chloroplast;uncultured;Other;Other
+   my ($taxo_str) = @_;
    my @names = split /;\s*/, $taxo_str;
    while ( my $elem = $names[-1] ) {
       next if not defined $elem;
@@ -713,7 +714,8 @@ method _get_lineage_name_arr ($taxo_str) {
 }
 
 
-method _get_lineage_obj_arr ($taxon) {
+sub _get_lineage_obj_arr {
+   my ($taxon) = @_;
    # Take a taxon and return an arrayref of all its lineage, i.e. the taxon
    # itself and all its ancestors
    my @arr;
@@ -728,7 +730,8 @@ method _get_lineage_obj_arr ($taxon) {
 }
 
 
-method _get_lineage_string ($lineage_arr) { 
+sub _get_lineage_string {
+   my ($lineage_arr) = @_;
    # Take an arrayref of taxa names or taxa objects and return a full lineage string
    my @names = map { ref $_ ? $_->node_name : $_ } @$lineage_arr;
    return join ';', @names;
