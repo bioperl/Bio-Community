@@ -123,7 +123,8 @@ has communities => (
            level. The taxonomic level depends on which taxonomy is used. For the
            Greengenes taxonomy, level 1 represents kingdom, level 2 represents
            phylum, and so on, until level 7, representing the species level.
-           Members without taxonomic information are left alone.
+           Members without taxonomic information are grouped together in a Member
+           with the description 'Unknown taxonomy'.
            Not that summarizing by taxonomy level takes place before grouping by
            relative abundance, by_rel_ab(). Also, since each community member
            represents the combination of multiple members, they have to be given
@@ -165,7 +166,7 @@ has by_tax_level => (
 
 has by_rel_ab => (
    is => 'rw',
-   isa => 'ArrayRef', # how to specify ArrayRef[Str, Num]?
+   isa => 'Maybe[ArrayRef]', # how to specify ArrayRef[Str, Num]?
    required => 0,
    lazy => 1,
    default => undef,
@@ -197,10 +198,10 @@ method get_summaries {
    my $members = $communities->[0]->get_all_members($communities);
 
 
-   ### First filter out members TODO
+   ### First, filter out members TODO
 
 
-   # Then summarize by taxonomy TODO
+   # Then summarize by taxonomy
    my $tax_level = $self->by_tax_level();
    if (defined $self->by_tax_level) {
       $summaries = $self->_group_by_taxonomic_level($members, $communities,
@@ -218,10 +219,7 @@ method get_summaries {
 };
 
 
-method _group_by_taxonomic_level (
-   ArrayRef $members, ArrayRef $communities, ArrayRef $summaries, ArrayRef $params 
-) {
-
+method _group_by_taxonomic_level ( $members, $communities, $summaries, $tax_level ) {
    my $nof_communities = scalar @$communities;
    my $taxa_counts = {};
    my $taxa_objs   = {};
@@ -229,10 +227,15 @@ method _group_by_taxonomic_level (
 
          my $taxon = $member->taxon;
          if ($taxon) { # member has taxonomic information
+
             my $lineage_arr = Bio::Community::IO::_get_lineage_obj_arr($taxon);
-            $taxon = $lineage_arr->[$self->by_tax_level-1];
-            if ($taxon) { # could find Bio::Taxon at requested taxonomic level
-               my $lineage_str = Bio::Community::_get_lineage_string($lineage_arr);
+            my $end_idx = $tax_level-1 > $#$lineage_arr ?  $#$lineage_arr : $tax_level-1;
+            $lineage_arr = [ @{$lineage_arr}[0 .. $end_idx] ];
+
+            if ( scalar @$lineage_arr > 0 ) { # could find Bio::Taxon at requested taxonomic level
+
+               my $lineage_str = Bio::Community::IO::_get_lineage_string($lineage_arr);
+               $taxon = $lineage_arr->[-1];
 
                # Save taxon object
                if (not exists $taxa_objs->{$lineage_str}) {
@@ -248,16 +251,29 @@ method _group_by_taxonomic_level (
                   $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
                }
 
+            } else {
+               # Member had taxonomic information at a higher level than requested.
+               # Add member as-is in all summaries.
+               for my $i (0 .. $nof_communities-1) {
+                  my $count = $communities->[$i]->get_count($member);
+                  my $summary = $summaries->[$i];
+                  $summary->add_member($member, $count);
+               }
             }
          }
 
          if (not $taxon) {
-            # Member had no taxonomic info, or at a higher level than requested.
-            # Add member as-is in all summaries.
+            # Member had no taxonomic info. Add it in a separate group.
+            my $lineage_str = 'Unknown taxonomy';
+            if (not exists $taxa_objs->{$lineage_str}) {
+               $taxa_objs->{$lineage_str} = undef;
+            }
             for my $i (0 .. $nof_communities-1) {
-               my $count = $communities->[$i]->get_count($member);
-               my $summary = $summaries->[$i];
-               $summary->add_member($member, $count);
+               my $community = $communities->[$i];
+               my $count = $community->get_count($member);
+               my $wcount = $count / Bio::Community::_prod($member->weights);
+               $taxa_counts->{$lineage_str}->{$i}->[0] += $count;
+               $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
             }
          }
 
@@ -266,6 +282,7 @@ method _group_by_taxonomic_level (
    # Add taxonomic groups to all communities
    while (my ($lineage_str, $taxon) = each %$taxa_objs) {
       my $member_id;
+      my $taxon = $taxa_objs->{$lineage_str};
       for my $i (0 .. $nof_communities-1) {
          my ($count, $wcount) = @{$taxa_counts->{$lineage_str}->{$i}};
          my $summary = $summaries->[$i];
@@ -277,8 +294,9 @@ method _group_by_taxonomic_level (
             $member_id = $member->id;
          }
          $member->desc($lineage_str);
+         $member->taxon($taxon);
          $member->weights( $self->_calc_weights($count, $wcount) );
-         $summary->add_member($member, $count);
+         $summary->add_member($member, $count) if $count > 0;
       }
    }
 
@@ -286,10 +304,7 @@ method _group_by_taxonomic_level (
 }
 
 
-method _group_by_relative_abundance (
-   ArrayRef $members, ArrayRef $communities, ArrayRef $summaries, ArrayRef $params 
-) {
-
+method _group_by_relative_abundance ( $members, $communities, $summaries, $params ) {
    # Get grouping parameters
    my $thresh   = $params->[1] || $self->throw("No grouping threshold was provided.");
    my $operator = $params->[0] || $self->throw("No comparison operator was provided.");
@@ -334,7 +349,7 @@ method _group_by_relative_abundance (
          } else {
             # Add member as-is, ungrouped
             my $summary = $summaries->[$i];
-            $summary->add_member($member, $count);
+            $summary->add_member($member, $count) if $count > 0;
          }
       }
 
@@ -368,7 +383,8 @@ method _group_by_relative_abundance (
 
 method _calc_weights ($count, $weighted_count) {
    # Given a count and a weighted count, calcualte
-   return [ $count / $weighted_count ];
+   my $weight = ($count > 0) ? ($count / $weighted_count) : 1;
+   return [ $weight ];
 }
 
 
