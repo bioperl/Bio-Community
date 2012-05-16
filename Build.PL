@@ -13,11 +13,13 @@ my $build = Module::Build->new(
     license              => 'perl',
     recursive_test_files => 1,
     create_license       => 1,
-#    meta_merge           => {
-#                             'resources' => {
-#                                             'repository' => 'git@github.com:bioperl/Bio-Community.git',
-#                                            },
-#                            },
+    meta_merge           => {
+                             'resources' => {
+                                             'repository' => 'git://github.com/bioperl/Bio-Community.git',
+                                             #'homepage'   => 'http://...',
+                                             #'bugtracker' => 'http://...',
+                                            },
+                            },
     build_requires       => {
                              'Test::Number::Delta'          =>  0,
                             },
