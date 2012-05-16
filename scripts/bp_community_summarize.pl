@@ -149,13 +149,13 @@ Email florent.angly@gmail.com
 =cut
 
 summarize( $ARGV{'input_files'} , $ARGV{'output_prefix'}, $ARGV{'relative_abundance'},
-           $ARGV{'weight_files'}, $ARGV{'weight_assign'}, $ARGV{'other_lt'} );
+           $ARGV{'weight_files'}, $ARGV{'weight_assign'}, $ARGV{'by_rel_ab'} );
 exit;
 
 
 sub summarize {
    my ($input_files, $output_prefix, $relative_abundance, $weight_files,
-      $weight_assign, $other_lt) = @_;
+      $weight_assign, $by_rel_ab) = @_;
 
    # Read input communities and do weight assignment
    my $communities = [];
@@ -179,10 +179,10 @@ sub summarize {
 
    # Summarize communities
    my $summarized_communities;
-   if ($other_lt) {
+   if ($by_rel_ab) {
       my $summarizer = Bio::Community::Tools::Summarizer->new(
          -communities => $communities,
-         -by_rel_ab   => ['<', $other_lt],
+         -by_rel_ab   => ['<', $by_rel_ab],
       );
       $summarized_communities = $summarizer->get_summaries;
    } else {
