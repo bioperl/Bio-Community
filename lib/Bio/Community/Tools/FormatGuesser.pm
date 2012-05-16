@@ -15,7 +15,10 @@ Bio::Community::Tools::FormatGuesser - Determine the format used by a community 
 
   use Bio::Community::Tools::FormatGuesser;
 
-  my $format = Bio::Community::Tools::FormatGuesser->new( ... );
+  my $guesser = Bio::Community::Tools::FormatGuesser->new(
+     -file => 'file.txt',
+  );
+  my $format = $guesser->guess;
 
 =head1 DESCRIPTION
 
