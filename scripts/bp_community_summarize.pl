@@ -76,7 +76,7 @@ Convert counts into relative abundances (taking into account weights): 1 (yes),
 =item -ol <other_lt> | -other_lt <other_lt>
 
 Group community members with a relative abundance less than the specified
-threshold (in %) into an 'Other' group. Default: other_lt.default
+threshold (in %) into an 'Other' group. Default: other_lt.default %
 
 =for Euclid:
    other_lt.type: integer, other_lt >= 0 && other_lt <= 100
@@ -85,7 +85,7 @@ threshold (in %) into an 'Other' group. Default: other_lt.default
 
 =item -wf <weight_files>... | -weight_files <weight_files>...
 
-Tab-delimited files containing weight to assign to the community members.
+Tab-delimited files containing weights to assign to the community members.
 
 =for Euclid:
    weight_files.type: readable
@@ -164,6 +164,7 @@ sub summarize {
       my $in = Bio::Community::IO->new(
          -file          => $input_file,
          -weight_assign => $weight_assign,
+         #### Consider building the taxonomy only when needed, i.e. when taxonomy summary or weight assignment by taxonomy is required
          -taxonomy      => Bio::DB::Taxonomy->new( -source => 'list' ), # build taxonomy on-the-fly
       );
       if ($weight_files) {
@@ -181,7 +182,7 @@ sub summarize {
    if ($other_lt) {
       my $summarizer = Bio::Community::Tools::Summarizer->new(
          -communities => $communities,
-         -group       => ['<', $other_lt],
+         -by_rel_ab   => ['<', $other_lt],
       );
       $summarized_communities = $summarizer->get_summaries;
    } else {
