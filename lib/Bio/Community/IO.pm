@@ -26,7 +26,8 @@ Bio::Community::IO - Read and write files that describe communities
 
 A Bio::Community::IO object implement methods to read and write communities in
 formats used by popular programs such as GAAS and QIIME, or as generic tab-
-separated tables.
+separated tables. It can also convert community member abundance between counts,
+fraction and relative abundance.
 
 =back
 
