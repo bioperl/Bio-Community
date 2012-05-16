@@ -70,8 +70,8 @@ delta_ok $summary->get_count($group)  , 1;
 
 $summary = $summaries->[1];
 $group = get_group($summary);
-is $group->id, $id; # different object because the weight is different,
-                          # but ID need to be the same
+is $group->id, $id; # different object because the weight is different, 
+                    # but ID need to be the same
 is $summary->name, 'grassland summarized';
 delta_ok $summary->get_count($member1), 8;
 delta_ok $summary->get_count($member2), 90;
@@ -83,27 +83,7 @@ delta_ok $summary->get_count($group)  , 2;
 $summary = $summaries->[0];
 
 
-# Test community where nothing is to be grouped.
-
-$community1 = Bio::Community->new();
-$community1->add_member( $member1, 100 );
-
-ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
-   -by_rel_ab   => ['<', 2],
-), 'No grouping';
-
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
-
-$summary = $summaries->[0];
-delta_ok $summary->get_count($member1), 100;
-
-$group = get_group($summary);
-is $group, undef;
-
-
-# Test <= operators
+# Test <= operator
 
 $community1 = Bio::Community->new();
 $community1->add_member( $member1,  2 );
@@ -111,8 +91,23 @@ $community1->add_member( $member2, 98 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
-   -by_rel_ab   => ['<=', 2],
+   -by_rel_ab   => ['<=', 1.9],
 ), "Operator '<='";
+
+ok $summaries = $summarizer->get_summaries;
+is scalar @$summaries, 1;
+
+$summary = $summaries->[0];
+$group = get_group($summary);
+is $group, undef;
+delta_ok $summary->get_count($member1), 2;
+delta_ok $summary->get_count($member2), 98;
+
+
+ok $summarizer = Bio::Community::Tools::Summarizer->new(
+   -communities => [$community1],
+   -by_rel_ab   => ['<=', 2],
+);
 
 ok $summaries = $summarizer->get_summaries;
 is scalar @$summaries, 1;
@@ -124,15 +119,11 @@ delta_ok $summary->get_count($member2), 98;
 delta_ok $summary->get_count($group  ), 2;
 
 
-# Test < operators
-
-$community1 = Bio::Community->new();
-$community1->add_member( $member1,  1 );
-$community1->add_member( $member2, 99 );
+# Test < operator
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
-   -by_rel_ab   => ['<', 2],
+   -by_rel_ab   => ['<', 2.1],
 ), "Operator '<'";
 
 ok $summaries = $summarizer->get_summaries;
@@ -141,15 +132,27 @@ is scalar @$summaries, 1;
 $summary = $summaries->[0];
 ok $group = get_group($summary);
 delta_ok $summary->get_count($member1), 0;
-delta_ok $summary->get_count($member2), 99;
-delta_ok $summary->get_count($group  ), 1;
+delta_ok $summary->get_count($member2), 98;
+delta_ok $summary->get_count($group  ), 2;
 
 
-# Test > operators
+ok $summarizer = Bio::Community::Tools::Summarizer->new(
+   -communities => [$community1],
+   -by_rel_ab   => ['<', 2],
+);
 
-$community1 = Bio::Community->new();
-$community1->add_member( $member1,  1 );
-$community1->add_member( $member2, 99 );
+ok $summaries = $summarizer->get_summaries;
+is scalar @$summaries, 1;
+
+$summary = $summaries->[0];
+
+$group = get_group($summary);
+is $group, undef;
+delta_ok $summary->get_count($member1), 2;
+delta_ok $summary->get_count($member2), 98;
+
+
+# Test > operator
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
@@ -161,20 +164,31 @@ is scalar @$summaries, 1;
 
 $summary = $summaries->[0];
 ok $group = get_group($summary);
-delta_ok $summary->get_count($member1), 1;
+delta_ok $summary->get_count($member1), 2;
 delta_ok $summary->get_count($member2), 0;
-delta_ok $summary->get_count($group  ), 99;
+delta_ok $summary->get_count($group  ), 98;
 
-
-# Test >= operators
-
-$community1 = Bio::Community->new();
-$community1->add_member( $member1,  1 );
-$community1->add_member( $member2, 99 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
-   -by_rel_ab   => ['>=', 2],
+   -by_rel_ab   => ['>', 1.9],
+);
+
+ok $summaries = $summarizer->get_summaries;
+is scalar @$summaries, 1;
+
+$summary = $summaries->[0];
+ok $group = get_group($summary);
+delta_ok $summary->get_count($member1), 0;
+delta_ok $summary->get_count($member2), 0;
+delta_ok $summary->get_count($group  ), 100;
+
+
+# Test >= operator
+
+ok $summarizer = Bio::Community::Tools::Summarizer->new(
+   -communities => [$community1],
+   -by_rel_ab   => ['>=', 3],
 ), "Operator '>='";
 
 ok $summaries = $summarizer->get_summaries;
@@ -182,9 +196,24 @@ is scalar @$summaries, 1;
 
 $summary = $summaries->[0];
 ok $group = get_group($summary);
-delta_ok $summary->get_count($member1), 1;
+delta_ok $summary->get_count($member1), 2;
 delta_ok $summary->get_count($member2), 0;
-delta_ok $summary->get_count($group  ), 99;
+delta_ok $summary->get_count($group  ), 98;
+
+
+ok $summarizer = Bio::Community::Tools::Summarizer->new(
+   -communities => [$community1],
+   -by_rel_ab   => ['>=', 2],
+);
+
+ok $summaries = $summarizer->get_summaries;
+is scalar @$summaries, 1;
+
+$summary = $summaries->[0];
+ok $group = get_group($summary);
+delta_ok $summary->get_count($member1), 0;
+delta_ok $summary->get_count($member2), 0;
+delta_ok $summary->get_count($group  ), 100;
 
 
 # Test with multiple communities with weighted members
@@ -349,16 +378,10 @@ is scalar @$summaries, 1;
 $summary = $summaries->[0];
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Actinobacteria';
-is $member->taxon->node_name, 'p__Actinobacteria';
+is $member->desc, 'Unknown taxonomy';
+is $member->taxon, undef;
 delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.1624215;
-
-$member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Proteobacteria';
-is $member->taxon->node_name, 'p__Proteobacteria';
-delta_ok $summary->get_count($member), 2002;
-delta_ok $summary->get_rel_ab($member), 97.6112442;
+delta_ok $summary->get_rel_ab($member), 0.3654483;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes';
@@ -367,10 +390,16 @@ delta_ok $summary->get_count($member), 23;
 delta_ok $summary->get_rel_ab($member), 1.860886;
 
 $member = $summary->next_member;
-is $member->desc, 'Unknown taxonomy';
-is $member->taxon, undef;
+is $member->desc, 'k__Bacteria;p__Proteobacteria';
+is $member->taxon->node_name, 'p__Proteobacteria';
+delta_ok $summary->get_count($member), 2002;
+delta_ok $summary->get_rel_ab($member), 97.6112442;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Actinobacteria';
+is $member->taxon->node_name, 'p__Actinobacteria';
 delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.3654483;
+delta_ok $summary->get_rel_ab($member), 0.1624215;
 
 is $summary->next_member, undef;
 
@@ -388,10 +417,10 @@ is scalar @$summaries, 1;
 $summary = $summaries->[0];
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Enterococcaceae;g__Enterococcus';
-is $member->taxon->node_name, 'g__Enterococcus';
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.1392184;
+is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Carnobacteriaceae;g__Granulicatella';
+is $member->taxon->node_name, 'g__Granulicatella';
+delta_ok $summary->get_count($member), 18;
+delta_ok $summary->get_rel_ab($member), 0.9745288;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Actinomycetaceae;g__Actinomyces';
@@ -400,10 +429,16 @@ delta_ok $summary->get_count($member), 2;
 delta_ok $summary->get_rel_ab($member), 0.1624215;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae';
-is $member->taxon->node_name, 'f__Enterobacteriaceae';
-delta_ok $summary->get_count($member), 2002;
-delta_ok $summary->get_rel_ab($member), 97.6112442;
+is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus';
+is $member->taxon->node_name, 'g__Lactobacillus';
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.2598744;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Enterococcaceae;g__Enterococcus';
+is $member->taxon->node_name, 'g__Enterococcus';
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.1392184;
 
 $member = $summary->next_member;
 is $member->desc, 'Unknown taxonomy';
@@ -418,16 +453,10 @@ delta_ok $summary->get_count($member), 1;
 delta_ok $summary->get_rel_ab($member), 0.4872644;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Carnobacteriaceae;g__Granulicatella';
-is $member->taxon->node_name, 'g__Granulicatella';
-delta_ok $summary->get_count($member), 18;
-delta_ok $summary->get_rel_ab($member), 0.9745288;
-
-$member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus';
-is $member->taxon->node_name, 'g__Lactobacillus';
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.2598744;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae';
+is $member->taxon->node_name, 'f__Enterobacteriaceae';
+delta_ok $summary->get_count($member), 2002;
+delta_ok $summary->get_rel_ab($member), 97.6112442;
 
 is $summary->next_member, undef;
 
@@ -445,28 +474,10 @@ is scalar @$summaries, 1;
 $summary = $summaries->[0];
 
 $member = $summary->next_member;
-is $member->desc, 'Unknown taxonomy';
-is $member->taxon, undef;
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.3654483;
-
-$member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Veillonellaceae;g__Veillonella';
-is $member->taxon->node_name, 'g__Veillonella';
-delta_ok $summary->get_count($member), 1;
-delta_ok $summary->get_rel_ab($member), 0.4872644;
-
-$member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus;s__Lactobacillusiners';
 is $member->taxon->node_name, 's__Lactobacillusiners';
 delta_ok $summary->get_count($member), 2;
 delta_ok $summary->get_rel_ab($member), 0.2598744;
-
-$member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae';
-is $member->taxon->node_name, 'f__Enterobacteriaceae';
-delta_ok $summary->get_count($member), 2002;
-delta_ok $summary->get_rel_ab($member), 97.6112442;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Carnobacteriaceae;g__Granulicatella;s__Granulicatellaelegans';
@@ -475,16 +486,34 @@ delta_ok $summary->get_count($member), 18;
 delta_ok $summary->get_rel_ab($member), 0.9745288;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Enterococcaceae;g__Enterococcus;s__Enterococcusfaecalis';
-is $member->taxon->node_name, 's__Enterococcusfaecalis';
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.1392184;
-
-$member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Actinomycetaceae;g__Actinomyces;s__Actinomycesodontolyticus';
 is $member->taxon->node_name, 's__Actinomycesodontolyticus';
 delta_ok $summary->get_count($member), 2;
 delta_ok $summary->get_rel_ab($member), 0.1624215;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Veillonellaceae;g__Veillonella';
+is $member->taxon->node_name, 'g__Veillonella';
+delta_ok $summary->get_count($member), 1;
+delta_ok $summary->get_rel_ab($member), 0.4872644;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae';
+is $member->taxon->node_name, 'f__Enterobacteriaceae';
+delta_ok $summary->get_count($member), 2002;
+delta_ok $summary->get_rel_ab($member), 97.6112442;
+
+$member = $summary->next_member;
+is $member->desc, 'Unknown taxonomy';
+is $member->taxon, undef;
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.3654483;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Enterococcaceae;g__Enterococcus;s__Enterococcusfaecalis';
+is $member->taxon->node_name, 's__Enterococcusfaecalis';
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.1392184;
 
 is $summary->next_member, undef;
 
@@ -511,18 +540,18 @@ is scalar @$summaries, 3;
 $summary = $summaries->[0];
 
 $member = $summary->next_member;
-is $member->desc, 'Unknown taxonomy';
-is $member->taxon, undef;
-delta_ok $summary->get_count($member), 41;
-delta_ok $summary->get_rel_ab($member), 50.6172840;
-$id2 = $member->id;
-
-$member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales';
 is $member->taxon->node_name, 'o__Rickettsiales';
 delta_ok $summary->get_count($member), 40;
 delta_ok $summary->get_rel_ab($member), 49.3827160;
 $id1 = $member->id;
+
+$member = $summary->next_member;
+is $member->desc, 'Unknown taxonomy';
+is $member->taxon, undef;
+delta_ok $summary->get_count($member), 41;
+delta_ok $summary->get_rel_ab($member), 50.6172840;
+$id2 = $member->id;
 
 is $summary->next_member, undef;
 
@@ -540,13 +569,6 @@ is $summary->next_member, undef;
 $summary = $summaries->[2];
 
 $member = $summary->next_member;
-is $member->desc, 'Unknown taxonomy';
-is $member->taxon, undef;
-delta_ok $summary->get_count($member), 43;
-delta_ok $summary->get_rel_ab($member), 35.5371901;
-is $member->id, $id2;
-
-$member = $summary->next_member;
 is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2';
 is $member->taxon->node_name, 'o__E2';
 delta_ok $summary->get_count($member), 2;
@@ -559,6 +581,13 @@ is $member->taxon->node_name, 'o__Rickettsiales';
 delta_ok $summary->get_count($member), 76;
 delta_ok $summary->get_rel_ab($member), 62.8099174;
 is $member->id, $id1;
+
+$member = $summary->next_member;
+is $member->desc, 'Unknown taxonomy';
+is $member->taxon, undef;
+delta_ok $summary->get_count($member), 43;
+delta_ok $summary->get_rel_ab($member), 35.5371901;
+is $member->id, $id2;
 
 is $summary->next_member, undef;
 

@@ -73,15 +73,15 @@ Convert counts into relative abundances (taking into account weights): 1 (yes),
    relative_abundance.type.error: <relative_abundance> must be 0 or 1 (not relative_abundance)
    relative_abundance.default: 1
 
-=item -ol <other_lt> | -other_lt <other_lt>
+=item -rl <relab_lt> | -relab_lt <relab_lt>
 
 Group community members with a relative abundance less than the specified
-threshold (in %) into an 'Other' group. Default: other_lt.default %
+threshold (in %) into an 'Other' group. Default: relab_lt.default %
 
 =for Euclid:
-   other_lt.type: integer, other_lt >= 0 && other_lt <= 100
-   other_lt.type.error: <other_lt> must be between 0 and 100 (not other_lt)
-   other_lt.default: 1
+   relab_lt.type: number, relab_lt >= 0 && relab_lt <= 100
+   relab_lt.type.error: <relab_lt> must be between 0 and 100 (not relab_lt)
+   relab_lt.default: 1
 
 =item -wf <weight_files>... | -weight_files <weight_files>...
 
@@ -149,7 +149,7 @@ Email florent.angly@gmail.com
 =cut
 
 summarize( $ARGV{'input_files'} , $ARGV{'output_prefix'}, $ARGV{'relative_abundance'},
-           $ARGV{'weight_files'}, $ARGV{'weight_assign'}, $ARGV{'by_rel_ab'} );
+           $ARGV{'weight_files'}, $ARGV{'weight_assign'}, $ARGV{'relab_lt'} );
 exit;
 
 
