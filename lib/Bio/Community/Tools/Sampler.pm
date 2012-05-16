@@ -86,6 +86,7 @@ package Bio::Community::Tools::Sampler;
 
 use Moose;
 use MooseX::NonMoose;
+use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use List::Util qw( first );

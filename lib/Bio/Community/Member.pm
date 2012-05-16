@@ -109,6 +109,7 @@ package Bio::Community::Member;
 
 use Moose;
 use MooseX::NonMoose;
+use MooseX::StrictConstructor;
 use namespace::autoclean;
 use Method::Signatures;
 use Bio::Community::Types;

@@ -122,6 +122,7 @@ package Bio::Community::Tools::FormatGuesser;
 
 use Moose;
 use MooseX::NonMoose;
+use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 

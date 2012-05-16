@@ -89,6 +89,7 @@ package Bio::Community::Tools::Summarizer;
 
 use Moose;
 use MooseX::NonMoose;
+use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::IO;

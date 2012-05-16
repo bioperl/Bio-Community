@@ -27,6 +27,7 @@ This module requires these other modules and libraries:
   Moose
   Moose::Util::TypeConstraints
   MooseX::NonMoose
+  MooseX::StrictConstructor
   Parallel::Iterator
   Test::Number::Delta
 

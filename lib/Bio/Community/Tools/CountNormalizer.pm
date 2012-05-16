@@ -97,6 +97,7 @@ package Bio::Community::Tools::CountNormalizer;
 
 use Moose;
 use MooseX::NonMoose;
+use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Tools::Sampler;
