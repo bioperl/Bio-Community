@@ -38,6 +38,7 @@ my $build = Module::Build->new(
     script_files         => [
                              'scripts/bp_community_bootstrap.pl',
                              'scripts/bp_community_convert.pl',
+                             'scripts/bp_community_summarize.pl',
                             ],
     recursive_test_files => 1,
     dynamic_config       => 1,
