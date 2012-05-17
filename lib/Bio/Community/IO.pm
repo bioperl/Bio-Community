@@ -695,7 +695,7 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
 sub _get_lineage_name_arr {
    # Take a lineage string and put the taxa name into an arrayref. Also, remove
    # lineage tail elements that look like:
-   #    '', 'Other', 'No blast hit', 'g__', 's__', etc
+   #    '', 'Other', 'No blast hit', 'uncultured', 'environmental', 'g__', 's__', etc
    # from input strings that look like:
    # GreenGenes:
    #   k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
@@ -703,9 +703,10 @@ sub _get_lineage_name_arr {
    #   Bacteria;Cyanobacteria;Chloroplast;uncultured;Other;Other
    my ($taxo_str) = @_;
    my @names = split /;\s*/, $taxo_str;
+   my $re = qr/^(?:\S__|Other|No blast hit|unidentified|uncultured|environmental|)$/i;
    while ( my $elem = $names[-1] ) {
       next if not defined $elem;
-      if ($elem =~ m/^(?:\S__|Other|No blast hit|)$/i) {
+      if ($elem =~ $re) {
          pop @names;
       } else {
          last;
