@@ -319,6 +319,8 @@ method _read_table () {
 
    while (my $line = $self->_readline(-raw => 1)) {
 
+      next if $line =~ m/^\s*$/;
+
       if (not defined $num_eol_chars) {
          # Count line length
          $line =~ m/([\r\n]?\n)$/; # last line may not match
