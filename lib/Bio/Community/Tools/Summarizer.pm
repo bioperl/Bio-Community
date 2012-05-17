@@ -122,6 +122,30 @@ has communities => (
 );
 
 
+=head2 merge_dups
+
+ Function: Merge community members with the exact same taxonomic affiliation
+           together. For example, if your community contained several members
+           with a taxonomic lineage of 'Archaea;Euryarchaeota;Halobacteria', all
+           would be merged into a new member with the same taxonomy and the sum
+           of the counts. Note that merging duplicates takes place before grouping
+           by taxonomy level, by_tax_level().
+ Usage   : $summarizer->merge_dups(1);
+ Args    : 0 (no) or 1 (yes). Default: 1
+ Returns : a positive integer
+
+=cut
+
+has merge_dups => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   lazy => 1,
+   default => 1,
+   init_arg => '-merge_dups',
+);
+
+
 =head2 by_tax_level
 
  Function: Get/set the taxonomic level at which to group community members. When
@@ -204,8 +228,14 @@ method get_summaries {
 
    my $members = $communities->[0]->get_all_members($communities);
 
+   #### First, filter out members TODO
 
-   ### First, filter out members TODO
+   # Then merge duplicates
+   my $merge_dups = $self->merge_dups();
+   if ($merge_dups) {
+      $summaries = $self->_merge_duplicates($members, $communities, $summaries,
+          $merge_dups);
+   }
 
    # Then summarize by taxonomy
    my $tax_level = $self->by_tax_level();
@@ -225,6 +255,50 @@ method get_summaries {
 };
 
 
+method _merge_duplicates ( $members, $communities, $summaries, $merge_dups ) {
+   my $nof_communities = scalar @$communities;
+   my $taxa_counts = {};
+   my $taxa_objs   = {};
+   for my $member ( @$members ) {
+
+      my $taxon = $member->taxon;
+      if ($taxon) {
+         # Member has taxonomic information
+         my $lineage_arr = Bio::Community::IO::_get_lineage_obj_arr($taxon);
+         my $lineage_str = Bio::Community::IO::_get_lineage_string($lineage_arr);
+
+         # Save taxon object
+         if (not exists $taxa_objs->{$lineage_str}) {
+            $taxa_objs->{$lineage_str} = $taxon;
+         }
+
+         # For each community, add member counts and weighted counts to the taxonomic group
+         for my $i (0 .. $nof_communities-1) {
+            my $community = $communities->[$i];
+            my $count = $community->get_count($member);
+            my $wcount = $count / Bio::Community::_prod($member->weights);
+            $taxa_counts->{$lineage_str}->{$i}->[0] += $count;
+            $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
+         }
+
+      } else {
+         # Member has no taxonomic assignment. Add member as-is in all summaries.
+         for my $i (0 .. $nof_communities-1) {
+            my $count = $communities->[$i]->get_count($member);
+            my $summary = $summaries->[$i];
+            $summary->add_member($member, $count);
+         }
+      }
+
+   }
+
+   # Add taxonomic groups to all communities
+   $self->_add_groups($taxa_objs, $taxa_counts, $summaries);
+
+   return $summaries;
+}
+
+
 method _group_by_taxonomic_level ( $members, $communities, $summaries, $tax_level ) {
    my $nof_communities = scalar @$communities;
    my $taxa_counts = {};
@@ -232,14 +306,14 @@ method _group_by_taxonomic_level ( $members, $communities, $summaries, $tax_leve
    for my $member ( @$members ) {
 
       my $taxon = $member->taxon;
-      if ($taxon) { # member has taxonomic information
-
+      if ($taxon) {
+         # Member has taxonomic information
          my $lineage_arr = Bio::Community::IO::_get_lineage_obj_arr($taxon);
          my $end_idx = $tax_level-1 > $#$lineage_arr ?  $#$lineage_arr : $tax_level-1;
          $lineage_arr = [ @{$lineage_arr}[0 .. $end_idx] ];
 
-         if ( scalar @$lineage_arr > 0 ) { # could find Bio::Taxon at requested taxonomic level
-
+         if ( scalar @$lineage_arr > 0 ) {
+            # Could find Bio::Taxon at requested taxonomic level
             my $lineage_str = Bio::Community::IO::_get_lineage_string($lineage_arr);
             $taxon = $lineage_arr->[-1];
 

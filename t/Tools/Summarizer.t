@@ -44,6 +44,7 @@ $community2->add_member( $member5, 1 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1, $community2],
+   -merge_dups  => 0,
    -by_rel_ab   => ['<', 2],
 ), 'Multiple communities';
 
@@ -91,6 +92,7 @@ $community1->add_member( $member2, 98 );
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
+   -merge_dups  => 0,
    -by_rel_ab   => ['<=', 1.9],
 ), "Operator '<='";
 
@@ -106,6 +108,7 @@ delta_ok $summary->get_count($member2), 98;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
+   -merge_dups  => 0,
    -by_rel_ab   => ['<=', 2],
 );
 
@@ -123,6 +126,7 @@ delta_ok $summary->get_count($group  ), 2;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
+   -merge_dups  => 0,
    -by_rel_ab   => ['<', 2.1],
 ), "Operator '<'";
 
@@ -138,6 +142,7 @@ delta_ok $summary->get_count($group  ), 2;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
+   -merge_dups  => 0,
    -by_rel_ab   => ['<', 2],
 );
 
@@ -156,6 +161,7 @@ delta_ok $summary->get_count($member2), 98;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
+   -merge_dups  => 0,
    -by_rel_ab   => ['>', 2],
 ), "Operator '>'";
 
@@ -171,6 +177,7 @@ delta_ok $summary->get_count($group  ), 98;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
+   -merge_dups  => 0,
    -by_rel_ab   => ['>', 1.9],
 );
 
@@ -188,6 +195,7 @@ delta_ok $summary->get_count($group  ), 100;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
+   -merge_dups  => 0,
    -by_rel_ab   => ['>=', 3],
 ), "Operator '>='";
 
@@ -203,6 +211,7 @@ delta_ok $summary->get_count($group  ), 98;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1],
+   -merge_dups  => 0,
    -by_rel_ab   => ['>=', 2],
 );
 
@@ -248,6 +257,7 @@ delta_ok $community2->get_rel_ab($member4), 12.0000000;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities => [$community1, $community2],
+   -merge_dups  => 0,
    -by_rel_ab   => ['<', 20],
 ), 'Multiple weighted communities';
 
@@ -342,6 +352,7 @@ delta_ok $community1->get_rel_ab($member10),  0.4872644;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities  => [$community1],
+   -merge_dups   => 0,
    -by_tax_level => 1,
 ), 'Taxonomic summary (level 1)';
 
@@ -369,6 +380,7 @@ is $summary->next_member, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities  => [$community1],
+   -merge_dups   => 0,
    -by_tax_level => 2,
 ), 'Taxonomic summary (level 2)';
 
@@ -408,6 +420,7 @@ is $summary->next_member, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities  => [$community1],
+   -merge_dups   => 0,
    -by_tax_level => 6,
 ), 'Taxonomic summary (level 6)';
 
@@ -465,6 +478,7 @@ is $summary->next_member, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities  => [$community1],
+   -merge_dups   => 0,
    -by_tax_level => 7,
 ), 'Taxonomic summary (level 7)';
 
@@ -531,6 +545,7 @@ $community3 = $in->next_community;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities  => [$community1, $community2, $community3],
+   -merge_dups   => 0,
    -by_tax_level => 4,
 ), 'Taxonomic summary from multiple communities (level 4)';
 
@@ -591,6 +606,88 @@ is $member->id, $id2;
 
 is $summary->next_member, undef;
 
+
+# Merge taxonomic duplicates
+
+$in = Bio::Community::IO->new(
+   -file     => test_input_file('generic_w_silva_taxo_and_dups.txt'),
+   -taxonomy => Bio::DB::Taxonomy->new( -source => 'list' ),
+);
+
+$community1 = $in->next_community;
+
+ok $summarizer = Bio::Community::Tools::Summarizer->new(
+   -communities  => [$community1],
+   -merge_dups   => 1,
+), 'Merge taxonomic duplicates';
+
+ok $summaries = $summarizer->get_summaries;
+is scalar @$summaries, 1;
+
+$summary = $summaries->[0];
+
+
+$member = $summary->next_member;
+is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
+is $member->taxon->node_name, 'Chytridiomycota';
+delta_ok $summary->get_count($member), 7;
+delta_ok $summary->get_rel_ab($member), 7;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter';
+is $member->taxon->node_name, 'Flexibacter';
+delta_ok $summary->get_count($member), 1;
+delta_ok $summary->get_rel_ab($member), 1;
+
+$member = $summary->next_member;
+is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;;Leucocryptos';
+is $member->taxon->node_name, 'Leucocryptos';
+delta_ok $summary->get_count($member), 9;
+delta_ok $summary->get_rel_ab($member), 9;
+
+$member = $summary->next_member;
+is $member->desc, 'Archaea;Crenarchaeota;Miscellaneous';
+is $member->taxon->node_name, 'Miscellaneous';
+delta_ok $summary->get_count($member), 6;
+delta_ok $summary->get_rel_ab($member), 6;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
+is $member->taxon->node_name, 'Rhodocyclaceae';
+delta_ok $summary->get_count($member), 17;
+delta_ok $summary->get_rel_ab($member), 17;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae;Uliginosibacterium;Sphingomonas';
+is $member->taxon->node_name, 'Sphingomonas';
+delta_ok $summary->get_count($member), 27;
+delta_ok $summary->get_rel_ab($member), 27;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas';
+is $member->taxon->node_name, 'Sphingomonas';
+delta_ok $summary->get_count($member), 6;
+delta_ok $summary->get_rel_ab($member), 6;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;WCHB1-60';
+is $member->taxon->node_name, 'WCHB1-60';
+delta_ok $summary->get_count($member), 1;
+delta_ok $summary->get_rel_ab($member), 1;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingobium;Sphingomonas';
+is $member->taxon->node_name, 'Sphingomonas';
+delta_ok $summary->get_count($member), 7;
+delta_ok $summary->get_rel_ab($member), 7;
+
+$member = $summary->next_member;
+is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
+is $member->taxon->node_name, 'Miscellaneous';
+delta_ok $summary->get_count($member), 19;
+delta_ok $summary->get_rel_ab($member), 19;
+
+is $summary->next_member, undef;
 
 
 done_testing();
