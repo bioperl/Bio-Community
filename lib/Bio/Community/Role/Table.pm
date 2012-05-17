@@ -121,7 +121,7 @@ has 'delim' => (
 # New lines can be: \n, \r\n, ... Record number of newline chars here
 has '_num_eol_chars' => (
    is => 'rw',
-   isa => 'PositiveInt',
+   #isa => 'PositiveInt',
    required => 0,
    lazy => 1,
    default => 0,
@@ -203,7 +203,7 @@ has 'missing_string' => (
 
 has '_max_line' => (
    is => 'rw',
-   isa => 'StrictlyPositiveInt',
+   #isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => undef,
    lazy => 1,
@@ -224,7 +224,7 @@ has '_max_line' => (
 
 has '_max_col' => (
    is => 'rw',
-   isa => 'StrictlyPositiveInt',
+   #isa => 'StrictlyPositiveInt',
    required => 0,
    init_arg => undef,
    lazy => 1,
@@ -256,7 +256,7 @@ before 'close' =>  sub {
 # Index of the location of the cells (when reading a table)
 has '_index' => (
    is => 'rw',
-   isa => 'ArrayRef', # really an ArrayRef[PositiveInt] but keep it light
+   #isa => 'ArrayRef[PositiveInt]',
    required => 0,
    init_arg => undef,
    lazy => 1,
@@ -268,7 +268,7 @@ has '_index' => (
 # Value contained in the table cells (when writing a table)
 has '_values' => (
    is => 'rw',
-   isa => 'ArrayRef', # really an ArrayRef[Str] but keep it light
+   #isa => 'ArrayRef[Str]'
    required => 0,
    init_arg => undef,
    lazy => 1,
@@ -278,7 +278,7 @@ has '_values' => (
 
 has '_was_written' => (
    is => 'rw',
-   isa => 'Bool',
+   #isa => 'Bool',
    required => 0,
    init_arg => undef,
    lazy => 1,
@@ -319,13 +319,11 @@ method _read_table () {
 
    while (my $line = $self->_readline(-raw => 1)) {
 
-      ####
       if (not defined $num_eol_chars) {
          # Count line length
          $line =~ m/([\r\n]?\n)$/; # last line may not match
          $num_eol_chars = length($1||'');
       }
-      ####
 
       my $line_length = length $line;
 
@@ -446,8 +444,6 @@ sub _get_value { # this function is called a lot, keep it lean
 #method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) {
 sub _set_value {  # this function is called a lot, keep it lean
    my ($self, $line, $col, $value) = @_;
-
-   #### try _index array preallocation?
 
    my $pos = 0;
    my $values = $self->_values;
