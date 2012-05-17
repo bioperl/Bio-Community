@@ -672,14 +672,14 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
       # Then find where the member belong in the taxonomy
       my $taxon;
       if ($is_name) {
-         my $name;
-         $name = $names[-1];
-         if ( (not defined $name) || ($name eq '') ) {
-            #$self->warn("Could not place '$taxo_str' in the given taxonomy");
+         # By taxon name
+         if (scalar @names > 0) {
+            $taxon = $self->taxonomy->get_taxon( -names => \@names );
          } else {
-            $taxon = $self->taxonomy->get_taxon( -name => $name );
+            #$self->warn("Could not place '$taxo_str' in the given taxonomy");
          }
       } else {
+         # By taxon ID
          $taxon = $self->taxonomy->get_taxon( -taxonid => $taxo_str );
       }
 
