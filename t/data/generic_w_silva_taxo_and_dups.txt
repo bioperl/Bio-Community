@@ -1,0 +1,26 @@
+Species	Com. 1
+Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Halobacteriaceae;Halobacterium;marine	1
+Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Marine	1
+Archaea;Crenarchaeota;Marine	1
+Archaea;Crenarchaeota;Marine	1
+Archaea;Euryarchaeota;Thermoplasmata;Thermoplasmatales;Marine	1
+Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous	1
+Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous	1
+Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous	2
+Archaea;Crenarchaeota;Miscellaneous	1
+Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingobium;Sphingomonas	1
+Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas;uncultured	1
+Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas;uncultured	1
+Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae;Uliginosibacterium;Sphingomonas	24
+Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Cytophagaceae;Flexibacter;Flexibacter	3
+Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter	1
+Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Cytophagaceae;Flexibacter;uncultured	17
+Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Cytophagaceae;Flexibacter;uncultured	1
+Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae;uncultured;uncultured	1
+Bacteria;WCHB1-60;unidentified	1
+Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;;Leucocryptos	1
+Eukaryota;Viridiplantae;Chlorophyta;Chlorophyceae;Chlamydomonadales;Chlamydomonadaceae;;Chlamydomonadaceae	4
+Eukaryota;Fungi;Chytridiomycota;environmental	1
+Eukaryota;Alveolata;Ciliophora;Intramacronucleata;Litostomatea;Haptoria;Cyclotrichida;Mesodiniidae;environmental	70
+Eukaryota;environmental	1
+Eukaryota;Alveolata;Dinophyceae;Syndiniales;environmental	2
