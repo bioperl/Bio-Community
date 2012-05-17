@@ -28,7 +28,10 @@ Bio::Community::Tools::Summarizer - Create a summary of a community
 =head1 DESCRIPTION
 
 Summarize a community by grouping members based on their taxonomic affiliation
-first, then by collapsing or removing members smaller than a threshold.
+first, then by collapsing or removing members with a relative abundance above
+or below a specified threshold. Summarizing communities should be the last step
+of any community analysis, because it compresses communities (members, weights,
+taxonomy, etc.) in a way that cannot be undone.
 
 =head1 FEEDBACK
 
@@ -80,6 +83,9 @@ methods. Internal methods are usually preceded with a _
  Args    : -communities
               An arrayref of the communities (Bio::Community objects) to
               calculate the summary from.
+           -merge_dups
+           -by_tax_level
+           -by_rel_ab
  Returns : a Bio::Community::Tools::Summarizer object
 
 =cut
@@ -126,7 +132,7 @@ has communities => (
            phylum, and so on, until level 7, representing the species level.
            Members without taxonomic information are grouped together in a Member
            with the description 'Unknown taxonomy'.
-           Not that summarizing by taxonomy level takes place before grouping by
+           Note that summarizing by taxonomy level takes place before grouping by
            relative abundance, by_rel_ab(). Also, since each community member
            represents the combination of multiple members, they have to be given
            a new weight, that is specific to the community they belong to.
@@ -201,17 +207,16 @@ method get_summaries {
 
    ### First, filter out members TODO
 
-
    # Then summarize by taxonomy
    my $tax_level = $self->by_tax_level();
-   if (defined $self->by_tax_level) {
+   if (defined $tax_level) {
       $summaries = $self->_group_by_taxonomic_level($members, $communities,
          $summaries, $tax_level);
    }
 
    # Finally, group members by abundance
    my $rel_ab_params = $self->by_rel_ab;
-   if (defined $self->by_rel_ab) {
+   if (defined $rel_ab_params) {
       $summaries = $self->_group_by_relative_abundance($members, $communities,
          $summaries, $rel_ab_params);
    }
@@ -226,49 +231,24 @@ method _group_by_taxonomic_level ( $members, $communities, $summaries, $tax_leve
    my $taxa_objs   = {};
    for my $member ( @$members ) {
 
-         my $taxon = $member->taxon;
-         if ($taxon) { # member has taxonomic information
+      my $taxon = $member->taxon;
+      if ($taxon) { # member has taxonomic information
 
-            my $lineage_arr = Bio::Community::IO::_get_lineage_obj_arr($taxon);
-            my $end_idx = $tax_level-1 > $#$lineage_arr ?  $#$lineage_arr : $tax_level-1;
-            $lineage_arr = [ @{$lineage_arr}[0 .. $end_idx] ];
+         my $lineage_arr = Bio::Community::IO::_get_lineage_obj_arr($taxon);
+         my $end_idx = $tax_level-1 > $#$lineage_arr ?  $#$lineage_arr : $tax_level-1;
+         $lineage_arr = [ @{$lineage_arr}[0 .. $end_idx] ];
 
-            if ( scalar @$lineage_arr > 0 ) { # could find Bio::Taxon at requested taxonomic level
+         if ( scalar @$lineage_arr > 0 ) { # could find Bio::Taxon at requested taxonomic level
 
-               my $lineage_str = Bio::Community::IO::_get_lineage_string($lineage_arr);
-               $taxon = $lineage_arr->[-1];
+            my $lineage_str = Bio::Community::IO::_get_lineage_string($lineage_arr);
+            $taxon = $lineage_arr->[-1];
 
-               # Save taxon object
-               if (not exists $taxa_objs->{$lineage_str}) {
-                  $taxa_objs->{$lineage_str} = $taxon;
-               }
-
-               # For each community, add member count and weighted counts to the taxonomic group
-               for my $i (0 .. $nof_communities-1) {
-                  my $community = $communities->[$i];
-                  my $count = $community->get_count($member);
-                  my $wcount = $count / Bio::Community::_prod($member->weights);
-                  $taxa_counts->{$lineage_str}->{$i}->[0] += $count;
-                  $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
-               }
-
-            } else {
-               # Member had taxonomic information at a higher level than requested.
-               # Add member as-is in all summaries.
-               for my $i (0 .. $nof_communities-1) {
-                  my $count = $communities->[$i]->get_count($member);
-                  my $summary = $summaries->[$i];
-                  $summary->add_member($member, $count);
-               }
-            }
-         }
-
-         if (not $taxon) {
-            # Member had no taxonomic info. Add it in a separate group.
-            my $lineage_str = 'Unknown taxonomy';
+            # Save taxon object
             if (not exists $taxa_objs->{$lineage_str}) {
-               $taxa_objs->{$lineage_str} = undef;
+               $taxa_objs->{$lineage_str} = $taxon;
             }
+
+            # For each community, add member counts and weighted counts to the taxonomic group
             for my $i (0 .. $nof_communities-1) {
                my $community = $communities->[$i];
                my $count = $community->get_count($member);
@@ -276,30 +256,37 @@ method _group_by_taxonomic_level ( $members, $communities, $summaries, $tax_leve
                $taxa_counts->{$lineage_str}->{$i}->[0] += $count;
                $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
             }
+
+         } else {
+            # Member had taxonomic information at a higher level than requested.
+            # Add member as-is in all summaries.
+            for my $i (0 .. $nof_communities-1) {
+               my $count = $communities->[$i]->get_count($member);
+               my $summary = $summaries->[$i];
+               $summary->add_member($member, $count);
+            }
          }
+      }
+
+      if (not $taxon) {
+         # Member had no taxonomic info. Add it in a separate group.
+         my $lineage_str = 'Unknown taxonomy';
+         if (not exists $taxa_objs->{$lineage_str}) {
+            $taxa_objs->{$lineage_str} = undef;
+         }
+         for my $i (0 .. $nof_communities-1) {
+            my $community = $communities->[$i];
+            my $count = $community->get_count($member);
+            my $wcount = $count / Bio::Community::_prod($member->weights);
+            $taxa_counts->{$lineage_str}->{$i}->[0] += $count;
+            $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
+         }
+      }
 
    }
 
    # Add taxonomic groups to all communities
-   while (my ($lineage_str, $taxon) = each %$taxa_objs) {
-      my $member_id;
-      my $taxon = $taxa_objs->{$lineage_str};
-      for my $i (0 .. $nof_communities-1) {
-         my ($count, $wcount) = @{$taxa_counts->{$lineage_str}->{$i}};
-         my $summary = $summaries->[$i];
-         my $member;
-         if ($member_id) {
-            $member = Bio::Community::Member->new( -id => $member_id );
-         } else {
-            $member = Bio::Community::Member->new( );
-            $member_id = $member->id;
-         }
-         $member->desc($lineage_str);
-         $member->taxon($taxon);
-         $member->weights( $self->_calc_weights($count, $wcount) );
-         $summary->add_member($member, $count) if $count > 0;
-      }
-   }
+   $self->_add_groups($taxa_objs, $taxa_counts, $summaries);
 
    return $summaries;
 }
@@ -323,12 +310,14 @@ method _group_by_relative_abundance ( $members, $communities, $summaries, $param
    }
 
    my $nof_communities = scalar @$communities;
-   my $group_count  = [(0) x $nof_communities];
-   my $group_wcount = [(0) x $nof_communities]; # weighted count
-   my $group_total_count = 0;
+
+   my $taxa_counts = {};
+   my $desc = "Other $operator $thresh %";
+   my $taxa_objs = { $desc => undef };
+
    for my $member ( @$members ) {
 
-      # Should this member be grouped?
+      # Determine if this member should be grouped
       my $member_to_group = 1;
       my $rel_abs = [ map { $_->get_rel_ab($member) } @$communities ];
       for my $rel_ab (@$rel_abs) {
@@ -344,9 +333,9 @@ method _group_by_relative_abundance ( $members, $communities, $summaries, $param
          my $count  = $communities->[$i]->get_count($member);
          if ($member_to_group) {
             # Will group member
-            $group_total_count  += $count;
-            $group_count->[$i]  += $count;
-            $group_wcount->[$i] += $count / Bio::Community::_prod($member->weights);
+            my $wcount = $count / Bio::Community::_prod($member->weights);
+            $taxa_counts->{$desc}->{$i}->[0] += $count;
+            $taxa_counts->{$desc}->{$i}->[1] += $wcount;
          } else {
             # Add member as-is, ungrouped
             my $summary = $summaries->[$i];
@@ -356,27 +345,8 @@ method _group_by_relative_abundance ( $members, $communities, $summaries, $param
 
    }
 
-   # Create group if needed and add it to all communities
-   if ($group_total_count > 0) {
-      my $group_id;
-      for my $i (0 .. $nof_communities-1) {
-         my $summary = $summaries->[$i];
-         my $count   = $group_count->[$i];
-         my $wcount  = $group_wcount->[$i];
-         # Create an 'Other' group for each community. Its weight is community-
-         # specific to not upset the rank-abundance of non-grouped members.
-         my $group;
-         if ($group_id) {
-            $group = Bio::Community::Member->new( -id => $group_id );
-         } else {
-            $group = Bio::Community::Member->new( );
-            $group_id = $group->id;
-         }
-         $group->desc("Other $operator $thresh %");
-         $group->weights( $self->_calc_weights($count, $wcount) );
-         $summary->add_member($group, $count);
-      }
-   }
+   # Add taxonomic groups to all communities
+   $self->_add_groups($taxa_objs, $taxa_counts, $summaries);
 
    return $summaries;
 }
@@ -388,6 +358,30 @@ method _calc_weights ($count, $weighted_count) {
    return [ $weight ];
 }
 
+
+method _add_groups ($taxa_objs, $taxa_counts, $summaries) {
+   # Add taxonomic groups to the summaries provided
+   while (my ($lineage_str, $taxon) = each %$taxa_objs) {
+      my $group_id;
+      for my $i (0 .. $#$summaries) {
+         my $count_info = $taxa_counts->{$lineage_str}->{$i} || next;
+         my ($count, $wcount) = @{$count_info};
+         my $summary = $summaries->[$i];
+         my $group;
+         if ($group_id) {
+            $group = Bio::Community::Member->new( -id => $group_id );
+         } else {
+            $group = Bio::Community::Member->new( );
+            $group_id = $group->id;
+         }
+         $group->desc($lineage_str);
+         $group->taxon($taxon) if $taxon;
+         $group->weights( $self->_calc_weights($count, $wcount) );
+         $summary->add_member($group, $count) if $count > 0;
+      }
+   }
+   return 1;
+}
 
 __PACKAGE__->meta->make_immutable;
 
