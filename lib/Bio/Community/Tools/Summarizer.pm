@@ -15,11 +15,13 @@ Bio::Community::Tools::Summarizer - Create a summary of a community
 
   use Bio::Community::Tools::Summarizer;
 
-  # Group community members less than 1% into a single group and summarize their
-  # taxonomy at the second level (i.e. phylum level when using the Greengenes
-  # taxonomy)
+  # Merge community members with the same taxonomy, then group members at the
+  # second level of their taxonomy (i.e. phylum level when using the Greengenes
+  # taxonomy), then group members at less than 1% relative abundance into a
+  # single group called 'Other':
   my $summarizer = Bio::Community::Tools::Summarizer->new(
      -communities  => [$community1, $community2],
+     -merge_dups   => 1,
      -by_tax_level => 2,
      -by_rel_ab    => ['<', 1],
   );
@@ -80,12 +82,11 @@ methods. Internal methods are usually preceded with a _
  Usage   : my $summarizer = Bio::Community::Tools::Summarizer->new(
               -communities => [ $community1, $community2 ],
            );
- Args    : -communities
-              An arrayref of the communities (Bio::Community objects) to
-              calculate the summary from.
-           -merge_dups
-           -by_tax_level
-           -by_rel_ab
+ Args    : -communities  : An arrayref of the communities (Bio::Community objects)
+                           to calculate the summary from. See communities().
+           -merge_dups   : Merge members with same taxonomy. See merge_dups().
+           -by_tax_level : Summarize at a given taxonomy level. See by_tax_level().
+           -by_rel_ab    : Group by relative abundance. See by_rel_ab().
  Returns : a Bio::Community::Tools::Summarizer object
 
 =cut
@@ -230,35 +231,17 @@ method get_summaries {
       $summaries = $self->_merge_duplicates($summaries, $merge_dups);
    }
 
-   ####
-   #use Data::Dumper;
-   #$Data::Dumper::Maxdepth = 4;
-   #print "SUMMARIES after dup removal: ".Dumper($summaries);
-   #####
-
    # Then summarize by taxonomy
    my $tax_level = $self->by_tax_level();
    if (defined $tax_level) {
       $summaries = $self->_group_by_taxonomic_level($summaries, $tax_level);
    }
 
-   ####
-   #use Data::Dumper;
-   #$Data::Dumper::Maxdepth = 4;
-   #print "SUMMARIES after taxonomic level grouping: ".Dumper($summaries);
-   #####
-
    # Finally, group members by abundance
    my $rel_ab_params = $self->by_rel_ab;
    if (defined $rel_ab_params) {
       $summaries = $self->_group_by_relative_abundance($summaries, $rel_ab_params);
    }
-
-   ####
-   #use Data::Dumper;
-   #$Data::Dumper::Maxdepth = 4;
-   #print "SUMMARIES after grouping by relative abundance: ".Dumper($summaries);
-   #####
 
    return $summaries;
 };
