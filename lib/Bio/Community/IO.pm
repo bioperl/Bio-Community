@@ -675,9 +675,9 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
          # By taxon name
          if (scalar @names > 0) {
             $taxon = $self->taxonomy->get_taxon( -names => \@names );
-         } else {
-            #$self->warn("Could not place '$taxo_str' in the given taxonomy");
-         }
+         }# else {
+         #   $self->warn("Could not place '$taxo_str' in the given taxonomy");
+         #}
       } else {
          # By taxon ID
          $taxon = $self->taxonomy->get_taxon( -taxonid => $taxo_str );
