@@ -28,13 +28,13 @@ bp_community_summarize - Summarize community composition
 
 =head1 DESCRIPTION
 
-This script reads a file containing biological communities and performs
-summarizes it. In practice, this means transforming community member counts
-into relative abundance (taking into account any weights that members could have).
-Other popular practices include grouping members with a low abundance together
-into an 'Other' group and representing the taxonomy at a higher level, such as
-phylum level instead of specied level. See L<Bio::Community::Tools::Summarizer>
-for more information.
+This script reads a file containing biological communities and summarizes it.
+In practice, this means transforming community member counts into relative
+abundance (taking into account any weights that members could have) and merging
+members that have the same taxonomic affiliation. Other popular practices
+include grouping members with a low abundance together into an 'Other' group and
+representing the taxonomy at a higher level, such as phylum level instead of
+specied level. See L<Bio::Community::Tools::Summarizer> for more information.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -54,34 +54,6 @@ input files.
 =head1 OPTIONAL ARGUMENTS
 
 =over
-
-=item -op <output_prefix> | -output_prefix <output_prefix>
-
-Path and prefix for the output files. Default: output_prefix.default
-
-=for Euclid:
-   output_prefix.type: string
-   output_prefix.default: 'bp_community_summarize'
-
-=item -ra <relative_abundance> | -relative_abundance <relative_abundance>
-
-Convert counts into relative abundances (taking into account weights): 1 (yes),
-0 (no). Default: relative_abundance.default
-
-=for Euclid:
-   relative_abundance.type: integer, relative_abundance == 0 || relative_abundance == 1
-   relative_abundance.type.error: <relative_abundance> must be 0 or 1 (not relative_abundance)
-   relative_abundance.default: 1
-
-=item -rl <relab_lt> | -relab_lt <relab_lt>
-
-Group community members with a relative abundance less than the specified
-threshold (in %) into an 'Other' group. Default: relab_lt.default %
-
-=for Euclid:
-   relab_lt.type: number, relab_lt >= 0 && relab_lt <= 100
-   relab_lt.type.error: <relab_lt> must be between 0 and 100 (not relab_lt)
-   relab_lt.default: 1
 
 =item -wf <weight_files>... | -weight_files <weight_files>...
 
@@ -107,6 +79,43 @@ of the first ancestor that has a weight in the weights file. Fall back to the
 =for Euclid:
    weight_assign.type: string
    weight_assign.default: 'ancestor'
+
+=item -op <output_prefix> | -output_prefix <output_prefix>
+
+Path and prefix for the output files. Default: output_prefix.default
+
+=for Euclid:
+   output_prefix.type: string
+   output_prefix.default: 'bp_community_summarize'
+
+=item -cr <convert_relab> | -convert_relab <convert_relab>
+
+Convert counts into relative abundances (taking into account weights): 1 (yes),
+0 (no). Default: convert_relab.default
+
+=for Euclid:
+   convert_relab.type: integer, convert_relab == 0 || convert_relab == 1
+   convert_relab.type.error: <convert_relab> must be 0 or 1 (not convert_relab)
+   convert_relab.default: 1
+
+=item -md <merge_dups> | -merge_dups <merge_dups>
+
+Merge community members with the exact same taxonomic affiliation. Default: merge_dups.default
+
+=for Euclid:
+   merge_dups.type: integer, merge_dups == 0 || merge_dups == 1
+   merge_dups.type.error: <merge_dups> must be 0 or 1 (not merge_dups)
+   merge_dups.default: 1
+
+=item -rl <relab_lt> | -relab_lt <relab_lt>
+
+Group community members with a relative abundance less than the specified
+threshold (in %) into an 'Other' group. Default: relab_lt.default %
+
+=for Euclid:
+   relab_lt.type: number, relab_lt >= 0 && relab_lt <= 100
+   relab_lt.type.error: <relab_lt> must be between 0 and 100 (not relab_lt)
+   relab_lt.default: 1
 
 =back
 
@@ -148,14 +157,15 @@ Email florent.angly@gmail.com
 
 =cut
 
-summarize( $ARGV{'input_files'} , $ARGV{'output_prefix'}, $ARGV{'relative_abundance'},
-           $ARGV{'weight_files'}, $ARGV{'weight_assign'}, $ARGV{'relab_lt'} );
+summarize( $ARGV{'input_files'}  , $ARGV{'weight_files'} , $ARGV{'weight_assign'},
+           $ARGV{'output_prefix'}, $ARGV{'convert_relab'}, $ARGV{'merge_dups'}   ,
+           $ARGV{'relab_lt'} );
 exit;
 
 
 sub summarize {
-   my ($input_files, $output_prefix, $relative_abundance, $weight_files,
-      $weight_assign, $by_rel_ab) = @_;
+   my ($input_files, $weight_files, $weight_assign, $output_prefix, $convert2relab,
+      $merge_dups, $by_rel_ab) = @_;
 
    # Read input communities and do weight assignment
    my $communities = [];
@@ -179,25 +189,26 @@ sub summarize {
 
    # Summarize communities
    my $summarized_communities;
+
+   my $summarizer = Bio::Community::Tools::Summarizer->new(
+      -communities => $communities,
+      -merge_dups  => $merge_dups,
+   );
+
    if ($by_rel_ab) {
-      my $summarizer = Bio::Community::Tools::Summarizer->new(
-         -communities => $communities,
-         -by_rel_ab   => ['<', $by_rel_ab],
-      );
-      $summarized_communities = $summarizer->get_summaries;
-   } else {
-      $summarized_communities = $communities;
+      $summarizer->by_rel_ab( ['<', $by_rel_ab] );
    }
+   $summarized_communities = $summarizer->get_summaries;
 
    # Write results, converting to relative abundance if desired
-   write_communities($summarized_communities, $output_prefix, $format, '', $relative_abundance);
+   write_communities($summarized_communities, $output_prefix, $format, '', $convert2relab);
 
    return 1;
 }
 
 
 sub write_communities {
-   my ($communities, $output_prefix, $output_format, $type, $relative_abundance) = @_;
+   my ($communities, $output_prefix, $output_format, $type, $convert2relab) = @_;
    $type ||= '';
    my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
    my $num = 0;
@@ -218,7 +229,7 @@ sub write_communities {
          $out = Bio::Community::IO->new(
             -format         => $output_format,
             -file           => '>'.$output_file,
-            -abundance_type => $relative_abundance ? 'percentage' : 'count',
+            -abundance_type => $convert2relab ? 'percentage' : 'count',
          );
       }
       print "Writing community '".$community->name."' to file '$output_file'\n";
