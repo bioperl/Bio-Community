@@ -117,6 +117,18 @@ threshold (in %) into an 'Other' group. Default: relab_lt.default %
    relab_lt.type.error: <relab_lt> must be between 0 and 100 (not relab_lt)
    relab_lt.default: 1
 
+=item -tl <taxonomy_level> | -taxonomy_level <taxonomy_level>
+
+Group members belonging to the same taxonomic level. For the Greengenes taxonomy,
+level 1 represents kingdom, level 2 represents phylum, and so on, until level 7,
+representing the species level. Members without taxonomic information are
+grouped together in a Member with the description 'Unknown taxonomy'. Default:
+none
+
+=for Euclid:
+   taxonomy_level.type: number, taxonomy_level > 0
+   taxonomy_level.type.error: <taxonomy_level> must be larger than 0
+
 =back
 
 =head1 FEEDBACK
@@ -157,15 +169,15 @@ Email florent.angly@gmail.com
 
 =cut
 
-summarize( $ARGV{'input_files'}  , $ARGV{'weight_files'} , $ARGV{'weight_assign'},
-           $ARGV{'output_prefix'}, $ARGV{'convert_relab'}, $ARGV{'merge_dups'}   ,
-           $ARGV{'relab_lt'} );
+summarize( $ARGV{'input_files'}  , $ARGV{'weight_files'}  , $ARGV{'weight_assign'},
+           $ARGV{'output_prefix'}, $ARGV{'convert_relab'} , $ARGV{'merge_dups'}   ,
+           $ARGV{'relab_lt'}     , $ARGV{'taxonomy_level'} );
 exit;
 
 
 sub summarize {
    my ($input_files, $weight_files, $weight_assign, $output_prefix, $convert2relab,
-      $merge_dups, $by_rel_ab) = @_;
+      $merge_dups, $by_rel_ab, $by_tax_level) = @_;
 
    # Read input communities and do weight assignment
    my $communities = [];
@@ -195,9 +207,14 @@ sub summarize {
       -merge_dups  => $merge_dups,
    );
 
+   if ($by_tax_level) {
+      $summarizer->by_tax_level($by_tax_level);
+   }
+
    if ($by_rel_ab) {
       $summarizer->by_rel_ab( ['<', $by_rel_ab] );
    }
+
    $summarized_communities = $summarizer->get_summaries;
 
    # Write results, converting to relative abundance if desired
