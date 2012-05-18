@@ -613,8 +613,8 @@ $in = Bio::Community::IO->new(
    -file     => test_input_file('generic_w_silva_taxo_and_dups.txt'),
    -taxonomy => Bio::DB::Taxonomy->new( -source => 'list' ),
 );
-
 $community1 = $in->next_community;
+
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -communities  => [$community1],
@@ -688,6 +688,60 @@ delta_ok $summary->get_count($member), 19;
 delta_ok $summary->get_rel_ab($member), 19;
 
 is $summary->next_member, undef;
+
+
+# Merge taxonomic duplicates, then summarize by taxonomy, then group low abundance groups
+
+ok $summarizer = Bio::Community::Tools::Summarizer->new(
+   -communities  => [$community1],
+   -merge_dups   => 1,
+   -by_tax_level => 5,
+   -by_rel_ab    => ['<=', 6],
+), 'Multiple summary operations';
+
+ok $summaries = $summarizer->get_summaries;
+is scalar @$summaries, 1;
+
+$summary = $summaries->[0];
+
+$member = $summary->next_member;
+is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
+is $member->taxon->node_name, 'Chytridiomycota';
+delta_ok $summary->get_count($member), 7;
+delta_ok $summary->get_rel_ab($member), 7;
+
+$member = $summary->next_member;
+is $member->desc, 'Other <= 6 %';
+is $member->taxon, undef;
+delta_ok $summary->get_count($member), 8;
+delta_ok $summary->get_rel_ab($member), 8;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
+is $member->taxon->node_name, 'Rhodocyclaceae';
+delta_ok $summary->get_count($member), 44;
+delta_ok $summary->get_rel_ab($member), 44;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae';
+is $member->taxon->node_name, 'Sphingomonadaceae';
+delta_ok $summary->get_count($member), 13;
+delta_ok $summary->get_rel_ab($member), 13;
+
+$member = $summary->next_member;
+is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
+is $member->taxon->node_name, 'Miscellaneous';
+delta_ok $summary->get_count($member), 19;
+delta_ok $summary->get_rel_ab($member), 19;
+
+$member = $summary->next_member;
+is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;';
+is $member->taxon->node_name, '';
+delta_ok $summary->get_count($member), 9;
+delta_ok $summary->get_rel_ab($member), 9;
+
+is $summary->next_member, undef;
+
 
 
 done_testing();
