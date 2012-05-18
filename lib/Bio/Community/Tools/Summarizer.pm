@@ -220,42 +220,57 @@ method get_summaries {
    if (scalar @$communities == 0) {
       $self->throw("Need to provide at least one community.");
    }
-
-   # Create fresh community objects to hold the summaries
-   my $summaries = [
-      map { Bio::Community->new( -name => $_->name.' summarized') } @$communities
-   ];
-
-   my $members = $communities->[0]->get_all_members($communities);
+   my $summaries = $communities;
 
    #### First, filter out members TODO
 
    # Then merge duplicates
    my $merge_dups = $self->merge_dups();
    if ($merge_dups) {
-      $summaries = $self->_merge_duplicates($members, $communities, $summaries,
-          $merge_dups);
+      $summaries = $self->_merge_duplicates($summaries, $merge_dups);
    }
+
+   ####
+   #use Data::Dumper;
+   #$Data::Dumper::Maxdepth = 4;
+   #print "SUMMARIES after dup removal: ".Dumper($summaries);
+   #####
 
    # Then summarize by taxonomy
    my $tax_level = $self->by_tax_level();
    if (defined $tax_level) {
-      $summaries = $self->_group_by_taxonomic_level($members, $communities,
-         $summaries, $tax_level);
+      $summaries = $self->_group_by_taxonomic_level($summaries, $tax_level);
    }
+
+   ####
+   #use Data::Dumper;
+   #$Data::Dumper::Maxdepth = 4;
+   #print "SUMMARIES after taxonomic level grouping: ".Dumper($summaries);
+   #####
 
    # Finally, group members by abundance
    my $rel_ab_params = $self->by_rel_ab;
    if (defined $rel_ab_params) {
-      $summaries = $self->_group_by_relative_abundance($members, $communities,
-         $summaries, $rel_ab_params);
+      $summaries = $self->_group_by_relative_abundance($summaries, $rel_ab_params);
    }
+
+   ####
+   #use Data::Dumper;
+   #$Data::Dumper::Maxdepth = 4;
+   #print "SUMMARIES after grouping by relative abundance: ".Dumper($summaries);
+   #####
 
    return $summaries;
 };
 
 
-method _merge_duplicates ( $members, $communities, $summaries, $merge_dups ) {
+method _merge_duplicates ( $communities, $merge_dups ) {
+
+   # Create fresh community objects to hold the summaries
+   my $summaries = $self->_new_summaries($communities);
+
+   my $members = $communities->[0]->get_all_members($communities);
+
    my $nof_communities = scalar @$communities;
    my $taxa_counts = {};
    my $taxa_objs   = {};
@@ -299,8 +314,14 @@ method _merge_duplicates ( $members, $communities, $summaries, $merge_dups ) {
 }
 
 
-method _group_by_taxonomic_level ( $members, $communities, $summaries, $tax_level ) {
+method _group_by_taxonomic_level ( $communities, $tax_level ) {
    my $nof_communities = scalar @$communities;
+
+   my $members = $communities->[0]->get_all_members($communities);
+
+   # Create fresh community objects to hold the summaries
+   my $summaries = $self->_new_summaries($communities);
+
    my $taxa_counts = {};
    my $taxa_objs   = {};
    for my $member ( @$members ) {
@@ -366,7 +387,13 @@ method _group_by_taxonomic_level ( $members, $communities, $summaries, $tax_leve
 }
 
 
-method _group_by_relative_abundance ( $members, $communities, $summaries, $params ) {
+method _group_by_relative_abundance ( $communities, $params ) {
+
+   my $members = $communities->[0]->get_all_members($communities);
+
+   # Create fresh community objects to hold the summaries
+   my $summaries = $self->_new_summaries($communities);
+
    # Get grouping parameters
    my $thresh   = $params->[1] || $self->throw("No grouping threshold was provided.");
    my $operator = $params->[0] || $self->throw("No comparison operator was provided.");
@@ -456,6 +483,27 @@ method _add_groups ($taxa_objs, $taxa_counts, $summaries) {
    }
    return 1;
 }
+
+
+method _new_summaries ($communities) {
+   # Create fresh community objects to hold the summaries. One summary per input
+   # community.
+   my $summaries = [];
+   for my $community (@$communities) {
+      my $name = $community->name;
+      if ($name !~ / summarized$/) {
+         $name .= ' summarized';
+      }
+      my $use_weights = $community->use_weights;
+      my $summary = Bio::Community->new(
+         -name        => $name,
+         -use_weights => $use_weights,
+      );
+      push @$summaries, $summary;
+   }
+   return $summaries;
+}
+
 
 __PACKAGE__->meta->make_immutable;
 
