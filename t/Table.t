@@ -15,7 +15,6 @@ my $file = test_output_file();
 # Read linux tab-delimited file
 
 ok $in = t::TestTableRole->new(
-   -file => $file,
    -file => test_input_file('table.txt'),
 ), 'Read linux table';
 is $in->delim, "\t";

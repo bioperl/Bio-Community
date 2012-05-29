@@ -421,12 +421,10 @@ sub _get_value { # this function is called a lot, keep it lean
       }
 
       # Read value
-      seek $self->_fh, $offset, 0;
-      read $self->_fh, $val, $self->_index->[$pos+1] - $offset;
-      if ($!) {
-         $self->throw("Could not read from filehandle at offset $offset: $!\n");
-      }
-
+      seek( $self->_fh, $offset, 0 ) or $self->throw("Could not seek on filehandle at offset $offset: $!\n");
+      defined( read( $self->_fh, $val, $self->_index->[$pos+1] - $offset ) ) or $self->throw("Could not read from filehandle: $!\n");
+      # Note: read() returns the number of characters read, 0 at end of file, or undef if there was an error
+ 
    }
    return $val;
 }

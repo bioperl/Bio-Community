@@ -200,7 +200,7 @@ has '_id2line' => (
 
 has '_line2desc' => (
    is => 'rw',
-   isa => 'HashRef', # HashRef[PositiveInt] but keep it lean
+   #isa => 'HashRef', # HashRef[PositiveInt] but keep it lean
    required => 0,
    init_arg => undef,
    default => sub { {} },
