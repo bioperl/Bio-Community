@@ -128,7 +128,7 @@ before 'close' => sub {
    my ($self) = @_;
    my $col = $self->_col + 1;
    my $descs = $self->_line2desc;
-   if (scalar keys $descs) {
+   if ( scalar keys %{$descs} ) {
       $self->_set_value(1, $col, 'Consensus Lineage');
       while ( my ($line, $desc) = each %$descs ) {
          $self->_set_value($line, $col, $desc);
