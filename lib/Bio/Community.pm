@@ -284,31 +284,35 @@ method add_member ( $member, $count = 1 ) {
 
  Function: remove members from a community
  Usage   : $community->remove_member($member, 3);
- Args    : * a Bio::Community::Member to remove
-           * how many of this member to remove (positive number, default: 1)
+ Args    : * A Bio::Community::Member to remove
+           * Optional: how of this member to remove. If no value is provided,
+             all such members are removed.
  Returns : 1 on success
 
 =cut
 
 #method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
-method remove_member ( $member, $count = 1 ) {
+method remove_member ( $member, $count? ) {
    # Sanity checks
    my $member_id = $member->id;
    my $counts = $self->_counts;
    if (not exists $counts->{$member_id}) {
       $self->throw("Error: Could not remove member because it did not exist in the community\n");
    }
-   if ($count > $counts->{$member_id}) {
+   if ( defined($count) && ($count > $counts->{$member_id}) ) {
       $self->throw("Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n");
    }
    # Now remove unwanted members
+   if (not defined $count) {
+      $count = $counts->{$member_id};
+   }
    $counts->{$member_id} -= $count;
    if ($counts->{$member_id} == 0) {
       delete $counts->{$member_id};
       delete $self->_members->{$member_id};
    }
    $self->_set_total_count( $self->get_total_count - $count );
-   $self->_weighted_count( $self->_weighted_count - $count / _prod($member->weights) );
+   $self->_weighted_count(  $self->_weighted_count - $count / _prod($member->weights) );
    $self->_has_changed(1);
    return 1;
 }
