@@ -112,7 +112,7 @@ extends 'Bio::Root::Root';
 
  Function: Get or set the communities to normalize.
  Usage   : my $communities = $normalizer->communities;
- Args    : arrayref of Bio::Community objects or nothing
+ Args    : arrayref of Bio::Community objects
  Returns : arrayref of Bio::Community objects
 
 =cut
@@ -160,7 +160,7 @@ has sample_size => (
            instead of the threshold() method, the distance between the last two
            average communities repetitions can be accessed using the threshold()
            method.
- Usage   : my $repetitions = $normalizer->repetitions;
+ Usage   : my $threshold = $normalizer->threshold;
  Args    : positive integer for the number of repetitions
  Returns : positive integer for the (minimum) number of repetitions
 
