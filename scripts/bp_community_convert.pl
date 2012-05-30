@@ -68,22 +68,6 @@ table), qiime or gaas. Default: output_format.default
    output_format.type: string
    output_format.default: 'generic'
 
-=item -in <include_names>... | -include_names <include_names>...
-
-If names of communities are specified, only these communities will be
-included in the output file.
-
-=for Euclid:
-   include_names.type: string
-
-=item -en <exclude_names>... | -exclude_names <exclude_names>...
-
-If names of communities are specified, these communities will be excluded from
-the output file.
-
-=for Euclid:
-   exclude_names.type: string
-
 =back
 
 =head1 FEEDBACK
@@ -125,31 +109,13 @@ Email florent.angly@gmail.com
 =cut
 
 
-convert( $ARGV{'input_files'}  , $ARGV{'output_prefix'}, $ARGV{'output_format'},
-         $ARGV{'include_names'}, $ARGV{'exclude_names'} );
+convert( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'output_format'} );
 
 exit;
 
 
 sub convert {
-   my ($input_files, $output_prefix, $output_format, $include_names, $exclude_names) = @_;
-
-   # Prepare communities to include or exclude 
-   my $nof_includes = 0;
-   my %includes;
-   if (defined $include_names) {
-      $nof_includes = scalar @$include_names;
-      %includes = map { $_ => undef } @$include_names;
-   }
-   my %excludes;
-   if (defined $exclude_names) {
-      %excludes = map { $_ => undef } @$exclude_names;
-   }
-   while ( my ($include, undef) = each %includes ) {
-      if (exists $excludes{$include}) {
-         die "Error: Cannot request to include and exclude community '$include' at the same time\n";
-      }
-   }
+   my ($input_files, $output_prefix, $output_format) = @_;
 
    # Read input communities
    my @communities;
@@ -157,53 +123,38 @@ sub convert {
       print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new( -file => $input_file );
       while (my $community = $in->next_community) {
-         my $name = $community->name;
-         if ( $nof_includes > 0 ) {
-            # Only include specifically requested communities
-            if ( exists $includes{$name} ) {
-               push @communities, $community;
-            }
-         } else {
-            if ( not exists $excludes{$name} ) {
-               push @communities, $community;
-
-            } # else it is specifically excluded
-         }
+         push @communities, $community;
       }
       $in->close;
    }
 
-   if (scalar @communities == 0) {
-      warn "Warning: No communities to write\n";
-   } else {
-      # Write output communities
-      my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
-      my $num = 0;
-      my $out;
-      my $output_file;
-      for my $community (@communities) {
-         if (not defined $out) {
-            if ($multiple_communities) {
-               $output_file = $output_prefix.'.'.$output_format;
-            } else {
-              $num++;
-               $output_file = $output_prefix.'_'.$num.'.'.$output_format;
-            }
-            $out = Bio::Community::IO->new(
-               -format => $output_format,
-               -file   => '>'.$output_file,
-            );
+   # Write output communities
+   my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
+   my $num = 0;
+   my $out;
+   my $output_file;
+   for my $community (@communities) {
+      if (not defined $out) {
+         if ($multiple_communities) {
+            $output_file = $output_prefix.'.'.$output_format;
+         } else {
+            $num++;
+            $output_file = $output_prefix.'_'.$num.'.'.$output_format;
          }
-         print "Writing community '".$community->name."' to file '$output_file'\n";
-         $out->write_community($community);
-         if (not $multiple_communities) {
-            $out->close;
-            $out = undef;
-         }
+         $out = Bio::Community::IO->new(
+            -format => $output_format,
+            -file   => '>'.$output_file,
+         );
       }
-      if (defined $out) {
+      print "Writing community '".$community->name."' to file '$output_file'\n";
+      $out->write_community($community);
+      if (not $multiple_communities) {
          $out->close;
+         $out = undef;
       }
+   }
+   if (defined $out) {
+      $out->close;
    }
 
    return 1;
