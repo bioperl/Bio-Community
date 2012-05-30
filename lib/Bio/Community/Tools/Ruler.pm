@@ -87,8 +87,8 @@ methods. Internal methods are usually preceded with a _
               An arrayref of the communities (Bio::Community objects) to
               calculate the distance from.
            -type
-              The type of distance to use: 1-norm, 2-norm (euclidean), or
-              infinity-norm.
+              The type of distance to use: 1-norm, 2-norm (euclidean), infinity-
+              norm.
  Returns : a Bio::Community::Tools::Ruler object
 
 =cut
@@ -107,6 +107,15 @@ use namespace::autoclean;
 extends 'Bio::Root::Root';
 
 
+=head2 communities
+
+ Function: Get or set the communities to process.
+ Usage   : my $communities = $ruler->communities;
+ Args    : arrayref of Bio::Community objects
+ Returns : arrayref of Bio::Community objects
+
+=cut
+
 has communities => (
    is => 'ro',
    isa => 'ArrayRef[Bio::Community]',
@@ -115,6 +124,16 @@ has communities => (
    init_arg => '-communities',
 );
 
+
+
+=head2 type
+
+ Function: Get or set the type of distance to measure.
+ Usage   : my $type = $ruler->type;
+ Args    : string: 1-norm, 2-norm (a.k.a. euclidean), p-norm, or infinity-norm
+ Returns : string: 1-norm, 2-norm (a.k.a. euclidean), p-norm, or infinity-norm
+
+=cut
 
 has type => (
    is => 'ro',
@@ -141,7 +160,9 @@ has type => (
 method get_distance {
    my $dist;
    my $type = $self->type;
-   if ($type eq '1-norm') {
+   if ($type eq 'unifrac') {
+      $dist = $self->_unifrac();
+   } elsif ($type eq '1-norm') {
       $dist = $self->_pnorm(1);
    } elsif ( ($type eq '2-norm') || ($type eq 'euclidean') ) {
       $dist = $self->_pnorm(2);
@@ -154,7 +175,7 @@ method get_distance {
 };
 
 
-method _pnorm (PositiveNum $power) {
+method _pnorm ($power) {
    # Calculate the p-norm. If power is 1, this is the 1-norm. If power is 2,
    # this is the 2-norm.
    my $communities = $self->communities;
