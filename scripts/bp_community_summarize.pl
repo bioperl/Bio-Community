@@ -183,6 +183,7 @@ sub summarize {
    my $communities = [];
    my $format;
    for my $input_file (@$input_files) {
+      print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new(
          -file          => $input_file,
          -weight_assign => $weight_assign,
