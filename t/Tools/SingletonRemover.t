@@ -1,20 +1,15 @@
 use strict;
 use warnings;
 use Bio::Root::Test;
-#use Test::Number::Delta;
 use Bio::Community;
 
 use_ok($_) for qw(
-    Bio::Community::Tools::SingletonRemover
+    Bio::Community::Tools::ShrapnelCleaner
 );
 
 
-my ($remover, $community1, $community2, $member1, $member2, $member3, $member4,
+my ($cleaner, $community1, $community2, $member1, $member2, $member3, $member4,
     $member5, $member6);
-
-my $epsilon1 = 20;
-my $epsilon2 = 1.5;
-my $epsilon3 = 0.4;
 
 
 $member1 = Bio::Community::Member->new( -id => 1 );
@@ -40,18 +35,18 @@ $community2->add_member( $member3, 100);
 $community2->add_member( $member6,   4);
 
 
-# Basic remover object
+# Basic cleaner object
 
-ok $remover = Bio::Community::Tools::SingletonRemover->new( );
-isa_ok $remover, 'Bio::Community::Tools::SingletonRemover';
+ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new( );
+isa_ok $cleaner, 'Bio::Community::Tools::ShrapnelCleaner';
 
 
-# Remover with default
+# Cleaner with default
 
-ok $remover = Bio::Community::Tools::SingletonRemover->new(
+ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
    -communities => [ $community1, $community2 ],
 ), 'Default';
-ok $remover->remove;
+ok $cleaner->clean;
 
 is $community1->get_count($member1),   1;
 is $community1->get_count($member2),   0;
@@ -68,13 +63,13 @@ is $community2->get_count($member5),   0;
 is $community2->get_count($member6),   4;
 
 
-# Remover with specified threshold
+# Cleaner with specified count threshold
 
-ok $remover = Bio::Community::Tools::SingletonRemover->new(
-   -communities => [ $community1, $community2 ],
-   -threshold   => 5,
-), 'Specified threshold';
-ok $remover->remove;
+ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
+   -communities     => [ $community1, $community2 ],
+   -count_threshold => 5,
+), 'Specified count threshold';
+ok $cleaner->clean;
 
 is $community1->get_count($member1),   1;
 is $community1->get_count($member2),   0;

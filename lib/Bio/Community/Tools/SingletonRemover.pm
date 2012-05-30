@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::Tools::SingletonRemover
+# BioPerl module for Bio::Community::Tools::ShrapnelCleaner
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -9,27 +9,26 @@
 
 =head1 NAME
 
-Bio::Community::Tools::SingletonRemover - Remove unique, low-abundance members 
+Bio::Community::Tools::ShrapnelCleaner - Remove unique, low-abundance members 
 
 =head1 SYNOPSIS
 
-  use Bio::Community::Tools::SingletonRemover;
+  use Bio::Community::Tools::ShrapnelCleaner;
 
   # Remove singletons from $community1 and $community2
-  my $remover = Bio::Community::Tools::SingletonRemover->new(
+  my $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
      -communities => [$community1, $community2],
   );
-  $remover->remove;
+  $cleaner->clean;
 
 =head1 DESCRIPTION
 
-This module takes biological communities and remove all singles, i.e. community
-members that appear in only one community and have only 1 count (or any
-threshold you supply). The purpose behind this is that analyses of communities
-that use amplicon sequences as a species markers are biased by sequencing errors.
-Removing community members that are specific to a community and have a very low
-count (likely to be erroneous) may provide a more accurate picture of community
-composition.
+This module takes biological communities and remove shrapnel, low abundance,
+low prevalence members that are likely to be the result of sequencing errors
+(when doing sequence-based analyses). By default, only the cleaner removes only
+singletons, i.e. community members that appear in only one community (prevalence
+of 1) and have only 1 count. You can specify your own count and prevalence
+thresholds though.
 
 =head1 FEEDBACK
 
@@ -74,15 +73,15 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Function: Create a new Bio::Community::Tool::SingletonRemover object
- Usage   : my $remover = Bio::Community::Tool::SingletonRemover->new( );
- Args    : -communities, -threshold. See details below.
- Returns : a new Bio::Community::Tools::SingletonRemover object
+ Function: Create a new Bio::Community::Tool::ShrapnelCleaner object
+ Usage   : my $cleaner = Bio::Community::Tool::ShrapnelCleaner->new( );
+ Args    : -communities, -count_threshold. See details below.
+ Returns : a new Bio::Community::Tools::ShrapnelCleaner object
 
 =cut
 
 
-package Bio::Community::Tools::SingletonRemover;
+package Bio::Community::Tools::ShrapnelCleaner;
 
 use Moose;
 use MooseX::NonMoose;
@@ -96,8 +95,8 @@ extends 'Bio::Root::Root';
 =head2 communities
 
  Function: Get or set the communities to process.
- Usage   : my $communities = $remover->communities;
- Args    : arrayref of Bio::Community objects or nothing
+ Usage   : my $communities = $cleaner->communities;
+ Args    : arrayref of Bio::Community objects
  Returns : arrayref of Bio::Community objects
 
 =cut
@@ -112,39 +111,59 @@ has communities => (
 );
 
 
-=head2 threshold
+=head2 count_threshold
 
- Function: Get or set the threshold. Community members appearing in a single
-           community, and with a count equal or lower than this threshold are
-           removed.
- Usage   : my $threshold = $remover->threshold;
- Args    : positive integer for the number of repetitions
- Returns : positive integer for the (minimum) number of repetitions
+ Function: Get or set the count threshold. Community members with a count equal
+           or lower than this threshold are removed (provided they also meet the
+           prevalence_threshold).
+ Usage   : my $count_thresh = $cleaner->count_threshold;
+ Args    : positive integer for the count
+ Returns : positive integer for the count
 
 =cut
 
-has threshold => (
+has count_threshold => (
    is => 'rw',
    isa => 'Maybe[PositiveNum]',
    required => 0, 
    default => 1,
    lazy => 1,
-   init_arg => '-threshold',
+   init_arg => '-count_threshold',
 );
 
 
-=head2 remove
+=head2 prevalence_threshold
+
+ Function: Get or set the prevalence threshold. Community members with a count
+           equal or lower than this threshold are removed (provided they also
+           meet the count_threshold).
+ Usage   : my $prevalence_thresh = $cleaner->prevalence_threshold;
+ Args    : positive integer for the prevalence
+ Returns : positive integer for the prevalence
+
+=cut
+
+has prevalence_threshold => (
+   is => 'rw',
+   isa => 'Maybe[PositiveNum]',
+   required => 0, 
+   default => 1,
+   lazy => 1,
+   init_arg => '-prevalence_threshold',
+);
+
+
+=head2 clean
 
  Function: Remove singletons from the communities and return the updated
            communities.
- Usage   : my $communities = $remover->remove;
+ Usage   : my $communities = $cleaner->clean;
  Args    : none
  Returns : arrayref of Bio::Community objects
 
 =cut
 
-
-method remove {
+method clean {
    # Sanity check
    my $communities = $self->communities;
    if (scalar @$communities == 0) {
@@ -155,7 +174,8 @@ method remove {
    my $members = $communities->[0]->get_all_members($communities);
 
    # Remove singletons
-   my $threshold = $self->threshold;
+   my $count_thresh = $self->count_threshold;
+   my $prevalence_thresh = $self->prevalence_threshold;
    for my $member ( @$members ) {
       my $total_count = 0; # sum of member counts in all communities
       my $prevalence  = 0; # in how many communities was the member seen
@@ -166,7 +186,7 @@ method remove {
             $total_count += $count;
          }
       }
-      if ( ($total_count <= $threshold) && ($prevalence <= 1) ) {
+      if ( ($total_count <= $count_thres) && ($prevalence <= $prevalence_thres) ) {
          # Remove all of this member
          for my $community (@$communities) {
             $community->remove_member($member);
