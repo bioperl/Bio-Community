@@ -174,8 +174,8 @@ method clean {
    my $members = $communities->[0]->get_all_members($communities);
 
    # Remove singletons
-   my $count_thresh = $self->count_threshold;
-   my $prevalence_thresh = $self->prevalence_threshold;
+   my $count_thres = $self->count_threshold;
+   my $prevalence_thres = $self->prevalence_threshold;
    for my $member ( @$members ) {
       my $total_count = 0; # sum of member counts in all communities
       my $prevalence  = 0; # in how many communities was the member seen

@@ -86,6 +86,53 @@ is $community2->get_count($member5),   0;
 is $community2->get_count($member6),   0;
 
 
+# Cleaner with specified prevalence threshold
+
+ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
+   -communities          => [ $community1, $community2 ],
+   -prevalence_threshold => 2,
+), 'Specified prevalence threshold';
+ok $cleaner->clean;
+
+is $community1->get_count($member1),   1;
+is $community1->get_count($member2),   0;
+is $community1->get_count($member3),   5;
+is $community1->get_count($member4),   0;
+is $community1->get_count($member5), 125;
+is $community1->get_count($member6),   0;
+
+is $community2->get_count($member1),   1;
+is $community2->get_count($member2),   0;
+is $community2->get_count($member3), 100;
+is $community2->get_count($member4),   0;
+is $community2->get_count($member5),   0;
+is $community2->get_count($member6),   0;
+
+
+# Cleaner with specified prevalence threshold
+
+ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
+   -communities          => [ $community1, $community2 ],
+   -count_threshold      => 2,
+   -prevalence_threshold => 2,
+), 'Specified count and prevalence thresholds';
+ok $cleaner->clean;
+
+is $community1->get_count($member1),   0;
+is $community1->get_count($member2),   0;
+is $community1->get_count($member3),   5;
+is $community1->get_count($member4),   0;
+is $community1->get_count($member5), 125;
+is $community1->get_count($member6),   0;
+
+is $community2->get_count($member1),   0;
+is $community2->get_count($member2),   0;
+is $community2->get_count($member3), 100;
+is $community2->get_count($member4),   0;
+is $community2->get_count($member5),   0;
+is $community2->get_count($member6),   0;
+
+
 done_testing();
 
 exit;
