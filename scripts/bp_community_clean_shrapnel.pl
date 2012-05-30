@@ -178,8 +178,8 @@ sub write_communities {
          }
          $output_file .= '.'.$output_format;
          $out = Bio::Community::IO->new(
-            -format         => $output_format,
-            -file           => '>'.$output_file,
+            -format => $output_format,
+            -file   => '>'.$output_file,
          );
       }
       print "Writing community '".$community->name."' to file '$output_file'\n";
