@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Community::Tools::ShrapnelCleaner - Remove unique, low-abundance members 
+Bio::Community::Tools::ShrapnelCleaner - Remove low-count, low-abundance community members
 
 =head1 SYNOPSIS
 
@@ -23,9 +23,9 @@ Bio::Community::Tools::ShrapnelCleaner - Remove unique, low-abundance members
 
 =head1 DESCRIPTION
 
-This module takes biological communities and remove shrapnel, low abundance,
+This module takes biological communities and removes shrapnel, low abundance,
 low prevalence members that are likely to be the result of sequencing errors
-(when doing sequence-based analyses). By default, only the cleaner removes only
+(when doing sequence-based analyses). By default, the cleaner removes only
 singletons, i.e. community members that appear in only one community (prevalence
 of 1) and have only 1 count. You can specify your own count and prevalence
 thresholds though.
@@ -134,9 +134,10 @@ has count_threshold => (
 
 =head2 prevalence_threshold
 
- Function: Get or set the prevalence threshold. Community members with a count
-           equal or lower than this threshold are removed (provided they also
-           meet the count_threshold).
+ Function: Get or set the prevalence threshold. Community members with a
+           prevalence (number of communities that the member is found in) equal
+           or lower than this threshold are removed (provided they also meet the
+           count_threshold).
  Usage   : my $prevalence_thresh = $cleaner->prevalence_threshold;
  Args    : positive integer for the prevalence
  Returns : positive integer for the prevalence
