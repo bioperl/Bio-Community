@@ -19,7 +19,7 @@ Bio::Community::Tools::CountNormalizer - Normalize communities by count
   my $normalizer = Bio::Community::Tools::CountNormalizer->new(
      -communities => [ $community ],
      -sample_size => 1000,
-     -threshold   => 0.001, # When to stop iterating. Could specify repetions instead
+     -threshold   => 0.001, # When to stop iterating. Can specify repetions instead
   );
 
   my $average_community = $normalizer->get_average_communities->[0];
@@ -298,8 +298,16 @@ method _count_normalize {
       $self->sample_size($sample_size); 
    } else {
       if ($sample_size > $min) {
+         my $name;
+         for my $community (@$communities) {
+            if ($community->get_total_count == $min) {
+               $name = $community->name;
+               last;
+            }
+         }
          $self->throw("Was given a sample size of $sample_size which is larger".
-            " than the smallest community ($min counts)");
+            " than counts in the smallest community, (name: '$name', counts: ".
+            "$min)");
       }
    }
    if ($self->verbose) {
