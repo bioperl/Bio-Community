@@ -296,24 +296,24 @@ method remove_member ( $member, $count? ) {
    # Sanity checks
    my $member_id = $member->id;
    my $counts = $self->_counts;
-   if (not exists $counts->{$member_id}) {
-      $self->throw("Error: Could not remove member because it did not exist in the community\n");
-   }
-   if ( defined($count) && ($count > $counts->{$member_id}) ) {
-      $self->throw("Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n");
-   }
-   # Now remove unwanted members
-   if (not defined $count) {
-      $count = $counts->{$member_id};
-   }
-   $counts->{$member_id} -= $count;
-   if ($counts->{$member_id} == 0) {
-      delete $counts->{$member_id};
-      delete $self->_members->{$member_id};
-   }
-   $self->_set_total_count( $self->get_total_count - $count );
-   $self->_weighted_count(  $self->_weighted_count - $count / _prod($member->weights) );
-   $self->_has_changed(1);
+   if (exists $counts->{$member_id}) {
+      # Remove existing member
+      if ( defined($count) && ($count > $counts->{$member_id}) ) {
+         $self->throw("Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n");
+      }
+      # Now remove unwanted members
+      if (not defined $count) {
+         $count = $counts->{$member_id};
+      }
+      $counts->{$member_id} -= $count;
+      if ($counts->{$member_id} == 0) {
+         delete $counts->{$member_id};
+         delete $self->_members->{$member_id};
+      }
+      $self->_set_total_count( $self->get_total_count - $count );
+      $self->_weighted_count(  $self->_weighted_count - $count / _prod($member->weights) );
+      $self->_has_changed(1);
+   } # else no such member in the community, nothing to remove
    return 1;
 }
 
