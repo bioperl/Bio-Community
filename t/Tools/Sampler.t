@@ -57,7 +57,7 @@ cmp_ok( $descs{'A'}, '<=', 1500 );
 cmp_ok( $descs{'B'}, '>=',   50 ); # should be  100
 cmp_ok( $descs{'B'}, '<=',  150 );
 cmp_ok( $descs{'C'}, '>=',    4 ); # should be   10
-cmp_ok( $descs{'C'}, '<=',   15 );
+cmp_ok( $descs{'C'}, '<=',   16 );
 
 ok $rand_community = $sampler->get_rand_community($count);
 
