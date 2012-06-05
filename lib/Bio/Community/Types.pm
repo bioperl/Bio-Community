@@ -109,8 +109,8 @@ subtype 'DistanceType'
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 subtype 'WeightAssignType'
    => as 'Str'
-   => where { ($_ =~ m/^(average|ancestor)$/) || ($_ * 2) }
-   => message { "This only accepts 'average' or a number, but got '$_'" };
+   => where { ($_ =~ m/^(file_average|community_average|ancestor)$/) || ($_ * 2) }
+   => message { "This only accepts 'file_average', 'community_average', 'ancestor' or a number, but got '$_'" };
 ;
 
 __PACKAGE__->meta->make_immutable;

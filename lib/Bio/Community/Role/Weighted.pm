@@ -94,7 +94,8 @@ use namespace::autoclean;
 
 has weights => (
    is => 'rw',
-   isa => 'Maybe[ArrayRef[StrictlyPositiveNum]]',
+   ###isa => 'Maybe[ArrayRef[StrictlyPositiveNum]]',
+   isa => 'Maybe[ArrayRef[PositiveNum]]', # we use zero temporarily to mean that the weight still needs to be assigned
    required => 0,
    default => sub{[ 1 ]},
    init_arg => '-weights',

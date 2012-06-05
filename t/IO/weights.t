@@ -77,14 +77,14 @@ ok $in = Bio::Community::IO->new(
    -file          => test_input_file('generic_table.txt'),
    -format        => 'generic',
    -weight_files  => [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ],
-   -weight_assign => 'average',
+   -weight_assign => 'file_average',
 ), 'Read generic format with average weights';
 isa_ok $in, 'Bio::Community::IO::generic';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
 is_deeply $in->weight_files, [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ];
-is $in->weight_assign, 'average';
+is $in->weight_assign, 'file_average';
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';

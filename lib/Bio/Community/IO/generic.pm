@@ -180,6 +180,7 @@ method next_member {
    return $member, $count;
 }
 
+
 method _next_community_init {
    # Go to start of next column and return name of new community. The first time,
    # generate all community members.
