@@ -201,11 +201,6 @@ method next_community {
       my $count_queue = {};
       my $member_queue = $self->_member_queue;
 
-      ####
-      #use Data::Dumper;
-      #print Dumper($member_queue);
-      ####
-
       # Populate the community with members
       while ( my ($member, $count) = $self->next_member() ) {
 
@@ -218,14 +213,7 @@ method next_community {
             next;
          }
 
-         ####
-         print "Adding member ".$member->id."\n";
-         use Data::Dumper;
-         $Data::Dumper::Maxdepth = 2;
-         print "member: ".Dumper($member);
-         ####
-
-         # Add this member
+         # Add this member to the community
          $community->add_member($member, $count);
       }
       $self->_count_queue( $count_queue );
@@ -470,17 +458,18 @@ has '_file_average_weights' => (
    required => 0,
    lazy => 1,
    default => sub { [] },
-   #predicate => '_has_file_average_weights',
 );
 
 
-has '_member_queue' => ( # hashref of members that will need proper weights, keyed by member ID
+# The member queue contains members that will need to be given proper weights
+# and to be added to the community
+
+has '_member_queue' => ( # hashref of Bio::Community::Members, keyed by member ID
    is => 'rw',
    required => 0,
    lazy => 1,
    default => sub { {} },
 );
-
 
 has '_count_queue' => ( # hashref of member counts, keyed by member ID
    is => 'rw',
@@ -525,23 +514,28 @@ method _read_weights ($args) {
  Function: When using weights, specify what value to assign to the members for
            which no weight is found in the provided weight file:
             * $num : Check the member description against each file of weights.
-                 If no weight is found, assign to the member the arbitrary
-                 weight provided as argument
+                 If no weight is found in a file, assign the arbitrary weight
+                 provided as argument to the member.
             * file_average : Check the member description against each file of
-                 weights. If no weight is found in a file, assign to the member
-                 the average weight in this file.
+                 weights. If no weight is found in a file, assign the average
+                 weight in this file to the member.
             * community_average : Check the member description against each file
-                 of weights. If no weight is found in a file, assign to the
-                 member the average weight of the members in this community.
-                 Note that this means that the member will not have a weight
-                 until the community has been entirely created. This also means
-                 that this member will have a different weight in different
-                 communities.
+                 of weights. If no weight is found in a file, the weight given
+                 to the member is the average weight of all the other members in
+                 in this community. If none of the community members have
+                 weights, the weight assignment method defaults to 'file_average'
+                 for this community. Note that because the assigned weight is
+                 the average weight in this community, this means that the same
+                 members will have different weights in different communities.
+                 Note also that the processing of members with no explicit
+                 weights can only be done after all other members have been
+                 added and is effective only if the community is built using the
+                 next_community() method.
             * ancestor: Provided the member have a taxonomic assignment, check
                  the taxonomic lineage of this member against each file of
                  weights. When no weight is found for this taxonomic lineage in
                  a weight file, go up the taxonomic lineage of the member and
-                 assign to it the weight of the first aancestor that has a
+                 assign to it the weight of the first ancestor that has a
                  weight in the weights file. Fall back to the 'community_average'
                  method if no taxonomic information is available for this member
                  (for example a member with no BLAST hit), or if none of the
@@ -577,13 +571,6 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
    # Once we have a member, attach weights to it
    if ( defined($member) && $self->_has_weights ) {
 
-      ####
-      print "Giving weights to member ".$member->id."\n";
-      use Data::Dumper;
-      $Data::Dumper::Maxdepth = 1;
-      print "member: ".Dumper($member);
-      ####
-
       my $weights;
       my $assign_method = $self->weight_assign;
       for my $i (0 .. scalar @{$self->_weights} - 1) {
@@ -608,15 +595,6 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
                # Correct weight will be assigned when community is 100% created
                $weight = 0;
                $self->_member_queue->{$member->id} = $member;
-             
-               ####
-               print "Gave member ".$member->id." a weight of zero\n";
-               ####
-
-               ##### Do community average instead
-               ## Fall back to community average if it fails
-               #$weight = $self->_file_average_weights->[$i];
-               #####
             
                #$lineage = _get_lineage_string( $member->taxon );
                #$self->warn("No weight found for member with ID '".$member->id.
@@ -638,14 +616,9 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
                   # Use the average weight in the weight file
                   $weight = $self->_file_average_weights->[$i];
                } elsif ($assign_method eq 'community_average') {
-                  # Correct weight will be assigned when community is 100% created
+                  # Proper weight will be assigned when community is 100% created
                   $weight = 0;
                   $self->_member_queue->{$member->id} = $member;
-          
-                  ####
-                  print "Gave member ".$member->id." a weight of zero\n";
-                  ####
-
                } else {
                   # Use an arbitrary weight
                   $weight = $assign_method;
@@ -658,12 +631,6 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
       }
       $member->weights($weights);
 
-      ####
-      use Data::Dumper;
-      print "member weights: ".Dumper($weights);
-      print "member queue  : ".Dumper($self->_member_queue);
-      ####
-
    }
 
    return 1;
@@ -674,10 +641,6 @@ method _process_member_queue ($community) {
    # Now is the time to add the community average weight to members that lack
    # weight, and to add the members themselves to the community
 
-   ####
-   print "Now processing member queue\n";
-   ####
-
    my $counts  = $self->_count_queue;
    my $members = $self->_member_queue;
 
@@ -687,17 +650,16 @@ method _process_member_queue ($community) {
       my $rel_ab  = $community->get_rel_ab($member);
       my $weights = $member->weights;
       for my $i (0 .. scalar @{$self->_weights} - 1) {
-         ####
-         print "$rel_ab %, ".$weights->[$i]."\n";
-         ####
          $community_average_weights->[$i] += $rel_ab / 100 * $weights->[$i];
       }
    }
 
-   ####
-   use Data::Dumper;
-   print "community average weights: ".Dumper($community_average_weights);
-   ####
+   # Default to file-average weight if needed
+   for my $i (0 .. scalar @{$self->_weights} - 1) {
+      if (not defined $community_average_weights->[$i]) {
+         $community_average_weights->[$i] = $self->_file_average_weights->[$i];
+      }
+   }
 
    # Assign average weight to members that need it
    while ( my ($id, $count) = each %$counts) {
@@ -707,9 +669,6 @@ method _process_member_queue ($community) {
       # Update member weights
       for my $i (0 .. scalar @{$self->_weights} - 1) {
          if ( $member_weights->[$i] == 0 ) {
-            ####
-            print "Giving member average weight ".$community_average_weights->[$i]."\n";
-            #### 
             $member_weights->[$i] = $community_average_weights->[$i];
          }
       }

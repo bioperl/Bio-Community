@@ -86,7 +86,10 @@ use namespace::autoclean;
            of reads in the sequence library is not proportional to the relative
            abundance of the genomes because larger genomes contribute
            disproportionalely more reads than small genomes. In such a case, you
-           could set the weight to the length of the genome.
+           could set the weight to the length of the genome. Do not attempt to
+           change weights after a member has been added to a community!
+           Note: Do not use a weight value of zero, except temporarily, and make
+           sure to give a proper weight (>0) before adding a member to a community.
  Args    : An arrayref of positive integers
  Returns : An arrayref of positive integers
 
@@ -95,7 +98,7 @@ use namespace::autoclean;
 has weights => (
    is => 'rw',
    ###isa => 'Maybe[ArrayRef[StrictlyPositiveNum]]',
-   isa => 'Maybe[ArrayRef[PositiveNum]]', # we use zero temporarily to mean that the weight still needs to be assigned
+   isa => 'Maybe[ArrayRef[PositiveNum]]',
    required => 0,
    default => sub{[ 1 ]},
    init_arg => '-weights',
