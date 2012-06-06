@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Community::Tools::Ruler - Calculate the distance separating communities
+Bio::Community::Tools::Ruler - Beta-diversity and distance separating communities
 
 =head1 SYNOPSIS
 
@@ -31,8 +31,9 @@ Several types of distance are available: 1-norm, 2-norm (euclidean), and
 infinity-norm. They consider the communities as a n-dimensional space, where n
 is the total number of unique community members across the communities.
 
-Note that the distance is based on the relative abundance and is hence affected
-by weights assigned to the community members. See the get_rel_ab() method in
+Note that the distances are based on the relative abundance (as a fractional
+number between 0 and 1, not as a percentage) and is hence affected by weights
+assigned to the community members. See the get_rel_ab() method in
 L<Bio::Community>.
 
 =head1 FEEDBACK
@@ -84,16 +85,12 @@ methods. Internal methods are usually preceded with a _
               -type        => 'euclidean',
            );
  Args    : -communities
-              An arrayref of the communities (Bio::Community objects) to
-              calculate the distance from.
+              Communities to calculate the distance of. See communities().
            -type
-              The type of distance to use: 1-norm, 2-norm (euclidean), infinity-
-              norm.
+              The type of distance to use 1-norm, hellinger, etc. See type().
  Returns : a Bio::Community::Tools::Ruler object
 
 =cut
-
-#### TODO: unifrac distance
 
 
 package Bio::Community::Tools::Ruler;
@@ -130,8 +127,12 @@ has communities => (
 
  Function: Get or set the type of distance to measure.
  Usage   : my $type = $ruler->type;
- Args    : string: 1-norm, 2-norm (a.k.a. euclidean), p-norm, or infinity-norm
- Returns : string: 1-norm, 2-norm (a.k.a. euclidean), p-norm, or infinity-norm
+ Args    : string for the desired type of distance
+            * 1-norm
+            * 2-norm (or euclidean)
+            * infinity-norm
+            * hellinger: like the euclidean distance, but constrained between 0 and 1
+ Returns : string for the desired type of distance
 
 =cut
 
@@ -168,6 +169,8 @@ method get_distance {
       $dist = $self->_pnorm(2);
    } elsif ($type eq 'infinity-norm') {
       $dist = $self->_infnorm();
+   } elsif ($type eq 'hellinger') {
+      $dist = $self->_hellinger();
    } else {
       $self->throw("Invalid distance type '$type'");
    }
@@ -177,15 +180,15 @@ method get_distance {
 
 method _pnorm ($power) {
    # Calculate the p-norm. If power is 1, this is the 1-norm. If power is 2,
-   # this is the 2-norm.
+   # this is the 2-norm (a.k.a. euclidean distance).
    my $communities = $self->communities;
    my $community1  = $communities->[0];
    my $community2  = $communities->[1];
    my $all_members = $community1->get_all_members($communities);
    my $sumdiff = 0;
    for my $member (@$all_members) {
-      my $abundance1 = $community1->get_rel_ab($member);
-      my $abundance2 = $community2->get_rel_ab($member);
+      my $abundance1 = $community1->get_rel_ab($member) / 100;
+      my $abundance2 = $community2->get_rel_ab($member) / 100;
       $sumdiff += ( abs($abundance1 - $abundance2) )**$power;
    }
    my $dist = $sumdiff ** (1/$power);
@@ -201,14 +204,26 @@ method _infnorm () {
    my $all_members = $community1->get_all_members($communities);
    my $dist = 0;
    for my $member (@$all_members) {
-      my $abundance1 = $community1->get_rel_ab($member);
-      my $abundance2 = $community2->get_rel_ab($member);
+      my $abundance1 = $community1->get_rel_ab($member) / 100;
+      my $abundance2 = $community2->get_rel_ab($member) / 100;
       my $diff = abs($abundance1 - $abundance2);
       if ($diff > $dist) {
          $dist = $diff;
       }
    }
    return $dist;
+}
+
+
+method _hellinger () {
+   # Calculate the Hellinger distance.
+   return $self->_pnorm(2) / sqrt(2);
+}
+
+
+method _unifrac () {
+   #### TODO: unifrac distance
+   $self->throw_not_implemented;
 }
 
 

@@ -170,7 +170,7 @@ has threshold => (
    is => 'rw',
    isa => 'Maybe[PositiveNum]',
    required => 0, 
-   default => 1E-3, # it may not be possible to reach < 1e-4 for simplistic communities
+   default => 1E-5, # maybe impossible to reach lower thresholds for simplistic communities
    lazy => 1,
    init_arg => '-threshold',
 );
