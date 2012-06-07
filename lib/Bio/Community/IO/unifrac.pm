@@ -38,11 +38,21 @@ $member->desc() contains the content of the first field, i.e. the first column.
 Since the Unifrac format does not specify a member ID, one is automatically
 generated and can be retrieved using $member->id().
 
-Note that member counts (the third column) is optional, in which case the data
-is to be interpreted as presence/absence data. When reading a Unifrac file
-without counts, all members are given a count of 1. Conversely, when writing a
-Unifrac file, if all members have a count of 1, then the third column is not
-written.
+Note that member counts (the third column) is optional. Example:
+
+  Sequence.1	Sample.1
+  Sequence.1	Sample.2
+  Sequence.2	Sample.1
+  Sequence.3	Sample.1
+  Sequence.4	Sample.2
+  Sequence.5	Sample.1
+  Sequence.6	Sample.3
+  Sequence.6	Sample.2
+
+In this case the data is to be interpreted as presence/absence data. When
+reading a Unifrac file without counts, all members are given a count of 1.
+Conversely, when writing a Unifrac file, if all members have a count of 1, then
+the third column is not written.
 
 =head1 CONSTRUCTOR
 
@@ -178,6 +188,16 @@ has '_desc2line' => (
 );
 
 
+has '_qualitative_unifrac' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   init_arg => undef,
+   default => 1,
+   lazy => 1,
+);
+
+
 method _generate_community_names {
    # Read all possible community names from the second column
    my %names;
@@ -276,7 +296,14 @@ method write_member (Bio::Community::Member $member, Count $count) {
    my $desc = $member->desc;
    my $desc2line = $self->_desc2line;
    my $line = $desc2line->{$desc};
+
    my $values = [$desc, $self->_current_name, $count];
+
+   ### not needed if column removal is done at the end
+   my $max_cols = $self->_get_max_col;
+   if ($max_cols > 0 && (scalar @$values > $max_cols) ) {
+      pop @$values;
+   }
 
    if (not defined $line) {
 
@@ -300,6 +327,11 @@ method write_member (Bio::Community::Member $member, Count $count) {
       }
         
    }
+
+   if ($self->_qualitative_unifrac && $count > 1) {
+      $self->_qualitative_unifrac( 0 );
+   }
+
    $self->_line( $line + 1 );
    return 1;
 }
@@ -313,9 +345,11 @@ method _write_community_init (Bio::Community $community) {
 
 method _write_community_finish (Bio::Community $community) {
 
-   ####
-   # if a member had a count != 1, then this was qualitative... delete last col
-   ####
+   ### Do it at very end, not after each community
+   if ( ($self->_get_max_col == 3) && $self->_qualitative_unifrac ) {
+      # Delete last column (the counts)
+      $self->_delete_col(3);
+   }
 
    return 1;
 }

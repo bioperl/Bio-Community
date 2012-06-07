@@ -20,7 +20,8 @@ access to their cells
   extends 'Bio::Root::IO';
   with 'Bio::Community::Role::Table';
 
-  # Use the new(), _read_table(), _get_value(), _set_value() and _write_table()
+  # Use the new(), _read_table(), _get_value(), _set_value(), _insert_line(),
+  # _delete_col() and _write_table()
   # methods as needed
   # ...
 
@@ -518,6 +519,42 @@ sub _insert_line {  # this function is called a lot, keep it lean
    $self->_set_max_line($max_lines + 1);
    if ($max_cols == 0) {
       $self->_set_max_col(scalar @$insert_values);
+   }
+
+   return 1;
+}
+
+
+=head2 _delete_col
+
+ Usage   : $out->_delete_col(3);
+ Function: Delete a column of the table.
+ Args    : A strictly positive integer for the column to delete.
+ Returns : 1 for success
+
+=cut
+
+#method _delete_col (StrictlyPositiveInt $col) {
+sub _delete_col {  # this function is called a lot, keep it lean
+   my ($self, $col) = @_;
+
+   my $max_cols = $self->_get_max_col;
+   if ( $col > $max_cols ) {
+      $self->throw("Could not delete column $col because the table has only $max_cols columns.");
+   }
+
+   # Extend table with columns if needed
+   my $max_lines = $self->_get_max_line;
+   my $max_idx = $max_cols * $max_lines - 1;
+   my $values = $self->_values;
+   for (my $idx = $max_idx; $idx >= 0; $idx -= $max_cols) {
+      splice @$values, $idx, 1;
+   }
+
+   $self->_set_max_col( $max_cols - 1 );
+
+   if ($self->_get_max_col == 0) {
+      $self->_set_max_line( 0 );
    }
 
    return 1;

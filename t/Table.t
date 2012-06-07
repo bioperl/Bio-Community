@@ -77,6 +77,13 @@ is $out->delim, "\t";
 is $out->_get_max_col, 0;
 is $out->_get_max_line, 0;
 
+# Add a first column... and delete it
+ok $out->_set_value(1, 1, 'Species');
+is $out->_get_max_col, 1;
+$out->_delete_col(1);
+is $out->_get_max_col, 0;
+
+# More table content
 ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(1, 2, 'gut');
 ok $out->_set_value(1, 3, 'soda lake');
@@ -86,7 +93,19 @@ ok $out->_set_value(2, 1, 'Goatpox virus');
 ok $out->_set_value(3, 1, 'Lumpy skin disease virus');
 ok $out->_set_value(3, 2, '');
 ok $out->_set_value(3, 3,  123);
+is $out->_get_max_line, 3;
 ok $out->_insert_line(2, ['Streptococcus', 241, 334]);
+is $out->_get_max_line, 4;
+
+# Add a fourth column... and delete it
+is $out->_get_max_col, 3;
+ok $out->_set_value(1, 4, 'some');
+ok $out->_set_value(2, 4, 'thing');
+ok $out->_set_value(3, 4, 'or');
+ok $out->_set_value(4, 4, 'other');
+is $out->_get_max_col, 4;
+ok $out->_delete_col(4);
+is $out->_get_max_col, 3;
 
 $out->close;
 
