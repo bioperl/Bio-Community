@@ -293,6 +293,7 @@ method _next_community_finish {
 
 
 method write_member (Bio::Community::Member $member, Count $count) {
+
    my $desc = $member->desc;
    my $desc2line = $self->_desc2line;
    my $line = $desc2line->{$desc};
@@ -318,14 +319,15 @@ method write_member (Bio::Community::Member $member, Count $count) {
       # Member already seen. Insert it in table next to where this member is
       # located for other communities. Not sure that this is required by the
       # Unifrac format, but this is safer this way.
-      $self->_insert_line($line, $values );
+      $self->_insert_line($line+1, $values);
       while (my ($memdesc, $memline) = each %$desc2line) {
+         #print "   desc $memdesc"; ###
          if ($memline >= $line) {
             # Increment line numbers
-            $desc2line->{$desc}++;
+            $desc2line->{$memdesc}++;
          }
       }
-        
+
    }
 
    if ($self->_qualitative_unifrac && $count > 1) {
@@ -333,6 +335,7 @@ method write_member (Bio::Community::Member $member, Count $count) {
    }
 
    $self->_line( $line + 1 );
+
    return 1;
 }
 
