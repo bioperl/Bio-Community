@@ -197,7 +197,7 @@ has 'missing_string' => (
  Usage   : my $num_lines = $in->_get_max_line;
  Function: Get the number of lines in the table
  Args    : None
- Returns : Strictly positive integer
+ Returns : Positive integer
 
 =cut
 
@@ -207,7 +207,7 @@ has '_max_line' => (
    required => 0,
    init_arg => undef,
    lazy => 1,
-   default => 1,
+   default => 0,
    reader => '_get_max_line',
    writer => '_set_max_line',
 );
@@ -218,7 +218,7 @@ has '_max_line' => (
  Usage   : my $num_cols = $in->_get_max_col;
  Function: Get the number of columns in the table
  Args    : None
- Returns : Strictly positive integer
+ Returns : Positive integer
 
 =cut
 
@@ -228,7 +228,7 @@ has '_max_col' => (
    required => 0,
    init_arg => undef,
    lazy => 1,
-   default => 1,
+   default => 0,
    reader => '_get_max_col',
    writer => '_set_max_col',
 );
@@ -508,7 +508,7 @@ sub _insert_line {  # this function is called a lot, keep it lean
    }
 
    my $max_cols  = $self->_get_max_col;
-   if (scalar @$insert_values != $max_cols) {
+   if ( ($max_cols > 0) && (scalar @$insert_values != $max_cols) ) {
       $self->throw("Could not insert a line because it did not match table width ($max_cols).");
    }
 

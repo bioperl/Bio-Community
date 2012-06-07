@@ -74,8 +74,8 @@ $in->close;
 
 ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write tab-delimited table';
 is $out->delim, "\t";
-is $out->_get_max_col, 1;
-is $out->_get_max_line, 1;
+is $out->_get_max_col, 0;
+is $out->_get_max_line, 0;
 
 ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(1, 2, 'gut');
@@ -125,8 +125,8 @@ unlink $file;
 
 ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write tab-delimited table again';
 is $out->delim, "\t";
-is $out->_get_max_col, 1;
-is $out->_get_max_line, 1;
+is $out->_get_max_col, 0;
+is $out->_get_max_line, 0;
 
 ok $out->_set_value(2, 2,  241);
 ok $out->_set_value(1, 2, 'gut');
