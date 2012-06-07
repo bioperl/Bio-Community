@@ -97,44 +97,85 @@ delta_ok $community3->get_count($member), 15;
 is $community3->next_member, undef;
 
 
-#### Write Unifrac format
+# Write Unifrac quantitative format
 
-###$output_file = test_output_file();
+$output_file = test_output_file();
 
-###ok $out = Bio::Community::IO->new(
-###   -file   => '>'.$output_file,
-###   -format => 'unifrac',
-###), 'Write Unifrac format';
-###ok $out->write_community($community);
-###ok $out->write_community($community2);
-###$out->close;
+####
+$output_file = 'test.unifrac';
+####
 
-###ok $in = Bio::Community::IO->new(
-###   -file   => $output_file,
-###   -format => 'unifrac',
-###), 'Re-read Unifrac format';
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'unifrac',
+), 'Write Unifrac quantitative format';
+ok $out->write_community($community);
+ok $out->write_community($community2);
+ok $out->write_community($community3);
+$out->close;
 
-###ok $community = $in->next_community;
-###ok $member = $community->next_member;
-###is $member->desc, 'Streptococcus';
-###delta_ok $community->get_count($member), 241;
-###is $community->next_member, undef;
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+   -format => 'unifrac',
+), 'Re-read Unifrac quantitative format';
 
-###ok $community2 = $in->next_community;
-###ok $member = $community2->next_member;
-###is $member->desc, 'Goatpox virus';
-###delta_ok $community2->get_count($member), 1023.9;
-###ok $member = $community2->next_member;
-###is $member->desc, 'Streptococcus';
-###delta_ok $community2->get_count($member), 334;
-###ok $member = $community2->next_member;
-###is $member->desc, 'Lumpy skin disease virus';
-###delta_ok $community2->get_count($member), 123;
-###is $community2->next_member, undef;
+ok $community = $in->next_community;
 
-###is $in->next_community, undef;
+####
+print "Community ".$community->name."\n";
+####
 
-###$in->close;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.6';
+delta_ok $community->get_count($member), 1;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.1';
+delta_ok $community->get_count($member), 2;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.4';
+delta_ok $community->get_count($member), 8;
+is $community->next_member, undef;
+
+ok $community2 = $in->next_community;
+
+####
+print "Community2 ".$community2->name."\n";
+####
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.6';
+delta_ok $community2->get_count($member), 1;
+is $community2->next_member, undef;
+
+ok $community3 = $in->next_community;
+
+####
+print "Community3 ".$community3->name."\n";
+####
+
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.1';
+delta_ok $community3->get_count($member), 1;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.2';
+delta_ok $community3->get_count($member), 15;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.5';
+delta_ok $community3->get_count($member), 4;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.3';
+delta_ok $community3->get_count($member), 2;
+is $community3->next_member, undef;
+
+$in->close;
 
 
 # Read Unifrac qualitative format
@@ -165,15 +206,15 @@ $in->close;
 
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.1';
-delta_ok $community->get_count($member), 1;
-ok $member = $community->next_member;
-isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.4';
 delta_ok $community->get_count($member), 1;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.6';
+delta_ok $community->get_count($member), 1;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.1';
 delta_ok $community->get_count($member), 1;
 is $community->next_member, undef;
 
@@ -185,6 +226,10 @@ is $community2->next_member, undef;
 
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.5';
+delta_ok $community3->get_count($member), 1;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.2';
 delta_ok $community3->get_count($member), 1;
 ok $member = $community3->next_member;
@@ -194,10 +239,6 @@ delta_ok $community3->get_count($member), 1;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.3';
-delta_ok $community3->get_count($member), 1;
-ok $member = $community3->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.5';
 delta_ok $community3->get_count($member), 1;
 is $community3->next_member, undef;
 
@@ -481,20 +522,20 @@ is $community2->next_member, undef;
 
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.5';
-delta_ok $community3->get_count($member), 4;
+is $member->desc, 'Sequence.1';
+delta_ok $community3->get_count($member), 1;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.2';
 delta_ok $community3->get_count($member), 15;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.1';
-delta_ok $community3->get_count($member), 1;
-ok $member = $community3->next_member;
-isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.3';
 delta_ok $community3->get_count($member), 2;
+ok $member = $community3->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.5';
+delta_ok $community3->get_count($member), 4;
 is $community3->next_member, undef;
 
 

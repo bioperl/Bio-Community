@@ -168,7 +168,7 @@ has '_community_names' => (
 );
 
 
-has '_id2line' => (
+has '_desc2line' => (
    is => 'rw',
    isa => 'HashRef', # HashRef[String] but keep it lean
    required => 0,
@@ -273,44 +273,50 @@ method _next_community_finish {
 
 
 method write_member (Bio::Community::Member $member, Count $count) {
-    my $id   = $member->id;
-    my $line = $self->_id2line->{$id};
-    if (not defined $line) {
-        # This member has not been written previously for another community
-        $line = $self->_get_max_line + 1;
-        $self->_set_value( $line, 1, $member->desc );
-        $self->_id2line->{$id} = $line;
-    }
-    $self->_set_value($line, $self->_col, $count);
-    $self->_line( $line + 1 );
-    return 1;
-}
+   my $desc = $member->desc;
+   my $desc2line = $self->_desc2line;
+   my $line = $desc2line->{$desc};
+   my $values = [$desc, $self->_current_name, $count];
 
+   if (not defined $line) {
 
-method _write_community_init (Bio::Community $community) {
-   # If first community, write first column header
-   if ($self->_first_community) {
-      $self->_write_headers;
-      $self->_first_community(0);
+      # This member has not been written previously for another community
+      # append to table
+      $line = $self->_get_max_line + 1;
+      $self->_insert_line($line, $values );
+      $desc2line->{$desc} = $line;
+
+   } else {
+
+      # Member already seen. Insert it in table next to where this member is
+      # located for other communities. Not sure that this is required by the
+      # Unifrac format, but this is safer this way.
+      $self->_insert_line($line, $values );
+      while (my ($memdesc, $memline) = each %$desc2line) {
+         if ($memline >= $line) {
+            # Increment line numbers
+            $desc2line->{$desc}++;
+         }
+      }
+        
    }
-
-   my $col  = $self->_col + 1;
-   my $line = 1;
-
-   # Write header for that community
-   $self->_set_value($line, $col, $community->name);
-   $self->_line( $line + 1);
-   $self->_col( $col );
+   $self->_line( $line + 1 );
    return 1;
 }
 
 
-method _write_headers {
-   $self->_set_value(1, 1, 'Species');
+method _write_community_init (Bio::Community $community) {
+   $self->_current_name( $community->name );
+   return 1;
 }
 
 
 method _write_community_finish (Bio::Community $community) {
+
+   ####
+   # if a member had a count != 1, then this was qualitative... delete last col
+   ####
+
    return 1;
 }
 
