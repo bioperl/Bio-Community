@@ -177,9 +177,7 @@ ok $out = t::TestTableRole->new(
    -delim => '  ',
 ), 'Write double-space delimited table';
 
-ok $out->_set_value(1, 1, 'Species');
-ok $out->_set_value(1, 2, 'gut');
-ok $out->_set_value(1, 3, 'soda_lake');
+ok $out->_insert_line(1, ['Species', 'gut', 'soda_lake']);
 ok $out->_set_value(2, 1, 'Streptococcus');
 ok $out->_set_value(2, 2,  241);
 ok $out->_set_value(2, 3,  334);

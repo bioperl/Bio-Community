@@ -272,7 +272,7 @@ has '_values' => (
    required => 0,
    init_arg => undef,
    lazy => 1,
-   default => sub { [''] },
+   default => sub { [] },
 );
 
 
@@ -516,6 +516,10 @@ sub _insert_line {  # this function is called a lot, keep it lean
    splice @{$self->_values}, $idx, 0, @$insert_values;
 
    $self->_set_max_line($max_lines + 1);
+   if ($max_cols == 0) {
+      $self->_set_max_col(scalar @$insert_values);
+   }
+
    return 1;
 }
 
