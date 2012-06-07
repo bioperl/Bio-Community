@@ -490,7 +490,8 @@ sub _set_value {  # this function is called a lot, keep it lean
 
  Usage   : $out->_insert_line(3, ['sample1', 3, 10.9, 'Mus musculus']);
  Function: Insert a line of values in the table, at the indicated line, shifting
-           all other lines down.
+           all other lines down. You can also append a line to the table by
+           providing the maximum line number + 1.
  Args    : A strictly positive integer for the line at which to insert
            An arrayref containing the values to insert (must match table width)
  Returns : 1 for success
@@ -502,7 +503,7 @@ sub _insert_line {  # this function is called a lot, keep it lean
    my ($self, $line, $insert_values) = @_;
 
    my $max_lines = $self->_get_max_line;
-   if ($line > $max_lines) {
+   if ($line > $max_lines + 1) {
       $self->throw("Could not insert line beyond last line of table.");
    }
 

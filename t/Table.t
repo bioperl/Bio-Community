@@ -86,8 +86,7 @@ ok $out->_set_value(2, 1, 'Goatpox virus');
 ok $out->_set_value(3, 1, 'Lumpy skin disease virus');
 ok $out->_set_value(3, 2, '');
 ok $out->_set_value(3, 3,  123);
-
-ok $out->_insert_line(2, ['Streptococcus', 241, 334]), 'Insert line';
+ok $out->_insert_line(2, ['Streptococcus', 241, 334]);
 
 $out->close;
 
@@ -187,9 +186,7 @@ ok $out->_set_value(2, 3,  334);
 ok $out->_set_value(3, 1, 'Goatpox_virus');
 ok $out->_set_value(3, 2,  '"0"');
 ok $out->_set_value(3, 3,  1023.9);
-ok $out->_set_value(4, 1, 'Lumpy_skin_disease_virus');
-ok $out->_set_value(4, 2, '');
-ok $out->_set_value(4, 3,  123);
+ok $out->_insert_line(4, ['Lumpy_skin_disease_virus', '', 123]);
 
 $out->close;
 
