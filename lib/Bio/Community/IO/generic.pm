@@ -223,17 +223,8 @@ method _write_community_init (Bio::Community $community) {
       $self->_first_community(0);
    }
 
-
    my $col  = $self->_col + 1;
    my $line = 1;
-
-   ####
-   # Try to extend the table now if needed
-   #$line = $community->get_richness;
-   #if ($line > $self->_get_max_line) {
-   #   $self->_set_value( $line , $col, $self->missing_string );
-   #}
-   ####
 
    # Write header for that community
    $self->_set_value($line, $col, $community->name);
