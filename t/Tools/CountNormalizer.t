@@ -104,7 +104,7 @@ is scalar(@{$normalizer->get_average_communities}), 2;
 is scalar(@{$normalizer->get_representative_communities}), 2;
 
 is $normalizer->repetitions, 10;
-isnt $normalizer->threshold, 0.1;
+isnt $normalizer->threshold, 0.00001;
 cmp_ok $normalizer->threshold, '<', 1;
 is $normalizer->sample_size, 1000;
 is $normalizer->verbose, 1;
@@ -150,14 +150,14 @@ delta_within $representative->get_count($member6), $representative->get_count($m
 
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
    -communities => [ $community1, $community2 ],
-   -threshold   => 1E-1,
+   -threshold   => 1E-3,
    -sample_size => 1000,
 );
 is scalar(@{$normalizer->get_average_communities}), 2;
 is scalar(@{$normalizer->get_representative_communities}), 2;
 
 cmp_ok $normalizer->repetitions, '>=', 3;
-is $normalizer->threshold, 0.1;
+is $normalizer->threshold, 0.001;
 is $normalizer->sample_size, 1000;
 
 $average = $normalizer->get_average_communities->[0];
@@ -201,14 +201,14 @@ delta_within $representative->get_count($member6), $average->get_count($member6)
 
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
    -communities => [ $community1, $community2 ],
-   -threshold   => 1E-1,
+   -threshold   => 1E-3,
    -repetitions => 10,
 );
 is scalar(@{$normalizer->get_average_communities}), 2;
 is scalar(@{$normalizer->get_representative_communities}), 2;
 
 is $normalizer->repetitions, 10;
-isnt $normalizer->threshold, 0.1;
+isnt $normalizer->threshold, 0.001;
 cmp_ok $normalizer->threshold, '<', 1;
 is $normalizer->sample_size, 1500;
 
@@ -260,7 +260,7 @@ is scalar(@{$normalizer->get_average_communities}), 2;
 is scalar(@{$normalizer->get_representative_communities}), 2;
 
 is $normalizer->repetitions, 50;
-isnt $normalizer->threshold, 0.1;
+isnt $normalizer->threshold, 0.00001;
 cmp_ok $normalizer->threshold, '<', 10;
 is $normalizer->sample_size, 4;
 

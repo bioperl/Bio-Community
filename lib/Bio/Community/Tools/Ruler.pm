@@ -100,6 +100,7 @@ use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
+use List::Util qw(min);
 
 extends 'Bio::Root::Root';
 
@@ -125,13 +126,16 @@ has communities => (
 
 =head2 type
 
- Function: Get or set the type of distance to measure.
+ Function: Get or set the type of distance or beta-diversity index to measure.
  Usage   : my $type = $ruler->type;
  Args    : string for the desired type of distance
-            * 1-norm
-            * 2-norm (or euclidean)
-            * infinity-norm
-            * hellinger: like the euclidean distance, but constrained between 0 and 1
+            * 1-norm: the 1-norm distance
+            * 2-norm (or euclidean): the euclidean distance
+            * infinity-norm: the infinity-norm distance
+            * hellinger: like the euclidean distance, but constrained between 0
+                and 1
+            * bray-curtis: the Bray-Curtis dissimilarity index, between 0 and 1
+
  Returns : string for the desired type of distance
 
 =cut
@@ -161,9 +165,7 @@ has type => (
 method get_distance {
    my $dist;
    my $type = $self->type;
-   if ($type eq 'unifrac') {
-      $dist = $self->_unifrac();
-   } elsif ($type eq '1-norm') {
+   if ($type eq '1-norm') {
       $dist = $self->_pnorm(1);
    } elsif ( ($type eq '2-norm') || ($type eq 'euclidean') ) {
       $dist = $self->_pnorm(2);
@@ -171,6 +173,10 @@ method get_distance {
       $dist = $self->_infnorm();
    } elsif ($type eq 'hellinger') {
       $dist = $self->_hellinger();
+   } elsif ($type eq 'bray-curtis') {
+      $dist = $self->_braycurtis();
+   } elsif ($type eq 'unifrac') {
+      $dist = $self->_unifrac();
    } else {
       $self->throw("Invalid distance type '$type'");
    }
@@ -218,6 +224,30 @@ method _infnorm () {
 method _hellinger () {
    # Calculate the Hellinger distance.
    return $self->_pnorm(2) / sqrt(2);
+}
+
+
+method _braycurtis () {
+   # Calculate the Bray-Curtis dissimilarity index BC:
+   #    BC = 1 - sum( min(r_i, r_j) )
+   # where r_i and r_j are the relative abundance (fractional) for species in
+   # common between both sites.
+   # Can also be written as:
+   #    BC = sum( c_i - c_j ) / sum( c_i + c_j )
+   # where c_i and c_j are the counts for all observed species.
+   my $communities = $self->communities;
+   my $community1  = $communities->[0];
+   my $community2  = $communities->[1];
+   my $all_members = $community1->get_all_members($communities);
+   my $sumdiff = 0;
+   for my $member (@$all_members) {
+      my $abundance1 = $community1->get_rel_ab($member) / 100;
+      next if $abundance1 == 0;
+      my $abundance2 = $community2->get_rel_ab($member) / 100;
+      next if $abundance2 == 0;
+      $sumdiff += min($abundance1, $abundance2);
+   }
+   return 1 - $sumdiff;
 }
 
 
