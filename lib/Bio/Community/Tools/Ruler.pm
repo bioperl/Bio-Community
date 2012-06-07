@@ -123,7 +123,6 @@ has communities => (
 );
 
 
-
 =head2 type
 
  Function: Get or set the type of distance or beta-diversity index to measure.

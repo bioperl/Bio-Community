@@ -80,15 +80,14 @@ is $out->_get_max_line, 1;
 ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(1, 2, 'gut');
 ok $out->_set_value(1, 3, 'soda lake');
-ok $out->_set_value(3, 3,  1023.9);
-ok $out->_set_value(3, 2,  '"0"');
-ok $out->_set_value(3, 1, 'Goatpox virus');
-ok $out->_set_value(4, 1, 'Lumpy skin disease virus');
-ok $out->_set_value(4, 2, '');
-ok $out->_set_value(4, 3,  123);
-ok $out->_set_value(2, 1, 'Streptococcus');
-ok $out->_set_value(2, 2,  241);
-ok $out->_set_value(2, 3,  334);
+ok $out->_set_value(2, 3,  1023.9);
+ok $out->_set_value(2, 2,  '"0"');
+ok $out->_set_value(2, 1, 'Goatpox virus');
+ok $out->_set_value(3, 1, 'Lumpy skin disease virus');
+ok $out->_set_value(3, 2, '');
+ok $out->_set_value(3, 3,  123);
+
+ok $out->_insert_line(2, ['Streptococcus', 241, 334]), 'Insert line';
 
 $out->close;
 

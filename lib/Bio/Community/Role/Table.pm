@@ -486,6 +486,39 @@ sub _set_value {  # this function is called a lot, keep it lean
 }
 
 
+=head2 _insert_line
+
+ Usage   : $out->_insert_line(3, ['sample1', 3, 10.9, 'Mus musculus']);
+ Function: Insert a line of values in the table, at the indicated line, shifting
+           all other lines down.
+ Args    : A strictly positive integer for the line at which to insert
+           An arrayref containing the values to insert (must match table width)
+ Returns : 1 for success
+
+=cut
+
+#method _insert_line (StrictlyPositiveInt $line, ArrayRef $values) {
+sub _insert_line {  # this function is called a lot, keep it lean
+   my ($self, $line, $insert_values) = @_;
+
+   my $max_lines = $self->_get_max_line;
+   if ($line > $max_lines) {
+      $self->throw("Could not insert line beyond last line of table.");
+   }
+
+   my $max_cols  = $self->_get_max_col;
+   if (scalar @$insert_values != $max_cols) {
+      $self->throw("Could not insert a line because it did not match table width ($max_cols).");
+   }
+
+   my $idx = $max_cols * ($line - 1);
+   splice @{$self->_values}, $idx, 0, @$insert_values;
+
+   $self->_set_max_line($max_lines + 1);
+   return 1;
+}
+
+
 =head2 _write_table
 
  Usage   : $out->_write_table;
