@@ -127,6 +127,11 @@ ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'qiime';
 
+$file = test_input_file('qiime_w_silva_taxo_and_dups.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
+is $guesser->file, $file;
+is $guesser->guess, 'qiime';
+
 
 # Test unknown format
 

@@ -16,10 +16,10 @@ my (@communities, @methods);
 
 # Automatic format detection
 
-###ok $in = Bio::Community::IO->new(
-###   -file   => test_input_file('unifrac_quantitative.txt'),
-###), 'Format detection';
-###is $in->format, 'unifrac';
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('unifrac_quantitative.txt'),
+), 'Format detection';
+is $in->format, 'unifrac';
 
 
 # Read Unifrac quantitative format

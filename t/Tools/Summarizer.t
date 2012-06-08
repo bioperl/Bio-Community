@@ -610,9 +610,14 @@ is $summary->next_member, undef;
 # Merge taxonomic duplicates
 
 $in = Bio::Community::IO->new(
-   -file     => test_input_file('generic_w_silva_taxo_and_dups.txt'),
+   -file     => test_input_file('qiime_w_silva_taxo_and_dups.txt'),
    -taxonomy => Bio::DB::Taxonomy->new( -source => 'list' ),
 );
+
+###
+print "FORMAT: ".$in->format."\n";
+###
+
 $community1 = $in->next_community;
 
 
@@ -628,28 +633,16 @@ $summary = $summaries->[0];
 
 
 $member = $summary->next_member;
-is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
-is $member->taxon->node_name, 'Chytridiomycota';
-delta_ok $summary->get_count($member), 7;
-delta_ok $summary->get_rel_ab($member), 7;
-
-$member = $summary->next_member;
-is $member->desc, 'Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter';
-is $member->taxon->node_name, 'Flexibacter';
+is $member->desc, 'Bacteria;WCHB1-60';
+is $member->taxon->node_name, 'WCHB1-60';
 delta_ok $summary->get_count($member), 1;
 delta_ok $summary->get_rel_ab($member), 1;
 
 $member = $summary->next_member;
-is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;;Leucocryptos';
-is $member->taxon->node_name, 'Leucocryptos';
-delta_ok $summary->get_count($member), 9;
-delta_ok $summary->get_rel_ab($member), 9;
-
-$member = $summary->next_member;
-is $member->desc, 'Archaea;Crenarchaeota;Miscellaneous';
+is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
 is $member->taxon->node_name, 'Miscellaneous';
-delta_ok $summary->get_count($member), 6;
-delta_ok $summary->get_rel_ab($member), 6;
+delta_ok $summary->get_count($member), 19;
+delta_ok $summary->get_rel_ab($member), 19;
 
 $member = $summary->next_member;
 is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
@@ -664,16 +657,22 @@ delta_ok $summary->get_count($member), 27;
 delta_ok $summary->get_rel_ab($member), 27;
 
 $member = $summary->next_member;
-is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas';
-is $member->taxon->node_name, 'Sphingomonas';
-delta_ok $summary->get_count($member), 6;
-delta_ok $summary->get_rel_ab($member), 6;
+is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
+is $member->taxon->node_name, 'Chytridiomycota';
+delta_ok $summary->get_count($member), 7;
+delta_ok $summary->get_rel_ab($member), 7;
 
 $member = $summary->next_member;
-is $member->desc, 'Bacteria;WCHB1-60';
-is $member->taxon->node_name, 'WCHB1-60';
-delta_ok $summary->get_count($member), 1;
-delta_ok $summary->get_rel_ab($member), 1;
+is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;;Leucocryptos';
+is $member->taxon->node_name, 'Leucocryptos';
+delta_ok $summary->get_count($member), 9;
+delta_ok $summary->get_rel_ab($member), 9;
+
+$member = $summary->next_member;
+is $member->desc, 'Archaea;Crenarchaeota;Miscellaneous';
+is $member->taxon->node_name, 'Miscellaneous';
+delta_ok $summary->get_count($member), 6;
+delta_ok $summary->get_rel_ab($member), 6;
 
 $member = $summary->next_member;
 is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingobium;Sphingomonas';
@@ -682,10 +681,16 @@ delta_ok $summary->get_count($member), 7;
 delta_ok $summary->get_rel_ab($member), 7;
 
 $member = $summary->next_member;
-is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
-is $member->taxon->node_name, 'Miscellaneous';
-delta_ok $summary->get_count($member), 19;
-delta_ok $summary->get_rel_ab($member), 19;
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas';
+is $member->taxon->node_name, 'Sphingomonas';
+delta_ok $summary->get_count($member), 6;
+delta_ok $summary->get_rel_ab($member), 6;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter';
+is $member->taxon->node_name, 'Flexibacter';
+delta_ok $summary->get_count($member), 1;
+delta_ok $summary->get_rel_ab($member), 1;
 
 is $summary->next_member, undef;
 
@@ -705,22 +710,16 @@ is scalar @$summaries, 1;
 $summary = $summaries->[0];
 
 $member = $summary->next_member;
-is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
-is $member->taxon->node_name, 'Chytridiomycota';
-delta_ok $summary->get_count($member), 7;
-delta_ok $summary->get_rel_ab($member), 7;
-
-$member = $summary->next_member;
 is $member->desc, 'Other <= 6 %';
 is $member->taxon, undef;
 delta_ok $summary->get_count($member), 8;
 delta_ok $summary->get_rel_ab($member), 8;
 
 $member = $summary->next_member;
-is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
-is $member->taxon->node_name, 'Rhodocyclaceae';
-delta_ok $summary->get_count($member), 44;
-delta_ok $summary->get_rel_ab($member), 44;
+is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;';
+is $member->taxon->node_name, '';
+delta_ok $summary->get_count($member), 9;
+delta_ok $summary->get_rel_ab($member), 9;
 
 $member = $summary->next_member;
 is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae';
@@ -729,16 +728,22 @@ delta_ok $summary->get_count($member), 13;
 delta_ok $summary->get_rel_ab($member), 13;
 
 $member = $summary->next_member;
+is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
+is $member->taxon->node_name, 'Chytridiomycota';
+delta_ok $summary->get_count($member), 7;
+delta_ok $summary->get_rel_ab($member), 7;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
+is $member->taxon->node_name, 'Rhodocyclaceae';
+delta_ok $summary->get_count($member), 44;
+delta_ok $summary->get_rel_ab($member), 44;
+
+$member = $summary->next_member;
 is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
 is $member->taxon->node_name, 'Miscellaneous';
 delta_ok $summary->get_count($member), 19;
 delta_ok $summary->get_rel_ab($member), 19;
-
-$member = $summary->next_member;
-is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;';
-is $member->taxon->node_name, '';
-delta_ok $summary->get_count($member), 9;
-delta_ok $summary->get_rel_ab($member), 9;
 
 is $summary->next_member, undef;
 
