@@ -233,10 +233,10 @@ method guess {
 
    # Read lines and try to attribute format
    my %test_formats = %formats;
+   my %ok_formats;
    my $line_num  = 0;
    my $prev_line = '';
    while (1) {
-      $format = undef;
 
       # Read next line. Exit if no lines left
       $line_num++;
@@ -251,38 +251,22 @@ method guess {
       # Skip white and empty lines.      
       next if $line =~ /^\s*$/;
 
-      # Try every possible format
-      my $matches = 0;
+      # Try all formats remaining
+      %ok_formats = ();
       my ($test_format, $test_function);
-
-      ####
-      print "line $line_num:";
-      ####
-
       while ( ($test_format, $test_function) = each (%test_formats) ) {
          if ( &$test_function($line, $line_num, $prev_line) ) {
             # Line matches this format
-
-            ####
-            print " $test_format";
-            ####
-
-            $matches++;
-            $format = $test_format;
+            $ok_formats{$test_format} = undef;
          } else {
             # Do not try to match this format with upcoming lines
             delete $test_formats{$test_format};
          }
       }
-
       $prev_line = $line;
 
-      ####
-      print "\n";
-      ####
-
       # Exit if there was a match to only one format
-      if ($matches == 1) {
+      if (scalar keys %ok_formats == 1) {
          last;
       }
 
@@ -291,6 +275,19 @@ method guess {
          last;
       }
 
+   }
+
+   # If several formats matched. Assume 'generic' if possible, undef otherwise
+   if (scalar keys %ok_formats > 1) {
+      for my $ok_format (keys %ok_formats) {
+         if (not $ok_format eq 'generic') {
+            delete $ok_formats{$ok_format};
+         }
+      }
+   }
+
+   if (scalar keys %ok_formats == 1) {
+      $format = (keys %ok_formats)[0];
    }
 
    # Cleanup
@@ -343,29 +340,11 @@ sub _possibly_generic {
    if (scalar @fields >= 2) {
       if ($line_num == 1) {
         $ok = 1 if $line !~ m/^#/; #### don't like this... too restrictive
+        #$ok = 1;
       } else {
         $ok = 1 if $line !~ m/^#/;
       }
    }
-
-#   if (scalar @fields >= 2) {
-#      if ($line_num == 1) {
-#         $ok = 1;
-#         ###$ok = 1 if $line !~ m/^#/; #### too restrictive...
-#      } else {
-#         if ($line !~ m/^#/) {
-#            $ok = 1;
-#            for my $i (1 .. scalar @fields - 1) {
-#               my $val = $fields[$i]; # value of 2nd col, 3rd col, ...
-#               if ($val !~ m/$RE{num}{real}/) {
-#                  $ok = 0;
-#                  last;
-#               }
-#            }
-#         }
-#      }      
-#   }
-
    if ($ok && $prev_line) {
       my @prev_fields = split /\t/, $prev_line;
       if ($prev_fields[0] eq $fields[0]) {
@@ -373,7 +352,6 @@ sub _possibly_generic {
          $ok = 0;
       }
    }
-
    return $ok;
 }
 
@@ -463,7 +441,6 @@ sub _possibly_qiime {
          }
       }
    }
-
    return $ok;
 }
 
