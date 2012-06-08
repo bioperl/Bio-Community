@@ -232,6 +232,7 @@ method guess {
    }
 
    # Read lines and try to attribute format
+   my %test_formats = %formats;
    my $line_num  = 0;
    my $prev_line = '';
    while (1) {
@@ -258,7 +259,7 @@ method guess {
       print "line $line_num:";
       ####
 
-      while ( ($test_format, $test_function) = each (%formats) ) {
+      while ( ($test_format, $test_function) = each (%test_formats) ) {
          if ( &$test_function($line, $line_num, $prev_line) ) {
             # Line matches this format
 
@@ -268,10 +269,9 @@ method guess {
 
             $matches++;
             $format = $test_format;
-
          } else {
-            # Exclude this format for future lines
-            delete $formats{$test_format};
+            # Do not try to match this format with upcoming lines
+            delete $test_formats{$test_format};
          }
       }
 
