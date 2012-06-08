@@ -321,7 +321,6 @@ method write_member (Bio::Community::Member $member, Count $count) {
       # Unifrac format, but this is safer this way.
       $self->_insert_line($line+1, $values);
       while (my ($memdesc, $memline) = each %$desc2line) {
-         #print "   desc $memdesc"; ###
          if ($memline >= $line) {
             # Increment line numbers
             $desc2line->{$memdesc}++;

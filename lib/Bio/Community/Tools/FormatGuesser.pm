@@ -132,6 +132,7 @@ extends 'Bio::Root::Root';
 my %formats = (
    biom    => \&_possibly_biom    ,
    gaas    => \&_possibly_gaas    ,
+   unifrac => \&_possibly_unifrac ,
    generic => \&_possibly_generic ,
    qiime   => \&_possibly_qiime   ,
 
@@ -231,7 +232,8 @@ method guess {
    }
 
    # Read lines and try to attribute format
-   my $line_num = 0;
+   my $line_num  = 0;
+   my $prev_line = '';
    while (1) {
       $format = undef;
 
@@ -251,15 +253,41 @@ method guess {
       # Try every possible format
       my $matches = 0;
       my ($test_format, $test_function);
+
+      ####
+      print "line $line_num:";
+      ####
+
       while ( ($test_format, $test_function) = each (%formats) ) {
-         if ( &$test_function($line, $line_num) ) {
+         if ( &$test_function($line, $line_num, $prev_line) ) {
+            # Line matches this format
+
+            ####
+            print " $test_format";
+            ####
+
             $matches++;
             $format = $test_format;
+
+         } else {
+            # Exclude this format for future lines
+            delete $formats{$test_format};
          }
       }
 
+      $prev_line = $line;
+
+      ####
+      print "\n";
+      ####
+
       # Exit if there was a match to only one format
       if ($matches == 1) {
+         last;
+      }
+
+      # Give up after having tested 100 lines
+      if ($line_num >= 100) {
          last;
       }
 
@@ -282,7 +310,7 @@ method guess {
 
 
 sub _possibly_biom {
-   my ($line, $line_num) = @_;
+   my ($line, $line_num, $prev_line) = @_;
    # Example:
    # {
    #  "id":null,
@@ -305,7 +333,7 @@ sub _possibly_biom {
 
 
 sub _possibly_generic {
-   my ($line, $line_num) = @_;
+   my ($line, $line_num, $prev_line) = @_;
    # Example:
    # Species	gut	soda lake
    # Streptococcus	241	334
@@ -319,23 +347,87 @@ sub _possibly_generic {
         $ok = 1 if $line !~ m/^#/;
       }
    }
+
+#   if (scalar @fields >= 2) {
+#      if ($line_num == 1) {
+#         $ok = 1;
+#         ###$ok = 1 if $line !~ m/^#/; #### too restrictive...
+#      } else {
+#         if ($line !~ m/^#/) {
+#            $ok = 1;
+#            for my $i (1 .. scalar @fields - 1) {
+#               my $val = $fields[$i]; # value of 2nd col, 3rd col, ...
+#               if ($val !~ m/$RE{num}{real}/) {
+#                  $ok = 0;
+#                  last;
+#               }
+#            }
+#         }
+#      }      
+#   }
+
+   if ($ok && $prev_line) {
+      my @prev_fields = split /\t/, $prev_line;
+      if ($prev_fields[0] eq $fields[0]) {
+         # Same have same species or OTU on previous line
+         $ok = 0;
+      }
+   }
+
    return $ok;
 }
 
 
 sub _possibly_gaas {
-   my ($line, $line_num) = @_;
+   my ($line, $line_num, $prev_line) = @_;
    # Example:
-   # # tax_name	tax_id	rel_abund
-   # Streptococcus pyogenes phage 315.1	198538	0.791035649011735
-   # ...
+   #    # tax_name	tax_id	rel_abund
+   #    Streptococcus pyogenes phage 315.1	198538	0.791035649011735
+   # or:
+   #    # sequence_name	sequence_id	relative_abundance_%
+   #    Milk vetch dwarf virus segment 9, complete sequence	gi|20177473|ref|NC_003646.1|	42.6354640657824	
+   # First field contains string, second field an ID, third field a float.
    my $ok = 0;
    my @fields = split /\t/, $line;
    if (scalar @fields == 3) {
       if ($line_num == 1) {
-        $ok = 1 if $line =~ m/^#/; ### second string is an integer third a float
+        $ok = 1 if $line =~ m/^#\s*(seq*_name|tax*_name)/;
       } else {
         $ok = 1 if $line !~ m/^#/;
+      }
+   }
+   if ($ok && $prev_line) {
+      my @prev_fields = split /\t/, $prev_line;
+      if ($prev_fields[0] eq $fields[0]) {
+         # Cannot have same species name on previous line
+         $ok = 0;
+      }
+      if ($prev_fields[1] eq $fields[1]) {
+         # Cannot have same species ID on previous line
+         $ok = 0;
+      }
+   }
+   return $ok;
+}
+
+
+sub _possibly_unifrac {
+   my ($line, $line_num, $prev_line) = @_;
+   # Example:
+   #    Sequence.1	Sample.1	1
+   # or:
+   #    Sequence.1	Sample.1
+   # There are no headers. Two first fields contain strings. Optional third
+   # field contains numbers. 
+   my $ok = 0;
+   my @fields = split /\t/, $line;
+   if ($line =~ m/^#/) {
+      $ok = 0;
+   } else {
+      if (scalar @fields == 2) {
+         $ok = 1;
+      } elsif (scalar @fields == 3) {
+         $ok = 1;
       }
    }
    return $ok;
@@ -343,7 +435,7 @@ sub _possibly_gaas {
 
 
 sub _possibly_qiime {
-   my ($line, $line_num) = @_;
+   my ($line, $line_num, $prev_line) = @_;
    # Example:
    # # QIIME v1.3.0 OTU table
    # #OTU ID	20100302	20100304	20100823
@@ -363,7 +455,15 @@ sub _possibly_qiime {
             $ok = 1;
          }
       }
+      if ($ok && $prev_line) {
+         my @prev_fields = split /\t/, $prev_line;
+         if ($prev_fields[0] eq $fields[0]) {
+            # Cannot have same OTU ID on previous line
+            $ok = 0;
+         }
+      }
    }
+
    return $ok;
 }
 
