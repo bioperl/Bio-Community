@@ -41,9 +41,9 @@ See L<Bio::Community::Tools::CountNormalizer> for more information.
 
 =item -if <input_files>... | -input_files <input_files>...
 
-Input file containing the communities to bootstrap. When using a file format
-that supports only one community per file (e.g. gaas), you can provide multiple
-input files.
+Input file containing the communities to bootstrap. When providing communities
+in a format that supports only one community per file (e.g. gaas), you can
+provide multiple input files.
 
 =for Euclid:
    input_files.type: readable
