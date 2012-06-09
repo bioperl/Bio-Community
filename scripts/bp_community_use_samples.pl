@@ -54,8 +54,7 @@ provide multiple input files.
 
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
-Path and prefix for the output files. Several output files will be created if
-the requested output format can only hold a single community. Default: output_prefix.default
+Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
