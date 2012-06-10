@@ -21,7 +21,8 @@ Bio::Community::IO::unifrac - Driver to read and write files in the unifrac form
 
 This Bio::Community::IO driver reads and writes files in the Unifrac format, as
 defined at L<http://bmf2.colorado.edu/fastunifrac/help.psp#sample_id_mapping_file>.
-Multiple communities can be written to generate a Unifrac format (tab-delimited).
+Spaces are not supported in community name or member description. Multiple
+communities can be written to generate a Unifrac format (tab-delimited).
 Example:
 
   Sequence.1	Sample.1	1
@@ -52,7 +53,8 @@ Note that member counts (the third column) is optional. Example:
 In this case the data is to be interpreted as presence/absence data. When
 reading a Unifrac file without counts, all members are given a count of 1.
 Conversely, when writing a Unifrac file, if all members have a count of 1, then
-the third column is not written.
+the third column is not written. Also, when writing Unifrac files, any spaces in 
+ommunity member name or member description is replaced by an underscore.
 
 =head1 CONSTRUCTOR
 
@@ -295,6 +297,8 @@ method _next_community_finish {
 method write_member (Bio::Community::Member $member, Count $count) {
 
    my $desc = $member->desc;
+   $desc =~ s/ /_/g;
+
    my $desc2line = $self->_desc2line;
    my $line = $desc2line->{$desc};
 
@@ -340,7 +344,10 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 
 method _write_community_init (Bio::Community $community) {
-   $self->_current_name( $community->name );
+   my $name = $community->name;
+   # Replace spaces by underscores
+   $name =~ s/ /_/g;
+   $self->_current_name( $name );
    return 1;
 }
 

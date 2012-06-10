@@ -47,7 +47,7 @@ is $community->name, 'Sample.2';
 ok $community2 = $in->next_community;
 isa_ok $community2, 'Bio::Community';
 is $community2->get_richness, 2;
-is $community2->name, 'Sample.3';
+is $community2->name, 'Sample 3';
 
 ok $community3 = $in->next_community;
 isa_ok $community3, 'Bio::Community';
@@ -96,7 +96,7 @@ is $member->desc, 'Sequence.5';
 delta_ok $community3->get_count($member), 4;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.3';
+is $member->desc, 'Sequence 3';
 delta_ok $community3->get_count($member), 2;
 is $community3->next_member, undef;
 
@@ -104,10 +104,6 @@ is $community3->next_member, undef;
 # Write Unifrac quantitative format
 
 $output_file = test_output_file();
-
-####
-$output_file = 'test.unifrac';
-####
 
 ok $out = Bio::Community::IO->new(
    -file   => '>'.$output_file,
@@ -124,36 +120,38 @@ ok $in = Bio::Community::IO->new(
 ), 'Re-read Unifrac quantitative format';
 
 ok $community = $in->next_community;
-
+is $community->name, 'Sample_3'; # space replaced by underscore
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.6';
 delta_ok $community->get_count($member), 1;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.4';
-delta_ok $community->get_count($member), 8;
-ok $member = $community->next_member;
-isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.1';
-delta_ok $community->get_count($member), 2;
+delta_ok $community->get_count($member), 1;
 is $community->next_member, undef;
 
 ok $community2 = $in->next_community;
+is $community2->name, 'Sample.2';
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.6';
 delta_ok $community2->get_count($member), 1;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.4';
+delta_ok $community2->get_count($member), 8;
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.1';
-delta_ok $community2->get_count($member), 1;
+delta_ok $community2->get_count($member), 2;
 is $community2->next_member, undef;
 
 ok $community3 = $in->next_community;
+is $community3->name, 'Sample.1';
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.3';
+is $member->desc, 'Sequence_3'; # space replaced by underscore
 delta_ok $community3->get_count($member), 2;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
@@ -242,10 +240,6 @@ is $community3->next_member, undef;
 
 $output_file = test_output_file();
 
-####
-$output_file = 'test2.unifrac';
-####
-
 ok $out = Bio::Community::IO->new(
    -file   => '>'.$output_file,
    -format => 'unifrac',
@@ -304,7 +298,6 @@ is $community3->next_member, undef;
 is $in->next_community, undef;
 
 $in->close;
-
 
 
 # Read Unifrac quantitative format (with some missing values)
