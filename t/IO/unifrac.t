@@ -120,38 +120,38 @@ ok $in = Bio::Community::IO->new(
 ), 'Re-read Unifrac quantitative format';
 
 ok $community = $in->next_community;
-is $community->name, 'Sample_3'; # space replaced by underscore
+is $community->name, 'Sample.2';
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.6';
 delta_ok $community->get_count($member), 1;
 ok $member = $community->next_member;
 isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.4';
+delta_ok $community->get_count($member), 8;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.1';
-delta_ok $community->get_count($member), 1;
+delta_ok $community->get_count($member), 2;
 is $community->next_member, undef;
 
 ok $community2 = $in->next_community;
-is $community2->name, 'Sample.2';
+is $community2->name, 'Sample.3'; # space replaced by dot
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.6';
 delta_ok $community2->get_count($member), 1;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.4';
-delta_ok $community2->get_count($member), 8;
-ok $member = $community2->next_member;
-isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.1';
-delta_ok $community2->get_count($member), 2;
+delta_ok $community2->get_count($member), 1;
 is $community2->next_member, undef;
 
 ok $community3 = $in->next_community;
 is $community3->name, 'Sample.1';
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence_3'; # space replaced by underscore
+is $member->desc, 'Sequence.3'; # space replaced by underscore
 delta_ok $community3->get_count($member), 2;
 ok $member = $community3->next_member;
 isa_ok $member, 'Bio::Community::Member';
