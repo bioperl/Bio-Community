@@ -151,45 +151,50 @@ has type => (
 
 =head2 get_distance
 
- Function: Calculate the distance between the communities based on the relative
-           abundance of the members.
+ Function: Calculate the distance or beta-diversity between the provided
+           communities. The distance is calculated based on the relative
+           abundance of the members (not their counts).
  Usage   : my $distance = $ruler->get_distance;
- Args    : none
- Returns : a number for the distance
+ Args    : None
+ Returns : A number for the distance
 
 =cut
 
 ####after new => sub { # prevents inlining
 #### or maybe try BUILD
 method get_distance {
-   my $dist;
-   my $type = $self->type;
-   if ($type eq '1-norm') {
-      $dist = $self->_pnorm(1);
-   } elsif ( ($type eq '2-norm') || ($type eq 'euclidean') ) {
-      $dist = $self->_pnorm(2);
-   } elsif ($type eq 'infinity-norm') {
-      $dist = $self->_infnorm();
-   } elsif ($type eq 'hellinger') {
-      $dist = $self->_hellinger();
-   } elsif ($type eq 'bray-curtis') {
-      $dist = $self->_braycurtis();
-   } elsif ($type eq 'unifrac') {
-      $dist = $self->_unifrac();
-   } else {
-      $self->throw("Invalid distance type '$type'");
-   }
-   return $dist;
+   my $communities = $self->communities;
+   return $self->_get_pairwise_distance($communities->[0], $communities->[1]);
 };
 
 
-method _pnorm ($power) {
+method _get_pairwise_distance ($community1, $community2) {
+   my $type = $self->type;
+   my $dist;
+   if ($type eq '1-norm') {
+      $dist = $self->_pnorm($community1, $community2, 1);
+   } elsif ( ($type eq '2-norm') || ($type eq 'euclidean') ) {
+      $dist = $self->_pnorm($community1, $community2, 2);
+   } elsif ($type eq 'infinity-norm') {
+      $dist = $self->_infnorm($community1, $community2);
+   } elsif ($type eq 'hellinger') {
+      $dist = $self->_hellinger($community1, $community2);
+   } elsif ($type eq 'bray-curtis') {
+      $dist = $self->_braycurtis($community1, $community2);
+   } elsif ($type eq 'unifrac') {
+      my $tree;
+      $dist = $self->_unifrac($community1, $community2, $tree);
+   } else {
+      $self->throw("Invalid distance type '$type'.");
+   }
+   return $dist;
+}
+
+
+method _pnorm ($community1, $community2, $power) {
    # Calculate the p-norm. If power is 1, this is the 1-norm. If power is 2,
    # this is the 2-norm (a.k.a. euclidean distance).
-   my $communities = $self->communities;
-   my $community1  = $communities->[0];
-   my $community2  = $communities->[1];
-   my $all_members = $community1->get_all_members($communities);
+   my $all_members = $community1->get_all_members($self->communities);
    my $sumdiff = 0;
    for my $member (@$all_members) {
       my $abundance1 = $community1->get_rel_ab($member) / 100;
@@ -201,12 +206,9 @@ method _pnorm ($power) {
 }
 
 
-method _infnorm () {
+method _infnorm ($community1, $community2) {
    # Calculate the infinity-norm.
-   my $communities = $self->communities;
-   my $community1  = $communities->[0];
-   my $community2  = $communities->[1];
-   my $all_members = $community1->get_all_members($communities);
+   my $all_members = $community1->get_all_members($self->communities);
    my $dist = 0;
    for my $member (@$all_members) {
       my $abundance1 = $community1->get_rel_ab($member) / 100;
@@ -220,13 +222,13 @@ method _infnorm () {
 }
 
 
-method _hellinger () {
+method _hellinger ($community1, $community2) {
    # Calculate the Hellinger distance.
-   return $self->_pnorm(2) / sqrt(2);
+   return $self->_pnorm($community1, $community2, 2) / sqrt(2);
 }
 
 
-method _braycurtis () {
+method _braycurtis ($community1, $community2) {
    # Calculate the Bray-Curtis dissimilarity index BC:
    #    BC = 1 - sum( min(r_i, r_j) )
    # where r_i and r_j are the relative abundance (fractional) for species in
@@ -234,10 +236,7 @@ method _braycurtis () {
    # Can also be written as:
    #    BC = sum( c_i - c_j ) / sum( c_i + c_j )
    # where c_i and c_j are the counts for all observed species.
-   my $communities = $self->communities;
-   my $community1  = $communities->[0];
-   my $community2  = $communities->[1];
-   my $all_members = $community1->get_all_members($communities);
+   my $all_members = $community1->get_all_members($self->communities);
    my $sumdiff = 0;
    for my $member (@$all_members) {
       my $abundance1 = $community1->get_rel_ab($member) / 100;
@@ -250,7 +249,7 @@ method _braycurtis () {
 }
 
 
-method _unifrac () {
+method _unifrac ($community1, $community2, $tree) {
    #### TODO: unifrac distance
    $self->throw_not_implemented;
 }
