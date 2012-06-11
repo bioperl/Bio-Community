@@ -213,7 +213,7 @@ method get_all_distances {
    my $num_communities = scalar @$communities;
    my $average = 0;
    my $num_pairs = 0;
-   my %distances;
+   my $distances;
    for my $i (0 .. $num_communities - 1) {
       my $community1 = $communities->[$i];
       my $name1 = $community1->name;
@@ -223,15 +223,15 @@ method get_all_distances {
          my $distance = $self->_get_pairwise_distance($community1, $community2);
          $num_pairs++;
          $average += $distance;
-         if (exists $distances{$name1}{$name2}) {
+         if (exists $distances->{$name1}->{$name2}) {
             $self->throw("There are several communities called '$name2'.");
          } else {
-            $distances{$name1}{$name2} = $distances{$name2}{$name1} = $distance;
+            $distances->{$name1}->{$name2} = $distances->{$name2}->{$name1} = $distance;
          }
       }
    }
-   $average /= $num_pairs if $num_pairs > 0;
-   return $average, \%distances;
+   $average = ($num_pairs > 0) ? ($average / $num_pairs) : undef;
+   return $average, $distances;
 }
 
 

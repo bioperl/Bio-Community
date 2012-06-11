@@ -128,6 +128,15 @@ delta_ok $distances->{$name3}->{$name2}, 0.4330127;
 delta_ok $average, 0.6005191;
 
 
+ok $ruler = Bio::Community::Tools::Ruler->new(
+   -communities => [],
+   -type => '1-norm',
+);
+ok( ($average, $distances) = $ruler->get_all_distances );
+is $average  , undef;
+is $distances, undef;
+
+
 done_testing();
 
 exit;
