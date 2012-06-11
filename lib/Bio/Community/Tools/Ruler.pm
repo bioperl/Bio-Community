@@ -191,6 +191,50 @@ method _get_pairwise_distance ($community1, $community2) {
 }
 
 
+=head2 get_all_distances
+
+ Function: Similar to get_distance(), but return the distance between all
+           possible pairs of input communities and also return their average
+           distance.
+ Usage   : my ($average, $distances) = $ruler->get_all_distances;
+ Args    : None
+ Returns : * A number for the average distance
+           * A hashref of hashref with the value of all pairwise distances,
+             keyed by the community names. To get the distance for a specific
+             pair of communities, do:
+                my $dist = $distances->{$name1}->{$name2};
+             or:
+                my $dist = $distances->{$name2}->{$name1};
+ 
+=cut
+
+method get_all_distances {
+   my $communities = $self->communities;
+   my $num_communities = scalar @$communities;
+   my $average = 0;
+   my $num_pairs = 0;
+   my %distances;
+   for my $i (0 .. $num_communities - 1) {
+      my $community1 = $communities->[$i];
+      my $name1 = $community1->name;
+      for my $j ($i + 1 .. $num_communities -1) {
+         my $community2 = $communities->[$j];
+         my $name2 = $community2->name;
+         my $distance = $self->_get_pairwise_distance($community1, $community2);
+         $num_pairs++;
+         $average += $distance;
+         if (exists $distances{$name1}{$name2}) {
+            $self->throw("There are several communities called '$name2'.");
+         } else {
+            $distances{$name1}{$name2} = $distances{$name2}{$name1} = $distance;
+         }
+      }
+   }
+   $average /= $num_pairs if $num_pairs > 0;
+   return $average, \%distances;
+}
+
+
 method _pnorm ($community1, $community2, $power) {
    # Calculate the p-norm. If power is 1, this is the 1-norm. If power is 2,
    # this is the 2-norm (a.k.a. euclidean distance).
