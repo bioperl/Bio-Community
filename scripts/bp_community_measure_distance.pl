@@ -38,6 +38,8 @@ L<Bio::Community::Tools::Ruler> for more details. Note that distances and beta-
 diversity metrics are based on relative abundances. Hence, any weight you
 provide will affect the results.
 
+### format of the output files
+
 =head1 REQUIRED ARGUMENTS
 
 =over
@@ -99,6 +101,16 @@ The type of distance or beta-diversity metric to calculate: 1-norm, euclidean
    dist_type.type: string
    dist_type.default: 'euclidean'
 
+=item -pf <pair_files>... | -pair_files <pair_files>...
+
+Input file specifying the pairs of communities for which to calculate the
+distance or beta-diversity. Each line of a file of pairs should have the name
+of two communities, separated by a tab. For each file of pairs, there will be a
+corresponding output file.
+
+=for Euclid:
+   pair_files.type: readable
+
 =back
 
 =head1 FEEDBACK
@@ -141,12 +153,13 @@ Email florent.angly@gmail.com
 
 
 calc_dist( $ARGV{'input_files'}  , $ARGV{'weight_files'}, $ARGV{'weight_assign'},
-           $ARGV{'output_prefix'}, $ARGV{'dist_type'} );
+           $ARGV{'output_prefix'}, $ARGV{'dist_type'}   , $ARGV{'pair_files'}    );
 exit;
 
 
 sub calc_dist {
-   my ($input_files, $weight_files, $weight_assign, $output_prefix, $dist_type) = @_;
+   my ($input_files, $weight_files, $weight_assign, $output_prefix, $dist_type,
+       $pair_files) = @_;
 
    # Read input communities
    my $communities = [];
@@ -166,22 +179,85 @@ sub calc_dist {
    }
 
    # Calculate distances
+   if ($pair_files) {
+      _process_specific_pairs($communities, $dist_type, $output_prefix, $pair_files);
+   } else {
+      _process_all_pairs($communities, $dist_type, $output_prefix);
+   }
+
+   return 1;
+}
+
+
+sub _process_specific_pairs {
+   my ($communities, $dist_type, $output_prefix, $pair_files) = @_;
+   $communities = { map { $_->name => $_ } @$communities };
+   my $i = 0;
+   for my $pair_file (@$pair_files) {
+      $i++;
+      print "Reading pair file $pair_file...\n";
+      my $pairs = _read_pair_file($pair_file);
+      my $out_file = $output_prefix.'_group'.$i.'.txt';
+      print "Writing distances to file $out_file\n";
+      open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
+      for my $pair (@$pairs) {
+         my $name1 = $pair->[0];
+         my $community1 = $communities->{$name1} or
+            die "Error: Community $name1 was not found in the provided community file";
+         my $name2 = $pair->[1];
+         my $community2 = $communities->{$name2} or
+            die "Error: Community $name2 was not found in the provided community file";
+         my $distance = Bio::Community::Tools::Ruler->new(
+            -communities => [ $community1, $community2 ],
+            -type        => $dist_type,
+         )->get_distance;
+         print $out $community1->name."\t".$community2->name."\t".$distance."\n";
+      }
+      close $out;
+   }
+   return 1;
+}
+
+
+sub _process_all_pairs {
+   my ($communities, $dist_type, $output_prefix) = @_;
+   # Calculate distances between all pairs of communities
    my $out_file = $output_prefix.'.txt';
    print "Writing distances to file $out_file\n";
    open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
    my $num_communities = scalar @$communities;
    for my $i (0 .. $num_communities - 1) {
-      my $community_1 = $communities->[$i];
+      my $community1 = $communities->[$i];
       for my $j ($i + 1 .. $num_communities -1) {
-         my $community_2 = $communities->[$j];
+         my $community2 = $communities->[$j];
          my $distance = Bio::Community::Tools::Ruler->new(
-            -communities => [$community_1, $community_2],
+            -communities => [$community1, $community2],
             -type        => $dist_type,
          )->get_distance;
-         print $out $community_1->name."\t".$community_2->name."\t".$distance."\n";
+         print $out $community1->name."\t".$community2->name."\t".$distance."\n";
       }
    }
    close $out;
-
    return 1;
+}
+
+
+sub _read_pair_file {
+   # Read a file of pairs and return an arrayref of all pairs found
+   my ($file) = @_;
+   my @pairs;
+   open my $in, '<', $file or die "Error: Could not read file $file\n$!\n";
+   while (my $line = <$in>) {
+      chomp $line;
+      next if $line =~ m/^#/;
+      next if $line =~ m/^\s*$/;
+      my @pair = split /\t/, $line;
+      if (scalar @pair != 2) {
+         warn "Line '$line' does not seem to specify a pair of communities. Skipping it\n";
+         next;
+      }
+      push @pairs, \@pair;
+   }
+   close $in;
+   return \@pairs;
 }
