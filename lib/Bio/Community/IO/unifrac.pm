@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Community::IO::unifrac - Driver to read and write files in the unifrac format
+Bio::Community::IO::unifrac - Driver to read and write files in the (Fast)Unifrac format
 
 =head1 SYNOPSIS
 
@@ -19,11 +19,15 @@ Bio::Community::IO::unifrac - Driver to read and write files in the unifrac form
 
 =head1 DESCRIPTION
 
-This Bio::Community::IO driver reads and writes files in the Unifrac format, as
-defined at L<http://bmf2.colorado.edu/fastunifrac/help.psp#sample_id_mapping_file>.
-Spaces are not supported in community name or member description. Multiple
-communities can be written to generate a Unifrac format (tab-delimited).
-Example:
+This Bio::Community::IO driver reads and writes Unifrac environment files and
+FastUnifrac sample ID mapping files, whose format is described at
+L<http://bmf2.colorado.edu/unifrac/help.psp#env_file> and
+L<http://bmf2.colorado.edu/fastunifrac/help.psp#sample_id_mapping_file>. In this
+tab-delimited format, the first column is a sequence ID, the second is the name
+of a community, and the optional third column contains the number of
+observations of this sequence in the community. Multiple communities can be
+written in a Unifrac formatted-file and spaces are not supported in community
+name or member description. Example:
 
   Sequence.1	Sample.1	1
   Sequence.1	Sample.2	2

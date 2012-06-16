@@ -20,7 +20,7 @@ Bio::Community - A biological community
   $community->add_member( $member2, 3 ); # add 3 of this member
 
   print "There are ".$community->get_total_count." members in the community\n";
-  print "The total diversity is ".$community->richness." species\n";
+  print "The total diversity is ".$community->get_richness." species\n";
 
   while (my $member = $community->next_member) {
      my $member_id     = $member->id;
