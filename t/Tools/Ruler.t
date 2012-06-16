@@ -31,6 +31,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 100;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, 0;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 0;
 
 
 # Communities with all members shared and 0% permuted
@@ -52,6 +53,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.3523077;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 100.00000;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, 0;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 0;
 
 
 # Communities with all members shared and 100% permuted
@@ -73,6 +75,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.3656410;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 100.00000;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, 100.00000;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 0.5000000;
 
 
 # Other communities with all members shared and 100% permuted
@@ -94,6 +97,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.3589744;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 100.00000;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, 100.00000;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 0.5000000;
 
 
 # Communities with all members shared and 66% permuted
@@ -115,6 +119,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.3589744;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 100.00000;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, 66.666667;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 0.3333333;
 
 
 # Equally rich communities with some shared members
@@ -136,6 +141,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.4292308;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 66.666666;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, 0;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 0.3333333;
 
 
 # Unequally rich communities with some shared members (0% permuted)
@@ -158,6 +164,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.5092308;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 66.666666;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, 0;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 0.3333333;
 
 
 # Other unequally rich communities with some shared members (90% permuted)
@@ -185,6 +192,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.7475860;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 80.000000;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, 90.000000;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 0.5600000;
 
 
 # Communities with no shared members
@@ -206,6 +214,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 1.0000000;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 0.0000000;
 is       Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, undef;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 1.0000000;
 
 
 # Maximum distance (no shared members)
@@ -223,6 +232,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 1.0000000;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 0.0000000;
 is       Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'permuted'      )->get_distance, undef;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'maxiphi'       )->get_distance, 1.0000000;
 
 
 # Distance between all pairs

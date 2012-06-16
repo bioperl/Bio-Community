@@ -143,7 +143,6 @@ has communities => (
                 with a permuted abundance rank in the second community. As a
                 special case, when no species are shared (and the percentage
                 permuted is meaningless), undef is returned.
-            * permuted:
             * maxiphi: a beta-diversity measure between 0 and 1, based on the 
                 percentage of species shared and the percentage of top species
                 permuted (that have had a change in abundance rank)
@@ -198,8 +197,8 @@ method _get_pairwise_distance ($community1, $community2) {
       $dist = $self->_shared($community1, $community2);
    } elsif ($type eq 'permuted') {
       $dist = $self->_permuted($community1, $community2);
-   #} elsif ($type eq 'maxiphi') {
-   #   $dist = $self->_maxiphi($community1, $community2);
+   } elsif ($type eq 'maxiphi') {
+      $dist = $self->_maxiphi($community1, $community2);
    } elsif ($type eq 'unifrac') {
       my $tree;
       $dist = $self->_unifrac($community1, $community2, $tree);
@@ -421,41 +420,37 @@ method _min_permuted ($community1, $community2) {
 }
 
 
-#method _maxiphi ($community1, $community2) {
-#   # Given S, the percent shared, and P, the percent permuted, calculate M, the
-#   # MaxiPhi beta diversity as:
-#   #       M = 1 - S*(2-P)/2
-#   #
-#   # M ranges from 0 (low beta diversity, similar communities), to 1 (high beta
-#   # diversity, dissimilar communities). The weight of the percent permuted parameter
-#   # is proportional to the percent shared. At 0% shared, the percent permuted has
-#   # no weight in the index, while at 100% shared, the percent permuted and percent
-#   # shared have the same weight.
-#   #
-#   # For example:
-#   #      for 100 % shared, 0   % permuted -> M = 0
-#   #      for 100 % shared, 100 % permuted -> M = 0.5
-#   #      for 0   % shared, 0   % permuted -> M = 1
-#   #      for 0   % shared, 100 % permuted -> M = 1
+method _maxiphi ($community1, $community2) {
+   # Given S, the fraction shared, and P, the fraction permuted, calculate the
+   # MaxiPhi beta diversity M as:
+   #       M = 1 - S*(2-P)/2
+   #
+   # M ranges from 0 (low beta diversity, similar communities), to 1 (high beta
+   # diversity, dissimilar communities). The weight of the percent permuted
+   # parameter is proportional to the percent shared. At 0% shared, the fraction
+   # permuted has no weight in the index, while at 100% shared, the fraction
+   # permuted and fraction shared have the same weight.
+   #
+   # For example:
+   #      for 100 % shared, 0   % permuted -> M = 0
+   #      for 100 % shared, 100 % permuted -> M = 0.5
+   #      for 0   % shared, 0   % permuted -> M = 1
+   #      for 0   % shared, 100 % permuted -> M = 1
 
-#   # Calculate the percentage shared (relative to the least rich community)
-#   my $s = $self->_shared($community1, $community2);
+   # Calculate the fraction shared
+   my $s = $self->_shared($community1, $community2) / 100;
 
-#   ####
-#   print "s: $s\n";
-#   ####
+   # Calculate the fraction permuted
+   my $p = $self->_permuted($community1, $community2);
+   if (not defined $p) {
+      $p = 100; # but any value between 0 and 100 would work as well
+   }
+   $p /= 100;
 
-#   # Calculate the percentage permuted
-#   my $p = $self->_permuted($community1, $community2) / min( $community1->get_richness, $community2->get_richness );
-
-#   ####
-#   print "p: $p\n";
-#   ####
-
-#   # Calculate the Maxiphi index
-#   my $m = 1 - $s * (2-$p) / 2;
-#   return $m;   
-#}
+   # Calculate the Maxiphi index
+   my $m = 1 - $s * (2-$p) / 2;
+   return $m;
+}
 
 
 method _unifrac ($community1, $community2, $tree) {
