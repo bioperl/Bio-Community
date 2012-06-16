@@ -30,6 +30,8 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'infinity-norm' )->get_distance, 0;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'hellinger'     )->get_distance, 0;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 100;
+
 
 # Communities with all members shared, but different relative abundances
 
@@ -48,9 +50,10 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'infinity-norm' )->get_distance, 0.358974358974359;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'hellinger'     )->get_distance, 0.3202563;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.3589744;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 100;
 
 
-# Communities with some shared members
+# Equally rich Communities with some shared members
 
 $community1 = Bio::Community->new( -name => 'sample1' );
 $community1->add_member( Bio::Community::Member->new(-id => 1), 10 );
@@ -67,6 +70,28 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'infinity-norm' )->get_distance, 0.692307692307692;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'hellinger'     )->get_distance, 0.5773503;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.6923077;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 66.66666666;
+
+
+# Unequally rich communities with some shared members
+
+$community1 = Bio::Community->new( -name => 'sample1' );
+$community1->add_member( Bio::Community::Member->new(-id => 1), 10 );
+$community1->add_member( Bio::Community::Member->new(-id => 2), 30 );
+$community1->add_member( Bio::Community::Member->new(-id => 3), 90 );
+
+$community2 = Bio::Community->new( -name => 'sample2' );
+$community2->add_member( Bio::Community::Member->new(-id => 1), 50 );
+$community2->add_member( Bio::Community::Member->new(-id => 2), 50 );
+$community2->add_member( Bio::Community::Member->new(-id => 4), 50 );
+$community2->add_member( Bio::Community::Member->new(-id => 5), 50 );
+
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => '2-norm'        )->get_distance, 0.7966275, 'Other communities with some shared members';
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => '1-norm'        )->get_distance, 1.38461538461538;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'infinity-norm' )->get_distance, 0.692307692307692;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'hellinger'     )->get_distance, 0.5633007;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 0.6923077;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 66.66666666;
 
 
 # Communities with no shared members
@@ -86,6 +111,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'infinity-norm' )->get_distance, 0.692307692307692;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'hellinger'     )->get_distance, 0.6602253;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 1.0000000;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 0;
 
 
 # Maximum distance
@@ -101,6 +127,7 @@ delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $commu
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'infinity-norm' )->get_distance, 1.0000000;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'hellinger'     )->get_distance, 1.0;
 delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'bray-curtis'   )->get_distance, 1.0;
+delta_ok Bio::Community::Tools::Ruler->new( -communities => [$community1, $community2], -type => 'shared'        )->get_distance, 0;
 
 
 # Distance between all pairs

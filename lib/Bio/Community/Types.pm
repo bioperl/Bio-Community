@@ -103,8 +103,8 @@ subtype 'AbundanceRank'
 # Type of distance: 1-norm, 2-norm, euclidean, p-norm, infinity-norm, unifrac
 subtype 'DistanceType'
    => as 'Str'
-   => where { $_ =~ m/^(1-norm|2-norm|euclidean|p-norm|infinity-norm|hellinger|bray-curtis|unifrac)$/ }
-   => message { "This only accepts '1-norm', '2-norm', 'euclidean', 'p-norm', 'infinity-norm' or 'unifrac', but got '$_'" };
+   => where { $_ =~ m/^(1-norm|2-norm|euclidean|p-norm|infinity-norm|hellinger|bray-curtis|shared|permuted|maxiphi|unifrac)$/ }
+   => message { "This only accepts '1-norm', '2-norm', 'euclidean', 'p-norm', 'infinity-norm', 'bray-curtis, 'shared', 'permuted', 'maxiphi' or 'unifrac', but got '$_'" };
 
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 subtype 'WeightAssignType'

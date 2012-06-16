@@ -100,7 +100,7 @@ use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
-use List::Util qw(min);
+use List::Util qw(min max);
 
 extends 'Bio::Root::Root';
 
@@ -134,6 +134,17 @@ has communities => (
             * hellinger: like the euclidean distance, but constrained between 0
                 and 1
             * bray-curtis: the Bray-Curtis dissimilarity index, between 0 and 1
+            * shared: percentage of species shared (between 0 and 100), relative
+                to the least rich community). Note: this is the opposite
+                of a beta-diversity measure: the higher the percent of 
+                species shared, the smaller the smaller the beta-diversity.
+            * permuted: a beta-diversity measure between 0 and 100, representing
+                the percentage of the dominant species in the first community
+                with a permuted abundance rank in the second community
+            * permuted:
+            * maxiphi: a beta-diversity measure between 0 and 1, based on the 
+                percentage of species shared and the percentage of top species
+                permuted (that have had a change in abundance rank)
 
  Returns : string for the desired type of distance
 
@@ -181,6 +192,12 @@ method _get_pairwise_distance ($community1, $community2) {
       $dist = $self->_hellinger($community1, $community2);
    } elsif ($type eq 'bray-curtis') {
       $dist = $self->_braycurtis($community1, $community2);
+   } elsif ($type eq 'shared') {
+      $dist = $self->_shared($community1, $community2);
+   #} elsif ($type eq 'permuted') {
+   #   $dist = $self->_permuted($community1, $community2);
+   #} elsif ($type eq 'maxiphi') {
+   #   $dist = $self->_maxiphi($community1, $community2);
    } elsif ($type eq 'unifrac') {
       my $tree;
       $dist = $self->_unifrac($community1, $community2, $tree);
@@ -290,6 +307,21 @@ method _braycurtis ($community1, $community2) {
       $sumdiff += min($abundance1, $abundance2);
    }
    return 1 - $sumdiff;
+}
+
+
+method _shared ($community1, $community2) {
+   # Fraction of species in common between two communities, relative to the
+   # least rich community.
+   my $all_members = $community1->get_all_members($self->communities);
+   my $num_shared = 0;
+   for my $member (@$all_members) {
+      if ( ($community1->get_rel_ab($member) > 0) &&
+           ($community2->get_rel_ab($member) > 0) ) {
+         $num_shared++;
+      }
+   }
+   return $num_shared / min($community1->get_richness,$community2->get_richness) * 100;
 }
 
 
