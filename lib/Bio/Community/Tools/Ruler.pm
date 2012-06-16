@@ -140,7 +140,9 @@ has communities => (
                 species shared, the smaller the smaller the beta-diversity.
             * permuted: a beta-diversity measure between 0 and 100, representing
                 the percentage of the dominant species in the first community
-                with a permuted abundance rank in the second community
+                with a permuted abundance rank in the second community. As a
+                special case, when no species are shared (and the percentage
+                permuted is meaningless), undef is returned.
             * permuted:
             * maxiphi: a beta-diversity measure between 0 and 1, based on the 
                 percentage of species shared and the percentage of top species
@@ -194,8 +196,8 @@ method _get_pairwise_distance ($community1, $community2) {
       $dist = $self->_braycurtis($community1, $community2);
    } elsif ($type eq 'shared') {
       $dist = $self->_shared($community1, $community2);
-   #} elsif ($type eq 'permuted') {
-   #   $dist = $self->_permuted($community1, $community2);
+   } elsif ($type eq 'permuted') {
+      $dist = $self->_permuted($community1, $community2);
    #} elsif ($type eq 'maxiphi') {
    #   $dist = $self->_maxiphi($community1, $community2);
    } elsif ($type eq 'unifrac') {
@@ -311,7 +313,7 @@ method _braycurtis ($community1, $community2) {
 
 
 method _shared ($community1, $community2) {
-   # Fraction of species in common between two communities, relative to the
+   # Percentage of species in common between two communities, relative to the
    # least rich community.
    my $all_members = $community1->get_all_members($self->communities);
    my $num_shared = 0;
@@ -323,6 +325,137 @@ method _shared ($community1, $community2) {
    }
    return $num_shared / min($community1->get_richness,$community2->get_richness) * 100;
 }
+
+
+method _permuted ($community1, $community2) {
+   # Percent of top species with a permuted rank-abundance between 2 communities.
+   # The exact number cannot be calculated for certain because the random
+   # permutation of x species could generate the same sequence (but it would be
+   # extremely unlikely). The best we can do is calculate a minimum bound for
+   # the number of species permuted. Do this once for the species of community1
+   # once, and then for the members of community2 and return the average of the
+   # two.This should be a reasonable approximation of the true percent of
+   # species permuted.
+
+
+   #### should it really be the average or simply relative to the least rich community
+
+
+   my $min_p1 = $self->_min_permuted($community1, $community2);
+   my $min_p2 = $self->_min_permuted($community2, $community1);
+   my $p;
+   if ( (defined $min_p1) && defined($min_p2) ) {
+      $p = ($min_p1 + $min_p2) / 2;
+   }
+
+   ####
+   print "min_p1: '".(defined($min_p1)?$min_p1:'')."'\n";
+   print "min_p2: '".(defined($min_p2)?$min_p2:'')."'\n";
+   print "p     : '".(defined($p)?$p:'')." %'\n";
+   ####
+
+   return $p;
+}
+
+
+method _min_permuted ($community1, $community2) {
+   # Estimate the minimum percent of permuted species in community1. Do this by
+   # going through members of community2 in increasing abundance rank order and
+   # comparing their position to that of the same member in community1 (if
+   # shared). If there are no species shared, return undef.
+
+   my $min_permuted;
+
+   my $i = 0;
+   my $richness = $community2->get_richness;
+   while ($i < $richness) {
+      $i++;
+
+      ####
+      #print "i $i\n";
+      ####
+       
+      my $member = $community2->get_member_by_rank($i);
+
+      # Skip this member if it is not shared
+      next if not $community1->get_rel_ab($member);
+         
+      my $j = $community1->get_rank($member);
+
+      ####
+      #print "   j $j\n";
+      ####
+
+      # Record the first mapping as the min permuted
+      if (not defined $min_permuted) {
+         $min_permuted = $j;
+      }
+
+      if ($j > $min_permuted) {
+         # Member rank in second community conflicts with minimum permutation
+         # assumption. Increase minimum permutation.
+         $min_permuted = $j;
+
+         ####
+         #print "Updated min_permuted: $min_permuted\n";
+         ####
+      }
+
+      # Finish if the permutation limit has been reached without conflicts
+      last if $i >= $min_permuted;
+
+   }
+
+   if (defined $min_permuted) {
+      if ($min_permuted == 1) {
+         $min_permuted--;
+      }
+      $min_permuted = $min_permuted / $community1->get_richness * 100;
+   }
+
+   ####
+   #print "Return min_permuted: '".(defined($min_permuted)?$min_permuted:'')."'\n";
+   ####    
+
+   return $min_permuted;
+}
+
+
+#method _maxiphi ($community1, $community2) {
+#   # Given S, the percent shared, and P, the percent permuted, calculate M, the
+#   # MaxiPhi beta diversity as:
+#   #       M = 1 - S*(2-P)/2
+#   #
+#   # M ranges from 0 (low beta diversity, similar communities), to 1 (high beta
+#   # diversity, dissimilar communities). The weight of the percent permuted parameter
+#   # is proportional to the percent shared. At 0% shared, the percent permuted has
+#   # no weight in the index, while at 100% shared, the percent permuted and percent
+#   # shared have the same weight.
+#   #
+#   # For example:
+#   #      for 100 % shared, 0   % permuted -> M = 0
+#   #      for 100 % shared, 100 % permuted -> M = 0.5
+#   #      for 0   % shared, 0   % permuted -> M = 1
+#   #      for 0   % shared, 100 % permuted -> M = 1
+
+#   # Calculate the percentage shared (relative to the least rich community)
+#   my $s = $self->_shared($community1, $community2);
+
+#   ####
+#   print "s: $s\n";
+#   ####
+
+#   # Calculate the percentage permuted
+#   my $p = $self->_permuted($community1, $community2) / min( $community1->get_richness, $community2->get_richness );
+
+#   ####
+#   print "p: $p\n";
+#   ####
+
+#   # Calculate the Maxiphi index
+#   my $m = 1 - $s * (2-$p) / 2;
+#   return $m;   
+#}
 
 
 method _unifrac ($community1, $community2, $tree) {
