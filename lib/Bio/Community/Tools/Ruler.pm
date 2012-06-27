@@ -24,17 +24,19 @@ Bio::Community::Tools::Ruler - Beta-diversity and distance separating communitie
 =head1 DESCRIPTION
 
 Calculate the distance between two communities. The more different communities
-are, the larger the distance between them. Thus, these distance metrics can also
-be considered a measure of beta-diversity.
+are, the larger the distance between them. Thus, these distance metrics a form
+of beta-diversity metric.
 
 Several types of distance are available: 1-norm, 2-norm (euclidean), and
 infinity-norm. They consider the communities as a n-dimensional space, where n
-is the total number of unique community members across the communities.
+is the total number of unique members across the communities.
 
-Note that the distances are based on the relative abundance (as a fractional
-number between 0 and 1, not as a percentage) and is hence affected by weights
-assigned to the community members. See the get_rel_ab() method in
-L<Bio::Community>.
+Since the relative abundance of community members is not always proportional to
+member counts (see weights() in Bio::Community::Member and use_weights() in
+Bio::Community), the distances measured here are always based on relative
+abundance (as a fractional number between 0 and 1, not as a percentage), even
+for beta-diversity metrics that are usually based on number of observations
+(counts).
 
 =head1 FEEDBACK
 

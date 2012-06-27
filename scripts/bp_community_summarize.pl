@@ -69,12 +69,16 @@ weight is not specified in the weight file (default: weight_assign.default):
 
 * $num : assign to the member the arbitrary weight $num provided
 
-* average : assign to the member the average weight in this file.
+* file_average : assign to the member the average weight in this file.
+
+* community_average : assign to the member the average weight in this community.
 
 * ancestor: go up the taxonomic lineage of the member and assign to it the weight
 of the first ancestor that has a weight in the weights file. Fall back to the
-'average' method if no taxonomic information is available for this member
-(for example a member with no BLAST hit).
+'community_average' method if no taxonomic information is available for this
+member (for example a member with no BLAST hit).
+
+See the weight_assign() method in Bio::Community::IO for more details.
 
 =for Euclid:
    weight_assign.type: string
