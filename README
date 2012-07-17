@@ -1,8 +1,8 @@
 Bio-Community version 0.01
 ==========================
 
-THIS MODULE IS IN EARLY DEVELOPMENT STAGE! VERY LITTLE IS USEABLE RIGHT NOW AND
-IT IS PROBABLY BUG-RIDDEN!
+THIS MODULE IS IN EARLY DEVELOPMENT STAGE! WHILE IT CURRENTLY PROVIDES USEFUL
+OPERATIONS, THE INTERFACE MAY UNDERGO CHANGES TO IMPROVE THE MODULES.
 
 Bio::Community is a set of BioPerl modules to represent and manipulate communities
 of biological organisms.
@@ -22,7 +22,7 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  BioPerl version > 1.006902 (as of May 2012, this means an unreleased development version)
+  BioPerl version > 1.006901 (as of May 2012, this means an unreleased development version)
   Method::Signatures
   Moose
   Moose::Util::TypeConstraints
