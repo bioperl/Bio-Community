@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bp_community_measure_distance
+# BioPerl script bc_measure_distance
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -18,16 +18,13 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bp_community_measure_distance - Measure the distance or beta-diversity between communities
+bc_measure_distance - Measure the distance or beta-diversity between communities
 
 =head1 SYNOPSIS
 
-  bp_community_measure_distance -input_files   communities.generic      \
-                                -dist_type     'hellinger'              \
-                              ### pair_file  : a file containing the pairs of sample
-                              ###    to calculate (output_type cannot be matrix)        \
-                              ### ouput_type : either matrix format or pairwise format
-                                -output_prefix community_distance
+  bc_measure_distance -input_files   communities.generic      \
+                      -dist_type     'hellinger'              \
+                      -output_prefix community_distance
 
 =head1 DESCRIPTION
 
@@ -38,7 +35,9 @@ L<Bio::Community::Tools::Ruler> for more details. Note that distances and beta-
 diversity metrics are based on relative abundances. Hence, any weight you
 provide will affect the results.
 
-### format of the output files
+The output files are in tab-delimited format and the column represent the name
+of first community, of the second community, and the distance that separates
+them.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -90,7 +89,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bp_community_measure_distance'
+   output_prefix.default: 'bc_distance'
 
 =item -dt <dist_type> | -dist_type <dist_type>
 
@@ -155,6 +154,9 @@ Email florent.angly@gmail.com
 calc_dist( $ARGV{'input_files'}  , $ARGV{'weight_files'}, $ARGV{'weight_assign'},
            $ARGV{'output_prefix'}, $ARGV{'dist_type'}   , $ARGV{'pair_files'}    );
 exit;
+
+
+# TODO: implement option for matrix output
 
 
 sub calc_dist {

@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bp_community_use_samples
+# BioPerl script bc_manage_samples
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -18,15 +18,15 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bp_community_use_samples - Include, delete or merge samples
+bc_manage_samples - Include, delete or merge samples
 
 =head1 SYNOPSIS
 
-  bp_community_use_samples -input_files   communities.generic              \
-                           -exclude_names community1                       \
-                           -merge_names   community2 community5            \
-                           -merge_names   community7 community8 community9 \
-                           -output_prefix processed_communities
+  bc_manage_samples -input_files   communities.generic              \
+                    -exclude_names community1                       \
+                    -merge_names   community2 community5            \
+                    -merge_names   community7 community8 community9 \
+                    -output_prefix processed_communities
 
 =head1 DESCRIPTION
 
@@ -58,7 +58,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bp_community_use_samples'
+   output_prefix.default: 'bc_manage_samples'
 
 =item -in <include_names>... | -include_names <include_names>...
 

@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bp_community_summarize
+# BioPerl script bc_clean_shrapnel
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -18,14 +18,14 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bp_community_clean_shrapnel - Remove low-count, low-abundance community members
+bc_clean_shrapnel - Remove low-count, low-prevalence community members
 
 =head1 SYNOPSIS
 
-  bp_community_clean_shrapnel -input_files          communities.generic         \
-                              -count_threshold      1                           \
-                              -prevalence_threshold 1                           \
-                              -output_prefix        cleaned_communities.generic
+  bc_clean_shrapnel -input_files          communities.generic         \
+                    -count_threshold      1                           \
+                    -prevalence_threshold 1                           \
+                    -output_prefix        cleaned_communities.generic
 
 =head1 DESCRIPTION
 
@@ -83,7 +83,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bp_community_clean_shrapnel'
+   output_prefix.default: 'bc_clean_shrapnel'
 
 =back
 

@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bp_community_summarize
+# BioPerl script bc_summarize
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -19,11 +19,11 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bp_community_summarize - Summarize community composition
+bc_summarize - Summarize community composition
 
 =head1 SYNOPSIS
 
-  bp_community_summarize -input_files   my_communities.generic   \
+  bc_summarize -input_files   my_communities.generic   \
                          -output_prefix my_converted_communities
 
 =head1 DESCRIPTION
@@ -90,7 +90,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bp_community_summarize'
+   output_prefix.default: 'bc_summarize'
 
 =item -cr <convert_relab> | -convert_relab <convert_relab>
 

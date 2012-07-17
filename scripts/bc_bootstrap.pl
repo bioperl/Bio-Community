@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bp_community_bootstrap
+# BioPerl script bc_bootstrap
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -18,14 +18,13 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bp_community_bootstrap - Perform bootstrapping to normalize community composition
-by member count
+bc_bootstrap - Do bootstrapping to normalize community by member count
 
 =head1 SYNOPSIS
 
-  bp_community_bootstrap -input_files   my_communities.generic   \
-                         -output_prefix my_converted_communities \
-                         -sample_size   1000
+  bc_bootstrap -input_files   my_communities.generic   \
+               -output_prefix my_converted_communities \
+               -sample_size   1000
 
 =head1 DESCRIPTION
 
@@ -60,7 +59,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bp_community_bootstrap'
+   output_prefix.default: 'bc_bootstrap'
 
 =item -ss <sample_size> | -sample_size <sample_size>
 
