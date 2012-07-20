@@ -474,9 +474,9 @@ method _new_summaries ($communities) {
    my $summaries = [];
    for my $community (@$communities) {
       my $name = $community->name;
-      if ($name !~ / summarized$/) {
-         $name .= ' summarized';
-      }
+      #if ($name !~ / summarized$/) {
+      #   $name .= ' summarized';
+      #}
       my $use_weights = $community->use_weights;
       my $summary = Bio::Community->new(
          -name        => $name,

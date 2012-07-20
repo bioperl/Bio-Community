@@ -331,8 +331,8 @@ method _count_normalize {
          ($average, $repetitions, $dist) = $self->_bootstrap($community);
       }
       my $name = $community->name;
-      $name .= ' ' if $name;
-      $name .= 'average';
+      #$name .= ' ' if $name;
+      #$name .= 'average';
       $average->name($name);
       if (defined $self->repetitions) {
          $max_threshold = $dist if (defined $dist) && ($dist > $max_threshold);
@@ -462,9 +462,9 @@ method _calc_representative(Bio::Community $average) {
    my $target_count = int( $average->get_total_count + 0.5 ); # round count like 999.9 to 1000
 
    my $name = $average->name;
-   $name =~ s/\s*average$//;
-   $name .= ' ' if $name;
-   $name .= 'representative';
+   #$name =~ s/\s*average$//;
+   #$name .= ' ' if $name;
+   #$name .= 'representative';
 
    my $representative = Bio::Community->new(
       -name        => $name,

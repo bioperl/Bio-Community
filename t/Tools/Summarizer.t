@@ -61,7 +61,7 @@ isa_ok $group, 'Bio::Community::Member';
 is $group->desc, 'Other < 2 %';
 $id = $group->id;
 
-is $summary->name, 'Unnamed community summarized';
+is $summary->name, 'Unnamed community';
 delta_ok $summary->get_count($member1), 1;
 delta_ok $summary->get_count($member2), 95;
 delta_ok $summary->get_count($member3), 0;
@@ -73,7 +73,7 @@ $summary = $summaries->[1];
 $group = get_group($summary);
 is $group->id, $id; # different object because the weight is different, 
                     # but ID need to be the same
-is $summary->name, 'grassland summarized';
+is $summary->name, 'grassland';
 delta_ok $summary->get_count($member1), 8;
 delta_ok $summary->get_count($member2), 90;
 delta_ok $summary->get_count($member3), 0;
@@ -267,7 +267,7 @@ is scalar @$summaries, 2;
 $summary = $summaries->[0];
 $group = get_group($summary);
 $id = $group->id;
-is $summary->name, 'Unnamed community summarized';
+is $summary->name, 'Unnamed community';
 delta_ok $summary->get_rel_ab($member1), 95.9558824;
 delta_ok $summary->get_rel_ab($member2),  0.5514706;
 delta_ok $summary->get_rel_ab($member3),  0;
@@ -277,7 +277,7 @@ delta_ok $summary->get_rel_ab($group)  ,  3.4926470;
 $summary = $summaries->[1];
 $group = get_group($summary);
 is $group->id, $id;
-is $summary->name, 'grassland summarized';
+is $summary->name, 'grassland';
 delta_ok $summary->get_rel_ab($member1), 48.0000000;
 delta_ok $summary->get_rel_ab($member2), 24.0000000;
 delta_ok $summary->get_rel_ab($member3), 0;
@@ -613,11 +613,6 @@ $in = Bio::Community::IO->new(
    -file     => test_input_file('qiime_w_silva_taxo_and_dups.txt'),
    -taxonomy => Bio::DB::Taxonomy->new( -source => 'list' ),
 );
-
-###
-print "FORMAT: ".$in->format."\n";
-###
-
 $community1 = $in->next_community;
 
 

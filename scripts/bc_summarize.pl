@@ -264,4 +264,5 @@ sub write_communities {
    if (defined $out) {
       $out->close;
    }
+   return 1;
 }
