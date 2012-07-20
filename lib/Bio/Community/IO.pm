@@ -84,10 +84,10 @@ methods. Internal methods are usually preceded with a _
            -format : Format of the file: 'generic', 'gaas', 'qiime'. This is
                optional when reading a community file because the format is
                automatically detected. See format() in Bio::Root::IO.
-           -weight_files : Arrayref of files that contains weights to assign to
-               members. See weight_files().
-           -weight_assign : When using a files of weights, define what to do
-               for community members that do not have weights. See weight_assign().
+           -weight_files : Arrayref of files (or filehandles) that contain
+               weights to assign to members. See weight_files().
+           -weight_assign : When using files of weights, define what to do for
+               community members that do not have weights. See weight_assign().
            -taxonomy: Given a Bio::DB::Taxonomy object, try to place the community
                members in this taxonomy. See taxonomy().
            See Bio::Root::IO for other accepted constructors, like -fh.
@@ -419,21 +419,23 @@ has 'multiple_communities' => (
 =head2 weight_files
 
  Usage   : $in->weight_files();
- Function: When reading a community, specify files containing weights to assign
-           to the community members. Each type of file can contain a different
-           type of weight to add. The file should contain two tab-delimited
-           columns: the first one should contain the description of the member
-           (or the string representation of its taxonomic lineage, when using 
-           -weight_assign => 'ancestor'), and the second one the weight to
-           assign to this member.
- Args    : arrayref of file names
- Returns : arrayref of file names
+ Function: When reading a community, specify files (or filehandles opened in
+           read mode) containing weights to assign to the community members.
+           Each file can contain a different type of weight to add. The file
+           should contain two tab-delimited columns: the first one should
+           contain the description of the member (or the string representation
+           of its taxonomic lineage, when using -weight_assign => 'ancestor'),
+           and the
+           second one the weight to assign to this member.
+ Args    : arrayref of file names (or filehandles)
+ Returns : arrayref of filehandles
 
 =cut
 
 has 'weight_files' => (
    is => 'rw',
-   isa => 'ArrayRef[Str]',
+   isa => 'ArrayRefOfReadableFileHandles',
+   coerce => 1,
    required => 0,
    lazy => 1,
    default => sub { [] },
@@ -480,15 +482,13 @@ has '_count_queue' => ( # hashref of member counts, keyed by member ID
 
 
 method _read_weights ($args) {
-   my $files = $self->weight_files;
    my $all_weights = [];
    my $file_average_weights = [];
-   for my $file (@$files) {
+   for my $fh (@{$self->weight_files}) {
       my $average = 0;
       my $num = 0;
       my $file_weights = {};
-      open my $in, '<', $file or $self->throw("Could not open file '$file': $!");
-      while (my $line = <$in>) {
+      while (my $line = <$fh>) {
          next if $line =~ m/^#/;
          next if $line =~ m/^\s*$/;
          chomp $line;
@@ -497,7 +497,7 @@ method _read_weights ($args) {
          $average += $weight;
          $num++;
       }
-      close $in;
+      close $fh;
       push @$all_weights, $file_weights;
       $average /= $num if $num > 0;
       push @$file_average_weights, $average;

@@ -57,6 +57,8 @@ use Moose::Util::TypeConstraints;
 use namespace::autoclean;
 
 
+# Numbers
+
 subtype 'PositiveNum'
    => as 'Num'
    => where { $_ >= 0 }
@@ -89,14 +91,14 @@ subtype 'Count'
 
 # Sort numerically
 subtype 'NumericSort'
-   => as enum( [ qw(-1 0 1) ] ),
+   => as enum( [ qw(-1 0 1) ] )
    => message { gen_err_msg('0 (off), 1 (increasing) or -1 (decreasing)', $_) };
 
 
 # Abundance representation
 my @AbundanceRepr = qw(count percentage fraction);
 subtype 'AbundanceRepr'
-   => as enum( [ @AbundanceRepr ] ),
+   => as enum( [ @AbundanceRepr ] )
    => message { gen_err_msg(\@AbundanceRepr, $_) };
 
 
@@ -106,20 +108,58 @@ subtype 'AbundanceRank'
 
 
 # Type of distance
-my @DistanceType  = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger bray-curtis shared permuted maxiphi unifrac);
+my @DistanceType  = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger
+                       bray-curtis shared permuted maxiphi unifrac);
 subtype 'DistanceType'
-   => as enum( [ @DistanceType ] ),
+   => as enum( [ @DistanceType ] )
    => message { gen_err_msg(\@DistanceType, $_) };
 
 
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 my @WeightAssignStr = qw(file_average community_average ancestor);
 subtype 'WeightAssignStr'
-   => as enum( [ @WeightAssignStr ] ),
+   => as enum( [ @WeightAssignStr ] )
    => message { gen_err_msg(\@WeightAssignStr, $_) };
 subtype 'WeightAssignType'
-   => as 'WeightAssignStr | Num',
+   => as 'WeightAssignStr | Num'
    => message { gen_err_msg( ['a number', @WeightAssignStr], $_) };
+
+
+# A readable file
+subtype 'ReadableFile'
+   => as 'Str'
+   => where { (-e $_) && (-r $_) }
+   => message { gen_err_msg([], $_) };
+
+subtype 'ArrayRefOfReadableFiles'
+   => as 'ArrayRef[ReadableFile]';
+
+# A readable filehandle (and coercing it from a readable file)
+subtype 'ReadableFileHandle'
+   => as 'FileHandle';
+
+coerce 'ReadableFileHandle'
+   => from 'Str'
+   => via { read_file($_) };
+
+subtype 'ArrayRefOfReadableFileHandles'
+   => as 'ArrayRef[ReadableFileHandle]';
+
+coerce 'ArrayRefOfReadableFileHandles'
+   => from 'ArrayRefOfReadableFiles'
+   => via { [ map {
+          print "file to open: $_\n"; ###
+           read_file($_) } @{$_} ] };
+
+sub read_file {
+   my $file = shift;
+   open my $fh, '<', $file or die "Could not open file '$_': $!\n";
+   return $fh;
+   #return IO::File->new($file, 'r') or die "Could not open file '$_': $!\n";
+                          # $self->throw("Could not open file '$_': $!")
+}
+
+
 
 
 sub gen_err_msg {

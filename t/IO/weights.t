@@ -9,23 +9,26 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $community3, $member, $count);
+my ($in, $out, $output_file, $community, $community2, $community3, $member,
+   $count, $fh1, $fh2);
 my (@communities, @methods);
 
 
 # Read generic format with arbitrary weights
-
+open $fh1, '<', test_input_file('weights_1.txt') or die "Could not open file: $!\n";
+open $fh2, '<', test_input_file('weights_2.txt') or die "Could not open file: $!\n";
 ok $in = Bio::Community::IO->new(
    -file          => test_input_file('generic_table.txt'),
    -format        => 'generic',
-   -weight_files  => [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ],
+   -weight_files  => [ $fh1, $fh2 ],
    -weight_assign => 1,
 ), 'Read generic format with arbitrary weights';
 isa_ok $in, 'Bio::Community::IO::generic';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
-is_deeply $in->weight_files, [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ];
+isa_ok $in->weight_files->[0], 'GLOB';  # filehandle
+isa_ok $in->weight_files->[1], 'GLOB';
 is $in->weight_assign, 1;
 
 ok $community = $in->next_community;
@@ -83,7 +86,8 @@ isa_ok $in, 'Bio::Community::IO::generic';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
-is_deeply $in->weight_files, [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ];
+isa_ok $in->weight_files->[0], 'GLOB';
+isa_ok $in->weight_files->[1], 'GLOB';
 is $in->weight_assign, 'file_average';
 
 ok $community = $in->next_community;
@@ -141,7 +145,8 @@ isa_ok $in, 'Bio::Community::IO::generic';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
-is_deeply $in->weight_files, [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ];
+isa_ok $in->weight_files->[0], 'GLOB';
+isa_ok $in->weight_files->[1], 'GLOB';
 is $in->weight_assign, 'community_average';
 
 ok $community = $in->next_community;
@@ -196,7 +201,7 @@ ok $in = Bio::Community::IO->new(
    -weight_files  => [ test_input_file('weights_taxo.txt') ],
    -weight_assign => 'ancestor',
 ), 'Read qiime format with ancestor-based weights';
-is_deeply $in->weight_files, [ test_input_file('weights_taxo.txt') ];
+isa_ok $in->weight_files->[0], 'GLOB';
 is $in->weight_assign, 'ancestor';
 
 ok $community = $in->next_community;
