@@ -56,62 +56,90 @@ use Moose;
 use Moose::Util::TypeConstraints;
 use namespace::autoclean;
 
+
 subtype 'PositiveNum'
    => as 'Num'
    => where { $_ >= 0 }
-   => message { "Only positive numbers accepted, but got '".($_||'')."'" };
+   => message { gen_err_msg('a positive number', $_) };
+
 
 subtype 'StrictlyPositiveNum'
    => as 'PositiveNum'
    => where { $_ > 0 }
-   => message { "Only strictly positive numbers accepted, but got '".($_||'')."'" };
+   => message { gen_err_msg('a strictly positive number', $_) };
+
 
 subtype 'PositiveInt'
    => as 'Int'
    => where { $_ >= 0 }
-   => message { "Only positive integers accepted, but got '".($_||'')."'" };
+   => message { gen_err_msg('a positive integer', $_) };
+
 
 subtype 'StrictlyPositiveInt'
    => as 'PositiveInt'
    => where { $_ > 0 }
-   => message { "Only strictly positive integers accepted, but got '".($_||'')."'" };
+   => message { gen_err_msg('a strictly positive integer', $_) };
 
 
-# A Count should be a positive integer but to make things easier. We sometimes
-# do not have access to the actual count, but just the relative abundance (a
-# float) that we use as a proxy for a count.
+# A Count should be a positive integer. Sometimes, however, we only have access
+# to the relative abundance (a float), and use it as a proxy for a count.
 subtype 'Count'
    => as 'PositiveNum';
 
-# Sort numerically: 0, 1, -1
+
+# Sort numerically
 subtype 'NumericSort'
-   => as 'Int'
-   => where { ($_ >= -1) && ($_ <= 1) }
-   => message { "This only accepts 0 (off), 1 (increasing) or -1 (decreasing), but got '".($_||'')."'" };
+   => as enum( [ qw(-1 0 1) ] ),
+   => message { gen_err_msg('0 (off), 1 (increasing) or -1 (decreasing)', $_) };
 
 
-# Abundance representation: count, percentage, fraction
+# Abundance representation
+my @AbundanceRepr = qw(count percentage fraction);
 subtype 'AbundanceRepr'
-   => as 'Str'
-   => where { $_ =~ m/^(count|percentage|fraction)$/ }
-   => message { "This only accepts 'count', 'percentage', or 'fraction', but got '".($_||'')."'" };
+   => as enum( [ @AbundanceRepr ] ),
+   => message { gen_err_msg(\@AbundanceRepr, $_) };
+
 
 # Rank: a strictly positive integer
 subtype 'AbundanceRank'
    => as 'StrictlyPositiveInt';
 
-# Type of distance: 1-norm, 2-norm, euclidean, p-norm, infinity-norm, unifrac
+
+# Type of distance
+my @DistanceType  = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger bray-curtis shared permuted maxiphi unifrac);
 subtype 'DistanceType'
-   => as 'Str'
-   => where { $_ =~ m/^(1-norm|2-norm|euclidean|p-norm|infinity-norm|hellinger|bray-curtis|shared|permuted|maxiphi|unifrac)$/ }
-   => message { "This only accepts '1-norm', '2-norm', 'euclidean', 'p-norm', 'infinity-norm', 'bray-curtis, 'shared', 'permuted', 'maxiphi' or 'unifrac', but got '$_'" };
+   => as enum( [ @DistanceType ] ),
+   => message { gen_err_msg(\@DistanceType, $_) };
+
 
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
+my @WeightAssignStr = qw(file_average community_average ancestor);
+subtype 'WeightAssignStr'
+   => as enum( [ @WeightAssignStr ] ),
+   => message { gen_err_msg(\@WeightAssignStr, $_) };
 subtype 'WeightAssignType'
-   => as 'Str'
-   => where { ($_ =~ m/^(file_average|community_average|ancestor)$/) || ($_ * 2) }
-   => message { "This only accepts 'file_average', 'community_average', 'ancestor' or a number, but got '$_'" };
-;
+   => as 'WeightAssignStr | Num',
+   => message { gen_err_msg( ['a number', @WeightAssignStr], $_) };
+
+
+sub gen_err_msg {
+   # Generate an error message. The input is:
+   #  * an arrayref of the values accepted, or a string describing valid input
+   #  * the value obtained instead of the
+   my ($accepts, $got) = @_;
+   $got = '' if not defined $got;
+   my $accept_str;
+   if (ref($accepts) eq 'ARRAY') {
+      if (scalar @$accepts > 1) {
+         $accept_str = join(', ', @$accepts[0,-2]);
+      }
+      $accept_str = $accept_str.' or '.$accepts->[-1];
+   } else {
+      $accept_str = $accepts;
+   }
+   return "It can only be $accept_str, but was '$got'";
+}
+
 
 __PACKAGE__->meta->make_immutable;
 
