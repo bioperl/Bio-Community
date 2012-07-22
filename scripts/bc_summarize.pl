@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use Method::Signatures;
 use Bio::DB::Taxonomy;
 use Bio::Community::IO;
 use Bio::Community::Tools::Summarizer;
@@ -179,9 +180,8 @@ summarize( $ARGV{'input_files'}  , $ARGV{'weight_files'}  , $ARGV{'weight_assign
 exit;
 
 
-sub summarize {
-   my ($input_files, $weight_files, $weight_assign, $output_prefix, $convert2relab,
-      $merge_dups, $by_rel_ab, $by_tax_level) = @_;
+func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
+   $convert2relab, $merge_dups, $by_rel_ab, $by_tax_level) {
 
    # Read input communities and do weight assignment
    my $communities = [];
@@ -229,9 +229,8 @@ sub summarize {
 }
 
 
-sub write_communities {
-   my ($communities, $output_prefix, $output_format, $type, $convert2relab) = @_;
-   $type ||= '';
+func write_communities ($communities, $output_prefix, $output_format, $type = '',
+   $convert2relab) {
    my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
    my $num = 0;
    my $out;

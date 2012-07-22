@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Tools::ShrapnelCleaner;
 use Getopt::Euclid qw(:minimal_keys);
@@ -130,8 +131,8 @@ clean( $ARGV{'input_files'}         , $ARGV{'count_threshold'},
 exit;
 
 
-sub clean {
-   my ($input_files, $count_threshold, $prevalence_threshold, $output_prefix) = @_;
+func clean ($input_files, $count_threshold, $prevalence_threshold,
+   $output_prefix) {
 
    # Read input communities and do weight assignment
    my $communities = [];
@@ -162,8 +163,7 @@ sub clean {
 }
 
 
-sub write_communities {
-   my ($communities, $output_prefix, $output_format) = @_;
+func write_communities ($communities, $output_prefix, $output_format) {
    my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
    my $num = 0;
    my $out;

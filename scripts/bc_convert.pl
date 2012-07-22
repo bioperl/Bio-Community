@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use Method::Signatures;
 use Bio::Community::IO;
 use Getopt::Euclid qw(:minimal_keys);
 
@@ -114,8 +115,7 @@ convert( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'output_format'} );
 exit;
 
 
-sub convert {
-   my ($input_files, $output_prefix, $output_format) = @_;
+func convert ($input_files, $output_prefix, $output_format) {
 
    # Read input communities
    my @communities;

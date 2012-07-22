@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Tools::Ruler;
 use Getopt::Euclid qw(:minimal_keys);
@@ -159,9 +160,8 @@ exit;
 # TODO: implement option for matrix output
 
 
-sub calc_dist {
-   my ($input_files, $weight_files, $weight_assign, $output_prefix, $dist_type,
-       $pair_files) = @_;
+func calc_dist ($input_files, $weight_files, $weight_assign, $output_prefix,
+   $dist_type, $pair_files) {
 
    # Read input communities
    my $communities = [];
@@ -191,8 +191,8 @@ sub calc_dist {
 }
 
 
-sub _process_specific_pairs {
-   my ($communities, $dist_type, $output_prefix, $pair_files) = @_;
+func _process_specific_pairs ($communities, $dist_type, $output_prefix,
+   $pair_files) {
    $communities = { map { $_->name => $_ } @$communities };
    my $i = 0;
    for my $pair_file (@$pair_files) {
@@ -221,8 +221,7 @@ sub _process_specific_pairs {
 }
 
 
-sub _process_all_pairs {
-   my ($communities, $dist_type, $output_prefix) = @_;
+func _process_all_pairs ($communities, $dist_type, $output_prefix) {
    # Calculate distances between all pairs of communities
    my $out_file = $output_prefix.'.txt';
    print "Writing distances to file $out_file\n";
@@ -244,9 +243,8 @@ sub _process_all_pairs {
 }
 
 
-sub _read_pair_file {
+func _read_pair_file ($file) {
    # Read a file of pairs and return an arrayref of all pairs found
-   my ($file) = @_;
    my @pairs;
    open my $in, '<', $file or die "Error: Could not read file $file\n$!\n";
    while (my $line = <$in>) {

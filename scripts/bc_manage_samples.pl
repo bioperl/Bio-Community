@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use Method::Signatures;
 use Bio::Community;
 use Bio::Community::IO;
 use Getopt::Euclid qw(:minimal_keys);
@@ -133,8 +134,8 @@ manip( $ARGV{'input_files'}  , $ARGV{'output_prefix'}, $ARGV{'include_names'},
 exit;
 
 
-sub manip {
-   my ($input_files, $output_prefix, $include_names, $exclude_names, $merge_names) = @_;
+func manip ($input_files, $output_prefix, $include_names, $exclude_names,
+   $merge_names) {
 
    # Prepare communities to include or exclude 
    my $nof_includes = 0;

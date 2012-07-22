@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Tools::CountNormalizer;
 use Getopt::Euclid qw(:minimal_keys);
@@ -133,8 +134,8 @@ bootstrap( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'sample_size'},
 exit;
 
 
-sub bootstrap {
-   my ($input_files, $output_prefix, $sample_size, $dist_threshold, $num_repetitions) = @_;
+func bootstrap ($input_files, $output_prefix, $sample_size, $dist_threshold,
+   $num_repetitions) {
 
    # Read input communities
    my $communities = [];
@@ -175,8 +176,7 @@ sub bootstrap {
 }
 
 
-sub write_communities {
-   my ($communities, $output_prefix, $output_format, $type) = @_;
+func write_communities ($communities, $output_prefix, $output_format, $type='') {
    $type ||= '';
    my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
    my $num = 0;
