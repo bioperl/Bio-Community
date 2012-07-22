@@ -100,6 +100,9 @@ use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::IO;
+use Bio::Community::TaxonomyUtils
+   qw(get_taxon_lineage get_lineage_string clean_lineage_arr);
+
 
 extends 'Bio::Root::Root';
 
@@ -262,8 +265,8 @@ method _merge_duplicates ( $communities, $merge_dups ) {
       my $taxon = $member->taxon;
       if ($taxon) {
          # Member has taxonomic information
-         my $lineage_arr = Bio::Community::IO::_get_taxon_lineage($taxon);
-         my $lineage_str = Bio::Community::IO::_get_lineage_string($lineage_arr);
+         my $lineage_arr = get_taxon_lineage($taxon);
+         my $lineage_str = get_lineage_string($lineage_arr);
 
          # Save taxon object
          if (not exists $taxa_objs->{$lineage_str}) {
@@ -312,17 +315,17 @@ method _group_by_taxonomic_level ( $communities, $tax_level ) {
       my $taxon = $member->taxon;
       if ($taxon) {
          # Member has taxonomic information
-         my $lineage_arr = Bio::Community::IO::_get_taxon_lineage($taxon);
+         my $lineage_arr = get_taxon_lineage($taxon);
          my $end_idx = $tax_level-1 > $#$lineage_arr ?  $#$lineage_arr : $tax_level-1;
          $lineage_arr = [ @{$lineage_arr}[0 .. $end_idx] ];
          
          # Need to clean lineage again to prevent this from happening:
          #   o__Rickettsiales;f__;g__Candidatus P. -> o__Rickettsiales;f__
-         $lineage_arr = Bio::Community::IO::_clean_lineage_arr($lineage_arr);
+         $lineage_arr = clean_lineage_arr($lineage_arr);
 
          if ( scalar @$lineage_arr > 0 ) {
             # Could find Bio::Taxon at requested taxonomic level
-            my $lineage_str = Bio::Community::IO::_get_lineage_string($lineage_arr);
+            my $lineage_str = get_lineage_string($lineage_arr);
             $taxon = $lineage_arr->[-1];
 
             # Save taxon object
