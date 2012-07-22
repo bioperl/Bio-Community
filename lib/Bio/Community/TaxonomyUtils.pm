@@ -115,7 +115,7 @@ func split_lineage_string ($lineage_str) {
 
 =head2 clean_lineage_arr
 
- Function: Proceed from the end of the array and remove ambigous taxonomic
+ Function: Proceed from the end of the array and remove ambiguous taxonomic
            information such as:
               '', 'No blast hit', 'unidentified', 'uncultured', 'environmental',
               'Other', 'g__', 's__', etc

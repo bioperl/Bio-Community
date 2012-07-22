@@ -106,7 +106,7 @@ use Bio::Community;
 use Bio::Community::Types;
 use Bio::Community::Tools::FormatGuesser;
 use Bio::Community::TaxonomyUtils
-   qw(split_lineage_string get_taxon_lineage get_lineage_string);
+   qw(split_lineage_string get_taxon_lineage get_lineage_string clean_lineage_arr);
 
 extends 'Bio::Root::Root',
         'Bio::Root::IO';
@@ -578,30 +578,31 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
          my $weight;
          my $weight_type = $self->_weights->[$i];
          if ($assign_method eq 'ancestor') {
-
-            # Method based on member taxonomic lineage
             my $taxon = $member->taxon;
-            my $lineage_arr = get_taxon_lineage($taxon);
-            my $lineage;
-            do {
-               $lineage = get_lineage_string($lineage_arr);
-               if (exists $weight_type->{$lineage}) {
+            if (defined $taxon) {
+               # Method based on member taxonomic lineage
+               my $lineage_arr = get_taxon_lineage($taxon);
+               my $lineage;
+               do {
+                  $lineage = get_lineage_string(clean_lineage_arr($lineage_arr));
                   $weight = $weight_type->{$lineage};
-                  @$lineage_arr = (); # to exit loop
-               }
-            } while ( pop @$lineage_arr );
-
+                  if ( (not defined $weight) && ($lineage =~ s/ //g) ) {
+                     # If no weight found, try lineage again without white spaces
+                     $weight = $weight_type->{$lineage};
+                  }
+                  if (defined $weight) {
+                     # Weight found. Get ready to exit loop.
+                     $self->debug(get_lineage_string(get_taxon_lineage($taxon)).
+                        " got weight from ".$lineage_arr->[-1]->node_name.": $weight\n");
+                     @$lineage_arr = ();
+                  }
+              } while ( pop @$lineage_arr );
+            }
             if (not defined $weight) {
                # Use the 'community_average' assignment method:
                # Correct weight will be assigned when community is 100% created
                $weight = 0;
                $self->_member_queue->{$member->id} = $member;
-            
-               #$lineage = _get_lineage_string( $member->taxon );
-               #$self->warn("No weight found for member with ID '".$member->id.
-               #   "', description '".$member->desc."' and taxonomic lineage '".
-               #   "$lineage' or any of its ancestors. Using average weight from".
-               #   " file, $weight.");
             }
 
          } else {
@@ -671,6 +672,8 @@ method _process_member_queue ($community) {
       for my $i (0 .. scalar @{$self->_weights} - 1) {
          if ( $member_weights->[$i] == 0 ) {
             $member_weights->[$i] = $community_average_weights->[$i];
+            $self->debug($member->desc." got average weight from community '".
+               $community->name."': ".$community_average_weights->[$i]."\n");
          }
       }
       # Add member to community
