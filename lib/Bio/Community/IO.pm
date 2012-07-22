@@ -580,7 +580,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
 
             # Method based on member taxonomic lineage
             my $taxon = $member->taxon;
-            my $lineage_arr = _get_lineage_obj_arr($taxon);
+            my $lineage_arr = _get_taxon_lineage($taxon);
             my $lineage;
             do {
                $lineage = _get_lineage_string($lineage_arr);
@@ -763,7 +763,7 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
       # First do some lineage curation
       my @names;
       if ($is_name) {
-         @names = @{_get_lineage_name_arr($taxo_str)};
+         @names = @{_split_lineage_string($taxo_str)};
       }
 
       # Then add lineage to taxonomy if desired
@@ -795,8 +795,25 @@ method _attach_taxon (Maybe[Bio::Community::Member] $member, $taxo_str, $is_name
 }
 
 
-sub _get_lineage_name_arr {
-   # Take a lineage string and put the taxa name into an arrayref. Also, remove
+#---- taxonomy utils ----------------------------------------------------------#
+
+
+my $sep = ';';
+my $sep_re = qr/$sep\s*/;
+my $ignore_re = qr/^(?:\S__|Other|No blast hit|unidentified|uncultured|environmental|)$/i;
+
+
+sub _split_lineage_string {
+   # Take a lineage string, clean it, and put the taxa name into an arrayref.
+   my ($taxo_str) = @_;
+   my $names = [ split $sep_re, $taxo_str ];
+   $names = _clean_lineage_arr($names);
+   return $names;
+}
+
+
+sub _clean_lineage_arr {
+   # Clean the given lineage arrayref (strings or taxa objects) by removing
    # lineage tail elements that look like:
    #    '', 'Other', 'No blast hit', 'uncultured', 'environmental', 'g__', 's__', etc
    # from input strings that look like:
@@ -804,25 +821,24 @@ sub _get_lineage_name_arr {
    #   k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__
    # Silva:
    #   Bacteria;Cyanobacteria;Chloroplast;uncultured;Other;Other
-   my ($taxo_str) = @_;
-   my @names = split /;\s*/, $taxo_str;
-   my $re = qr/^(?:\S__|Other|No blast hit|unidentified|uncultured|environmental|)$/i;
-   while ( my $elem = $names[-1] ) {
+   my ($arr) = @_;
+   while ( my $elem = $arr->[-1] ) {
       next if not defined $elem;
-      if ($elem =~ $re) {
-         pop @names;
+      $elem = $elem->node_name if ref $elem;
+      if ($elem =~ $ignore_re) {
+         pop @$arr;
       } else {
          last;
       }
    }
-   return \@names;
+   return $arr;
 }
 
 
-sub _get_lineage_obj_arr {
+sub _get_taxon_lineage {
+   # Take a taxon object and return its lineage, an arrayref of the taxon and 
+   # its ancestor taxa
    my ($taxon) = @_;
-   # Take a taxon and return an arrayref of all its lineage, i.e. the taxon
-   # itself and all its ancestors
    my @arr;
    if ($taxon) {
       @arr = ($taxon);
@@ -837,9 +853,10 @@ sub _get_lineage_obj_arr {
 
 sub _get_lineage_string {
    my ($lineage_arr) = @_;
-   # Take an arrayref of taxa names or taxa objects and return a full lineage string
+   # Take a lineage arrayref (strings or taxa objects) and return a full lineage
+   # string
    my @names = map { ref $_ ? $_->node_name : $_ } @$lineage_arr;
-   return join ';', @names;
+   return join $sep, @names;
 }
 
 
