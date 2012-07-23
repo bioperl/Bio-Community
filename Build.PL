@@ -45,6 +45,7 @@ my $build = Module::Build->new(
                              'scripts/bc_manage_samples.pl',
                              'scripts/bc_measure_distance.pl',
                              'scripts/bc_summarize.pl',
+                             'scripts/copyrighter.pl',
                             ],
     recursive_test_files => 1,
     dynamic_config       => 1,
