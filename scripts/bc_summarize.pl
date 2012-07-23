@@ -115,7 +115,7 @@ Merge community members with the exact same taxonomic affiliation. Default: merg
 =item -rl <relab_lt> | -relab_lt <relab_lt>
 
 Group community members with a relative abundance less than the specified
-threshold (in %) into an 'Other' group. Default: relab_lt.default %
+threshold (in %) in ALL the communities into an 'Other' group. Default: relab_lt.default %
 
 =for Euclid:
    relab_lt.type: number, relab_lt >= 0 && relab_lt <= 100
