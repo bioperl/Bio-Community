@@ -81,9 +81,9 @@ methods. Internal methods are usually preceded with a _
            my $member = Bio::Community::IO->new( -file   => '>community.txt',
                                                  -format => 'generic'         );
  Args    : -file : Path of a community file. See file() in Bio::Root::IO.
-           -format : Format of the file: 'generic', 'gaas', 'qiime'. This is
-               optional when reading a community file because the format is
-               automatically detected. See format() in Bio::Root::IO.
+           -format : Format of the file: 'generic', 'gaas', 'qiime', 'unifrac'.
+               This is optional when reading a community file because the format
+               is automatically detected. See also format() in Bio::Root::IO.
            -weight_files : Arrayref of files (or filehandles) that contain
                weights to assign to members. See weight_files().
            -weight_assign : When using files of weights, define what to do for
@@ -220,7 +220,7 @@ method next_community {
       $self->_count_queue( $count_queue );
 
       # Process member queue now
-      if (scalar keys $count_queue > 0) {
+      if (scalar keys %$count_queue > 0) {
          $self->_process_member_queue($community);
       }
 
