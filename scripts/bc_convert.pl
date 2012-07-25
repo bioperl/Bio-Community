@@ -29,8 +29,7 @@ bc_convert - Convert files of communities from one format to another
 =head1 DESCRIPTION
 
 This script reads files containing biological communities and converts them to
-another format. Supported formats are: generic (tab-delimited table), qiime and
-gaas. See L<Bio::Community::IO> for more information.
+another format.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -38,9 +37,11 @@ gaas. See L<Bio::Community::IO> for more information.
 
 =item -if <input_files>... | -input_files <input_files>...
 
-Input file containing the communities to convert. When converting from a format
-that supports only one community per file (e.g. gaas) to a format that holds
-several communities per file (e.g. qiime), you can provide multiple input files.
+Input file containing the communities to convert. Supported formats are: generic
+(tab-delimited table), qiime, gaas and unifrac. See L<Bio::Community::IO> for
+more information. When converting from a format that supports only one community
+per file (e.g. gaas) to a format that holds several communities per file (e.g.
+qiime), you can provide multiple input files.
 
 =for Euclid:
    input_files.type: readable

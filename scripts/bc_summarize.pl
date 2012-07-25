@@ -95,8 +95,8 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =item -cr <convert_relab> | -convert_relab <convert_relab>
 
-Convert counts into relative abundances (taking into account weights): 1 (yes),
-0 (no). Default: convert_relab.default
+Convert counts into relative abundances (in percentage, taking into account
+weights): 1 (yes), 0 (no). Default: convert_relab.default
 
 =for Euclid:
    convert_relab.type: integer, convert_relab == 0 || convert_relab == 1

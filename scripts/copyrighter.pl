@@ -46,7 +46,7 @@ identified by their Greengenes (2011) taxonomy string, e.g.:
 
   k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter
 
-The output is a copy-corrected OTU table, with relative abundances (in %).
+The output is a copy-corrected OTU table, with relative abundances (in percent).
 
 =head1 REQUIRED ARGUMENTS
 
@@ -67,7 +67,8 @@ Input OTU table (QIIME or generic site-by-species format).
 
 =item -o <output>
 
-Output path for the corrected OTU table (in same format as input). Default: output.default
+Output path for the corrected OTU table (in same format as input). Output OTU
+table has relative abundance, in percent, instead of counts. Default: output.default
 
 =for Euclid:
    output.type: string
