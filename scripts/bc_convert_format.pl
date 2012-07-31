@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bc_convert
+# BioPerl script bc_convert_format
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -18,13 +18,13 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_convert - Convert files of communities from one format to another
+bc_convert_format - Convert files of communities from one format to another
 
 =head1 SYNOPSIS
 
-  bc_convert -input_files   my_communities.qiime     \
-             -output_format generic                  \
-             -output_prefix my_converted_communities
+  bc_convert_format -input_files   my_communities.qiime     \
+                    -output_format generic                  \
+                    -output_prefix my_converted_communities
 
 =head1 DESCRIPTION
 
@@ -59,7 +59,7 @@ the requested output format can only hold a single community. Default: output_pr
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bc_convert'
+   output_prefix.default: 'bc_convert_format'
 
 =item -of <output_format> | -output_format <output_format>
 
