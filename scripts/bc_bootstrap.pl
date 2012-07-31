@@ -74,7 +74,7 @@ sample size defaults to the size (member count) of the smallest community.
 
 Keep doing bootstrap iterations until the distance between the current average
 community and the average community at the previous iteration becomes less than
-the specified threshold.
+the specified threshold. Default: dist_threshold.default
 
 =for Euclid:
    dist_threshold.type: +num
