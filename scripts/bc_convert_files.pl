@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bc_convert_format
+# BioPerl script bc_convert_files
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -18,13 +18,19 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_convert_format - Convert files of communities from one format to another
+bc_convert_files - Merge/split community files and convert between formats
 
 =head1 SYNOPSIS
 
-  bc_convert_format -input_files   my_communities.qiime     \
-                    -output_format generic                  \
-                    -output_prefix my_converted_communities
+  # Format conversion
+  bc_convert_files -input_files   my_communities.qiime     \
+                   -output_format generic                  \
+                   -output_prefix my_converted_communities
+
+  # Merging communities
+  bc_convert_files -input_files   some_communities.generic other_communities.generic \
+                   -output_format generic                  \
+                   -output_prefix my_converted_communities
 
 =head1 DESCRIPTION
 
@@ -59,7 +65,7 @@ the requested output format can only hold a single community. Default: output_pr
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bc_convert_format'
+   output_prefix.default: 'bc_convert_files'
 
 =item -of <output_format> | -output_format <output_format>
 
@@ -71,6 +77,18 @@ table), qiime or gaas. Default: output_format.default
    output_format.default: 'generic'
 
 =back
+
+=cut
+
+#=item -mi <member_identifier> | -member_identifier <merge_identifier>
+#
+#Pick how to decide if members in different communities are the same or not:
+#
+#Default: merge_identifier.default
+#
+#=for Euclid:
+#   member_identifier.type: string
+#   member_identifier.default: 'bc_convert_files'
 
 =head1 FEEDBACK
 
