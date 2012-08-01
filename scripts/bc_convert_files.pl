@@ -43,11 +43,12 @@ another format.
 
 =item -if <input_files>... | -input_files <input_files>...
 
-Input file containing the communities to convert. Supported formats are: generic
-(tab-delimited table), qiime, gaas and unifrac. See L<Bio::Community::IO> for
-more information. When converting from a format that supports only one community
-per file (e.g. gaas) to a format that holds several communities per file (e.g.
-qiime), you can provide multiple input files.
+Input files containing the communities to convert. All files must have the same
+format, which can be one of generic (tab-delimited table), qiime, gaas or
+unifrac. See L<Bio::Community::IO> for more information on these format. When
+converting from a format that supports only one community per file (e.g. gaas)
+to a format that holds several communities per file (e.g. qiime), you can
+provide multiple input files.
 
 =for Euclid:
    input_files.type: readable
@@ -70,11 +71,10 @@ the requested output format can only hold a single community. Default: output_pr
 =item -of <output_format> | -output_format <output_format>
 
 File format to use for writing the output communities, e.g. generic (tab-delimited
-table), qiime or gaas. Default: output_format.default
+table), qiime, gaas or unifrac. Default: same as input format
 
 =for Euclid:
    output_format.type: string
-   output_format.default: 'generic'
 
 =back
 
@@ -141,6 +141,9 @@ func convert ($input_files, $output_prefix, $output_format) {
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new( -file => $input_file );
+      if (not defined $output_format) {
+         $output_format = $in->format;
+      }
       while (my $community = $in->next_community) {
          push @communities, $community;
       }
@@ -152,9 +155,10 @@ func convert ($input_files, $output_prefix, $output_format) {
    my $num = 0;
    my $out;
    my $output_file;
+   my $num_communities = scalar @communities;
    for my $community (@communities) {
       if (not defined $out) {
-         if ($multiple_communities) {
+         if ($multiple_communities || ($num_communities <= 1)) {
             $output_file = $output_prefix.'.'.$output_format;
          } else {
             $num++;
