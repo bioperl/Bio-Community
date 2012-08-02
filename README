@@ -23,6 +23,7 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
   BioPerl version > 1.006901 (as of May 2012, this means an unreleased development version)
+  Tie::IxHash
   Method::Signatures
   Moose
   Moose::Util::TypeConstraints

@@ -27,6 +27,7 @@ my $build = Module::Build->new(
                              'perl'                         => '5.10.0',
                              'Bio::Root::Version'           => '>1.006901',
                              'Bio::DB::Taxonomy'            =>  0, # >1.006901
+                             'Tie::IxHash'                  =>  0,
                              'Method::Signatures'           =>  0,
                              'Moose'                        =>  0,
                              'Moose::Util::TypeConstraints' =>  0,
