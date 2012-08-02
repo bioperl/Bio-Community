@@ -375,11 +375,11 @@ method next_member ( $iter_name = 'default' ) {
            (remember that the only thing that defines if members are identical
            is their ID).
  Usage   : # Single community
-           my @members = $community->get_all_members();
+           my $members = $community->get_all_members();
            # Several communities (community1 and community2)
-           my @members = $community1->get_all_members([$community2]);
+           my $members = $community1->get_all_members([$community2]);
            # Or equivalently, for community1 and community2
-           my @members = $community1->get_all_members([$community1, $community2]);
+           my $members = $community1->get_all_members([$community1, $community2]);
  Args    : an arrayref of Bio::Community objects
  Returns : an arrayref of Bio::Community::Member objects
 
