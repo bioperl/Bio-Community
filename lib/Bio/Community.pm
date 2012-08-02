@@ -285,8 +285,8 @@ method add_member ( $member, $count = 1 ) {
  Function: remove members from a community
  Usage   : $community->remove_member($member, 3);
  Args    : * A Bio::Community::Member to remove
-           * Optional: how of this member to remove. If no value is provided,
-             all such members are removed.
+           * Optional: how many of this member to remove. If no value is
+             provided, all such members are removed.
  Returns : 1 on success
 
 =cut
