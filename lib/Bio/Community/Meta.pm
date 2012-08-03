@@ -120,11 +120,6 @@ has name => (
 );
 
 
-
-##### If the name of a community changed, need to change the hash
-
-
-
 has _communities => (
    is => 'rw',
    #isa => 'Tie::IxHash',
@@ -186,7 +181,7 @@ method remove_community ( Bio::Community $community ) {
 
 =cut
 
-method next_community ( ) {
+method next_community () {
    my $community = (each %{$self->_communities})[1];
    return $community;
 }
@@ -201,7 +196,7 @@ method next_community ( ) {
 
 =cut
 
-method get_all_communities ( ) {
+method get_all_communities () {
    my @all_communities = values %{$self->_communities};   
    return \@all_communities;
 }
@@ -225,9 +220,9 @@ method get_community_by_name ( Str $name ) {
 =head2 get_community_count
 
  Function: Get the total number of communities in the metacommunity
- Usage   : $meta->get_community_count();
+ Usage   : my $nof_communities = $meta->get_community_count();
  Args    : None
- Returns : Integer
+ Returns : Integer for the count
 
 =cut
 
@@ -251,7 +246,7 @@ has _community_count => (
 
 =cut
 
-method get_all_members ( ) {
+method get_all_members () {
    # Get all members in a hash
    my $all_members = {};
    while (my $community = $self->next_community) {
@@ -276,26 +271,31 @@ method get_all_members ( ) {
 
 =cut
 
-method get_richness {
+method get_richness () {
    my $richness = scalar @{$self->get_all_members};
    return $richness;
 }
 
 
-# get_member_total_count
-#   my $richness = 0;
-#   my $all_members = {};
-#   while (my $community = $self->next_community) {
-#      while (my $member = $community->next_member('_get_gamma_richness_ite')) {
-#         my $id = $member->id;
-#         if (not exists $all_members->{$id}) {
-#            # New distinct member
-#            $all_members->{$id} = undef;
-#            $richness++;
-#         }
-#      }
-#   }
-#   return $richness;
+=head2 get_member_count
+
+ Function: Calculate the total count of members in the metacommunity.
+ Usage   : my $nof_individuals = $meta->get_member_count;
+ Args    : None
+ Returns : Integer for the count
+
+=cut
+
+method get_member_count () {
+   my $total_count = 0;
+   my $all_members = {};
+   while (my $community = $self->next_community) {
+      while (my $member = $community->next_member('_get_gamma_richness_ite')) {
+         $total_count += $community->get_count($member);
+      }
+   }
+   return $total_count;
+}
 
 
 __PACKAGE__->meta->make_immutable;

@@ -74,6 +74,8 @@ is_deeply [map {$_->id}   @{$meta->get_all_members}], [1, 2];
 
 is $meta->get_richness, 2;
 
+is $meta->get_member_count, 20;
+
 
 # Add communities
 
@@ -93,6 +95,8 @@ is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member',
 is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2, 3];
 
 is $meta->get_richness, 3;
+
+is $meta->get_member_count, 155;
 
 
 # Remove communities
@@ -116,6 +120,8 @@ is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member',
 is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2];
 
 is $meta->get_richness, 2;
+
+is $meta->get_member_count, 45;
 
 
 done_testing();
