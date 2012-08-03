@@ -18,7 +18,7 @@ ok $meta = Bio::Community::Meta->new( ), 'Bare object';
 isa_ok $meta, 'Bio::Root::RootI';
 isa_ok $meta, 'Bio::Community::Meta';
 
-is $meta->name, 'Unnamed metacommunity';
+is $meta->name, 'Unnamed';
 is $meta->next_community, undef;
 
 is_deeply [map {ref $_}   @{$meta->get_all_communities}], [];

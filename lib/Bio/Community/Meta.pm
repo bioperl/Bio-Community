@@ -15,16 +15,23 @@ Bio::Community::Meta - A metacommunity, or group of communities
 
   use Bio::Community::Meta;
   
-  XXX
+  my $meta = Bio::Community::Meta->new( -name => 'alpine' );
+
+  # Get communities from somewhere and ...
+  $meta->add_communities( [$community1, $community2, $community3] );
   
+  print "Metacommunity contains:\n";
+  print "   ".$meta->get_community_count." communities\n";
+  print "   ".$meta->get_richness." species\n";
+  print "   ".$meta->get_member_count." individuals\n";
 
 =head1 DESCRIPTION
 
 The Bio::Community::Meta module represent metacommunities, or groups of
-communities. This object holds several Bio::Community objects, for examples
+communities. This object holds several Bio::Community objects, for example
 tree communities found at different sites of a forest. Random access to any of
 the communities is provided. However, the communities can also be accessed
-sequentially in the order they were given. This makes Bio::Community::Meta
+sequentially, in the order they were given. This makes Bio::Community::Meta
 capable of representing communities along a natural gradient.
 
 =head1 FEEDBACK
@@ -115,16 +122,17 @@ has name => (
    is => 'rw',
    isa => 'Str',
    lazy => 1,
-   default => 'Unnamed metacommunity',
+   default => 'Unnamed',
    init_arg => '-name',
 );
 
 
+# Communities are stored in a sorted hash
 has _communities => (
    is => 'rw',
    #isa => 'Tie::IxHash',
    lazy => 1,
-   default => sub{ tie my %hash, 'Tie::IxHash'; return \%hash },
+   default => sub { tie my %hash, 'Tie::IxHash'; return \%hash },
    init_arg => undef,
 );
 
@@ -228,7 +236,7 @@ method get_community_by_name ( Str $name ) {
 
 has _community_count => (
    is => 'ro',
-   #isa => 'PositiveNum', # too costly for an internal method
+   #isa => 'PositiveNum',
    lazy => 1,
    default => 0,
    init_arg => undef,
@@ -261,22 +269,6 @@ method get_all_members () {
 }
 
 
-=head2 get_richness
-
- Function: Calculate the richness of the metacommunity (number of different
-           types of members). This is a form of gamma diversity.
- Usage   : my $gamma_richness = $meta->get_richness();
- Args    : None
- Returns : Integer for the richness
-
-=cut
-
-method get_richness () {
-   my $richness = scalar @{$self->get_all_members};
-   return $richness;
-}
-
-
 =head2 get_member_count
 
  Function: Calculate the total count of members in the metacommunity.
@@ -295,6 +287,22 @@ method get_member_count () {
       }
    }
    return $total_count;
+}
+
+
+=head2 get_richness
+
+ Function: Calculate the richness of the metacommunity (number of different
+           types of members). This is a form of gamma diversity.
+ Usage   : my $gamma_richness = $meta->get_richness();
+ Args    : None
+ Returns : Integer for the richness
+
+=cut
+
+method get_richness () {
+   my $richness = scalar @{$self->get_all_members};
+   return $richness;
 }
 
 
