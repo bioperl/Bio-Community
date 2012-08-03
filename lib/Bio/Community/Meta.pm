@@ -311,9 +311,9 @@ method next_community ( ) {
 =head2 get_all_communities
 
  Function: Generate a list of all communities in the metacommunity.
- Usage   : my @communities = $meta->get_all_communities();
- Args    : an arrayref of Bio::Community objects
- Returns : an arrayref of Bio::Community::Member objects
+ Usage   : my $communities = $meta->get_all_communities();
+ Args    : none
+ Returns : an arrayref of Bio::Community objects
 
 =cut
 
@@ -358,6 +358,35 @@ has _community_count => (
 );
 
 
+=head2 get_all_members
+
+ Function: Generate a list of all members in the metacommunity.
+ Usage   : my $members = $meta->get_all_members();
+ Args    : none
+ Returns : an arrayref of Bio::Community::Member objects
+
+=cut
+
+method get_all_members ( ) {
+
+   # Get all members in a hash
+   my $all_members = {};
+   while (my $community = $self->next_community) {
+      while (my $member = $community->next_member('_get_all_members_ite')) {
+         # Members are defined by their ID
+         $all_members->{$member->id} = $member;
+      }
+   }
+
+   # Convert member hash to an array
+   $all_members = [values %$all_members];
+
+   return $all_members;
+}
+
+
+
+# get_member_total_count
 
 
 #=head2 get_richness
@@ -390,10 +419,6 @@ has _community_count => (
 #   return $self->_richness;
 #}
 
-
-# get_all_members
-
-# get_member_total_count
 
 __PACKAGE__->meta->make_immutable;
 
