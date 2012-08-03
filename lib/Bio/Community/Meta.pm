@@ -21,9 +21,9 @@ Bio::Community::Meta - A metacommunity, or group of communities
   $meta->add_communities( [$community1, $community2, $community3] );
   
   print "Metacommunity contains:\n";
-  print "   ".$meta->get_community_count." communities\n";
+  print "   ".$meta->get_communities_count." communities\n";
   print "   ".$meta->get_richness." species\n";
-  print "   ".$meta->get_member_count." individuals\n";
+  print "   ".$meta->get_members_count." individuals\n";
 
 =head1 DESCRIPTION
 
@@ -158,7 +158,7 @@ method add_communities ( ArrayRef[Bio::Community] $communities ) {
       $comm_hash->{$name} = $community;
    }
    $self->_communities( $comm_hash );
-   $self->_set_community_count( $self->get_community_count + scalar @$communities );
+   $self->_set_communities_count( $self->get_communities_count + scalar @$communities );
    return 1;
 }
 
@@ -174,7 +174,7 @@ method add_communities ( ArrayRef[Bio::Community] $communities ) {
 
 method remove_community ( Bio::Community $community ) {
    delete $self->_communities->{$community->name};
-   $self->_set_community_count( $self->get_community_count - 1 );
+   $self->_set_communities_count( $self->get_communities_count - 1 );
    return 1;
 }
 
@@ -225,23 +225,23 @@ method get_community_by_name ( Str $name ) {
 }
 
 
-=head2 get_community_count
+=head2 get_communities_count
 
  Function: Get the total number of communities in the metacommunity
- Usage   : my $nof_communities = $meta->get_community_count();
+ Usage   : my $nof_communities = $meta->get_communities_count();
  Args    : None
  Returns : Integer for the count
 
 =cut
 
-has _community_count => (
+has _communities_count => (
    is => 'ro',
    #isa => 'PositiveNum',
    lazy => 1,
    default => 0,
    init_arg => undef,
-   reader => 'get_community_count',
-   writer => '_set_community_count',
+   reader => 'get_communities_count',
+   writer => '_set_communities_count',
 );
 
 
@@ -269,16 +269,16 @@ method get_all_members () {
 }
 
 
-=head2 get_member_count
+=head2 get_members_count
 
  Function: Calculate the total count of members in the metacommunity.
- Usage   : my $nof_individuals = $meta->get_member_count;
+ Usage   : my $nof_individuals = $meta->get_members_count;
  Args    : None
  Returns : Integer for the count
 
 =cut
 
-method get_member_count () {
+method get_members_count () {
    my $total_count = 0;
    my $all_members = {};
    while (my $community = $self->next_community) {

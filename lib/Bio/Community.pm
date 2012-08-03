@@ -19,7 +19,7 @@ Bio::Community - A biological community
   $community->add_member( $member1 );    # add 1 of this type of Bio::Community::Member
   $community->add_member( $member2, 3 ); # add 3 of this member
 
-  print "There are ".$community->get_total_count." members in the community\n";
+  print "There are ".$community->get_members_count." members in the community\n";
   print "The total diversity is ".$community->get_richness." species\n";
 
   while (my $member = $community->next_member) {
@@ -116,7 +116,7 @@ has name => (
    is => 'rw',
    isa => 'Str',
    lazy => 1,
-   default => 'Unnamed community',
+   default => 'Unnamed',
    init_arg => '-name',
 );
 
@@ -143,23 +143,23 @@ has use_weights => (
 );
 
 
-=head2 get_total_count
+=head2 get_members_count
 
  Function: Get the total number of members in the community
- Usage   : $community->get_total_count();
+ Usage   : $community->get_members_count();
  Args    : none
  Returns : integer
 
 =cut
 
-has total_count => (
+has _total_count => (
    is => 'ro',
    #isa => 'PositiveNum', # too costly for an internal method
    lazy => 1,
    default => 0,
    init_arg => undef,
-   reader => 'get_total_count',
-   writer => '_set_total_count',
+   reader => 'get_members_count',
+   writer => '_set_members_count',
 );
 
 
@@ -273,7 +273,7 @@ method add_member ( $member, $count = 1 ) {
    my $member_id = $member->id;
    $self->_counts->{$member_id} += $count;
    $self->_members->{$member_id} = $member;
-   $self->_set_total_count( $self->get_total_count + $count );
+   $self->_set_members_count( $self->get_members_count + $count );
    $self->_weighted_count( $self->_weighted_count + $count / _prod($member->weights) );
    $self->_has_changed(1);
    return 1;
@@ -310,7 +310,7 @@ method remove_member ( $member, $count? ) {
          delete $counts->{$member_id};
          delete $self->_members->{$member_id};
       }
-      $self->_set_total_count( $self->get_total_count - $count );
+      $self->_set_members_count( $self->get_members_count - $count );
       $self->_weighted_count(  $self->_weighted_count - $count / _prod($member->weights) );
       $self->_has_changed(1);
    } # else no such member in the community, nothing to remove
@@ -404,7 +404,7 @@ method get_all_members ( $other_communities = [] ) {
    # Get all members in a hash
    my $all_members = {};
    for my $community (@$communities) {
-      while (my $member = $community->next_member('_get_all_member_ite')) {
+      while (my $member = $community->next_member('_community_get_all_members_ite')) {
          # Members are defined by their ID
          $all_members->{$member->id} = $member; 
       }
@@ -470,7 +470,8 @@ method get_member_by_rank (AbundanceRank $rank) {
 =head2 get_richness
 
  Function: Report the community richness or number of different types of members.
- Usage   : my $richness = $community->get_richness();
+           This is a form of alpha diversity.
+ Usage   : my $alpha_richness = $community->get_richness();
  Args    : none
  Returns : integer for the richness
 
@@ -486,7 +487,7 @@ method get_richness {
 
       # If rank abundance are not available, calculate richness manually
       if ($num_members == 0) {
-         while ($self->next_member('_get_richness_ite')) {
+         while ($self->next_member('_get_alpha_richness_ite')) {
             $num_members++;
          }
       }
@@ -532,7 +533,7 @@ method get_rel_ab (Bio::Community::Member $member) {
      $weighted_count = $self->_weighted_count;
   } else {
      $weight = 1;
-     $weighted_count = $self->get_total_count;
+     $weighted_count = $self->get_members_count;
   }
   if ($weighted_count != 0) {
      $rel_ab = $self->get_count($member) * 100 / ($weight * $weighted_count);

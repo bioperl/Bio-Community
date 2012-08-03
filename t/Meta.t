@@ -24,7 +24,7 @@ is $meta->next_community, undef;
 is_deeply [map {ref $_}   @{$meta->get_all_communities}], [];
 is_deeply [map {$_->name} @{$meta->get_all_communities}], [];
 
-is $meta->get_community_count, 0;
+is $meta->get_communities_count, 0;
 
 is_deeply [map {ref $_}   @{$meta->get_all_members}], [];
 is_deeply [map {$_->id}   @{$meta->get_all_members}], [];
@@ -67,14 +67,14 @@ is $meta->next_community, undef;
 is_deeply [map {ref $_}   @{$meta->get_all_communities}], ['Bio::Community'];
 is_deeply [map {$_->name} @{$meta->get_all_communities}], ['GOM'];
 
-is $meta->get_community_count, 1;
+is $meta->get_communities_count, 1;
 
 is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member'];
 is_deeply [map {$_->id}   @{$meta->get_all_members}], [1, 2];
 
 is $meta->get_richness, 2;
 
-is $meta->get_member_count, 20;
+is $meta->get_members_count, 20;
 
 
 # Add communities
@@ -89,14 +89,14 @@ is $meta->next_community, undef;
 is_deeply [map {ref $_}   @{$meta->get_all_communities}], ['Bio::Community', 'Bio::Community', 'Bio::Community'];
 is_deeply [map {$_->name} @{$meta->get_all_communities}], ['GOM', 'BBC', 'SAR'];
 
-is $meta->get_community_count, 3;
+is $meta->get_communities_count, 3;
 
 is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member', 'Bio::Community::Member'];
 is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2, 3];
 
 is $meta->get_richness, 3;
 
-is $meta->get_member_count, 155;
+is $meta->get_members_count, 155;
 
 
 # Remove communities
@@ -114,14 +114,14 @@ is $meta->get_community_by_name('SAR')->name, 'SAR';
 is $meta->get_community_by_name('BBC'), undef;
 is $meta->get_community_by_name('GOM')->name, 'GOM';
 
-is $meta->get_community_count, 2;
+is $meta->get_communities_count, 2;
 
 is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member'];
 is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2];
 
 is $meta->get_richness, 2;
 
-is $meta->get_member_count, 45;
+is $meta->get_members_count, 45;
 
 
 done_testing();

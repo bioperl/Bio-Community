@@ -61,7 +61,7 @@ isa_ok $group, 'Bio::Community::Member';
 is $group->desc, 'Other < 2 %';
 $id = $group->id;
 
-is $summary->name, 'Unnamed community';
+is $summary->name, 'Unnamed';
 delta_ok $summary->get_count($member1), 1;
 delta_ok $summary->get_count($member2), 95;
 delta_ok $summary->get_count($member3), 0;
@@ -267,7 +267,7 @@ is scalar @$summaries, 2;
 $summary = $summaries->[0];
 $group = get_group($summary);
 $id = $group->id;
-is $summary->name, 'Unnamed community';
+is $summary->name, 'Unnamed';
 delta_ok $summary->get_rel_ab($member1), 95.9558824;
 delta_ok $summary->get_rel_ab($member2),  0.5514706;
 delta_ok $summary->get_rel_ab($member3),  0;

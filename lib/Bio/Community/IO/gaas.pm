@@ -33,7 +33,7 @@ contains the content of the tax_id field, while $member->desc() reflects the
 tax_name field.
 
 Note that GAAS format does not include counts for the community members but
-relative abundances only. Thus, the get_member_count() method of the
+relative abundances only. Thus, the get_members_count() method of the
 Bio::Community objects generated using this driver is a relative abundance
 (a decimal number) instead of the usual integers used for counts.
 

@@ -22,19 +22,19 @@ isa_ok $community, 'Bio::Root::RootI';
 isa_ok $community, 'Bio::Community';
 
 $community = Bio::Community->new( -use_weights => 0 );
-is $community->get_total_count, 0;
+is $community->get_members_count, 0;
 
 $member1 = Bio::Community::Member->new( -weights => [3] );
 ok $community->add_member( $member1 );
-is $community->get_total_count, 1;
+is $community->get_members_count, 1;
 
 $member2 = Bio::Community::Member->new();
 ok $community->add_member( $member2, 23 );
-is $community->get_total_count, 24;
+is $community->get_members_count, 24;
 
 $member3 = Bio::Community::Member->new( -weights => [2,7] );
 ok $community->add_member( $member3, 4 );
-is $community->get_total_count, 28;
+is $community->get_members_count, 28;
 
 isa_ok $community->get_member_by_id(2), 'Bio::Community::Member';
 is $community->get_member_by_id(2)->id, 2;
@@ -72,10 +72,10 @@ is_deeply [sort keys %ids], [1, 2, 3];
 # Remove a member from the community
 
 ok $community->remove_member( $member2, 5 );
-is $community->get_total_count, 23;
+is $community->get_members_count, 23;
 
 ok $community->remove_member( $member2 ); # remove all of it
-is $community->get_total_count, 5;
+is $community->get_members_count, 5;
 
 ok $community->remove_member( $member2 ); # remove already removed member
 
@@ -92,7 +92,7 @@ is_deeply [sort keys %ids], [1, 3];
 
 is $community->get_richness, 2;
 
-is $community->name, 'Unnamed community';
+is $community->name, 'Unnamed';
 ok $community->name('ocean sample 3');
 is $community->name, 'ocean sample 3';
 
