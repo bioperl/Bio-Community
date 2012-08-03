@@ -153,7 +153,7 @@ method add_communities ( ArrayRef[Bio::Community] $communities ) {
       my $name = $community->name;
       if (exists $comm_hash->{$name}) {
          $self->throw("Could not add community '$name' because there already is".
-            "a community with this name in the metacommunity");
+            " a community with this name in the metacommunity");
       }
       $comm_hash->{$name} = $community;
    }
