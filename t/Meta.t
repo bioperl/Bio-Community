@@ -29,6 +29,8 @@ is $meta->get_community_count, 0;
 is_deeply [map {ref $_}   @{$meta->get_all_members}], [];
 is_deeply [map {$_->id}   @{$meta->get_all_members}], [];
 
+is $meta->get_richness, 0;
+
 
 # Basic metacommunity
 
@@ -70,6 +72,8 @@ is $meta->get_community_count, 1;
 is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member'];
 is_deeply [map {$_->id}   @{$meta->get_all_members}], [1, 2];
 
+is $meta->get_richness, 2;
+
 
 # Add communities
 
@@ -87,6 +91,8 @@ is $meta->get_community_count, 3;
 
 is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member', 'Bio::Community::Member'];
 is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2, 3];
+
+is $meta->get_richness, 3;
 
 
 # Remove communities
@@ -108,6 +114,8 @@ is $meta->get_community_count, 2;
 
 is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member'];
 is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2];
+
+is $meta->get_richness, 2;
 
 
 done_testing();

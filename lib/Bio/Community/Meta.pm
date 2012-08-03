@@ -74,7 +74,7 @@ methods. Internal methods are usually preceded with a _
  Usage   : my $meta = Bio::Community::Meta->new( ... );
  Args    : -name       : see name()
            -communities: see add_communities()
- Returns : a new Bio::Community::Meta object
+ Returns : A new Bio::Community::Meta object
 
 =cut
 
@@ -106,8 +106,8 @@ method BUILD ($args) {
  Function: Get or set the name of the metacommunity
  Usage   : $meta->name('estuary_salinity_gradient');
            my $name = $meta->name();
- Args    : string for the name
- Returns : string for the name
+ Args    : String for the name
+ Returns : String for the name
 
 =cut
 
@@ -125,122 +125,6 @@ has name => (
 
 
 
-###=head2 get_total_count
-
-### Function: Get the total number of members in the community
-### Usage   : $community->get_total_count();
-### Args    : none
-### Returns : integer
-
-###=cut
-
-###has total_count => (
-###   is => 'ro',
-###   #isa => 'PositiveNum', # too costly for an internal method
-###   lazy => 1,
-###   default => 0,
-###   init_arg => undef,
-###   reader => 'get_total_count',
-###   writer => '_set_total_count',
-###);
-
-
-###has _weighted_count => (
-###   is => 'rw',
-###   #isa => 'PositiveNum', # too costly for an internal method
-###   lazy => 1,
-###   default => 0,
-###   init_arg => undef,
-###);
-
-
-###has _members => (
-###   is => 'rw',
-###   isa => 'HashRef',
-###   lazy => 1,
-###   default => sub{ {} },
-###   init_arg => undef,
-###);
-
-
-###has _counts => (
-###   is => 'rw',
-###   isa => 'HashRef',
-###   lazy => 1,
-###   default => sub{ {} },
-###   init_arg => undef,
-###);
-
-
-###has _ranks_hash_weighted => (
-###   is => 'rw',
-###   isa => 'HashRef',
-###   lazy => 1,
-###   default => sub{ {} },
-###   init_arg => undef,
-###   clearer => '_clear_ranks_hash_weighted',
-###);
-
-
-###has _ranks_arr_weighted => (
-###   is => 'rw',
-###   isa => 'ArrayRef',
-###   lazy => 1,
-###   default => sub{ [] },
-###   init_arg => undef,
-###   clearer => '_clear_ranks_arr_weighted',
-###);
-
-
-###has _ranks_hash_unweighted => (
-###   is => 'rw',
-###   isa => 'HashRef',
-###   lazy => 1,
-###   default => sub{ {} },
-###   init_arg => undef,
-###   clearer => '_clear_ranks_hash_unweighted',
-###);
-
-
-###has _ranks_arr_unweighted => (
-###   is => 'rw',
-###   isa => 'ArrayRef',
-###   lazy => 1,
-###   default => sub{ [] },
-###   init_arg => undef,
-###   clearer => '_clear_ranks_arr_unweighted',
-###);
-
-
-###has _richness => (
-###   is => 'rw',
-###   isa => 'Maybe[Int]',
-###   lazy => 1,
-###   default => undef,
-###   init_arg => undef,
-###   clearer => '_clear_richness',
-###);
-
-
-###has _members_iterator => (
-###   is => 'rw',
-###   isa => 'Maybe[HashRef]',
-###   lazy => 1,
-###   default => undef,
-###   init_arg => undef,
-###   clearer => '_clear_members_iterator',
-###);
-
-###has _has_changed => (
-###   is => 'rw',
-###   isa => 'Bool',
-###   lazy => 1,
-###   default => 0,
-###   init_arg => undef,
-###);
-
-
-
 has _communities => (
    is => 'rw',
    #isa => 'Tie::IxHash',
@@ -253,9 +137,9 @@ has _communities => (
 =head2 add_communities
 
  Function: Add communities to a metacommunity. Communities have to have distinct
-           names.
+           names. Do not change the name of a community after you have added it!
  Usage   : $meta->add_communities([$community1, $community2]);
- Args    : an arrayref of Bio::Community objects to add
+ Args    : An arrayref of Bio::Community objects to add
  Returns : 1 on success
 
 =cut
@@ -297,8 +181,8 @@ method remove_community ( Bio::Community $community ) {
  Function: Access the next community in the metacommunity (in the order the
            communities were added). 
  Usage   : my $member = $meta->next_community();
- Args    : none
- Returns : a Bio::Community object
+ Args    : None
+ Returns : A Bio::Community object
 
 =cut
 
@@ -312,8 +196,8 @@ method next_community ( ) {
 
  Function: Generate a list of all communities in the metacommunity.
  Usage   : my $communities = $meta->get_all_communities();
- Args    : none
- Returns : an arrayref of Bio::Community objects
+ Args    : None
+ Returns : An arrayref of Bio::Community objects
 
 =cut
 
@@ -325,10 +209,10 @@ method get_all_communities ( ) {
 
 =head2 get_community_by_name
 
- Function: Fetch a community based on its ID
+ Function: Fetch a community based on its name
  Usage   : my $community = $meta->get_community_by_name('prairie');
- Args    : string for the community name
- Returns : a Bio::Community object or undef if the community was not found
+ Args    : String of the community name to look for
+ Returns : A Bio::Community object or undef if the community was not found
 
 =cut
 
@@ -342,8 +226,8 @@ method get_community_by_name ( Str $name ) {
 
  Function: Get the total number of communities in the metacommunity
  Usage   : $meta->get_community_count();
- Args    : none
- Returns : integer
+ Args    : None
+ Returns : Integer
 
 =cut
 
@@ -362,13 +246,12 @@ has _community_count => (
 
  Function: Generate a list of all members in the metacommunity.
  Usage   : my $members = $meta->get_all_members();
- Args    : none
- Returns : an arrayref of Bio::Community::Member objects
+ Args    : None
+ Returns : An arrayref of Bio::Community::Member objects
 
 =cut
 
 method get_all_members ( ) {
-
    # Get all members in a hash
    my $all_members = {};
    while (my $community = $self->next_community) {
@@ -377,47 +260,42 @@ method get_all_members ( ) {
          $all_members->{$member->id} = $member;
       }
    }
-
    # Convert member hash to an array
    $all_members = [values %$all_members];
-
    return $all_members;
 }
 
 
+=head2 get_richness
+
+ Function: Calculate the richness of the metacommunity (number of different
+           types of members). This is a form of gamma diversity.
+ Usage   : my $gamma_richness = $meta->get_richness();
+ Args    : None
+ Returns : Integer for the richness
+
+=cut
+
+method get_richness {
+   my $richness = scalar @{$self->get_all_members};
+   return $richness;
+}
+
 
 # get_member_total_count
-
-
-#=head2 get_richness
-
-# Function: Report the community richness or number of different types of members.
-# Usage   : my $richness = $community->get_richness();
-# Args    : none
-# Returns : integer for the richness
-
-#=cut
-
-#method get_richness {
-#   $self->_reset if $self->_has_changed;
-#   if (not defined $self->_richness) {
-
-#      # Try to calculate the richness from the abundance ranks if available
-#      my $num_members = scalar( @{$self->_ranks_arr_weighted}   ) ||
-#                        scalar( @{$self->_ranks_arr_unweighted} ) ;
-
-#      # If rank abundance are not available, calculate richness manually
-#      if ($num_members == 0) {
-#         while ($self->next_member('_get_richness_ite')) {
-#            $num_members++;
+#   my $richness = 0;
+#   my $all_members = {};
+#   while (my $community = $self->next_community) {
+#      while (my $member = $community->next_member('_get_gamma_richness_ite')) {
+#         my $id = $member->id;
+#         if (not exists $all_members->{$id}) {
+#            # New distinct member
+#            $all_members->{$id} = undef;
+#            $richness++;
 #         }
 #      }
-
-#      # Save richness for later re-use
-#      $self->_richness($num_members);
 #   }
-#   return $self->_richness;
-#}
+#   return $richness;
 
 
 __PACKAGE__->meta->make_immutable;
