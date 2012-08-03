@@ -271,46 +271,25 @@ method add_communities ( ArrayRef[Bio::Community] $communities ) {
       $comm_hash->{$name} = $community;
    }
    $self->_communities( $comm_hash );
+   $self->_set_community_count( $self->get_community_count + scalar @$communities );
    return 1;
 }
 
 
-#=head2 remove_member
+=head2 remove_community
 
-# Function: remove members from a community
-# Usage   : $community->remove_member($member, 3);
-# Args    : * A Bio::Community::Member to remove
-#           * Optional: how of this member to remove. If no value is provided,
-#             all such members are removed.
-# Returns : 1 on success
+ Function: Remove a community from a metacommunity
+ Usage   : $meta->remove_community($community);
+ Args    : A Bio::Community to remove
+ Returns : 1 on success
 
-#=cut
+=cut
 
-##method remove_member ( Bio::Community::Member $member, Count $count = 1 ) {
-#method remove_member ( $member, $count? ) {
-#   # Sanity checks
-#   my $member_id = $member->id;
-#   my $counts = $self->_counts;
-#   if (exists $counts->{$member_id}) {
-#      # Remove existing member
-#      if ( defined($count) && ($count > $counts->{$member_id}) ) {
-#         $self->throw("Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n");
-#      }
-#      # Now remove unwanted members
-#      if (not defined $count) {
-#         $count = $counts->{$member_id};
-#      }
-#      $counts->{$member_id} -= $count;
-#      if ($counts->{$member_id} == 0) {
-#         delete $counts->{$member_id};
-#         delete $self->_members->{$member_id};
-#      }
-#      $self->_set_total_count( $self->get_total_count - $count );
-#      $self->_weighted_count(  $self->_weighted_count - $count / _prod($member->weights) );
-#      $self->_has_changed(1);
-#   } # else no such member in the community, nothing to remove
-#   return 1;
-#}
+method remove_community ( Bio::Community $community ) {
+   delete $self->_communities->{$community->name};
+   $self->_set_community_count( $self->get_community_count - 1 );
+   return 1;
+}
 
 
 =head2 next_community
@@ -342,6 +321,41 @@ method get_all_communities ( ) {
    my @all_communities = values %{$self->_communities};   
    return \@all_communities;
 }
+
+
+=head2 get_community_by_name
+
+ Function: Fetch a community based on its ID
+ Usage   : my $community = $meta->get_community_by_name('prairie');
+ Args    : string for the community name
+ Returns : a Bio::Community object or undef if the community was not found
+
+=cut
+
+method get_community_by_name ( Str $name ) {
+   my $community = $self->_communities->{$name};
+   return $community;
+}
+
+
+=head2 get_community_count
+
+ Function: Get the total number of communities in the metacommunity
+ Usage   : $meta->get_community_count();
+ Args    : none
+ Returns : integer
+
+=cut
+
+has _community_count => (
+   is => 'ro',
+   #isa => 'PositiveNum', # too costly for an internal method
+   lazy => 1,
+   default => 0,
+   init_arg => undef,
+   reader => 'get_community_count',
+   writer => '_set_community_count',
+);
 
 
 
@@ -377,6 +391,9 @@ method get_all_communities ( ) {
 #}
 
 
+# get_all_members
+
+# get_member_total_count
 
 __PACKAGE__->meta->make_immutable;
 

@@ -14,9 +14,17 @@ my ($meta, $community1, $community2, $community3, $member1, $member2, $member3);
 
 # Basic
 
-ok $meta = Bio::Community::Meta->new( -name => 'basic' );
+ok $meta = Bio::Community::Meta->new( ), 'Basic';
 isa_ok $meta, 'Bio::Root::RootI';
 isa_ok $meta, 'Bio::Community::Meta';
+
+is $meta->name, 'Unnamed metacommunity';
+is $meta->next_community, undef;
+
+is_deeply [map {ref $_}   @{$meta->get_all_communities}], [];
+is_deeply [map {$_->name} @{$meta->get_all_communities}], [];
+
+is $meta->get_community_count, 0;
 
 
 # Add 3 communities to a metacommunity
@@ -40,8 +48,11 @@ $community3->add_member( $member1, 25);
 $community3->add_member( $member2,  0);
 $community3->add_member( $member3,  0);
 
-ok $meta = Bio::Community::Meta->new( -communities => [$community1] );
-is $meta->name, 'Unnamed metacommunity';
+ok $meta = Bio::Community::Meta->new(
+   -communities => [$community1],
+   -name        => 'oceanic provinces'
+);
+is $meta->name, 'oceanic provinces';
 ok $meta->name('marine regions');
 is $meta->name, 'marine regions';
 
@@ -50,6 +61,9 @@ is $meta->next_community, undef;
 
 is_deeply [map {ref $_}   @{$meta->get_all_communities}], ['Bio::Community'];
 is_deeply [map {$_->name} @{$meta->get_all_communities}], ['GOM'];
+
+is $meta->get_community_count, 1;
+
 
 ok $meta->add_communities([$community2, $community3]);
 
@@ -61,6 +75,22 @@ is $meta->next_community, undef;
 is_deeply [map {ref $_}   @{$meta->get_all_communities}], ['Bio::Community', 'Bio::Community', 'Bio::Community'];
 is_deeply [map {$_->name} @{$meta->get_all_communities}], ['GOM', 'BBC', 'SAR'];
 
+is $meta->get_community_count, 3;
+
+
+ok $meta->remove_community($community3);
+
+is $meta->next_community->name, 'GOM';
+is $meta->next_community->name, 'BBC';
+is $meta->next_community, undef;
+
+is_deeply [map {ref $_}   @{$meta->get_all_communities}], ['Bio::Community', 'Bio::Community'];
+is_deeply [map {$_->name} @{$meta->get_all_communities}], ['GOM', 'BBC'];
+
+is $meta->get_community_by_name('GOM')->name, 'GOM';
+is $meta->get_community_by_name('SAR'), undef;
+
+is $meta->get_community_count, 2;
 
 
 
