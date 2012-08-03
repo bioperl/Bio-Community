@@ -13,6 +13,7 @@ use strict;
 use warnings;
 use Method::Signatures;
 use Bio::Community::IO;
+use Bio::Community::Meta;
 use Bio::Community::Tools::CountNormalizer;
 use Getopt::Euclid qw(:minimal_keys);
 
@@ -138,21 +139,22 @@ func bootstrap ($input_files, $output_prefix, $sample_size, $dist_threshold,
    $num_repetitions) {
 
    # Read input communities
+   my $meta = Bio::Community::Meta->new();
    my $communities = [];
    my $format;
    for my $input_file (@$input_files) {
       my $in = Bio::Community::IO->new( -file => $input_file );
       $format = $in->format;
       while (my $community = $in->next_community) {
-         push @$communities, $community;
+         $meta->add_communities([$community]);
       }
       $in->close;
    }
 
    # Prepare normalizer
    my $normalizer = Bio::Community::Tools::CountNormalizer->new(
-      -communities => $communities,
-      -verbose     => 1,
+      -meta    => $meta,
+      -verbose => 1,
    );
    if (defined $dist_threshold) {
       $normalizer->threshold($dist_threshold);
@@ -165,24 +167,24 @@ func bootstrap ($input_files, $output_prefix, $sample_size, $dist_threshold,
    }
 
    # Bootstrap and write average communities
-   my $out_communities = $normalizer->get_average_communities;
-   write_communities($out_communities, $output_prefix, $format, 'average');
+   my $out_meta = $normalizer->get_avg_meta;
+   write_communities($out_meta, $output_prefix, $format, 'average');
 
    # Calculate and write representative communities
-   $out_communities = $normalizer->get_representative_communities;
-   write_communities($out_communities, $output_prefix, $format, 'representative');
+   $out_meta = $normalizer->get_repr_meta;
+   write_communities($out_meta, $output_prefix, $format, 'representative');
 
    return 1;
 }
 
 
-func write_communities ($communities, $output_prefix, $output_format, $type='') {
+func write_communities ($meta, $output_prefix, $output_format, $type='') {
    $type ||= '';
    my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
    my $num = 0;
    my $out;
    my $output_file = '';
-   for my $community (@$communities) {
+   while (my $community = $meta->next_community) {
       if (not defined $out) {
          if ($multiple_communities) {
             $output_file = $output_prefix;

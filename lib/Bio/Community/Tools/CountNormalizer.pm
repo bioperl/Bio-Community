@@ -15,21 +15,22 @@ Bio::Community::Tools::CountNormalizer - Normalize communities by count
 
   use Bio::Community::Tools::CountNormalizer;
 
-  # Normalize a community by repeatedly taking 1,000 random members
+  # Normalize communities in a metacommunity by repeatedly taking 1,000 random members
   my $normalizer = Bio::Community::Tools::CountNormalizer->new(
-     -communities => [ $community ],
+     -meta        => $meta,
      -sample_size => 1000,
      -threshold   => 0.001, # When to stop iterating. Can specify repetions instead
   );
 
-  my $average_community = $normalizer->get_average_communities->[0];
+  my $average_community = $normalizer->get_avg_meta->[0];
 
   # Round counts and remove members with abundance between 0 and 0.5
-  my $representative_community = $normalizer->get_representative_communities->[0];
+  my $representative_community = $normalizer->get_repr_meta->[0];
 
 =head1 DESCRIPTION
 
-This module produces communities normalized by their number of counts.
+This module takes a metacommunity and normalizes (rarefies) the communities it
+contains by their number of counts.
 
 Comparing the composition and diversity of biological communities can be biased
 by sampling artefacts. When comparing two identical communities, one for which
@@ -87,7 +88,7 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::Tool::CountNormalizer object
  Usage   : my $normalizer = Bio::Community::Tool::CountNormalizer->new( );
- Args    : -communities, -repetitions, -sample_size. See details below.
+ Args    : -meta, -repetitions, -sample_size. See details below.
  Returns : a new Bio::Community::Tools::CountNormalizer object
 
 =cut
@@ -100,6 +101,7 @@ use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
+use Bio::Community::Meta;
 use Bio::Community::Tools::Sampler;
 use Bio::Community::Tools::Ruler;
 use POSIX;
@@ -108,22 +110,22 @@ use List::Util qw(min);
 extends 'Bio::Root::Root';
 
 
-=head2 communities
+=head2 meta
 
- Function: Get or set the communities to normalize.
- Usage   : my $communities = $normalizer->communities;
- Args    : arrayref of Bio::Community objects
- Returns : arrayref of Bio::Community objects
+ Function: Get or set the metacommunity to normalize.
+ Usage   : my $meta = $normalizer->metacommunity;
+ Args    : A Bio::Community::Meta object
+ Returns : A Bio::Community::Meta object
 
 =cut
 
-has communities => (
+has metacommunity => (
    is => 'rw',
-   isa => 'ArrayRef[Bio::Community]',
+   isa => 'Bio::Community::Meta',
    required => 0,
-   default => sub{ [] },
+   default => undef,
    lazy => 1,
-   init_arg => '-communities',
+   init_arg => '-meta',
 );
 
 
@@ -220,61 +222,63 @@ has verbose => (
 );
 
 
-=head2 get_average_communities
+=head2 get_avg_meta
 
- Function: Calculate the average communities. Each normalized community returned
-           corresponds to the equivalent community in the input.
- Usage   : my $communities = $normalizer->get_average_communities;
+ Function: Calculate an average metacommunity.
+ Usage   : my $meta = $normalizer->get_avg_meta;
  Args    : none
  Returns : arrayref of Bio::Community objects
 
 =cut
 
-has average_communities => (
+has average_meta => (
    is => 'rw',
-   isa => 'ArrayRef', # ArrayRef[Bio::Community]
+   isa => 'Bio::Community::Meta',
    required => 0,
-   default => sub { [] },
+   default => sub { undef },
    lazy => 1,
-   reader => 'get_average_communities',
-   writer => '_set_average_communities',
-   predicate => '_has_average_community',
+   reader => 'get_avg_meta',
+   writer => '_set_avg_meta',
+   predicate => '_has_avg_meta',
 );
 
-before get_average_communities => sub {
+before get_avg_meta => sub {
    my ($self) = @_;
-   $self->_count_normalize if not $self->_has_average_community;
+   $self->_count_normalize if not $self->_has_avg_meta;
    return 1;
 };
 
 
-=head2 get_representative_communities
+=head2 get_repr_meta
 
- Function: Calculate the representative communities. Each normalized community
-           returned corresponds to the equivalent community in the input.
- Usage   : my $communities = $normalizer->get_representative_communities;
+ Function: Calculate a representative metacommunity.
+ Usage   : my $meta = $normalizer->get_repr_meta;
  Args    : none
  Returns : arrayref of Bio::Community objects
 
 =cut
 
-has representative_communities => (
+has representative_meta => (
    is => 'rw',
-   isa => 'ArrayRef', # ArrayRef[Bio::Community]
+   isa => 'Bio::Community::Meta',
    required => 0,
-   default => sub { [] },
+   default => sub { undef },
    lazy => 1,
-   reader => 'get_representative_communities',
-   writer => '_set_representative_communities',
-   predicate => '_has_representative_communities',
+   reader => 'get_repr_meta',
+   writer => '_set_repr_meta',
+   predicate => '_has_repr_meta',
 );
 
-before get_representative_communities => sub {
+before get_repr_meta => sub {
    my ($self) = @_;
-   if (not $self->_has_representative_communities) {
-      my $averages = $self->get_average_communities;
-      my $representatives = [ map { $self->_calc_representative($_) } @$averages ];
-      $self->_set_representative_communities($representatives);
+   if (not $self->_has_repr_meta) {
+      my $average_meta = $self->get_avg_meta;
+      my $representative_meta = Bio::Community::Meta->new( -name => $average_meta->name );
+      while (my $average_community = $average_meta->next_community) {
+         my $representative_community = $self->_calc_repr($average_community);
+         $representative_meta->add_communities([$representative_community]);
+      }
+      $self->_set_repr_meta($representative_meta);
    }
    return 1;
 };
@@ -284,12 +288,13 @@ method _count_normalize {
    # Normalize communties by total count
 
    # Sanity check
-   my $communities = $self->communities;
-   if (scalar @$communities == 0) {
-      $self->throw('Need to provide at least one community');
+   my $meta = $self->metacommunity;
+   if ($meta->get_communities_count == 0) {
+      $self->throw('Metacommunity should contain at least one community');
    }
 
    # Get or set sample size
+   my $communities = $meta->get_all_communities;
    my $min = min( map {$_->get_members_count} @$communities );
    my $sample_size = $self->sample_size;
    if (not defined $sample_size) { 
@@ -320,10 +325,10 @@ method _count_normalize {
    }
 
    # Bootstrap now
-   my $average_communities = [];
+   my $average_meta = Bio::Community::Meta->new( -name => $meta->name );
    my $min_repetitions = POSIX::DBL_MAX;
    my $max_threshold = 0;
-   for my $community ( @{$self->communities} ) {
+   for my $community ( @$communities ) {
       my ($average, $repetitions, $dist);
       if ($community->get_members_count == $sample_size) {         
          ($average, $repetitions, $dist) = ($community->clone, undef, undef);
@@ -339,10 +344,9 @@ method _count_normalize {
       } else {
          $min_repetitions = $repetitions if (defined $repetitions) && ($repetitions < $min_repetitions);
       }
-
-      push @$average_communities, $average;
+      $average_meta->add_communities([$average]);
    }
-   $self->_set_average_communities($average_communities);
+   $self->_set_avg_meta($average_meta);
 
    if (defined $self->repetitions) {
       $self->threshold($max_threshold);
@@ -456,7 +460,7 @@ method _divide (Bio::Community $community, StrictlyPositiveInt $divisor, $member
 }
 
 
-method _calc_representative(Bio::Community $average) {
+method _calc_repr(Bio::Community $average) {
    # Round the member count and add them into a new, representative community
    my $cur_count = 0;
    my $target_count = int( $average->get_members_count + 0.5 ); # round count like 999.9 to 1000
@@ -474,7 +478,7 @@ method _calc_representative(Bio::Community $average) {
    my $richness = 0;
    my $deltas;
    my $members;
-   while ( my $member = $average->next_member('_calc_representative_ite') ) {
+   while ( my $member = $average->next_member('_calc_repr_ite') ) {
       $richness++;
       # Add member and count to the community
       my $count = $average->get_count($member);
