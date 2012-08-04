@@ -13,8 +13,9 @@ use strict;
 use warnings;
 use Bio::DB::Taxonomy;
 use Bio::Community::IO;
-use Method::Signatures;
+use Bio::Community::Meta;
 use Bio::Community::Tools::Summarizer;
+use Method::Signatures;
 use Getopt::Euclid qw(:minimal_keys);
 
 
@@ -125,8 +126,7 @@ exit;
 func copyrighter ($input, $output, $verbose = 0) {
 
    # Read input communities and do weight assignment
-   my $communities = [];
-
+   my $meta = Bio::Community::Meta->new;
    print "Reading file '$input'\n";
    my $in = Bio::Community::IO->new(
       -file          => $input,
@@ -139,14 +139,14 @@ func copyrighter ($input, $output, $verbose = 0) {
    print "Detected format is '$format'\n";
 
    while (my $community = $in->next_community) {
-      push @$communities, $community;
+      $meta->add_communities([$community]);
    }
    $in->close;
 
    # Do the copy number correction
    my $summarized_communities = Bio::Community::Tools::Summarizer->new(
-      -communities => $communities,
-      -merge_dups  => 0,
+      -metacommunity => $meta,
+      -merge_dups    => 0,
    )->get_summaries;
 
    # Write results, converting to relative abundance if desired
@@ -156,7 +156,7 @@ func copyrighter ($input, $output, $verbose = 0) {
       -abundance_type => 'percentage',
    );
    print "Writing communities to file '$output'\n";
-   for my $community (@$communities) {
+   while (my $community = $meta->next_community) {
       $fh->write_community($community);
    }
    $fh->close;
