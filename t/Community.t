@@ -127,7 +127,7 @@ is $community->get_member_by_rank(1)->id, 1;
 is $community->get_member_by_rank(2)->id, 3;
 
 
-# Get all the members from multiple communities
+# Named iterators
 
 ok $community = Bio::Community->new();
 ok $community->add_member($member1);
@@ -143,29 +143,6 @@ ok $community3 = Bio::Community->new();
 ok $community3->add_member( Bio::Community::Member->new( -id => 3) );
 ok $member5 = Bio::Community::Member->new();
 ok $community3->add_member($member5);
-
-ok @members = @{$community2->get_all_members([$community, $community3])};
-is scalar(@members), 5;
-
-%members = map { $_->id => undef } @members;
-ok exists $members{$member1->id};
-ok exists $members{$member2->id};
-ok exists $members{$member3->id};
-ok exists $members{$member4->id};
-ok exists $members{$member5->id};
-
-ok @members = @{$community2->get_all_members([$community, $community2, $community3])};
-is scalar(@members), 5;
-
-%members = map { $_->id => undef } @members;
-ok exists $members{$member1->id};
-ok exists $members{$member2->id};
-ok exists $members{$member3->id};
-ok exists $members{$member4->id};
-ok exists $members{$member5->id};
-
-
-# Named iterators
 
 $iters = 0;
 while (my $memberA = $community->next_member('iterA')) {
