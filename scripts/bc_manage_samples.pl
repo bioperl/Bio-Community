@@ -14,6 +14,7 @@ use warnings;
 use Method::Signatures;
 use Bio::Community;
 use Bio::Community::IO;
+use Bio::Community::Meta;
 use Getopt::Euclid qw(:minimal_keys);
 
 
@@ -155,7 +156,7 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
    }
 
    # Read input communities, exclude or include as needed
-   my @communities;
+   my $meta = Bio::Community::Meta->new;
    my $format;
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
@@ -166,12 +167,11 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
          if ( $nof_includes > 0 ) {
             # Only include specifically requested communities
             if ( exists $includes{$name} ) {
-               push @communities, $community;
+               $meta->add_communities([$community]);
             }
          } else {
             if ( not exists $excludes{$name} ) {
-               push @communities, $community;
-
+               $meta->add_communities([$community]);
             } # else it is specifically excluded
          }
       }
@@ -181,7 +181,7 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
    # Merge communities
    if (defined $merge_names) {
       my %communities_hash;
-      for my $community (@communities) {
+      while (my $community = $meta->next_community) {
          my $name = $community->name;
          if (exists $communities_hash{$name}) {
             die "Error: Ambiguous community names. Several communities named ".
@@ -205,18 +205,18 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
          }
          $communities_hash{$merged_name} = $merged_community;
       }
-      @communities = values %communities_hash;
+      $meta = Bio::Community::Meta->new(-communities => [values %communities_hash]);
    }
 
    # Write output communities
-   if (scalar @communities == 0) {
+   if ($meta->get_communities_count == 0) {
       warn "Warning: No communities to write\n";
    } else {
       my $multiple_communities = Bio::Community::IO->new(-format=>$format)->multiple_communities;
       my $num = 0;
       my $out;
       my $output_file;
-      for my $community (@communities) {
+      while (my $community = $meta->next_community) {
          if (not defined $out) {
             if ($multiple_communities) {
                $output_file = $output_prefix.'.'.$format;
