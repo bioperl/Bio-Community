@@ -97,10 +97,10 @@ isa_ok $normalizer, 'Bio::Community::Tools::CountNormalizer';
 # Normalizer with specified settings
 
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
-   -meta        => $meta,
-   -repetitions => 10,
-   -sample_size => 1000,
-   -verbose     => 1,
+   -metacommunity => $meta,
+   -repetitions   => 10,
+   -sample_size   => 1000,
+   -verbose       => 1,
 );
 
 is $normalizer->get_avg_meta->get_communities_count, 2;
@@ -152,9 +152,9 @@ delta_within $representative->get_count($member6), $representative->get_count($m
 # Normalizer with manually specified threshold
 
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
-   -meta        => $meta,
-   -threshold   => 1E-3,
-   -sample_size => 1000,
+   -metacommunity => $meta,
+   -threshold     => 1E-3,
+   -sample_size   => 1000,
 );
 is $normalizer->get_avg_meta->get_communities_count, 2;
 is $normalizer->get_repr_meta->get_communities_count, 2;
@@ -203,9 +203,9 @@ delta_within $representative->get_count($member6), $average->get_count($member6)
 # Normalizer with automatic sample size and repetitions overriding threshold
 
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
-   -meta        => $meta,
-   -threshold   => 1E-3,
-   -repetitions => 10,
+   -metacommunity => $meta,
+   -threshold     => 1E-3,
+   -repetitions   => 10,
 );
 is $normalizer->get_avg_meta->get_communities_count, 2;
 is $normalizer->get_avg_meta->get_communities_count, 2;
@@ -255,9 +255,9 @@ delta_within $representative->get_count($member6), $average->get_count($member6)
 # Normalizer with sample that should exclude some members from representative
 
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
-   -meta        => $meta,
-   -repetitions => 50,
-   -sample_size => 4,
+   -metacommunity => $meta,
+   -repetitions   => 50,
+   -sample_size   => 4,
 );
 is $normalizer->get_avg_meta->get_communities_count, 2;
 is $normalizer->get_avg_meta->get_communities_count, 2;
@@ -311,9 +311,9 @@ delta_within $representative->get_count($member6), $representative->get_count($m
 # Normalizer with sample that should exclude some members from representative
 
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
-   -meta        => $meta,
-   -repetitions => 50,
-   -sample_size => 4,
+   -metacommunity => $meta,
+   -repetitions   => 50,
+   -sample_size   => 4,
 );
 is $normalizer->get_avg_meta->get_communities_count, 2;
 is $normalizer->get_avg_meta->get_communities_count, 2;
@@ -612,9 +612,9 @@ $community3->add_member( $member6, 2514);
 $meta = Bio::Community::Meta->new( -communities => [$community1, $community3] );
 
 ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
-   -meta        => $meta,
-   -repetitions => 10,
-   -sample_size => 1000,
+   -metacommunity => $meta,
+   -repetitions   => 10,
+   -sample_size   => 1000,
 );
 
 is $normalizer->get_avg_meta->get_communities_count, 2;

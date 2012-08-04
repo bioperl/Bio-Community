@@ -153,8 +153,8 @@ func bootstrap ($input_files, $output_prefix, $sample_size, $dist_threshold,
 
    # Prepare normalizer
    my $normalizer = Bio::Community::Tools::CountNormalizer->new(
-      -meta    => $meta,
-      -verbose => 1,
+      -metacommunity => $meta,
+      -verbose       => 1,
    );
    if (defined $dist_threshold) {
       $normalizer->threshold($dist_threshold);

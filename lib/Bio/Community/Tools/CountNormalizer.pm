@@ -17,9 +17,9 @@ Bio::Community::Tools::CountNormalizer - Normalize communities by count
 
   # Normalize communities in a metacommunity by repeatedly taking 1,000 random members
   my $normalizer = Bio::Community::Tools::CountNormalizer->new(
-     -meta        => $meta,
-     -sample_size => 1000,
-     -threshold   => 0.001, # When to stop iterating. Can specify repetions instead
+     -metacommunity => $meta,
+     -sample_size   => 1000,
+     -threshold     => 0.001, # When to stop iterating. Can specify repetions instead
   );
 
   my $average_community = $normalizer->get_avg_meta->[0];
@@ -88,7 +88,9 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::Tool::CountNormalizer object
  Usage   : my $normalizer = Bio::Community::Tool::CountNormalizer->new( );
- Args    : -meta, -repetitions, -sample_size. See details below.
+ Args    : -metacommunity: see metacommunity()
+           -repetitions  : see repetitions()
+           -sample_size  : see sample_size()
  Returns : a new Bio::Community::Tools::CountNormalizer object
 
 =cut
@@ -110,7 +112,7 @@ use List::Util qw(min);
 extends 'Bio::Root::Root';
 
 
-=head2 meta
+=head2 metacommunity
 
  Function: Get or set the metacommunity to normalize.
  Usage   : my $meta = $normalizer->metacommunity;
@@ -125,7 +127,7 @@ has metacommunity => (
    required => 0,
    default => undef,
    lazy => 1,
-   init_arg => '-meta',
+   init_arg => '-metacommunity',
 );
 
 
