@@ -400,12 +400,13 @@ method _bootstrap (Bio::Community $community) {
       # abundance, not the counts, it would be the same. Hence, only divide at
       # the end
 
+      my $meta = Bio::Community::Meta->new(-communities =>[$overall, $prev_overall]);
+
       if (not defined $repetitions) {
          # Exit if distance with last average community is small
          $dist = Bio::Community::Tools::Ruler->new(
                -type          => 'euclidean',
-               -metacommunity => Bio::Community::Meta->new(
-                  -communities =>[$overall, $prev_overall]),
+               -metacommunity => $meta,
          )->get_distance;
          if ($verbose) {
             print "   iteration $iteration, distance $dist\n";
@@ -424,8 +425,7 @@ method _bootstrap (Bio::Community $community) {
          } elsif ($iteration >= $repetitions) {
             $dist = Bio::Community::Tools::Ruler->new(
                   -type          => 'euclidean',
-                  -metacommunity => Bio::Community::Meta->new(
-                     -communities =>[$overall, $prev_overall]),
+                  -metacommunity => $meta,
             )->get_distance;
             last;
          }
