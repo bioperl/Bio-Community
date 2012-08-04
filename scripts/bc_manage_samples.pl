@@ -168,6 +168,7 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
             # Only include specifically requested communities
             if ( exists $includes{$name} ) {
                $meta->add_communities([$community]);
+               delete $includes{$name};
             }
          } else {
             if ( not exists $excludes{$name} ) {
@@ -176,6 +177,12 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
          }
       }
       $in->close;
+   }
+
+   # Warn if there are samples that were requested but not seen
+   my @missing = keys %includes;
+   if (scalar @missing > 0) {
+      warn "Warning: Did not find the following requested communities: ".join(' ,',@missing)."\n";
    }
 
    # Merge communities
