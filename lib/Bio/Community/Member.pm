@@ -146,9 +146,8 @@ has id => (
 );
 
 
-sub _register_id {
+func _register_id ($self, $id, $old_id?) {
    # Register ID after it has been assigned
-   my $self = shift;
    $ids{$self->{id}} = undef;
 };
 

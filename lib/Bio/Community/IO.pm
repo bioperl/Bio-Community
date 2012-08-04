@@ -113,12 +113,12 @@ extends 'Bio::Root::Root',
 
 
 # Overriding new... Is there a better alternative?
-sub new {
-   my $class = shift;
+
+func new ($class, @args) {
    my $real_class = Scalar::Util::blessed($class) || $class;
 
    # These all come from the same base, Moose::Object, so this is fine
-   my $params = $real_class->BUILDARGS(@_);
+   my $params = $real_class->BUILDARGS(@args);
    my $format = delete $params->{'-format'};
    if (not defined $format) {
       # Try to guess format
