@@ -13,6 +13,7 @@ use strict;
 use warnings;
 use Method::Signatures;
 use Bio::Community::IO;
+use Bio::Community::Meta;
 use Bio::Community::Tools::Ruler;
 use Getopt::Euclid qw(:minimal_keys);
 
@@ -164,7 +165,7 @@ func calc_dist ($input_files, $weight_files, $weight_assign, $output_prefix,
    $dist_type, $pair_files) {
 
    # Read input communities
-   my $communities = [];
+   my $meta = Bio::Community::Meta->new;
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new(
@@ -175,25 +176,23 @@ func calc_dist ($input_files, $weight_files, $weight_assign, $output_prefix,
          $in->weight_files($weight_files);
       }
       while (my $community = $in->next_community) {
-         push @$communities, $community;
+         $meta->add_communities([$community]);
       }
       $in->close;
    }
 
    # Calculate distances
    if ($pair_files) {
-      _process_specific_pairs($communities, $dist_type, $output_prefix, $pair_files);
+      _process_specific_pairs($meta, $dist_type, $output_prefix, $pair_files);
    } else {
-      _process_all_pairs($communities, $dist_type, $output_prefix);
+      _process_all_pairs($meta, $dist_type, $output_prefix);
    }
 
    return 1;
 }
 
 
-func _process_specific_pairs ($communities, $dist_type, $output_prefix,
-   $pair_files) {
-   $communities = { map { $_->name => $_ } @$communities };
+func _process_specific_pairs ($meta, $dist_type, $output_prefix, $pair_files) {
    my $i = 0;
    for my $pair_file (@$pair_files) {
       $i++;
@@ -204,14 +203,14 @@ func _process_specific_pairs ($communities, $dist_type, $output_prefix,
       open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
       for my $pair (@$pairs) {
          my $name1 = $pair->[0];
-         my $community1 = $communities->{$name1} or
+         my $community1 = $meta->get_community_by_name($name1) or
             die "Error: Community $name1 was not found in the provided community file";
          my $name2 = $pair->[1];
-         my $community2 = $communities->{$name2} or
+         my $community2 = $meta->get_community_by_name($name2) or
             die "Error: Community $name2 was not found in the provided community file";
          my $distance = Bio::Community::Tools::Ruler->new(
-            -communities => [ $community1, $community2 ],
-            -type        => $dist_type,
+            -metacommunity => Bio::Community::Meta->new(-communities => [$community1, $community2]),
+            -type          => $dist_type,
          )->get_distance;
          print $out $community1->name."\t".$community2->name."\t".$distance."\n";
       }
@@ -221,19 +220,20 @@ func _process_specific_pairs ($communities, $dist_type, $output_prefix,
 }
 
 
-func _process_all_pairs ($communities, $dist_type, $output_prefix) {
+func _process_all_pairs ($meta, $dist_type, $output_prefix) {
    # Calculate distances between all pairs of communities
    my $out_file = $output_prefix.'.txt';
    print "Writing distances to file $out_file\n";
    open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
+   my $communities = $meta->get_all_communities;
    my $num_communities = scalar @$communities;
    for my $i (0 .. $num_communities - 1) {
       my $community1 = $communities->[$i];
       for my $j ($i + 1 .. $num_communities -1) {
          my $community2 = $communities->[$j];
          my $distance = Bio::Community::Tools::Ruler->new(
-            -communities => [$community1, $community2],
-            -type        => $dist_type,
+            -metacommunity => Bio::Community::Meta->new(-communities => [$community1, $community2]),
+            -type          => $dist_type,
          )->get_distance;
          print $out $community1->name."\t".$community2->name."\t".$distance."\n";
       }
