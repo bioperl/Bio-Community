@@ -368,46 +368,19 @@ method next_member ( $iter_name = 'default' ) {
 
 =head2 get_all_members
 
- Function: Generate a list of all members in the community. Given more communities
-           as arguments, generate a list of all members in all the communities,
-           including the "caller" community. Every member appears only once in
-           that list, even if the member is present in multiple communities
-           (remember that the only thing that defines if members are identical
-           is their ID).
- Usage   : # Single community
-           my $members = $community->get_all_members();
-           # Several communities (community1 and community2)
-           my $members = $community1->get_all_members([$community2]);
-           # Or equivalently, for community1 and community2
-           my $members = $community1->get_all_members([$community1, $community2]);
- Args    : an arrayref of Bio::Community objects
- Returns : an arrayref of Bio::Community::Member objects
+ Function: Generate a list of all members in the community.
+ Usage   : my $members = $community->get_all_members();
+ Args    : An arrayref of Bio::Community objects
+ Returns : An arrayref of Bio::Community::Member objects
 
 =cut
 
-#method get_all_members ( ArrayRef[Bio::Community] $other_communities = [] ) {
-method get_all_members ( $other_communities = [] ) {
-
-   # Prepend $self to list of communities if it is not already in there
-   my $communities = $other_communities;
-   my $add_self = 1;
-   for my $community (@$communities) {
-      if ($community == $self) {
-         $add_self = 0;
-         last;
-      }
-   }
-   if ($add_self) {
-      unshift @$communities, $self;
-   }
-
+method get_all_members () {
    # Get all members in a hash
    my $all_members = {};
-   for my $community (@$communities) {
-      while (my $member = $community->next_member('_community_get_all_members_ite')) {
-         # Members are defined by their ID
-         $all_members->{$member->id} = $member; 
-      }
+   while (my $member = $self->next_member('_community_get_all_members_ite')) {
+      # Members are defined by their ID
+      $all_members->{$member->id} = $member;
    }
 
    # Convert member hash to an array
