@@ -20,7 +20,7 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_manage_samples - Include, delete or merge samples
+bc_manage_samples - Include, delete, merge and sort samples
 
 =head1 SYNOPSIS
 
@@ -32,8 +32,9 @@ bc_manage_samples - Include, delete or merge samples
 
 =head1 DESCRIPTION
 
-This script reads files containing biological communities and delete or merge
-the specified communities. See L<Bio::Community> for more information.
+This script reads files containing biological communities and includes, deletes
+merge or sorts the specified communities. See L<Bio::Community> for more
+information.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -64,8 +65,8 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =item -in <include_names>... | -include_names <include_names>...
 
-If names of communities are specified, only these communities will be
-included in the output file.
+If names of communities are specified, only these communities will be included
+in the output file, in the requested order. This is useful to sort communities.
 
 =for Euclid:
    include_names.type: string
@@ -182,7 +183,17 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
    # Warn if there are samples that were requested but not seen
    my @missing = keys %includes;
    if (scalar @missing > 0) {
-      warn "Warning: Did not find the following requested communities: ".join(' ,',@missing)."\n";
+      die "Error: Did not find the following requested communities: ".join(' ,',@missing)."\n";
+   }
+
+   # Order communities
+   if (scalar @$include_names > 0) {
+      my $ordered_meta = Bio::Community::Meta->new;
+      for my $name (@$include_names) {
+         my $community = $meta->get_community_by_name($name);
+         $ordered_meta->add_communities([$community]);
+      }
+      $meta = $ordered_meta;
    }
 
    # Merge communities
