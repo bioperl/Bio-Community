@@ -13,6 +13,7 @@ use strict;
 use warnings;
 use Method::Signatures;
 use Bio::Community::IO;
+use Bio::Community::Meta;
 use Bio::Community::Tools::ShrapnelCleaner;
 use Getopt::Euclid qw(:minimal_keys);
 
@@ -135,7 +136,7 @@ func clean ($input_files, $count_threshold, $prevalence_threshold,
    $output_prefix) {
 
    # Read input communities and do weight assignment
-   my $communities = [];
+   my $meta = Bio::Community::Meta->new;
    my $format;
    for my $input_file (@$input_files) {
       my $in = Bio::Community::IO->new(
@@ -143,32 +144,32 @@ func clean ($input_files, $count_threshold, $prevalence_threshold,
       );
       $format = $in->format;
       while (my $community = $in->next_community) {
-         push @$communities, $community;
+         $meta->add_communities([$community]);
       }
       $in->close;
    }
 
    # Remove shrapnel communities
    my $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
-      -communities          => $communities,
+      -metacommunity        => $meta,
       -count_threshold      => $count_threshold,
       -prevalence_threshold => $prevalence_threshold,
    );
-   $communities = $cleaner->clean;
+   $meta = $cleaner->clean;
 
    # Write results, converting to relative abundance if desired
-   write_communities($communities, $output_prefix, $format);
+   write_communities($meta, $output_prefix, $format);
 
    return 1;
 }
 
 
-func write_communities ($communities, $output_prefix, $output_format) {
+func write_communities ($meta, $output_prefix, $output_format) {
    my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
    my $num = 0;
    my $out;
    my $output_file = '';
-   for my $community (@$communities) {
+   while (my $community = $meta->next_community) {
       if (not defined $out) {
          if ($multiple_communities) {
             $output_file = $output_prefix;

@@ -15,20 +15,20 @@ Bio::Community::Tools::ShrapnelCleaner - Remove low-count, low-abundance communi
 
   use Bio::Community::Tools::ShrapnelCleaner;
 
-  # Remove singletons from $community1 and $community2
+  # Remove singletons the communities in the given metacommunity
   my $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
-     -communities => [$community1, $community2],
+     -metacommunity => $meta,
   );
   $cleaner->clean;
 
 =head1 DESCRIPTION
 
-This module takes biological communities and removes shrapnel, low abundance,
-low prevalence members that are likely to be the result of sequencing errors
-(when doing sequence-based analyses). By default, the cleaner removes only
-singletons, i.e. community members that appear in only one community (prevalence
-of 1) and have only 1 count. You can specify your own count and prevalence
-thresholds though.
+This module takes biological communities (contained in a metacommunity) and
+removes shrapnel, low abundance, low prevalence members that are likely to be
+the result of sequencing errors (when doing sequence-based analyses). By default,
+the cleaner removes only singletons, i.e. community members that appear in only
+one community (prevalence of 1) and have only 1 count. You can specify your own
+count and prevalence thresholds though.
 
 =head1 FEEDBACK
 
@@ -75,7 +75,9 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::Tool::ShrapnelCleaner object
  Usage   : my $cleaner = Bio::Community::Tool::ShrapnelCleaner->new( );
- Args    : -communities, -count_threshold. See details below.
+ Args    : -metacommunity       : See metacommunity().
+           -count_threshold     : See count_threshold().
+           -prevalence_threshold: See prevalence_threshold().
  Returns : a new Bio::Community::Tools::ShrapnelCleaner object
 
 =cut
@@ -92,22 +94,22 @@ use namespace::autoclean;
 extends 'Bio::Root::Root';
 
 
-=head2 communities
+=head2 metacommunity
 
  Function: Get or set the communities to process.
  Usage   : my $communities = $cleaner->communities;
- Args    : arrayref of Bio::Community objects
- Returns : arrayref of Bio::Community objects
+ Args    : A Bio::Community::Meta object
+ Returns : A Bio::Community::Meta object
 
 =cut
 
-has communities => (
+has metacommunity => (
    is => 'rw',
-   isa => 'ArrayRef[Bio::Community]',
+   isa => 'Bio::Community::Meta',
    required => 0,
-   default => sub{ [] },
+   default => undef,
    lazy => 1,
-   init_arg => '-communities',
+   init_arg => '-metacommunity',
 );
 
 
@@ -157,30 +159,27 @@ has prevalence_threshold => (
 =head2 clean
 
  Function: Remove singletons from the communities and return the updated
-           communities.
- Usage   : my $communities = $cleaner->clean;
+           metacommunity.
+ Usage   : my $meta = $cleaner->clean;
  Args    : none
  Returns : arrayref of Bio::Community objects
 
 =cut
 
-method clean {
+method clean () {
    # Sanity check
-   my $communities = $self->communities;
-   if (scalar @$communities == 0) {
+   my $meta = $self->metacommunity;
+   if ($meta->get_communities_count == 0) {
       $self->throw('Need to provide at least one community');
    }
-
-   # Get all members
-   my $members = $communities->[0]->get_all_members($communities);
 
    # Remove singletons
    my $count_thres = $self->count_threshold;
    my $prevalence_thres = $self->prevalence_threshold;
-   for my $member ( @$members ) {
+   for my $member ( @{$meta->get_all_members} ) {
       my $total_count = 0; # sum of member counts in all communities
       my $prevalence  = 0; # in how many communities was the member seen
-      for my $community (@$communities) {
+      while (my $community = $meta->next_community) {
          my $count = $community->get_count($member);
          if ($count > 0) {
             $prevalence++;
@@ -189,13 +188,13 @@ method clean {
       }
       if ( ($total_count <= $count_thres) && ($prevalence <= $prevalence_thres) ) {
          # Remove all of this member
-         for my $community (@$communities) {
+         while (my $community = $meta->next_community) {
             $community->remove_member($member);
          }
       }
    }
 
-   return $communities;
+   return $meta;
 }
 
 

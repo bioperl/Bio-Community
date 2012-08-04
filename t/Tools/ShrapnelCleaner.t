@@ -2,14 +2,15 @@ use strict;
 use warnings;
 use Bio::Root::Test;
 use Bio::Community;
+use Bio::Community::Meta;
 
 use_ok($_) for qw(
     Bio::Community::Tools::ShrapnelCleaner
 );
 
 
-my ($cleaner, $community1, $community2, $member1, $member2, $member3, $member4,
-    $member5, $member6);
+my ($cleaner, $meta, $community1, $community2, $member1, $member2, $member3,
+    $member4, $member5, $member6);
 
 
 $member1 = Bio::Community::Member->new( -id => 1 );
@@ -34,6 +35,8 @@ $community2->add_member( $member1,   1);
 $community2->add_member( $member3, 100);
 $community2->add_member( $member6,   4);
 
+$meta = Bio::Community::Meta->new( -communities => [$community1, $community2] );
+
 
 # Basic cleaner object
 
@@ -44,7 +47,7 @@ isa_ok $cleaner, 'Bio::Community::Tools::ShrapnelCleaner';
 # Cleaner with default
 
 ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
-   -communities => [ $community1, $community2 ],
+   -metacommunity => $meta,
 ), 'Default';
 ok $cleaner->clean;
 
@@ -66,7 +69,7 @@ is $community2->get_count($member6),   4;
 # Cleaner with specified count threshold
 
 ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
-   -communities     => [ $community1, $community2 ],
+   -metacommunity   => $meta,
    -count_threshold => 5,
 ), 'Specified count threshold';
 ok $cleaner->clean;
@@ -89,7 +92,7 @@ is $community2->get_count($member6),   0;
 # Cleaner with specified prevalence threshold
 
 ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
-   -communities          => [ $community1, $community2 ],
+   -metacommunity        => $meta,
    -prevalence_threshold => 2,
 ), 'Specified prevalence threshold';
 ok $cleaner->clean;
@@ -112,7 +115,7 @@ is $community2->get_count($member6),   0;
 # Cleaner with specified prevalence threshold
 
 ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new(
-   -communities          => [ $community1, $community2 ],
+   -metacommunity        => $meta,
    -count_threshold      => 2,
    -prevalence_threshold => 2,
 ), 'Specified count and prevalence thresholds';
