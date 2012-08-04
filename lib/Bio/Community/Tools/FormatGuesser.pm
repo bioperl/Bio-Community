@@ -306,8 +306,7 @@ method guess () {
 }
 
 
-sub _possibly_biom {
-   my ($line, $line_num, $prev_line) = @_;
+func _possibly_biom ($line, $line_num, $prev_line) {
    # Example:
    # {
    #  "id":null,
@@ -329,8 +328,7 @@ sub _possibly_biom {
 }
 
 
-sub _possibly_generic {
-   my ($line, $line_num, $prev_line) = @_;
+func _possibly_generic ($line, $line_num, $prev_line) {
    # Example:
    # Species	gut	soda lake
    # Streptococcus	241	334
@@ -356,8 +354,7 @@ sub _possibly_generic {
 }
 
 
-sub _possibly_gaas {
-   my ($line, $line_num, $prev_line) = @_;
+func _possibly_gaas ($line, $line_num, $prev_line) {
    # Example:
    #    # tax_name	tax_id	rel_abund
    #    Streptococcus pyogenes phage 315.1	198538	0.791035649011735
@@ -389,8 +386,7 @@ sub _possibly_gaas {
 }
 
 
-sub _possibly_unifrac {
-   my ($line, $line_num, $prev_line) = @_;
+func _possibly_unifrac ($line, $line_num, $prev_line) {
    # Example:
    #    Sequence.1	Sample.1	1
    # or:
@@ -412,8 +408,7 @@ sub _possibly_unifrac {
 }
 
 
-sub _possibly_qiime {
-   my ($line, $line_num, $prev_line) = @_;
+func _possibly_qiime ($line, $line_num, $prev_line) {
    # Example:
    # # QIIME v1.3.0 OTU table
    # #OTU ID	20100302	20100304	20100823

@@ -148,8 +148,7 @@ sub new {
 }
 
 
-sub BUILD {
-   my ($self, $args) = @_;
+method BUILD ($args) {
    # Start IOs
    $self->_initialize_io(%$args);
 }

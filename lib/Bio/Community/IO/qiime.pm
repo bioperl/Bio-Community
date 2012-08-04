@@ -115,11 +115,9 @@ our $default_abundance_type = 'count'; # absolute count (positive integer)
 our $default_missing_string =  0;      # empty members get a '0'
 
 
-sub BUILDARGS {
-   # Request the table to start at line 2 (first line is a comment line)
-   my ($class, %args) = @_;
-   $args{-start_line} = 2;
-   return \%args;
+around BUILDARGS => func ($orig, $class, %args) {
+   $args{-start_line} = 2; 
+   return $class->$orig(%args);
 };
 
 

@@ -6,6 +6,7 @@ use Bio::Community;
 use Bio::Community::Meta;
 use Bio::Community::Member;
 use Bio::DB::Taxonomy;
+use Method::Signatures;
 
 use_ok($_) for qw(
     Bio::Community::Tools::Summarizer
@@ -849,8 +850,7 @@ exit;
 #------------------------------------------------------------------------------#
 
 
-sub get_group {
-   my ($community) = @_;
+func get_group ($community) {
    my $group;
    while (my $member = $community->next_member) {
       if ($member->desc =~ m/other/i) {

@@ -54,6 +54,7 @@ package Bio::Community::Types;
 
 use Moose;
 use Moose::Util::TypeConstraints;
+use Method::Signatures;
 use namespace::autoclean;
 
 
@@ -140,34 +141,27 @@ subtype 'ReadableFileHandle'
 
 coerce 'ReadableFileHandle'
    => from 'Str'
-   => via { read_file($_) };
+   => via { _read_file($_) };
 
 subtype 'ArrayRefOfReadableFileHandles'
    => as 'ArrayRef[ReadableFileHandle]';
 
 coerce 'ArrayRefOfReadableFileHandles'
    => from 'ArrayRefOfReadableFiles'
-   => via { [ map {
-          print "file to open: $_\n"; ###
-           read_file($_) } @{$_} ] };
+   => via { [ map { _read_file($_) } @{$_} ] };
 
-sub read_file {
-   my $file = shift;
+
+func _read_file ($file) {
    open my $fh, '<', $file or die "Could not open file '$_': $!\n";
+                   # $self->throw("Could not open file '$_': $!")
    return $fh;
-   #return IO::File->new($file, 'r') or die "Could not open file '$_': $!\n";
-                          # $self->throw("Could not open file '$_': $!")
 }
 
 
-
-
-sub gen_err_msg {
+func _gen_err_msg ($accepts, $got = '') {
    # Generate an error message. The input is:
    #  * an arrayref of the values accepted, or a string describing valid input
    #  * the value obtained instead of the
-   my ($accepts, $got) = @_;
-   $got = '' if not defined $got;
    my $accept_str;
    if (ref($accepts) eq 'ARRAY') {
       if (scalar @$accepts > 1) {

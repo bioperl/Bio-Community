@@ -235,8 +235,7 @@ has '_max_col' => (
 );
 
 
-sub BUILD {
-   my $self = shift;
+method BUILD ($args) {
    # After object constructed with new(), index table if filehandle is readable
    if ($self->mode eq 'r') {
       $self->_read_table;
@@ -397,10 +396,8 @@ method _read_table () {
 
 =cut
 
-
 #method _get_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col) {
-sub _get_value { # this function is called a lot, keep it lean
-   my ($self, $line, $col) = @_;
+method _get_value ($line, $col) { # this function is called a lot, keep it lean
    my $val;
    my $max_col = $self->_get_max_col;
    if ( ($line <= $self->_get_max_line) && ($col <= $max_col) ) {
@@ -443,9 +440,7 @@ sub _get_value { # this function is called a lot, keep it lean
 =cut
 
 #method _set_value (StrictlyPositiveInt $line, StrictlyPositiveInt $col, $value) {
-sub _set_value {  # this function is called a lot, keep it lean
-   my ($self, $line, $col, $value) = @_;
-
+method _set_value ($line, $col, $value) {  # this function is called a lot, keep it lean
    my $pos = 0;
    my $values = $self->_values;
    my $max_lines = $self->_get_max_line;
@@ -500,9 +495,7 @@ sub _set_value {  # this function is called a lot, keep it lean
 =cut
 
 #method _insert_line (StrictlyPositiveInt $line, ArrayRef $values) {
-sub _insert_line {  # this function is called a lot, keep it lean
-   my ($self, $line, $insert_values) = @_;
-
+method _insert_line ($line, $insert_values) {  # this function is called a lot, keep it lean
    my $max_lines = $self->_get_max_line;
    if ($line > $max_lines + 1) {
       $self->throw("Could not insert line beyond last line of table.");
@@ -535,9 +528,7 @@ sub _insert_line {  # this function is called a lot, keep it lean
 =cut
 
 #method _delete_col (StrictlyPositiveInt $col) {
-sub _delete_col () {  # this function is called a lot, keep it lean
-   my ($self, $col) = @_;
-
+method _delete_col ($col) {  # this function is called a lot, keep it lean
    my $max_cols = $self->_get_max_col;
    if ( $col > $max_cols ) {
       $self->throw("Could not delete column $col because the table has only $max_cols columns.");

@@ -590,10 +590,9 @@ method _reset () {
 }
 
 
-sub _two_array_sort {
-   # Sort 2 arrays by doing an decreasing numeric sort of the first one and
+func _two_array_sort ($l1, $l2) {
+   # Sort 2 arrays by doing a decreasing numeric sort of the first one and
    # keeping the match of the elements of the second with those of the first one
-   my ($l1, $l2) = @_;
    my @ids = map { [ $$l1[$_], $$l2[$_] ] } (0..$#$l1);
    @ids = sort { $b->[0] <=> $a->[0] } @ids;
    my @k1;
@@ -606,9 +605,8 @@ sub _two_array_sort {
 }
 
 
-sub _prod {
+func _prod ($arr) {
    # Calculate the product of the numbers in an array
-   my ($arr) = @_;
    my $prod = 1;
    $prod *= $_ for @$arr;
    return $prod;
