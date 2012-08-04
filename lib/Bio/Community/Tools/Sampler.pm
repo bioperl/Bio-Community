@@ -76,7 +76,7 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::Tool::Sampler object
  Usage   : my $sampler = Bio::Community::Tool::Sampler->new( );
- Args    : -community (see below)
+ Args    : -community: See community().
  Returns : a new Bio::Community::Tools::Sampler object
 
 =cut
@@ -91,10 +91,7 @@ use Method::Signatures;
 use namespace::autoclean;
 use List::Util qw( first );
 use Bio::Community;
-
-####
-#use Math::Random::MT qw(srand rand);
-####
+use Math::Random::MT qw(srand rand);
 
 extends 'Bio::Root::Root';
 

@@ -23,13 +23,14 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
   BioPerl version > 1.006901 (as of May 2012, this means an unreleased development version)
-  Tie::IxHash
+  Math::Random::MT
   Method::Signatures
   Moose
   Moose::Util::TypeConstraints
   MooseX::NonMoose
   MooseX::StrictConstructor
   Parallel::Iterator
+  Tie::IxHash
   Test::Number::Delta
 
 These other modules are strongly recommended:
