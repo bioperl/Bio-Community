@@ -13,6 +13,7 @@ use strict;
 use warnings;
 use Method::Signatures;
 use Bio::Community::IO;
+use Bio::Community::Meta;
 use Getopt::Euclid qw(:minimal_keys);
 
 
@@ -137,7 +138,7 @@ exit;
 func convert ($input_files, $output_prefix, $output_format) {
 
    # Read input communities
-   my @communities;
+   my $meta = Bio::Community::Meta->new;
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new( -file => $input_file );
@@ -145,7 +146,7 @@ func convert ($input_files, $output_prefix, $output_format) {
          $output_format = $in->format;
       }
       while (my $community = $in->next_community) {
-         push @communities, $community;
+         $meta->add_communities([$community]);
       }
       $in->close;
    }
@@ -155,8 +156,8 @@ func convert ($input_files, $output_prefix, $output_format) {
    my $num = 0;
    my $out;
    my $output_file;
-   my $num_communities = scalar @communities;
-   for my $community (@communities) {
+   my $num_communities = $meta->get_communities_count;
+   while (my $community = $meta->next_community) {
       if (not defined $out) {
          if ($multiple_communities || ($num_communities <= 1)) {
             $output_file = $output_prefix.'.'.$output_format;
