@@ -149,7 +149,7 @@ has _members => (
 
 =cut
 
-method get_rand_member {
+method get_rand_member () {
    # Pick a random member based on the community's cdf
    my $rand_pick = rand();
    my $cdf = $self->_cdf;
@@ -196,7 +196,7 @@ method get_rand_community ( StrictlyPositiveInt $total_count = 1 ) {
 }
 
 
-method _calc_cdf {
+method _calc_cdf () {
    # Sort the members of the community by decreasing rank and calculate the
    # cumulative density function of their relative abundance
    my $community = $self->community;

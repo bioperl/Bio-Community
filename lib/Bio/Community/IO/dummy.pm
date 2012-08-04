@@ -96,18 +96,18 @@ has 'dummy' => (
 #    write_member(), _write_community_init(), _write_community_finish()
 
 
-method next_member {
+method next_member () {
    my ($member, $count);
    # Somehow read and create a member here...
    $self->_attach_weights($member);
    return $member, $count;
 }
 
-method _next_community_init {
+method _next_community_init () {
    return 'dummy';
 }
 
-method _next_community_finish {
+method _next_community_finish () {
    return 1;
 }
 

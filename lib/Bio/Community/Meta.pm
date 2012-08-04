@@ -244,10 +244,21 @@ has _communities_count => (
    writer => '_set_communities_count',
 );
 
+####
+# TODO: get_community_by_position() method
+####
+
+####
+# TODO: next_member() iterator method
+####
+
 
 =head2 get_all_members
 
- Function: Generate a list of all members in the metacommunity.
+ Function: Generate a list of all members in the metacommunity. Every member
+           appears only once in this list, even if the member is present in
+           multiple communities. Remember that members with the same ID are
+           considered the same member.
  Usage   : my $members = $meta->get_all_members();
  Args    : None
  Returns : An arrayref of Bio::Community::Member objects

@@ -210,7 +210,7 @@ has 'text' => (
 
 =cut
 
-method guess {
+method guess () {
    my $format;
 
    # Prepare input

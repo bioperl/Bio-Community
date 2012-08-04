@@ -208,7 +208,7 @@ has '_line2desc' => (
 );
 
 
-method _generate_members {
+method _generate_members () {
    # Make members from the first column. Also, find out if they have a taxonomy.
 
    # Does the last column contain the taxonomy?
@@ -247,7 +247,7 @@ method _generate_members {
 }
 
 
-method next_member {
+method next_member () {
    my ($member, $count);
    my $line = $self->_line;
    while ( $line++ ) {
@@ -267,7 +267,7 @@ method next_member {
 }
 
 
-method _next_community_init {
+method _next_community_init () {
    # Go to start of next column and return name of new community or undef.
    # The first time, initialize the read process by generating all community members.
    if (not $self->_has_members) {
@@ -288,7 +288,7 @@ method _next_community_init {
 }
 
 
-method _next_community_finish {
+method _next_community_finish () {
    return 1;
 }
 
@@ -328,7 +328,7 @@ method _write_community_init (Bio::Community $community) {
 }
 
 
-method _write_headers {
+method _write_headers () {
    $self->_print("# QIIME v1.3.0 OTU table\n");
    $self->_set_value(1, 1, '#OTU ID');
 }

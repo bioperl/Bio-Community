@@ -535,7 +535,7 @@ sub _insert_line {  # this function is called a lot, keep it lean
 =cut
 
 #method _delete_col (StrictlyPositiveInt $col) {
-sub _delete_col {  # this function is called a lot, keep it lean
+sub _delete_col () {  # this function is called a lot, keep it lean
    my ($self, $col) = @_;
 
    my $max_cols = $self->_get_max_col;
@@ -574,7 +574,7 @@ sub _delete_col {  # this function is called a lot, keep it lean
 
 =cut
 
-method _write_table {
+method _write_table () {
    my $delim    = $self->delim;
    my $values   = $self->_values;
    my $max_cols = $self->_get_max_col;

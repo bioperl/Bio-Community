@@ -146,7 +146,7 @@ has '_id2line' => (
 );
 
 
-method _generate_members {
+method _generate_members () {
    # Make members from the first column
    my @members;
    my $col = 1;
@@ -161,7 +161,7 @@ method _generate_members {
 }
 
 
-method next_member {
+method next_member () {
    my ($member, $count);
    my $line = $self->_line;
    while ( $line++ ) {
@@ -181,7 +181,7 @@ method next_member {
 }
 
 
-method _next_community_init {
+method _next_community_init () {
    # Go to start of next column and return name of new community. The first time,
    # generate all community members.
    if (not $self->_has_members) {
@@ -196,7 +196,7 @@ method _next_community_init {
 }
 
 
-method _next_community_finish {
+method _next_community_finish () {
    return 1;
 }
 
@@ -234,7 +234,7 @@ method _write_community_init (Bio::Community $community) {
 }
 
 
-method _write_headers {
+method _write_headers () {
    $self->_set_value(1, 1, 'Species');
 }
 

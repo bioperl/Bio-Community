@@ -450,7 +450,7 @@ method get_member_by_rank (AbundanceRank $rank) {
 
 =cut
 
-method get_richness {
+method get_richness () {
    $self->_reset if $self->_has_changed;
    if (not defined $self->_richness) {
 
@@ -546,7 +546,7 @@ method get_rank (Bio::Community::Member $member) {
 }
 
 
-method _calc_ranks {
+method _calc_ranks () {
    # Calculate the abundance ranks of the community members. Save them in a hash
    # and as an array.
 
@@ -577,7 +577,7 @@ method _calc_ranks {
 }
 
 
-method _reset {
+method _reset () {
    # Re-initialize some attributes when the community has changed
    $self->_clear_ranks_hash_weighted();
    $self->_clear_ranks_arr_weighted();

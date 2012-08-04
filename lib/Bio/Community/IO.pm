@@ -168,7 +168,7 @@ sub BUILD {
 
 =cut
 
-method next_member {
+method next_member () {
    $self->throw_not_implemented;
 }
 
@@ -185,7 +185,7 @@ method next_member {
 
 =cut
 
-method next_community {
+method next_community () {
    my $community;
    while ( 1 ) { # Skip communities with no members
 
@@ -239,13 +239,13 @@ method next_community {
 }
 
 
-method _next_community_init {
+method _next_community_init () {
    # Driver-side method to initialize new community and return its name
    $self->throw_not_implemented;
 }
 
 
-method _next_community_finish {
+method _next_community_finish () {
    # Driver-side method to finalize a community
    $self->throw_not_implemented;
 }

@@ -286,7 +286,7 @@ before get_repr_meta => sub {
 };
 
 
-method _count_normalize {
+method _count_normalize () {
    # Normalize communties by total count
 
    # Sanity check

@@ -117,7 +117,7 @@ has '_count' => (
 );
 
 
-method next_member {
+method next_member () {
    # Read next line
    my $line;
    do {
@@ -147,7 +147,7 @@ method next_member {
 }
 
 
-method _next_community_init {
+method _next_community_init () {
    my $count = $self->_count;
    $count++;
    if ($count <= 1) {
@@ -159,7 +159,7 @@ method _next_community_init {
 }
 
 
-method _next_community_finish {
+method _next_community_finish () {
    return 1;
 }
 
@@ -181,7 +181,7 @@ method _write_community_init (Bio::Community $community) {
 }
 
 
-method _write_headers {
+method _write_headers () {
    my $header_line = "# tax_name\ttax_id\trel_abund\n";
    # But it could also be "# seq_name\tseq_id\trel_abund\n";
    $self->_print( $header_line );

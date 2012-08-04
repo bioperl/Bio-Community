@@ -204,7 +204,7 @@ has '_qualitative_unifrac' => (
 );
 
 
-method _generate_community_names {
+method _generate_community_names () {
    # Read all possible community names from the second column
    my %names;
    my $col = 2;
@@ -219,7 +219,7 @@ method _generate_community_names {
 }
 
 
-method _generate_members {
+method _generate_members () {
    # Make members from the first column
    my %members;
    my $col = 1;
@@ -237,7 +237,7 @@ method _generate_members {
 }
 
 
-method next_member {
+method next_member () {
    my ($member, $count);
    my $line = $self->_line;
 
@@ -276,7 +276,7 @@ method next_member {
 }
 
 
-method _next_community_init {
+method _next_community_init () {
    # Go to start of next column and return name of new community. The first time,
    # generate all community members and read all community names
    if (not $self->_has_community_names) {
@@ -293,7 +293,7 @@ method _next_community_init {
 }
 
 
-method _next_community_finish {
+method _next_community_finish () {
    return 1;
 }
 
