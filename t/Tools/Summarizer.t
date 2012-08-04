@@ -2,8 +2,9 @@ use strict;
 use warnings;
 use Bio::Root::Test;
 use Test::Number::Delta;
-use Bio::Community::Member;
 use Bio::Community;
+use Bio::Community::Meta;
+use Bio::Community::Member;
 use Bio::DB::Taxonomy;
 
 use_ok($_) for qw(
@@ -12,8 +13,9 @@ use_ok($_) for qw(
 
 
 my ($summarizer, $member, $member1, $member2, $member3, $member4, $member5,
-   $member6, $member7, $member8, $member9, $member10, $community1, $community2,
-   $community3, $summaries, $summary, $group, $id, $id1, $id2, $id3, $in);
+   $member6, $member7, $member8, $member9, $member10, $meta, $community1,
+   $community2, $community3, $summary_meta, $summary, $group, $id, $id1, $id2,
+   $id3, $in);
 
 
 # Bare object
@@ -42,19 +44,22 @@ $community2->add_member( $member2, 90);
 $community2->add_member( $member3, 1 );
 $community2->add_member( $member5, 1 );
 
+$meta = Bio::Community::Meta->new(-communities => [$community1, $community2]);
+
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1, $community2],
-   -merge_dups  => 0,
-   -by_rel_ab   => ['<', 2],
+   -metacommunity => $meta,
+   -merge_dups    => 0,
+   -by_rel_ab     => ['<', 2],
 ), 'Multiple communities';
 
-is_deeply $summarizer->communities, [$community1, $community2];
+is_deeply $summarizer->metacommunity, $meta;
 is_deeply $summarizer->by_rel_ab, ['<', 2];
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 2;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 2;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $group = get_group($summary);
 isa_ok $group, 'Bio::Community::Member';
@@ -69,7 +74,7 @@ delta_ok $summary->get_count($member4), 3;
 delta_ok $summary->get_count($member5), 0;
 delta_ok $summary->get_count($group)  , 1;
 
-$summary = $summaries->[1];
+$summary = $summary_meta->next_community;
 $group = get_group($summary);
 is $group->id, $id; # different object because the weight is different, 
                     # but ID need to be the same
@@ -81,7 +86,7 @@ delta_ok $summary->get_count($member4), 0;
 delta_ok $summary->get_count($member5), 0;
 delta_ok $summary->get_count($group)  , 2;
 
-$summary = $summaries->[0];
+is $summary_meta->next_community, undef;
 
 
 # Test <= operator
@@ -90,139 +95,165 @@ $community1 = Bio::Community->new();
 $community1->add_member( $member1,  2 );
 $community1->add_member( $member2, 98 );
 
+$meta = Bio::Community::Meta->new(-communities => [$community1]);
+
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
-   -merge_dups  => 0,
-   -by_rel_ab   => ['<=', 1.9],
+   -metacommunity => $meta,
+   -merge_dups    => 0,
+   -by_rel_ab     => ['<=', 1.9],
 ), "Operator '<='";
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 $group = get_group($summary);
 is $group, undef;
 delta_ok $summary->get_count($member1), 2;
 delta_ok $summary->get_count($member2), 98;
 
+is $summary_meta->next_community, undef;
+
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
-   -merge_dups  => 0,
-   -by_rel_ab   => ['<=', 2],
+   -metacommunity => $meta,
+   -merge_dups    => 0,
+   -by_rel_ab     => ['<=', 2],
 );
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 ok $group = get_group($summary);
 delta_ok $summary->get_count($member1), 0;
 delta_ok $summary->get_count($member2), 98;
 delta_ok $summary->get_count($group  ), 2;
+
+is $summary_meta->next_community, undef;
 
 
 # Test < operator
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
-   -merge_dups  => 0,
-   -by_rel_ab   => ['<', 2.1],
+   -metacommunity => $meta,
+   -merge_dups    => 0,
+   -by_rel_ab     => ['<', 2.1],
 ), "Operator '<'";
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 ok $group = get_group($summary);
 delta_ok $summary->get_count($member1), 0;
 delta_ok $summary->get_count($member2), 98;
 delta_ok $summary->get_count($group  ), 2;
 
+is $summary_meta->next_community, undef;
+
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
-   -merge_dups  => 0,
-   -by_rel_ab   => ['<', 2],
+   -metacommunity => $meta,
+   -merge_dups    => 0,
+   -by_rel_ab     => ['<', 2],
 );
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $group = get_group($summary);
 is $group, undef;
 delta_ok $summary->get_count($member1), 2;
 delta_ok $summary->get_count($member2), 98;
 
+is $summary_meta->next_community, undef;
+
 
 # Test > operator
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
-   -merge_dups  => 0,
-   -by_rel_ab   => ['>', 2],
+   -metacommunity => $meta,
+   -merge_dups    => 0,
+   -by_rel_ab     => ['>', 2],
 ), "Operator '>'";
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 ok $group = get_group($summary);
 delta_ok $summary->get_count($member1), 2;
 delta_ok $summary->get_count($member2), 0;
 delta_ok $summary->get_count($group  ), 98;
 
+is $summary_meta->next_community, undef;
+
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
-   -merge_dups  => 0,
-   -by_rel_ab   => ['>', 1.9],
+   -metacommunity => $meta,
+   -merge_dups    => 0,
+   -by_rel_ab     => ['>', 1.9],
 );
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 ok $group = get_group($summary);
 delta_ok $summary->get_count($member1), 0;
 delta_ok $summary->get_count($member2), 0;
 delta_ok $summary->get_count($group  ), 100;
+
+is $summary_meta->next_community, undef;
 
 
 # Test >= operator
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
-   -merge_dups  => 0,
-   -by_rel_ab   => ['>=', 3],
+   -metacommunity => $meta,
+   -merge_dups    => 0,
+   -by_rel_ab     => ['>=', 3],
 ), "Operator '>='";
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 ok $group = get_group($summary);
 delta_ok $summary->get_count($member1), 2;
 delta_ok $summary->get_count($member2), 0;
 delta_ok $summary->get_count($group  ), 98;
 
+is $summary_meta->next_community, undef;
+
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1],
+   -metacommunity => $meta,
    -merge_dups  => 0,
    -by_rel_ab   => ['>=', 2],
 );
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 ok $group = get_group($summary);
 delta_ok $summary->get_count($member1), 0;
 delta_ok $summary->get_count($member2), 0;
 delta_ok $summary->get_count($group  ), 100;
+
+is $summary_meta->next_community, undef;
 
 
 # Test with multiple communities with weighted members
@@ -254,17 +285,19 @@ delta_ok $community2->get_rel_ab($member2), 24.0000000;
 delta_ok $community2->get_rel_ab($member3), 16.0000000;
 delta_ok $community2->get_rel_ab($member4), 12.0000000;
 
+$meta = Bio::Community::Meta->new(-communities => [$community1, $community2]);
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities => [$community1, $community2],
+   -metacommunity => $meta,
    -merge_dups  => 0,
    -by_rel_ab   => ['<', 20],
 ), 'Multiple weighted communities';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 2;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 2;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 $group = get_group($summary);
 $id = $group->id;
 is $summary->name, 'Unnamed';
@@ -274,7 +307,7 @@ delta_ok $summary->get_rel_ab($member3),  0;
 delta_ok $summary->get_rel_ab($member4),  0;
 delta_ok $summary->get_rel_ab($group)  ,  3.4926470;
 
-$summary = $summaries->[1];
+$summary = $summary_meta->next_community;
 $group = get_group($summary);
 is $group->id, $id;
 is $summary->name, 'grassland';
@@ -283,6 +316,8 @@ delta_ok $summary->get_rel_ab($member2), 24.0000000;
 delta_ok $summary->get_rel_ab($member3), 0;
 delta_ok $summary->get_rel_ab($member4), 0;
 delta_ok $summary->get_rel_ab($group)  , 28.0000000;
+
+is $summary_meta->next_community, undef;
 
 
 # Taxonomic summaries
@@ -348,18 +383,22 @@ delta_ok $community1->get_rel_ab( $member8),  0.1624215;
 delta_ok $community1->get_rel_ab( $member9),  0.2436322;
 delta_ok $community1->get_rel_ab($member10),  0.4872644;
 
+$meta = Bio::Community::Meta->new(-communities => [$community1]);
+
+
 # Taxonomic summary level 1
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities  => [$community1],
+   -metacommunity => $meta,
    -merge_dups   => 0,
    -by_tax_level => 1,
 ), 'Taxonomic summary (level 1)';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria';
@@ -375,19 +414,22 @@ delta_ok $summary->get_rel_ab($member), 0.3654483;
 
 is $summary->next_member, undef;
 
+is $summary_meta->next_community, undef;
+
 
 # Taxonomic summary level 2
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities  => [$community1],
+   -metacommunity => $meta,
    -merge_dups   => 0,
    -by_tax_level => 2,
 ), 'Taxonomic summary (level 2)';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'Unknown taxonomy';
@@ -415,19 +457,22 @@ delta_ok $summary->get_rel_ab($member), 0.1624215;
 
 is $summary->next_member, undef;
 
+is $summary_meta->next_community, undef;
+
 
 # Taxonomic summary level 6
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities  => [$community1],
+   -metacommunity => $meta,
    -merge_dups   => 0,
    -by_tax_level => 6,
 ), 'Taxonomic summary (level 6)';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Carnobacteriaceae;g__Granulicatella';
@@ -473,19 +518,22 @@ delta_ok $summary->get_rel_ab($member), 97.6112442;
 
 is $summary->next_member, undef;
 
+is $summary_meta->next_community, undef;
+
 
 # Taxonomic summary level 7
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities  => [$community1],
+   -metacommunity => $meta,
    -merge_dups   => 0,
    -by_tax_level => 7,
 ), 'Taxonomic summary (level 7)';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus;s__Lactobacillusiners';
@@ -531,6 +579,8 @@ delta_ok $summary->get_rel_ab($member), 0.1392184;
 
 is $summary->next_member, undef;
 
+is $summary_meta->next_community, undef;
+
 
 # Taxonomic summaries level 5
 
@@ -543,20 +593,21 @@ $community1 = $in->next_community;
 $community2 = $in->next_community;
 $community3 = $in->next_community;
 
+$meta = Bio::Community::Meta->new(-communities => [$community1, $community2, $community3]);
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities  => [$community1, $community2, $community3],
+   -metacommunity => $meta,
    -merge_dups   => 0,
    -by_tax_level => 5,
 ), 'Taxonomic summary from multiple communities (level 5)';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 3;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 3;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
-###is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__';
 is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales';
 is $member->taxon->node_name, 'o__Rickettsiales';
 delta_ok $summary->get_count($member), 40;
@@ -571,20 +622,27 @@ delta_ok $summary->get_rel_ab($member), 50.6172840;
 $id1 = $member->id;
 
 is $summary->next_member, undef;
+
+$summary = $summary_meta->next_community;
+
+$summary = $summary_meta->next_community;
+
+is $summary_meta->next_community, undef;
 
 
 # Taxonomic summaries level 4
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities  => [$community1, $community2, $community3],
+   -metacommunity => $meta,
    -merge_dups   => 0,
    -by_tax_level => 4,
 ), 'Taxonomic summary from multiple communities (level 4)';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 3;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 3;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales';
@@ -602,7 +660,7 @@ $id2 = $member->id;
 
 is $summary->next_member, undef;
 
-$summary = $summaries->[1];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2';
@@ -613,7 +671,7 @@ $id3 = $member->id;
 
 is $summary->next_member, undef;
 
-$summary = $summaries->[2];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales';
@@ -638,6 +696,8 @@ is $member->id, $id3;
 
 is $summary->next_member, undef;
 
+is $summary_meta->next_community, undef;
+
 
 # Merge taxonomic duplicates
 
@@ -647,16 +707,18 @@ $in = Bio::Community::IO->new(
 );
 $community1 = $in->next_community;
 
+$meta = Bio::Community::Meta->new(-communities => [$community1]);
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities  => [$community1],
+   -metacommunity => $meta,
    -merge_dups   => 1,
 ), 'Merge taxonomic duplicates';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
@@ -720,20 +782,23 @@ delta_ok $summary->get_rel_ab($member), 19;
 
 is $summary->next_member, undef;
 
+is $summary_meta->next_community, undef;
+
 
 # Merge taxonomic duplicates, then summarize by taxonomy, then group low abundance groups
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -communities  => [$community1],
+   -metacommunity => $meta,
    -merge_dups   => 1,
    -by_tax_level => 5,
    -by_rel_ab    => ['<=', 6],
 ), 'Multiple summary operations';
 
-ok $summaries = $summarizer->get_summaries;
-is scalar @$summaries, 1;
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
 
-$summary = $summaries->[0];
+$summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
 is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
@@ -773,6 +838,7 @@ delta_ok $summary->get_rel_ab($member), 19;
 
 is $summary->next_member, undef;
 
+is $summary_meta->next_community, undef;
 
 
 done_testing();

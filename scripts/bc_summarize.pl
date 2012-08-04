@@ -14,6 +14,7 @@ use warnings;
 use Method::Signatures;
 use Bio::DB::Taxonomy;
 use Bio::Community::IO;
+use Bio::Community::Meta;
 use Bio::Community::Tools::Summarizer;
 use Getopt::Euclid qw(:minimal_keys);
 
@@ -25,7 +26,7 @@ bc_summarize - Summarize community composition
 =head1 SYNOPSIS
 
   bc_summarize -input_files   my_communities.generic   \
-                         -output_prefix my_converted_communities
+               -output_prefix my_converted_communities
 
 =head1 DESCRIPTION
 
@@ -184,7 +185,7 @@ func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
    $convert2relab, $merge_dups, $by_rel_ab, $by_tax_level) {
 
    # Read input communities and do weight assignment
-   my $communities = [];
+   my $meta = Bio::Community::Meta->new();
    my $format;
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
@@ -199,17 +200,17 @@ func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
       }
       $format = $in->format;
       while (my $community = $in->next_community) {
-         push @$communities, $community;
+         $meta->add_communities([$community]);
       }
       $in->close;
    }
 
    # Summarize communities
-   my $summarized_communities;
+   my $summarized_meta;
 
    my $summarizer = Bio::Community::Tools::Summarizer->new(
-      -communities => $communities,
-      -merge_dups  => $merge_dups,
+      -metacommunity => $meta,
+      -merge_dups    => $merge_dups,
    );
 
    if ($by_tax_level) {
@@ -220,22 +221,22 @@ func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
       $summarizer->by_rel_ab( ['<', $by_rel_ab] );
    }
 
-   $summarized_communities = $summarizer->get_summaries;
+   $summarized_meta = $summarizer->get_summaries;
 
    # Write results, converting to relative abundance if desired
-   write_communities($summarized_communities, $output_prefix, $format, '', $convert2relab);
+   write_communities($summarized_meta, $output_prefix, $format, '', $convert2relab);
 
    return 1;
 }
 
 
-func write_communities ($communities, $output_prefix, $output_format, $type = '',
+func write_communities ($meta, $output_prefix, $output_format, $type = '',
    $convert2relab) {
    my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
    my $num = 0;
    my $out;
    my $output_file = '';
-   for my $community (@$communities) {
+   while (my $community = $meta->next_community) {
       if (not defined $out) {
          if ($multiple_communities) {
             $output_file = $output_prefix;
