@@ -375,6 +375,7 @@ method _bootstrap (Bio::Community $community) {
    my $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
 
    my $overall = Bio::Community->new(
+      -name        => 'overall',
       -use_weights => $use_weights,
    );
 
@@ -385,7 +386,7 @@ method _bootstrap (Bio::Community $community) {
       print "Community '".$community->name."'\n";
    }
 
-   my $prev_overall = Bio::Community->new();
+   my $prev_overall = Bio::Community->new( -name => 'prev' );
    my $iteration = 0;
    my $dist;
    while (1) {
@@ -402,14 +403,16 @@ method _bootstrap (Bio::Community $community) {
       if (not defined $repetitions) {
          # Exit if distance with last average community is small
          $dist = Bio::Community::Tools::Ruler->new(
-               -type        => 'euclidean',
-               -communities => [$overall, $prev_overall],
+               -type          => 'euclidean',
+               -metacommunity => Bio::Community::Meta->new(
+                  -communities =>[$overall, $prev_overall]),
          )->get_distance;
          if ($verbose) {
             print "   iteration $iteration, distance $dist\n";
          }
          last if $dist < $threshold;
          $prev_overall = $overall->clone;
+         $prev_overall->name('prev');
       } else {
          # Exit if all repetitions have been done
          if ($verbose) {
@@ -417,10 +420,12 @@ method _bootstrap (Bio::Community $community) {
          }
          if ($iteration == $repetitions - 1) {
             $prev_overall = $overall->clone;
+            $prev_overall->name('prev');
          } elsif ($iteration >= $repetitions) {
             $dist = Bio::Community::Tools::Ruler->new(
-                  -type        => 'euclidean',
-                  -communities => [$overall, $prev_overall],
+                  -type          => 'euclidean',
+                  -metacommunity => Bio::Community::Meta->new(
+                     -communities =>[$overall, $prev_overall]),
             )->get_distance;
             last;
          }
