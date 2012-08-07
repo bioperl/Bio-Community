@@ -16,6 +16,7 @@ use Bio::Community;
 use Bio::Community::IO;
 use Bio::Community::Meta;
 use Getopt::Euclid qw(:minimal_keys);
+use List::Util qw(min);
 
 
 =head1 NAME
@@ -89,6 +90,24 @@ these communities are added.
    repeatable
    merge_names.type: string
 
+=item -rm <renaming_method> | -renaming_method <renaming_method>
+
+When merging communities, specify a method to generate a name for the merged
+community:
+
+* a character that will join the names of the communities to merge, e.g. '+',
+  '_', ...
+
+* 'first': use the name of the first community
+
+* 'common': the largest string from the left in common between the names
+
+Default: renaming_method.default
+
+=for Euclid:
+   renaming_method.type: string
+   renaming_method.default: '+'
+
 =back
 
 =head1 FEEDBACK
@@ -131,13 +150,13 @@ Email florent.angly@gmail.com
 
 
 manip( $ARGV{'input_files'}  , $ARGV{'output_prefix'}, $ARGV{'include_names'},
-       $ARGV{'exclude_names'}, $ARGV{'merge_names'} );
+       $ARGV{'exclude_names'}, $ARGV{'merge_names'}  , $ARGV{'renaming_method'} );
 
 exit;
 
 
 func manip ($input_files, $output_prefix, $include_names, $exclude_names,
-   $merge_names) {
+   $merge_names, $renaming_method) {
 
    # Prepare communities to include or exclude 
    my $nof_includes = 0;
@@ -209,7 +228,7 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
          }
       }
       for my $merge_set (@$merge_names) {
-         my $merged_name = join('+', @$merge_set);
+         my $merged_name = gen_name($merge_set, $renaming_method);
          print "Processing $merged_name\n";
          my $merged_community = Bio::Community->new( -name => $merged_name );
          for my $name (@$merge_set) {
@@ -260,4 +279,40 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
    }
 
    return 1;
+}
+
+
+func gen_name ($names, $method) {
+   my $name;
+   if (length $method == 1) {
+      my $separator = $method;
+      $name = join($separator, @$names);
+   } elsif ($method eq 'first') {
+      $name = $names->[0];
+   } elsif ($method eq 'common') {
+      my $max = min( map {length $_} @$names);
+      OFF: for my $offset (0 .. $max-1) {
+         my $common;
+         for my $comm_name (@$names) {
+            my $char = substr $comm_name, $offset, 1;
+            if (not defined $common) {
+               $common = $char;
+               $name .= $char;
+            } else {
+               if (not ($char eq $common)) {
+                  # Char at this position not in common
+                  chop $name;
+                  last OFF;
+               }
+            }
+         }
+      }
+      if (length $name == 0) {
+         die "Error: Could not find a string common to the given communities: ".
+            join(' ', @{$names})."\n";
+      }
+   } else {
+      die "Error: Got an invalid renaming_method, '$method'\n";
+   }
+   return $name;
 }
