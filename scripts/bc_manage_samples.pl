@@ -21,7 +21,7 @@ use List::Util qw(min);
 
 =head1 NAME
 
-bc_manage_samples - Include, delete, merge and sort samples
+bc_manage_samples - Include, delete, merge, sort or rename samples
 
 =head1 SYNOPSIS
 
@@ -34,8 +34,8 @@ bc_manage_samples - Include, delete, merge and sort samples
 =head1 DESCRIPTION
 
 This script reads files containing biological communities and includes, deletes
-merge or sorts the specified communities. See L<Bio::Community> for more
-information.
+merges, sorts or renames the specified communities. See L<Bio::Community> for
+more information.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -63,6 +63,22 @@ Path and prefix for the output files. Default: output_prefix.default
 =for Euclid:
    output_prefix.type: string
    output_prefix.default: 'bc_manage_samples'
+
+=item -np <name_prefix> | -name_prefix <name_prefix>
+
+Prefix to add to the beginning of all community names. Default: name_prefix.default
+
+=for Euclid:
+   name_prefix.type: string
+   name_prefix.default: ''
+
+=item -ns <name_suffix> | -name_suffix <name_suffix>
+
+Suffix to add to the end of all community names. Default: name_suffix.default
+
+=for Euclid:
+   name_suffix.type: string
+   name_suffix.default: ''
 
 =item -in <include_names>... | -include_names <include_names>...
 
@@ -149,14 +165,15 @@ Email florent.angly@gmail.com
 =cut
 
 
-manip( $ARGV{'input_files'}  , $ARGV{'output_prefix'}, $ARGV{'include_names'},
-       $ARGV{'exclude_names'}, $ARGV{'merge_names'}  , $ARGV{'renaming_method'} );
+manip( $ARGV{'input_files'}, $ARGV{'output_prefix'}  , $ARGV{'name_prefix'},
+       $ARGV{'name_suffix'}, $ARGV{'include_names'}  , $ARGV{'exclude_names'},
+       $ARGV{'merge_names'}, $ARGV{'renaming_method'} );
 
 exit;
 
 
-func manip ($input_files, $output_prefix, $include_names, $exclude_names,
-   $merge_names, $renaming_method) {
+func manip ($input_files, $output_prefix, $name_prefix, $name_suffix,
+   $include_names, $exclude_names, $merge_names, $renaming_method) {
 
    # Prepare communities to include or exclude 
    my $nof_includes = 0;
@@ -266,6 +283,8 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
                -file   => '>'.$output_file,
             );
          }
+         # Add and prefix and suffix to community name
+         $community->name( $name_prefix.$community->name.$name_suffix );
          print "Writing community '".$community->name."' to file '$output_file'\n";
          $out->write_community($community);
          if (not $multiple_communities) {
