@@ -187,7 +187,7 @@ func manip ($input_files, $output_prefix, $include_names, $exclude_names,
    }
 
    # Order communities
-   if (scalar @$include_names > 0) {
+   if ((defined $include_names) && (scalar @$include_names > 0)) {
       my $ordered_meta = Bio::Community::Meta->new;
       for my $name (@$include_names) {
          my $community = $meta->get_community_by_name($name);
