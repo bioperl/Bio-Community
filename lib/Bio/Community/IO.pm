@@ -15,19 +15,30 @@ Bio::Community::IO - Read and write files that describe communities
 
   use Bio::Community::IO;
 
-  my $in = Bio::Community::IO->new( -file => '', -format => 'gaas' );
-  my $member1 = Bio::Community::Member->new( -id => 2 );
-  my $member1_id = $member1->id;
+  # Read communities from a file, one by one
+  my $in = Bio::Community::IO->new(
+     -file   => 'otu_table.qiime',
+     -format => 'qiime', # format is optional
+  );
+  my $community1 = $in->next_community(); # a Bio::Community object
+  my $community2 = $in->next_community();
+  $in->close;
 
-  my $member2 = Bio::Community::Member->new( );
-  my $member2_id = $member2->id;
+  # Write communities in another file
+  my $out = Bio::Community::IO->new(
+     -file   => '>new_otu_table.generic',
+     -format => 'generic',
+  );
+  $out->write_community;
+  $out->close;
 
 =head1 DESCRIPTION
 
 A Bio::Community::IO object implement methods to read and write communities in
-formats used by popular programs such as GAAS and QIIME, or as generic tab-
-separated tables. It can also convert community member abundance between counts,
-fraction and relative abundance.
+formats used by popular programs such as GAAS, QIIME, Unifrac, or as generic tab-
+separated tables. The format should be automatically detected though it can be
+manually specified. This moddule can also convert community member abundance
+between counts, fraction and relative abundance.
 
 =back
 
@@ -76,10 +87,10 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::IO object
  Usage   : # Reading a file
-           my $member = Bio::Community::IO->new( -file => 'community.txt' );
+           my $in = Bio::Community::IO->new( -file => 'community.txt' );
            # Writing a file
-           my $member = Bio::Community::IO->new( -file   => '>community.txt',
-                                                 -format => 'generic'         );
+           my $out = Bio::Community::IO->new( -file => '>community.txt',
+                                              -format => 'generic'       );
  Args    : -file : Path of a community file. See file() in Bio::Root::IO.
            -format : Format of the file: 'generic', 'gaas', 'qiime', 'unifrac'.
                This is optional when reading a community file because the format
