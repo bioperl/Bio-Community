@@ -121,15 +121,20 @@ with 'Bio::Community::Role::Described' , # -desc
      'Bio::Community::Role::Sequenced' , # -seqs
      'Bio::Community::Role::Weighted'  ; # -weights
 
-my %ids = ();
-my $last_id = 1;
+my $last_num = 1;
+my $prefix = 'bc';
+# First ID is 'bc1'
 
 
 =head2 id
 
  Function: my $description = $member->id();
  Usage   : Get or set the ID for the member. If an ID is not provided, a unique
-           ID is generated.
+           ID prefixed with 'bc' is generated, e.g. 'bc1', 'bc2', etc. This
+           makes it easy to distinguish IDs assigned by Bio::Community::Member
+           from IDs obtained from other sources, e.g. read from a QIIME file.
+           Use of the 'bc' prefix is restricted to the Bio::Community::Member
+           module; refrain from using it yourself.
  Args    : A string
  Returns : A string
 
@@ -142,25 +147,26 @@ has id => (
    init_arg => '-id',
    lazy => 0,
    predicate => '_has_id',
-   trigger => \&_register_id,
+   #trigger => \&_register_id,
 );
 
 
-func _register_id ($self, $id, $old_id?) {
-   # Register ID after it has been assigned
-   $ids{$self->{id}} = undef;
-};
+# Don't register IDs anymore since we use a prefix that users should not use.
+#my %ids = ();
+#func _register_id ($self, $id, $old_id?) {
+#   # Register ID after it has been assigned
+#   $ids{$self->{id}} = undef;
+#};
 
 
 method BUILD ($args) {
    # Ensure that a default ID is assigned if needed after object construction
    if (not $self->_has_id) {
-      while (exists $ids{$last_id}) {
-         $last_id++;
-      }
-      $self->id($last_id);
+      $self->id($prefix.$last_num);
+      $last_num++;      
    }
 }
+
 
 =head2 desc
 

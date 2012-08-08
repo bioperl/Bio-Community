@@ -38,7 +38,7 @@ my $build = Module::Build->new(
                             },
     recommends           => {
                               # Clone Bio::Community objects through the Bio::Root::clone() method
-                             'Clone'                        => 0,
+                             'Clone::Fast'                  => 0,
                             },
     script_files         => [
                              'scripts/bc_bootstrap.pl',

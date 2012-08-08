@@ -36,7 +36,8 @@ bc_convert_files - Merge/split community files and convert between formats
 =head1 DESCRIPTION
 
 This script reads files containing biological communities and converts them to
-another format.
+another format. This will also remove communities with no members or species
+with 0 counts in all communities.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -82,14 +83,16 @@ table), qiime, gaas or unifrac. Default: same as input format
 =cut
 
 #=item -mi <member_identifier> | -member_identifier <merge_identifier>
-#
-#Pick how to decide if members in different communities are the same or not:
-#
-#Default: merge_identifier.default
-#
+
+#When merging communities from different files, two methods can be be used to
+#decide if members of different communities are the same or not: 'id' or 'desc'.
+#The 'id' method will assume that members with the same ID are the same. However,
+#when this is not the case, you can decide that members that have the same
+#description are the same using the 'desc' method. Default: merge_identifier.default
+
 #=for Euclid:
 #   member_identifier.type: string
-#   member_identifier.default: 'bc_convert_files'
+#   member_identifier.default: 'id'
 
 =head1 FEEDBACK
 
@@ -130,12 +133,13 @@ Email florent.angly@gmail.com
 =cut
 
 
-convert( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'output_format'} );
+convert( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'output_format'},
+         $ARGV{'member_identifier'} );
 
 exit;
 
 
-func convert ($input_files, $output_prefix, $output_format) {
+func convert ($input_files, $output_prefix, $output_format, $member_identifier) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new;

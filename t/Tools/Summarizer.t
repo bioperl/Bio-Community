@@ -402,16 +402,16 @@ is $summary_meta->get_communities_count, 1;
 $summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria';
-is $member->taxon->node_name, 'k__Bacteria';
-delta_ok $summary->get_count($member), 2027;
-delta_ok $summary->get_rel_ab($member), 99.6345517;
-
-$member = $summary->next_member;
 is $member->desc, 'Unknown taxonomy';
 is $member->taxon, undef;
 delta_ok $summary->get_count($member), 2;
 delta_ok $summary->get_rel_ab($member), 0.3654483;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria';
+is $member->taxon->node_name, 'k__Bacteria';
+delta_ok $summary->get_count($member), 2027;
+delta_ok $summary->get_rel_ab($member), 99.6345517;
 
 is $summary->next_member, undef;
 
@@ -433,10 +433,10 @@ is $summary_meta->get_communities_count, 1;
 $summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
-is $member->desc, 'Unknown taxonomy';
-is $member->taxon, undef;
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.3654483;
+is $member->desc, 'k__Bacteria;p__Proteobacteria';
+is $member->taxon->node_name, 'p__Proteobacteria';
+delta_ok $summary->get_count($member), 2002;
+delta_ok $summary->get_rel_ab($member), 97.6112442;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes';
@@ -445,16 +445,16 @@ delta_ok $summary->get_count($member), 23;
 delta_ok $summary->get_rel_ab($member), 1.860886;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Proteobacteria';
-is $member->taxon->node_name, 'p__Proteobacteria';
-delta_ok $summary->get_count($member), 2002;
-delta_ok $summary->get_rel_ab($member), 97.6112442;
-
-$member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Actinobacteria';
 is $member->taxon->node_name, 'p__Actinobacteria';
 delta_ok $summary->get_count($member), 2;
 delta_ok $summary->get_rel_ab($member), 0.1624215;
+
+$member = $summary->next_member;
+is $member->desc, 'Unknown taxonomy';
+is $member->taxon, undef;
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.3654483;
 
 is $summary->next_member, undef;
 
@@ -476,22 +476,10 @@ is $summary_meta->get_communities_count, 1;
 $summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Carnobacteriaceae;g__Granulicatella';
-is $member->taxon->node_name, 'g__Granulicatella';
-delta_ok $summary->get_count($member), 18;
-delta_ok $summary->get_rel_ab($member), 0.9745288;
-
-$member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Actinomycetaceae;g__Actinomyces';
-is $member->taxon->node_name, 'g__Actinomyces';
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.1624215;
-
-$member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus';
-is $member->taxon->node_name, 'g__Lactobacillus';
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.2598744;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae';
+is $member->taxon->node_name, 'f__Enterobacteriaceae';
+delta_ok $summary->get_count($member), 2002;
+delta_ok $summary->get_rel_ab($member), 97.6112442;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Enterococcaceae;g__Enterococcus';
@@ -500,10 +488,22 @@ delta_ok $summary->get_count($member), 2;
 delta_ok $summary->get_rel_ab($member), 0.1392184;
 
 $member = $summary->next_member;
-is $member->desc, 'Unknown taxonomy';
-is $member->taxon, undef;
+is $member->desc, 'k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Actinomycetaceae;g__Actinomyces';
+is $member->taxon->node_name, 'g__Actinomyces';
 delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.3654483;
+delta_ok $summary->get_rel_ab($member), 0.1624215;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Carnobacteriaceae;g__Granulicatella';
+is $member->taxon->node_name, 'g__Granulicatella';
+delta_ok $summary->get_count($member), 18;
+delta_ok $summary->get_rel_ab($member), 0.9745288;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus';
+is $member->taxon->node_name, 'g__Lactobacillus';
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.2598744;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Veillonellaceae;g__Veillonella';
@@ -512,10 +512,10 @@ delta_ok $summary->get_count($member), 1;
 delta_ok $summary->get_rel_ab($member), 0.4872644;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae';
-is $member->taxon->node_name, 'f__Enterobacteriaceae';
-delta_ok $summary->get_count($member), 2002;
-delta_ok $summary->get_rel_ab($member), 97.6112442;
+is $member->desc, 'Unknown taxonomy';
+is $member->taxon, undef;
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.3654483;
 
 is $summary->next_member, undef;
 
@@ -537,22 +537,28 @@ is $summary_meta->get_communities_count, 1;
 $summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Enterococcaceae;g__Enterococcus;s__Enterococcusfaecalis';
+is $member->taxon->node_name, 's__Enterococcusfaecalis';
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.1392184;
+
+$member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus;s__Lactobacillusiners';
 is $member->taxon->node_name, 's__Lactobacillusiners';
 delta_ok $summary->get_count($member), 2;
 delta_ok $summary->get_rel_ab($member), 0.2598744;
 
 $member = $summary->next_member;
+is $member->desc, 'Unknown taxonomy';
+is $member->taxon, undef;
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 0.3654483;
+
+$member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Carnobacteriaceae;g__Granulicatella;s__Granulicatellaelegans';
 is $member->taxon->node_name, 's__Granulicatellaelegans';
 delta_ok $summary->get_count($member), 18;
 delta_ok $summary->get_rel_ab($member), 0.9745288;
-
-$member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Actinomycetaceae;g__Actinomyces;s__Actinomycesodontolyticus';
-is $member->taxon->node_name, 's__Actinomycesodontolyticus';
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.1624215;
 
 $member = $summary->next_member;
 is $member->desc, 'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Veillonellaceae;g__Veillonella';
@@ -567,16 +573,10 @@ delta_ok $summary->get_count($member), 2002;
 delta_ok $summary->get_rel_ab($member), 97.6112442;
 
 $member = $summary->next_member;
-is $member->desc, 'Unknown taxonomy';
-is $member->taxon, undef;
+is $member->desc, 'k__Bacteria;p__Actinobacteria;c__Actinobacteria;o__Actinomycetales;f__Actinomycetaceae;g__Actinomyces;s__Actinomycesodontolyticus';
+is $member->taxon->node_name, 's__Actinomycesodontolyticus';
 delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.3654483;
-
-$member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Enterococcaceae;g__Enterococcus;s__Enterococcusfaecalis';
-is $member->taxon->node_name, 's__Enterococcusfaecalis';
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 0.1392184;
+delta_ok $summary->get_rel_ab($member), 0.1624215;
 
 is $summary->next_member, undef;
 
@@ -646,18 +646,18 @@ is $summary_meta->get_communities_count, 3;
 $summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales';
-is $member->taxon->node_name, 'o__Rickettsiales';
-delta_ok $summary->get_count($member), 40;
-delta_ok $summary->get_rel_ab($member), 49.3827160;
-$id1 = $member->id;
-
-$member = $summary->next_member;
 is $member->desc, 'Unknown taxonomy';
 is $member->taxon, undef;
 delta_ok $summary->get_count($member), 41;
 delta_ok $summary->get_rel_ab($member), 50.6172840;
 $id2 = $member->id;
+
+$member = $summary->next_member;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales';
+is $member->taxon->node_name, 'o__Rickettsiales';
+delta_ok $summary->get_count($member), 40;
+delta_ok $summary->get_rel_ab($member), 49.3827160;
+$id1 = $member->id;
 
 is $summary->next_member, undef;
 
@@ -675,11 +675,11 @@ is $summary->next_member, undef;
 $summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales';
-is $member->taxon->node_name, 'o__Rickettsiales';
-delta_ok $summary->get_count($member), 76;
-delta_ok $summary->get_rel_ab($member), 62.8099174;
-is $member->id, $id1;
+is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2';
+is $member->taxon->node_name, 'o__E2';
+delta_ok $summary->get_count($member), 2;
+delta_ok $summary->get_rel_ab($member), 1.6528926;
+is $member->id, $id3;
 
 $member = $summary->next_member;
 is $member->desc, 'Unknown taxonomy';
@@ -689,11 +689,11 @@ delta_ok $summary->get_rel_ab($member), 35.5371901;
 is $member->id, $id2;
 
 $member = $summary->next_member;
-is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2';
-is $member->taxon->node_name, 'o__E2';
-delta_ok $summary->get_count($member), 2;
-delta_ok $summary->get_rel_ab($member), 1.6528926;
-is $member->id, $id3;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales';
+is $member->taxon->node_name, 'o__Rickettsiales';
+delta_ok $summary->get_count($member), 76;
+delta_ok $summary->get_rel_ab($member), 62.8099174;
+is $member->id, $id1;
 
 is $summary->next_member, undef;
 
@@ -728,16 +728,10 @@ delta_ok $summary->get_count($member), 17;
 delta_ok $summary->get_rel_ab($member), 17;
 
 $member = $summary->next_member;
-is $member->desc, 'Bacteria;WCHB1-60';
-is $member->taxon->node_name, 'WCHB1-60';
-delta_ok $summary->get_count($member), 1;
-delta_ok $summary->get_rel_ab($member), 1;
-
-$member = $summary->next_member;
-is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae;Uliginosibacterium;Sphingomonas';
-is $member->taxon->node_name, 'Sphingomonas';
-delta_ok $summary->get_count($member), 27;
-delta_ok $summary->get_rel_ab($member), 27;
+is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
+is $member->taxon->node_name, 'Miscellaneous';
+delta_ok $summary->get_count($member), 19;
+delta_ok $summary->get_rel_ab($member), 19;
 
 $member = $summary->next_member;
 is $member->desc, 'Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter';
@@ -746,10 +740,22 @@ delta_ok $summary->get_count($member), 1;
 delta_ok $summary->get_rel_ab($member), 1;
 
 $member = $summary->next_member;
-is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingobium;Sphingomonas';
-is $member->taxon->node_name, 'Sphingomonas';
+is $member->desc, 'Bacteria;WCHB1-60';
+is $member->taxon->node_name, 'WCHB1-60';
+delta_ok $summary->get_count($member), 1;
+delta_ok $summary->get_rel_ab($member), 1;
+
+$member = $summary->next_member;
+is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
+is $member->taxon->node_name, 'Chytridiomycota';
 delta_ok $summary->get_count($member), 7;
 delta_ok $summary->get_rel_ab($member), 7;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas';
+is $member->taxon->node_name, 'Sphingomonas';
+delta_ok $summary->get_count($member), 6;
+delta_ok $summary->get_rel_ab($member), 6;
 
 $member = $summary->next_member;
 is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;;Leucocryptos';
@@ -764,22 +770,16 @@ delta_ok $summary->get_count($member), 6;
 delta_ok $summary->get_rel_ab($member), 6;
 
 $member = $summary->next_member;
-is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas';
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingobium;Sphingomonas';
 is $member->taxon->node_name, 'Sphingomonas';
-delta_ok $summary->get_count($member), 6;
-delta_ok $summary->get_rel_ab($member), 6;
-
-$member = $summary->next_member;
-is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
-is $member->taxon->node_name, 'Chytridiomycota';
 delta_ok $summary->get_count($member), 7;
 delta_ok $summary->get_rel_ab($member), 7;
 
 $member = $summary->next_member;
-is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
-is $member->taxon->node_name, 'Miscellaneous';
-delta_ok $summary->get_count($member), 19;
-delta_ok $summary->get_rel_ab($member), 19;
+is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae;Uliginosibacterium;Sphingomonas';
+is $member->taxon->node_name, 'Sphingomonas';
+delta_ok $summary->get_count($member), 27;
+delta_ok $summary->get_rel_ab($member), 27;
 
 is $summary->next_member, undef;
 
@@ -802,10 +802,10 @@ is $summary_meta->get_communities_count, 1;
 $summary = $summary_meta->next_community;
 
 $member = $summary->next_member;
-is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
-is $member->taxon->node_name, 'Rhodocyclaceae';
-delta_ok $summary->get_count($member), 44;
-delta_ok $summary->get_rel_ab($member), 44;
+is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
+is $member->taxon->node_name, 'Miscellaneous';
+delta_ok $summary->get_count($member), 19;
+delta_ok $summary->get_rel_ab($member), 19;
 
 $member = $summary->next_member;
 is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae';
@@ -814,28 +814,28 @@ delta_ok $summary->get_count($member), 13;
 delta_ok $summary->get_rel_ab($member), 13;
 
 $member = $summary->next_member;
-is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
-is $member->taxon->node_name, 'Chytridiomycota';
-delta_ok $summary->get_count($member), 7;
-delta_ok $summary->get_rel_ab($member), 7;
-
-$member = $summary->next_member;
 is $member->desc, 'Other <= 6 %';
 is $member->taxon, undef;
 delta_ok $summary->get_count($member), 8;
 delta_ok $summary->get_rel_ab($member), 8;
 
 $member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae';
+is $member->taxon->node_name, 'Rhodocyclaceae';
+delta_ok $summary->get_count($member), 44;
+delta_ok $summary->get_rel_ab($member), 44;
+
+$member = $summary->next_member;
+is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
+is $member->taxon->node_name, 'Chytridiomycota';
+delta_ok $summary->get_count($member), 7;
+delta_ok $summary->get_rel_ab($member), 7;
+
+$member = $summary->next_member;
 is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos';
 is $member->taxon->node_name, 'Leucocryptos';
 delta_ok $summary->get_count($member), 9;
 delta_ok $summary->get_rel_ab($member), 9;
-
-$member = $summary->next_member;
-is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
-is $member->taxon->node_name, 'Miscellaneous';
-delta_ok $summary->get_count($member), 19;
-delta_ok $summary->get_rel_ab($member), 19;
 
 is $summary->next_member, undef;
 

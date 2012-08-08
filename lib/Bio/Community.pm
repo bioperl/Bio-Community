@@ -28,7 +28,6 @@ Bio::Community - A biological community
      my $member_rel_ab = $community->get_rel_ab($member);
      print "The relative abundance of member $member_id is $member_rel_ab % ($member_count counts)\n";
   }
-  
 
 =head1 DESCRIPTION
 
@@ -392,14 +391,14 @@ method get_all_members () {
 
 =head2 get_member_by_id
 
- Function: Fetch a member based on its ID
+ Function: Fetch a member based on its ID.
  Usage   : my $member = $community->get_member_by_id(3);
  Args    : integer for the member ID
  Returns : a Bio::Community::Member object or undef if member was not found
 
 =cut
 
-method get_member_by_id (Int $member_id) {
+method get_member_by_id (Str $member_id) {
    return $self->_members->{$member_id};
 }
 

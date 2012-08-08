@@ -24,15 +24,15 @@ isa_ok $community, 'Bio::Community';
 $community = Bio::Community->new( -use_weights => 0 );
 is $community->get_members_count, 0;
 
-$member1 = Bio::Community::Member->new( -weights => [3] );
+$member1 = Bio::Community::Member->new( -id => 1, -weights => [3] );
 ok $community->add_member( $member1 );
 is $community->get_members_count, 1;
 
-$member2 = Bio::Community::Member->new();
+$member2 = Bio::Community::Member->new( -id => 2 );
 ok $community->add_member( $member2, 23 );
 is $community->get_members_count, 24;
 
-$member3 = Bio::Community::Member->new( -weights => [2,7] );
+$member3 = Bio::Community::Member->new( -id => 3, -weights => [2,7] );
 ok $community->add_member( $member3, 4 );
 is $community->get_members_count, 28;
 

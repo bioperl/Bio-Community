@@ -55,7 +55,7 @@ The output is a copy-corrected OTU table, with relative abundances (in percent).
 
 =item -i <input>
 
-Input OTU table (QIIME or generic site-by-species format).
+Input OTU table (QIIME or generic site-by-species table).
 
 =for Euclid:
    input.type: readable
