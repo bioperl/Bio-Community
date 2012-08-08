@@ -63,25 +63,25 @@ use namespace::autoclean;
 subtype 'PositiveNum'
    => as 'Num'
    => where { $_ >= 0 }
-   => message { gen_err_msg('a positive number', $_) };
+   => message { _gen_err_msg('a positive number', $_) };
 
 
 subtype 'StrictlyPositiveNum'
    => as 'PositiveNum'
    => where { $_ > 0 }
-   => message { gen_err_msg('a strictly positive number', $_) };
+   => message { _gen_err_msg('a strictly positive number', $_) };
 
 
 subtype 'PositiveInt'
    => as 'Int'
    => where { $_ >= 0 }
-   => message { gen_err_msg('a positive integer', $_) };
+   => message { _gen_err_msg('a positive integer', $_) };
 
 
 subtype 'StrictlyPositiveInt'
    => as 'PositiveInt'
    => where { $_ > 0 }
-   => message { gen_err_msg('a strictly positive integer', $_) };
+   => message { _gen_err_msg('a strictly positive integer', $_) };
 
 
 # A Count should be a positive integer. Sometimes, however, we only have access
@@ -93,14 +93,14 @@ subtype 'Count'
 # Sort numerically
 subtype 'NumericSort'
    => as enum( [ qw(-1 0 1) ] )
-   => message { gen_err_msg('0 (off), 1 (increasing) or -1 (decreasing)', $_) };
+   => message { _gen_err_msg('0 (off), 1 (increasing) or -1 (decreasing)', $_) };
 
 
 # Abundance representation
 my @AbundanceRepr = qw(count percentage fraction);
 subtype 'AbundanceRepr'
    => as enum( [ @AbundanceRepr ] )
-   => message { gen_err_msg(\@AbundanceRepr, $_) };
+   => message { _gen_err_msg(\@AbundanceRepr, $_) };
 
 
 # Rank: a strictly positive integer
@@ -113,38 +113,38 @@ my @DistanceType  = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger
                        bray-curtis shared permuted maxiphi unifrac);
 subtype 'DistanceType'
    => as enum( [ @DistanceType ] )
-   => message { gen_err_msg(\@DistanceType, $_) };
+   => message { _gen_err_msg(\@DistanceType, $_) };
 
 
 # Type of distance
 my @AlphaType  = qw(richness);
 subtype 'AlphaType'
    => as enum( [ @AlphaType ] )
-   => message { gen_err_msg(\@AlphaType, $_) };
+   => message { _gen_err_msg(\@AlphaType, $_) };
 
 
 # Member identification method
 my @IdentifyByType = qw(id desc);
 subtype 'IdentifyByType'
    => as enum( [ @IdentifyByType ] )
-   => message { gen_err_msg(\@IdentifyByType, $_) };
+   => message { _gen_err_msg(\@IdentifyByType, $_) };
 
 
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 my @WeightAssignStr = qw(file_average community_average ancestor);
 subtype 'WeightAssignStr'
    => as enum( [ @WeightAssignStr ] )
-   => message { gen_err_msg(\@WeightAssignStr, $_) };
+   => message { _gen_err_msg(\@WeightAssignStr, $_) };
 subtype 'WeightAssignType'
    => as 'WeightAssignStr | Num'
-   => message { gen_err_msg( ['a number', @WeightAssignStr], $_) };
+   => message { _gen_err_msg( ['a number', @WeightAssignStr], $_) };
 
 
 # A readable file
 subtype 'ReadableFile'
    => as 'Str'
    => where { (-e $_) && (-r $_) }
-   => message { gen_err_msg([], $_) };
+   => message { _gen_err_msg([], $_) };
 
 subtype 'ArrayRefOfReadableFiles'
    => as 'ArrayRef[ReadableFile]';
