@@ -70,11 +70,11 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Function: Create a new Bio::Community object
+ Function: Create a new Bio::Community::Alpha object
  Usage   : my $alpha = Bio::Community::Alpha->new( ... );
  Args    : -community : See community().
            -type      : See type().
- Returns : a new Bio::Community object
+ Returns : a new Bio::Community::Alpha object
 
 =cut
 
