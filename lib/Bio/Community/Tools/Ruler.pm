@@ -174,7 +174,7 @@ has type => (
 =head2 get_distance
 
  Function: Calculate the distance or beta-diversity between two communities.
-           The inpot metacommunity should contain exactly two communities. The
+           The input metacommunity should contain exactly two communities. The
            distance is calculated based on the relative abundance (in %) of the
            members (not their counts).
  Usage   : my $distance = $ruler->get_distance;
