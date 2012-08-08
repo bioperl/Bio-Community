@@ -4,12 +4,16 @@ use Bio::Root::Test;
 
 use Bio::Community;
 use Bio::Community::Member;
+use Bio::Community::IO;
 
 use_ok($_) for qw(
     Bio::Community::Meta
 );
 
-my ($meta, $community1, $community2, $community3, $member1, $member2, $member3);
+my ($meta, $community1, $community2, $community3, $member1, $member2, $member3,
+   $member);
+
+my %ids;
 
 
 # Bare object
@@ -19,6 +23,7 @@ isa_ok $meta, 'Bio::Root::RootI';
 isa_ok $meta, 'Bio::Community::Meta';
 
 is $meta->name, 'Unnamed';
+is $meta->identify_by, 'id';
 is $meta->next_community, undef;
 
 is_deeply [map {ref $_}   @{$meta->get_all_communities}], [];
@@ -122,6 +127,65 @@ is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2];
 is $meta->get_richness, 2;
 
 is $meta->get_members_count, 45;
+
+
+# Merging communities from different sources
+
+$community1 = Bio::Community::IO->new(
+   -file => test_input_file('to_merge_1.qiime'),
+)->next_community;
+
+$community2 = Bio::Community::IO->new(
+   -file => test_input_file('to_merge_2.qiime'),
+)->next_community;
+
+ok $meta = Bio::Community::Meta->new( -identify_by => 'desc' );
+is $meta->identify_by, 'desc';
+
+ok $meta->add_communities([$community1, $community2]);
+
+# m5	m6
+# 123	0	k__Bacteria;p__Bacteroidetes
+# 527	0	k__Bacteria;p__Proteobacteria
+# 91	446	k__Bacteria;p__Firmicutes
+# 195	69	k__Bacteria;p__Actinobacteria
+# 0	87	k__Archaea
+
+ok $community1 = $meta->next_community;
+
+$member = $community1->next_member;
+is $member->desc, 'k__Bacteria;p__Firmicutes';
+$ids{$member->desc} = $member->id;
+is $community1->get_count($member), 91;
+$member = $community1->next_member;
+is $member->desc, 'k__Bacteria;p__Actinobacteria';
+$ids{$member->desc} = $member->id;
+is $community1->get_count($member), 195;
+$member = $community1->next_member;
+is $member->desc, 'k__Bacteria;p__Bacteroidetes';
+$ids{$member->desc} = $member->id;
+is $community1->get_count($member), 123;
+$member = $community1->next_member;
+is $member->desc, 'k__Bacteria;p__Proteobacteria';
+$ids{$member->desc} = $member->id;
+is $community1->get_count($member), 527;
+is $community1->next_member, undef;
+
+ok $community2 = $meta->next_community;
+
+$member = $community2->next_member;
+is $member->desc, 'k__Bacteria;p__Firmicutes';
+is $ids{$member->desc}, $member->id;
+is $community2->get_count($member), 446;
+$member = $community2->next_member;
+is $member->desc, 'k__Bacteria;p__Actinobacteria';
+is $community2->get_count($member), 69;
+$member = $community2->next_member;
+is $member->desc, 'k__Archaea';
+is $community2->get_count($member), 87;
+is $community2->next_member, undef;
+
+is $meta->next_community, undef;
 
 
 done_testing();

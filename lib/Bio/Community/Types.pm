@@ -123,6 +123,13 @@ subtype 'AlphaType'
    => message { gen_err_msg(\@AlphaType, $_) };
 
 
+# Member identification method
+my @IdentifyByType = qw(id desc);
+subtype 'IdentifyByType'
+   => as enum( [ @IdentifyByType ] )
+   => message { gen_err_msg(\@IdentifyByType, $_) };
+
+
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 my @WeightAssignStr = qw(file_average community_average ancestor);
 subtype 'WeightAssignStr'

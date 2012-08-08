@@ -121,7 +121,8 @@ with 'Bio::Community::Role::Described' , # -desc
      'Bio::Community::Role::Sequenced' , # -seqs
      'Bio::Community::Role::Weighted'  ; # -weights
 
-my $last_num = 1;
+
+my $last_num = 0;
 my $prefix = 'bc';
 # First ID is 'bc1'
 
@@ -162,9 +163,14 @@ has id => (
 method BUILD ($args) {
    # Ensure that a default ID is assigned if needed after object construction
    if (not $self->_has_id) {
-      $self->id($prefix.$last_num);
-      $last_num++;      
+      $self->id( _generate_id() );
    }
+}
+
+
+func _generate_id () {
+   $last_num++;
+   return $prefix.$last_num;
 }
 
 

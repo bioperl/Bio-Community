@@ -79,8 +79,9 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::Meta object
  Usage   : my $meta = Bio::Community::Meta->new( ... );
- Args    : -name       : see name()
-           -communities: see add_communities()
+ Args    : -name       : See name()
+           -communities: See add_communities()
+           -identify_by: See identify_by()
  Returns : A new Bio::Community::Meta object
 
 =cut
@@ -94,6 +95,7 @@ use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use Tie::IxHash;
+use Bio::Community::Member;
 
 
 extends 'Bio::Root::Root';
@@ -127,10 +129,45 @@ has name => (
 );
 
 
-# Communities are stored in a sorted hash
+=head2 identify_by
+
+ Function: Get or set how members are handled.
+           In the Bio::Community modules, members with the same ID are
+           considered identical, no matter what their description or taxonomy is.
+           If the communities added to the metacommunity come from different
+           sources or files, the IDs of the members are unsafe because the same
+           member in different communities will likely have a different ID and
+           be interpreted as a different member, whereas different members may
+           have the same ID and be counted as the same. To work around this, you
+           can specify to look at the desc() of the members and give the same ID
+           to members that have the same description.
+ Usage   : $meta->identify_by('desc');
+ Args    : String, either 'id' or 'desc'
+ Returns : String, either 'id' (default) or 'desc'
+
+=cut
+
+has identify_by => (
+   is => 'rw',
+   isa => 'IdentifyByType',
+   lazy => 1,
+   default => 'id',
+   init_arg => '-identify_by',
+);
+
+
+has _members_lookup => (
+   is => 'rw',
+   #isa => 'HashRef',
+   lazy => 1,
+   default => sub{ {} },
+   init_arg => undef,
+);
+
+
 has _communities => (
    is => 'rw',
-   #isa => 'Tie::IxHash',
+   #isa => 'Tie::IxHash', # Communities are stored in a sorted hash
    lazy => 1,
    default => sub { tie my %hash, 'Tie::IxHash'; return \%hash },
    init_arg => undef,
@@ -150,12 +187,37 @@ has _communities => (
 method add_communities ( ArrayRef[Bio::Community] $communities ) {
    my $comm_hash = $self->_communities;
    for my $community (@$communities) {
+
+      if ($self->identify_by eq 'desc') {
+         # Identify members by description and fix IDs.
+         my $members_lookup = $self->_members_lookup;
+         for my $member (@{$community->get_all_members}) {
+            my $desc = $member->desc;
+            my $same_member = $members_lookup->{$desc};
+            my $id;
+            if (defined $same_member) {
+               # Use same ID and same Member object
+               $id = $same_member->id;
+               #$member = $same_member;
+            } else {
+               # Use new ID
+               $id = Bio::Community::Member::_generate_id();
+               $members_lookup->{$desc} = $member;
+            }
+            my $count = $community->remove_member($member);
+            $member->id( $id );
+            $community->add_member($member, $count);
+         }
+      }
+
       my $name = $community->name;
       if (exists $comm_hash->{$name}) {
          $self->throw("Could not add community '$name' because there already is".
             " a community with this name in the metacommunity");
       }
+
       $comm_hash->{$name} = $community;
+
    }
    $self->_communities( $comm_hash );
    $self->_set_communities_count( $self->get_communities_count + scalar @$communities );
@@ -244,9 +306,11 @@ has _communities_count => (
    writer => '_set_communities_count',
 );
 
+
 ####
 # TODO: get_community_by_position() method
 ####
+
 
 ####
 # TODO: next_member() iterator method
