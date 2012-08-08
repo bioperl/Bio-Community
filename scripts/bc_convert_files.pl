@@ -82,17 +82,17 @@ table), qiime, gaas or unifrac. Default: same as input format
 
 =cut
 
-#=item -mi <member_identifier> | -member_identifier <merge_identifier>
+=item -mi <member_identifier> | -member_identifier <member_identifier>
 
-#When merging communities from different files, two methods can be be used to
-#decide if members of different communities are the same or not: 'id' or 'desc'.
-#The 'id' method will assume that members with the same ID are the same. However,
-#when this is not the case, you can decide that members that have the same
-#description are the same using the 'desc' method. Default: merge_identifier.default
+When merging communities from different files, two methods can be be used to
+decide if members of different communities are the same or not: 'id' or 'desc'.
+The 'id' method will assume that members with the same ID are the same. However,
+when this is not the case, you can decide that members that have the same
+description are the same using the 'desc' method. Default: merge_identifier.default
 
-#=for Euclid:
-#   member_identifier.type: string
-#   member_identifier.default: 'id'
+=for Euclid:
+   member_identifier.type: string
+   member_identifier.default: 'id'
 
 =head1 FEEDBACK
 
@@ -142,7 +142,7 @@ exit;
 func convert ($input_files, $output_prefix, $output_format, $member_identifier) {
 
    # Read input communities
-   my $meta = Bio::Community::Meta->new;
+   my $meta = Bio::Community::Meta->new( -identify_by => $member_identifier );
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new( -file => $input_file );
