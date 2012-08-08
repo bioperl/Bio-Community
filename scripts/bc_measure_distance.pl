@@ -14,13 +14,13 @@ use warnings;
 use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Meta;
-use Bio::Community::Tools::Ruler;
+use Bio::Community::Meta::Beta;
 use Getopt::Euclid qw(:minimal_keys);
 
 
 =head1 NAME
 
-bc_measure_distance - Measure the distance or beta-diversity between communities
+bc_measure_distance - Measure beta-diversity between communities
 
 =head1 SYNOPSIS
 
@@ -30,16 +30,13 @@ bc_measure_distance - Measure the distance or beta-diversity between communities
 
 =head1 DESCRIPTION
 
-This script reads files containing biological communities and calculate the
-distance or beta-diversity that separates them. The output is a tab-delimited
-matrix containing the distance between all communities. See
-L<Bio::Community::Tools::Ruler> for more details. Note that distances and beta-
-diversity metrics are based on relative abundances. Hence, any weight you
-provide will affect the results.
-
-The output files are in tab-delimited format and the column represent the name
-of first community, of the second community, and the distance that separates
-them.
+This script reads files containing biological communities and calculate how
+dissimilar they are (beta diversity). The output is a tab-delimited file
+containing the beta diversity between all pairs of communities. The columns of
+this file contain the name of the first community, of the second community, and
+their beta diversity, respectively. See L<Bio::Community::Meta::Beta> for more
+details. Note that beta diversity metrics are based on relative abundances.
+Hence, any weight you provide will affect the results.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -105,8 +102,8 @@ The type of distance or beta-diversity metric to calculate: 1-norm, euclidean
 =item -pf <pair_files>... | -pair_files <pair_files>...
 
 Input file specifying the pairs of communities for which to calculate the
-distance or beta-diversity. Each line of a file of pairs should have the name
-of two communities, separated by a tab. For each file of pairs, there will be a
+beta-diversity. Each line of a file of pairs should have the name of two
+communities, separated by a tab. For each file of pairs, there will be a
 corresponding output file.
 
 =for Euclid:
@@ -181,7 +178,7 @@ func calc_dist ($input_files, $weight_files, $weight_assign, $output_prefix,
       $in->close;
    }
 
-   # Calculate distances
+   # Calculate beta diversity
    if ($pair_files) {
       _process_specific_pairs($meta, $dist_type, $output_prefix, $pair_files);
    } else {
@@ -199,7 +196,7 @@ func _process_specific_pairs ($meta, $dist_type, $output_prefix, $pair_files) {
       print "Reading pair file $pair_file...\n";
       my $pairs = _read_pair_file($pair_file);
       my $out_file = $output_prefix.'_group'.$i.'.txt';
-      print "Writing distances to file $out_file\n";
+      print "Writing beta diversity to file $out_file\n";
       open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
       for my $pair (@$pairs) {
          my $name1 = $pair->[0];
@@ -208,11 +205,11 @@ func _process_specific_pairs ($meta, $dist_type, $output_prefix, $pair_files) {
          my $name2 = $pair->[1];
          my $community2 = $meta->get_community_by_name($name2) or
             die "Error: Community $name2 was not found in the provided community file";
-         my $distance = Bio::Community::Tools::Ruler->new(
+         my $beta_val = Bio::Community::Meta::Beta->new(
             -metacommunity => Bio::Community::Meta->new(-communities => [$community1, $community2]),
             -type          => $dist_type,
-         )->get_distance;
-         print $out $community1->name."\t".$community2->name."\t".$distance."\n";
+         )->get_beta;
+         print $out $community1->name."\t".$community2->name."\t".$beta_val."\n";
       }
       close $out;
    }
@@ -221,9 +218,9 @@ func _process_specific_pairs ($meta, $dist_type, $output_prefix, $pair_files) {
 
 
 func _process_all_pairs ($meta, $dist_type, $output_prefix) {
-   # Calculate distances between all pairs of communities
+   # Calculate beta diversity for all pairs of communities
    my $out_file = $output_prefix.'.txt';
-   print "Writing distances to file $out_file\n";
+   print "Writing beta diversity to file $out_file\n";
    open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
    my $communities = $meta->get_all_communities;
    my $num_communities = scalar @$communities;
@@ -231,11 +228,11 @@ func _process_all_pairs ($meta, $dist_type, $output_prefix) {
       my $community1 = $communities->[$i];
       for my $j ($i + 1 .. $num_communities -1) {
          my $community2 = $communities->[$j];
-         my $distance = Bio::Community::Tools::Ruler->new(
+         my $beta_val = Bio::Community::Meta::Beta->new(
             -metacommunity => Bio::Community::Meta->new(-communities => [$community1, $community2]),
             -type          => $dist_type,
-         )->get_distance;
-         print $out $community1->name."\t".$community2->name."\t".$distance."\n";
+         )->get_beta;
+         print $out $community1->name."\t".$community2->name."\t".$beta_val."\n";
       }
    }
    close $out;

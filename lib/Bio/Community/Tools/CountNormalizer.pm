@@ -105,7 +105,7 @@ use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Meta;
 use Bio::Community::Tools::Sampler;
-use Bio::Community::Tools::Ruler;
+use Bio::Community::Meta::Beta;
 use POSIX;
 use List::Util qw(min);
 
@@ -155,15 +155,15 @@ has sample_size => (
 
 =head2 threshold
 
- Function: Get or set the threshold. While iterating, when the distance between the
-           average community and the average community at the previous iteration
-           decreases below this threshold, the bootstrapping is stopped. By
-           default, the threshold is 1e-5. The repetitions() method provides an
-           alternative way to specify when to stop the computation. After
-           communities have been normalized using the repetitions() method
-           instead of the threshold() method, the distance between the last two
-           average communities repetitions can be accessed using the threshold()
-           method.
+ Function: Get or set the threshold. While iterating, when the beta diversity or
+           distance between the average community and the average community at
+           the previous iteration decreases below this threshold, the
+           bootstrapping is stopped. By default, the threshold is 1e-5. The
+           repetitions() method provides an alternative way to specify when to
+           stop the computation. After communities have been normalized using
+           the repetitions() method instead of the threshold() method, the
+           beta diversity between the last two average communities repetitions
+           can be accessed using the threshold() method.
  Usage   : my $threshold = $normalizer->threshold;
  Args    : positive integer for the number of repetitions
  Returns : positive integer for the (minimum) number of repetitions
@@ -207,7 +207,7 @@ has repetitions => (
 =head2 verbose
 
  Function: Get or set verbose mode. In verbose mode, the current number of
-           iterations (and distance if a threshold is used) is displayed.
+           iterations (and beta diversity if a threshold is used) is displayed.
  Usage   : $normalizer->verbose(1);
  Args    : 0 or 1
  Returns : 0 or 1
@@ -322,7 +322,7 @@ method _count_normalize () {
       if ($self->repetitions) {
          print "Bootstrap number of repetitions: ".$self->repetitions."\n";
       } else {
-         print "Bootstrap distance threshold: ".$self->threshold."\n";
+         print "Bootstrap beta diversity threshold: ".$self->threshold."\n";
       }
    }
 
@@ -331,18 +331,18 @@ method _count_normalize () {
    my $min_repetitions = POSIX::DBL_MAX;
    my $max_threshold = 0;
    for my $community ( @$communities ) {
-      my ($average, $repetitions, $dist);
+      my ($average, $repetitions, $beta_val);
       if ($community->get_members_count == $sample_size) {         
-         ($average, $repetitions, $dist) = ($community->clone, undef, undef);
+         ($average, $repetitions, $beta_val) = ($community->clone, undef, undef);
       } else {
-         ($average, $repetitions, $dist) = $self->_bootstrap($community);
+         ($average, $repetitions, $beta_val) = $self->_bootstrap($community);
       }
       my $name = $community->name;
       #$name .= ' ' if $name;
       #$name .= 'average';
       $average->name($name);
       if (defined $self->repetitions) {
-         $max_threshold = $dist if (defined $dist) && ($dist > $max_threshold);
+         $max_threshold = $beta_val if (defined $beta_val) && ($beta_val > $max_threshold);
       } else {
          $min_repetitions = $repetitions if (defined $repetitions) && ($repetitions < $min_repetitions);
       }
@@ -388,7 +388,7 @@ method _bootstrap (Bio::Community $community) {
 
    my $prev_overall = Bio::Community->new( -name => 'prev' );
    my $iteration = 0;
-   my $dist;
+   my $beta_val;
    while (1) {
 
       # Get a random community and add it to the overall community
@@ -396,22 +396,22 @@ method _bootstrap (Bio::Community $community) {
       my $random = $sampler->get_rand_community($sample_size);
       $overall = $self->_add( $overall, $random, $members );
 
-      # We could divide here, but since the distance is based on the relative
-      # abundance, not the counts, it would be the same. Hence, only divide at
-      # the end
+      # We could divide here, but since the beta diversity is based on the
+      # relative abundance, not the counts, it would be the same. Hence, only
+      # divide at the end
 
       my $meta = Bio::Community::Meta->new(-communities =>[$overall, $prev_overall]);
 
       if (not defined $repetitions) {
-         # Exit if distance with last average community is small
-         $dist = Bio::Community::Tools::Ruler->new(
+         # Exit if beta diversity with last average community is small
+         $beta_val = Bio::Community::Meta::Beta->new(
                -type          => 'euclidean',
                -metacommunity => $meta,
-         )->get_distance;
+         )->get_beta;
          if ($verbose) {
-            print "   iteration $iteration, distance $dist\n";
+            print "   iteration $iteration, beta diversity $beta_val\n";
          }
-         last if $dist < $threshold;
+         last if $beta_val < $threshold;
          $prev_overall = $overall->clone;
          $prev_overall->name('prev');
       } else {
@@ -423,10 +423,10 @@ method _bootstrap (Bio::Community $community) {
             $prev_overall = $overall->clone;
             $prev_overall->name('prev');
          } elsif ($iteration >= $repetitions) {
-            $dist = Bio::Community::Tools::Ruler->new(
+            $beta_val = Bio::Community::Meta::Beta->new(
                   -type          => 'euclidean',
                   -metacommunity => $meta,
-            )->get_distance;
+            )->get_beta;
             last;
          }
       }
@@ -440,7 +440,7 @@ method _bootstrap (Bio::Community $community) {
    $community->use_weights($use_weights);
    my $average = $self->_divide( $overall, $iteration, $members );
 
-   return $overall, $iteration, $dist;
+   return $overall, $iteration, $beta_val;
 }
 
 
