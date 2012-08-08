@@ -116,6 +116,13 @@ subtype 'DistanceType'
    => message { gen_err_msg(\@DistanceType, $_) };
 
 
+# Type of distance
+my @AlphaType  = qw(richness);
+subtype 'AlphaType'
+   => as enum( [ @AlphaType ] )
+   => message { gen_err_msg(\@AlphaType, $_) };
+
+
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 my @WeightAssignStr = qw(file_average community_average ancestor);
 subtype 'WeightAssignStr'
