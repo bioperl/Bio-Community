@@ -32,6 +32,11 @@ Bio::Community::IO - Read and write files that describe communities
   $out->write_community;
   $out->close;
 
+  # Re-read communities, but all at once
+  $in = Bio::Community::IO->new( -file => 'new_otu_table.generic' );
+  my $meta = $in->next_metacommunity(); # a Bio::Community::Meta object
+  $in->close;
+
 =head1 DESCRIPTION
 
 A Bio::Community::IO object implement methods to read and write communities in
@@ -114,6 +119,7 @@ use MooseX::NonMoose;
 use namespace::autoclean;
 use Method::Signatures;
 use Bio::Community;
+use Bio::Community::Meta;
 use Bio::Community::Types;
 use Bio::Community::Tools::FormatGuesser;
 use Bio::Community::TaxonomyUtils
@@ -162,6 +168,7 @@ func new ($class, @args) {
 method BUILD ($args) {
    # Start IOs
    $self->_initialize_io(%$args);
+   return 1;
 }
 
 
@@ -261,15 +268,36 @@ method _next_community_finish () {
 }
 
 
+=head2 next_metacommunity
+
+ Usage   : my $meta = $in->next_metacommunity;
+ Function: Get the next metacommunity. It may contain one or several communities
+           depending on the format of the file read,
+ Args    : None
+ Returns : A Bio::Community::Meta object
+             or
+           undef after the metacommunity has been read
+
+=cut
+
+method next_metacommunity () {
+   my $meta = Bio::Community::Meta->new();
+   while (my $community = $self->next_community) {
+      $meta->add_communities([$community]);
+   }
+   return $meta;
+}
+
+
 =head2 write_member
 
- Usage   : $in->write_member($member, $abundance);
+ Usage   : $out->write_member($member, $abundance);
  Function: Write the next member from the community and its count or relative
            abundance. This function is provided by a driver specific to each file
            format.
  Args    : A Bio::Community::Member object
            A positive number
- Returns : None
+ Returns : 1 for success
 
 =cut
 
@@ -280,10 +308,10 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 =head2 write_community
 
- Usage   : $in->write_community($community);
+ Usage   : $out->write_community($community);
  Function: Write the next community.
  Args    : A Bio::Community object
- Returns : None
+ Returns : 1 for success
 
 =cut
 
@@ -327,6 +355,23 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
+=head2 write_metacommunity
+
+ Usage   : $out->write_metacommunity($meta);
+ Function: Write a metacommunity.
+ Args    : A Bio::Community::Meta object
+ Returns : 1 for success
+
+=cut
+
+method write_metacommunity (Bio::Community::Meta $meta) {
+   while (my $community = $meta->next_community) {
+      $self->write_community($community);
+   }
+   return 1;
+}
+
+
 #method _process_member (Bio::Community::Member $member, Bio::Community $community) {
 method _process_member ($member, $community) {
    my $ab_value;
@@ -341,6 +386,7 @@ method _process_member ($member, $community) {
       $self->throw("Error: $ab_value is not a valid abundance type.\n");
    }
    $self->write_member($member, $ab_value);
+   return 1;
 }
 
 
@@ -750,6 +796,7 @@ method _is_taxonomy_empty ($taxonomy) {
    if ( (ref $taxonomy eq 'Bio::DB::Taxonomy::list') && ($taxonomy->get_num_taxa == 0) ) {
       $self->_onthefly_taxonomy(1);
    }
+   return 1;
 }
 
 
