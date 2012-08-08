@@ -281,12 +281,12 @@ method add_member ( $member, $count = 1 ) {
 
 =head2 remove_member
 
- Function: remove members from a community
+ Function: Remove members from a community
  Usage   : $community->remove_member($member, 3);
  Args    : * A Bio::Community::Member to remove
            * Optional: how many of this member to remove. If no value is
              provided, all such members are removed.
- Returns : 1 on success
+ Returns : Number of this member removed
 
 =cut
 
@@ -297,12 +297,13 @@ method remove_member ( $member, $count? ) {
    my $counts = $self->_counts;
    if (exists $counts->{$member_id}) {
       # Remove existing member
-      if ( defined($count) && ($count > $counts->{$member_id}) ) {
+      my $existing_count = $counts->{$member_id};
+      if ( defined($count) && ($count > $existing_count) ) {
          $self->throw("Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n");
       }
       # Now remove unwanted members
       if (not defined $count) {
-         $count = $counts->{$member_id};
+         $count = $existing_count;
       }
       $counts->{$member_id} -= $count;
       if ($counts->{$member_id} == 0) {
@@ -312,8 +313,11 @@ method remove_member ( $member, $count? ) {
       $self->_set_members_count( $self->get_members_count - $count );
       $self->_weighted_count(  $self->_weighted_count - $count / _prod($member->weights) );
       $self->_has_changed(1);
-   } # else no such member in the community, nothing to remove
-   return 1;
+   } else {
+       # Nothing to remove
+       $count = 0;
+   }
+   return $count;
 }
 
 

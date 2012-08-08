@@ -71,13 +71,13 @@ is_deeply [sort keys %ids], [1, 2, 3];
 
 # Remove a member from the community
 
-ok $community->remove_member( $member2, 5 );
+is $community->remove_member( $member2, 5 ), 5;
 is $community->get_members_count, 23;
 
-ok $community->remove_member( $member2 ); # remove all of it
+is $community->remove_member( $member2 ), 18; # remove all of it
 is $community->get_members_count, 5;
 
-ok $community->remove_member( $member2 ); # remove already removed member
+is $community->remove_member( $member2 ), 0; # remove already removed member
 
 is $community->get_member_by_id(2), undef;
 is $community->get_count($member2), 0;
