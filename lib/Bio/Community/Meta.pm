@@ -188,34 +188,34 @@ method add_communities ( ArrayRef[Bio::Community] $communities ) {
    my $comm_hash = $self->_communities;
    for my $community (@$communities) {
 
+      # Identify members by description and fix IDs
       if ($self->identify_by eq 'desc') {
-         # Identify members by description and fix IDs.
          my $members_lookup = $self->_members_lookup;
          for my $member (@{$community->get_all_members}) {
+            my $count = $community->remove_member($member);
             my $desc = $member->desc;
             my $same_member = $members_lookup->{$desc};
             my $id;
             if (defined $same_member) {
                # Use same ID and same Member object
                $id = $same_member->id;
-               #$member = $same_member;
+               $member = $same_member;
             } else {
                # Use new ID
                $id = Bio::Community::Member::_generate_id();
                $members_lookup->{$desc} = $member;
             }
-            my $count = $community->remove_member($member);
             $member->id( $id );
             $community->add_member($member, $count);
          }
       }
 
+      # Add community
       my $name = $community->name;
       if (exists $comm_hash->{$name}) {
          $self->throw("Could not add community '$name' because there already is".
             " a community with this name in the metacommunity");
       }
-
       $comm_hash->{$name} = $community;
 
    }
