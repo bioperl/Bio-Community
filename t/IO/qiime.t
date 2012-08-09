@@ -359,6 +359,63 @@ is $community2->get_count($member), 76;
 is $community2->next_member, undef;
 
 
+# Read QIIME file where a taxonomy has root and Consensuslineage is spelt differently
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('qiime_w_root.txt'),
+   -format => 'qiime',
+), 'Read QIIME file with root';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, 'Bact.12.15';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 4;
+is $community2->name, 'Bact.0.2';
+
+is $in->next_community, undef;
+
+$in->close;
+
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 4;
+is $member->desc, 'Root; k__Bacteria; p__Bacteroidetes; c__Bacteroidia; o__Bacteroidales; f__Prevotellaceae';
+is $community->get_count($member), 1;
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 0;
+is $member->desc, 'Root; k__Bacteria; p__TM7; c__TM7-3; o__CW040; f__F16';
+is $community->get_count($member), 41;
+is $community->next_member, undef;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 8;
+is $member->desc, 'Root; k__Bacteria; p__Firmicutes; c__Clostridia; o__Clostridiales; f__';
+is $community2->get_count($member), 1;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 4;
+is $member->desc, 'Root; k__Bacteria; p__Bacteroidetes; c__Bacteroidia; o__Bacteroidales; f__Prevotellaceae';
+is $community2->get_count($member), 11;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 0;
+is $member->desc, 'Root; k__Bacteria; p__TM7; c__TM7-3; o__CW040; f__F16';
+is $community2->get_count($member), 2;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 5;
+is $member->desc, 'Root; k__Bacteria; p__Bacteroidetes; c__Bacteroidia; o__Bacteroidales; f__Prevotellaceae';
+is $community2->get_count($member), 2;
+
 done_testing();
 
 exit;

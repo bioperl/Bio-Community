@@ -214,7 +214,7 @@ method _generate_members () {
    my $taxo_col;
    if ($first_col_header =~ m/OTU ID/i) {
       my $last_col_header = $self->_get_value(1, $self->_get_max_col);
-      if ( (defined $last_col_header) && ($last_col_header =~ m/consensus lineage/i) ) {
+      if ( (defined $last_col_header) && ($last_col_header =~ m/consensus\s*lineage/i) ) {
          $taxo_col = $self->_get_max_col;
          $self->_skip_last_col(1);
       }
