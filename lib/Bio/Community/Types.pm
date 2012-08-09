@@ -117,7 +117,7 @@ subtype 'DistanceType'
 
 
 # Type of distance
-my @AlphaType  = qw(richness);
+my @AlphaType  = qw(richness richness); # duplication intended to avoid error (min 2 values needed for enum)
 subtype 'AlphaType'
    => as enum( [ @AlphaType ] )
    => message { _gen_err_msg(\@AlphaType, $_) };
