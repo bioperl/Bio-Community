@@ -91,7 +91,8 @@ use base 'Bio::Root::Root';
 
 my $sep = ';'; # separator
 my $sep_re = qr/$sep\s*/;
-my $ignore_re = qr/^(?:\S__||Other|No blast hit|unidentified|uncultured|environmental)$/i;
+my $clean_front_re = qr/^(?:Root)$/i;
+my $clean_rear_re  = qr/^(?:\S__||Other|No blast hit|unidentified|uncultured|environmental)$/i;
 
 
 =head2 split_lineage_string
@@ -115,21 +116,31 @@ func split_lineage_string ($lineage_str) {
 
 =head2 clean_lineage_arr
 
- Function: Proceed from the end of the array and remove ambiguous taxonomic
-           information such as:
-              '', 'No blast hit', 'unidentified', 'uncultured', 'environmental',
-              'Other', 'g__', 's__', etc
+ Function: Two step cleanup:
+           1/ At the beginning of the array, remove anything called 'Root'
+           2/ Starting from the end of the array, remove ambiguous taxonomic
+              information such as:
+                '', 'No blast hit', 'unidentified', 'uncultured', 'environmental',
+                'Other', 'g__', 's__', etc
  Usage   : $lineage_arr = clean_lineage_arr($lineage_arr);
- Args    : a lineage arrayref (either taxon names or objects)
- Returns : a lineage arrayref
+ Args    : A lineage arrayref (either taxon names or objects)
+ Returns : A lineage arrayref
 
 =cut
 
 func clean_lineage_arr ($lineage_arr) {
-   while ( my $elem = $lineage_arr->[-1] ) {
-      next if not defined $elem;
+   # Clean the front
+   my $elem = $lineage_arr->[0];
+   if ( defined $elem ) {
       $elem = $elem->node_name if ref $elem;
-      if ($elem =~ $ignore_re) {
+      if ($elem =~ $clean_front_re) {
+         shift @$lineage_arr;
+      }
+   }
+   # Clean the rear
+   while ( $elem = $lineage_arr->[-1] ) {
+      $elem = $elem->node_name if ref $elem;
+      if ($elem =~ $clean_rear_re) {
          pop @$lineage_arr;
       } else {
          last;
@@ -144,8 +155,8 @@ func clean_lineage_arr ($lineage_arr) {
  Function: Take a taxon object and return its lineage as an arrayref of the
            taxon itself, preceded by its ancestor taxa.
  Usage   : my $lineage_arr = get_taxon_lineage($taxon);
- Args    : a taxon object
- Returns : an arrayref of taxon names
+ Args    : A taxon object
+ Returns : An arrayref of taxon names
 
 =cut
 
@@ -169,8 +180,8 @@ func get_taxon_lineage ($taxon) {
  Usage   : my $lineage = get_lineage_string(['Bacteria', 'Proteobacteria']);
              or
            my $lineage = get_lineage_string($taxon1, $taxon2);
- Args    : arrayref of taxon names or objects
- Returns : lineage string
+ Args    : Arrayref of taxon names or objects
+ Returns : A lineage string
 
 =cut
 

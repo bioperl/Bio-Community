@@ -240,8 +240,8 @@ is $summary_meta->next_community, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups  => 0,
-   -by_rel_ab   => ['>=', 2],
+   -merge_dups    => 0,
+   -by_rel_ab     => ['>=', 2],
 );
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -290,8 +290,8 @@ $meta = Bio::Community::Meta->new(-communities => [$community1, $community2]);
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups  => 0,
-   -by_rel_ab   => ['<', 20],
+   -merge_dups    => 0,
+   -by_rel_ab     => ['<', 20],
 ), 'Multiple weighted communities';
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -391,8 +391,8 @@ $meta = Bio::Community::Meta->new(-communities => [$community1]);
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups   => 0,
-   -by_tax_level => 1,
+   -merge_dups    => 0,
+   -by_tax_level  => 1,
 ), 'Taxonomic summary (level 1)';
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -422,8 +422,8 @@ is $summary_meta->next_community, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups   => 0,
-   -by_tax_level => 2,
+   -merge_dups    => 0,
+   -by_tax_level  => 2,
 ), 'Taxonomic summary (level 2)';
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -465,8 +465,8 @@ is $summary_meta->next_community, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups   => 0,
-   -by_tax_level => 6,
+   -merge_dups    => 0,
+   -by_tax_level  => 6,
 ), 'Taxonomic summary (level 6)';
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -526,8 +526,8 @@ is $summary_meta->next_community, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups   => 0,
-   -by_tax_level => 7,
+   -merge_dups    => 0,
+   -by_tax_level  => 7,
 ), 'Taxonomic summary (level 7)';
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -598,8 +598,8 @@ $meta = Bio::Community::Meta->new(-communities => [$community1, $community2, $co
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups   => 0,
-   -by_tax_level => 5,
+   -merge_dups    => 0,
+   -by_tax_level  => 5,
 ), 'Taxonomic summary from multiple communities (level 5)';
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -635,8 +635,8 @@ is $summary_meta->next_community, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups   => 0,
-   -by_tax_level => 4,
+   -merge_dups    => 0,
+   -by_tax_level  => 4,
 ), 'Taxonomic summary from multiple communities (level 4)';
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -790,9 +790,9 @@ is $summary_meta->next_community, undef;
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -metacommunity => $meta,
-   -merge_dups   => 1,
-   -by_tax_level => 5,
-   -by_rel_ab    => ['<=', 6],
+   -merge_dups    => 1,
+   -by_tax_level  => 5,
+   -by_rel_ab     => ['<=', 6],
 ), 'Multiple summary operations';
 
 ok $summary_meta = $summarizer->get_summaries;
