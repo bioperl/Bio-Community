@@ -369,7 +369,7 @@ ok $in = Bio::Community::IO->new(
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
-is $community->get_richness, 4;
+is $community->get_richness, 3;
 is $community->name, 'Bact.0.2';
 
 is $in->next_community, undef;
@@ -399,15 +399,6 @@ isa_ok $member, 'Bio::Community::Member';
 is $member->id, 0;
 is $member->desc, 'Root; k__Bacteria; p__TM7; c__TM7-3; o__CW040; f__F16';
 is $member->taxon->node_name, 'f__F16';
-is $member->taxon->ancestor->ancestor->ancestor->ancestor->node_name, 'k__Bacteria';
-is $member->taxon->ancestor->ancestor->ancestor->ancestor->ancestor, undef;
-is $community->get_count($member), 2;
-
-ok $member = $community->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->id, 5;
-is $member->desc, 'Root; k__Bacteria; p__Bacteroidetes; c__Bacteroidia; o__Bacteroidales; f__Prevotellaceae';
-is $member->taxon->node_name, 'f__Prevotellaceae';
 is $member->taxon->ancestor->ancestor->ancestor->ancestor->node_name, 'k__Bacteria';
 is $member->taxon->ancestor->ancestor->ancestor->ancestor->ancestor, undef;
 is $community->get_count($member), 2;
