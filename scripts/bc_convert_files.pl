@@ -71,6 +71,7 @@ the requested output format can only hold a single community. Default: output_pr
    output_prefix.default: 'bc_convert_files'
 
 =item -of <output_format> | -output_format <output_format>
+
 File format to use for writing the output communities, e.g. generic (tab-delimited
 table), qiime, gaas or unifrac. Default: same as input format
 
