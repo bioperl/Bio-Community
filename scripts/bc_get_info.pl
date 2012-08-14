@@ -31,8 +31,8 @@ bc_get_info - Display list of community names, member IDs and description
 
 This script reads a file containing biological communities and retrieves basic
 information from it, such as the names of the communities it contains, or the
-ID and description of their members. The information is displayed on screen
-unless an output prefix is provided.
+ID and description of their members, or the file format. The information is
+displayed on screen unless an output prefix is provided.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -65,11 +65,12 @@ output prefix is provided. Default: output_prefix.default
 =item -it <info_type> | -info_type <info_type>
 
 Type of information to return, either: 'name' to return community names (in
-order of appearance), 'desc' for members IDs (in no specific order), or 'id' for
-member description (in no specific order). Default: info_type.default
+order of appearance), 'desc' for members IDs (in no specific order), 'id' for
+member description (in no specific order), or 'format' for the file format.
+Default: info_type.default
 
 =for Euclid:
-   info_type.type: /(name|id|desc)/
+   info_type.type: /(name|id|desc|format)/
    info_type.default: 'name'
 
 =back
@@ -126,6 +127,9 @@ func get_info ($input_files, $output_prefix, $info_type) {
    for my $input_file (@$input_files) {
       my $in = Bio::Community::IO->new( -file => $input_file );
       $format = $in->format;
+      # Don't read the communities if all we need is the file format
+      last if $info_type eq 'format';
+      # Read communities and put them in a metacommunity
       while (my $community = $in->next_community) {
          $meta->add_communities([$community]);
       }
@@ -154,6 +158,8 @@ func get_info ($input_files, $output_prefix, $info_type) {
       for my $member (@{$meta->get_all_members}) {
          print $out $member->id."\n";
       }
+   } elsif ($info_type eq 'format') {
+      print $out $format."\n";
    } else {
       die "Error: $info_type is not a valid value for <info_type>\n";
    }
