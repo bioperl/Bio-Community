@@ -116,7 +116,9 @@ community:
 
 * 'first': use the name of the first community
 
-* 'common': the largest string from the left in common between the names
+* 'common': The largest substring common between the names, starting from the left.
+            After this, any trailing, non-alphanumerical character is considered
+            a separator and removed.
 
 Default: renaming_method.default
 
@@ -309,14 +311,14 @@ func gen_name ($names, $method) {
    } elsif ($method eq 'first') {
       $name = $names->[0];
    } elsif ($method eq 'common') {
-      my $max = min( map {length $_} @$names);
+      my $max = min( map {length $_} @$names );
       OFF: for my $offset (0 .. $max-1) {
          my $common;
          for my $comm_name (@$names) {
             my $char = substr $comm_name, $offset, 1;
             if (not defined $common) {
                $common = $char;
-               $name .= $char;
+               $name  .= $char;
             } else {
                if (not ($char eq $common)) {
                   # Char at this position not in common
@@ -326,6 +328,8 @@ func gen_name ($names, $method) {
             }
          }
       }
+      # Assume any trailing, non-alphanumeric character is a separator to remove
+      $name =~ s/[^\w]$//;
       if (length $name == 0) {
          die "Error: Could not find a string common to the given communities: ".
             join(' ', @{$names})."\n";
