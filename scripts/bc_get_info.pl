@@ -19,7 +19,7 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_get_info - Display list of community names, member IDs and description
+bc_get_info - Get information about a community file
 
 =head1 SYNOPSIS
 
@@ -30,8 +30,8 @@ bc_get_info - Display list of community names, member IDs and description
 =head1 DESCRIPTION
 
 This script reads a file containing biological communities and retrieves basic
-information from it, such as the names of the communities it contains, or the
-ID and description of their members, or the file format. The information is
+information from it, such as the names of the communities it contains, the ID
+and description of their members, or the file format. The information is 
 displayed on screen unless an output prefix is provided.
 
 =head1 REQUIRED ARGUMENTS
