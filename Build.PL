@@ -44,6 +44,7 @@ my $build = Module::Build->new(
                              'scripts/bc_bootstrap.pl',
                              'scripts/bc_clean_shrapnel.pl',
                              'scripts/bc_convert_files.pl',
+                             'scripts/bc_get_info.pl',
                              'scripts/bc_manage_samples.pl',
                              'scripts/bc_measure_distance.pl',
                              'scripts/bc_summarize.pl',
