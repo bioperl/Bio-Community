@@ -99,7 +99,7 @@ subtype 'NumericSort'
 # Abundance representation
 my @AbundanceRepr = qw(count percentage fraction);
 subtype 'AbundanceRepr'
-   => as enum( [ @AbundanceRepr ] )
+   => as enum( \@AbundanceRepr )
    => message { _gen_err_msg(\@AbundanceRepr, $_) };
 
 
@@ -112,28 +112,28 @@ subtype 'AbundanceRank'
 my @DistanceType  = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger
                        bray-curtis shared permuted maxiphi unifrac);
 subtype 'DistanceType'
-   => as enum( [ @DistanceType ] )
+   => as enum( \@DistanceType )
    => message { _gen_err_msg(\@DistanceType, $_) };
 
 
 # Type of distance
 my @AlphaType  = qw(richness richness); # duplication intended to avoid error (min 2 values needed for enum)
 subtype 'AlphaType'
-   => as enum( [ @AlphaType ] )
+   => as enum( \@AlphaType )
    => message { _gen_err_msg(\@AlphaType, $_) };
 
 
 # Member identification method
 my @IdentifyByType = qw(id desc);
 subtype 'IdentifyByType'
-   => as enum( [ @IdentifyByType ] )
+   => as enum( \@IdentifyByType )
    => message { _gen_err_msg(\@IdentifyByType, $_) };
 
 
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 my @WeightAssignStr = qw(file_average community_average ancestor);
 subtype 'WeightAssignStr'
-   => as enum( [ @WeightAssignStr ] )
+   => as enum( \@WeightAssignStr )
    => message { _gen_err_msg(\@WeightAssignStr, $_) };
 subtype 'WeightAssignType'
    => as 'WeightAssignStr | Num'
