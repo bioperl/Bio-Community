@@ -221,7 +221,7 @@ func manip ($input_files, $output_prefix, $name_prefix, $name_suffix,
    # Warn if there are samples that were requested but not seen
    my @missing = keys %includes;
    if (scalar @missing > 0) {
-      die "Error: Did not find the following requested communities: ".join(' ,',@missing)."\n";
+      die "Error: Did not find the following requested communities: ".join(', ',@missing)."\n";
    }
 
    # Order communities
@@ -332,7 +332,7 @@ func gen_name ($names, $method) {
       $name =~ s/[^\w]$//;
       if (length $name == 0) {
          die "Error: Could not find a string common to the given communities: ".
-            join(' ', @{$names})."\n";
+            join(', ', @{$names})."\n";
       }
    } else {
       die "Error: Got an invalid renaming_method, '$method'\n";
