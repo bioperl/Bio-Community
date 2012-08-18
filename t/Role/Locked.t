@@ -1,5 +1,8 @@
 use strict;
 use warnings;
+
+use diagnostics; ####
+
 use Bio::Root::Test;
 
 use_ok($_) for qw(
@@ -26,11 +29,11 @@ ok $@, 'Forbidden modification';
 is $obj->foo, 'bar';
 
 
-# Unlock object
+## Unlock object
 
-ok $obj->unlock, 'Unlock';
-ok $obj->foo('zzz');
-is $obj->foo, 'zzz';
+#ok $obj->unlock, 'Unlock';
+#ok $obj->foo('zzz');
+#is $obj->foo, 'zzz';
 
 
 done_testing();

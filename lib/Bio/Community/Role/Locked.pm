@@ -82,7 +82,7 @@ package Bio::Community::Role::Locked;
 use Moose::Role;
 use Method::Signatures;
 use namespace::autoclean;
-use Hash::Util qw( lock_hash unlock_hash );
+use Hash::Util ();
 
 
 =head2 lock
@@ -95,7 +95,7 @@ use Hash::Util qw( lock_hash unlock_hash );
 =cut
 
 method lock () {
-   lock_hash(%$self);
+   Hash::Util::lock_hash_recurse(%$self);
    return 1;
 }
 
@@ -110,7 +110,7 @@ method lock () {
 =cut
 
 method unlock () {
-   unlock_hash(%$self);
+   Hash::Util::lock_hash_recurse(%$self);
    return 1;
 }
 

@@ -2,8 +2,9 @@ package t::Role::TestLocked;
 
 use Moose;
 
-extends 'Bio::Community::IO';
+extends 'Bio::Community::Member';
 with 'Bio::Community::Role::Locked';
+
 
 # This is simply a test module that consumes the Locked role.
 

@@ -102,7 +102,7 @@ extends 'Bio::Root::Root';
 
 
 method BUILD ($args) {
-   # Process -community constructor
+   # Process -communities constructor
    my $communities = delete $args->{'-communities'};
    if ($communities) {
       $self->add_communities($communities);

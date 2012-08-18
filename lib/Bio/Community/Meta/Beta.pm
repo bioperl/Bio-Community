@@ -455,6 +455,15 @@ method _unifrac ($meta, $tree) {
 }
 
 
+#######
+# TODO:
+# Many more beta diversity indices to calculate:
+#    Unifrac
+#    Jaccard
+#    ...
+#######
+
+
 __PACKAGE__->meta->make_immutable;
 
 1;
