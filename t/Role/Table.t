@@ -17,6 +17,7 @@ my $file = test_output_file();
 ok $in = t::Role::TestTable->new(
    -file => test_input_file('table.txt'),
 ), 'Read linux table';
+isa_ok $in, 't::Role::TestTable';
 is $in->delim, "\t";
 is $in->_get_max_col, 3;
 is $in->_get_max_line, 4;
