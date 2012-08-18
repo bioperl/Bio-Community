@@ -27,6 +27,7 @@ my $build = Module::Build->new(
                              'perl'                         => '5.10.0',
                              'Bio::Root::Version'           => '>1.006901',
                              'Bio::DB::Taxonomy'            =>  0, # >1.006901
+                             'Hash::Util'                   =>  0,
                              'Tie::IxHash'                  =>  0, # metacommunity
                              'Math::Random::MT'             =>  0, # sampler
                              'Method::Signatures'           =>  0,
@@ -37,7 +38,7 @@ my $build = Module::Build->new(
                              'Parallel::Iterator'           =>  0, # community member iteration
                             },
     recommends           => {
-                              # Clone Bio::Community objects through the Bio::Root::clone() method
+                              # Clone objects using Bio::Root::clone(). Uses a pure-Perl way if needed.
                              'Clone::Fast'                  => 0,
                             },
     script_files         => [
