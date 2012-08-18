@@ -95,7 +95,8 @@ use Hash::Util ();
 =cut
 
 method lock () {
-   Hash::Util::lock_hash_recurse(%$self);
+   #Hash::Util::lock_hash_recurse(%$self);
+   Hash::Util::lock_hash(%$self);
    return 1;
 }
 
@@ -110,7 +111,8 @@ method lock () {
 =cut
 
 method unlock () {
-   Hash::Util::lock_hash_recurse(%$self);
+   #Hash::Util::unlock_hash_recurse(%$self);
+   Hash::Util::unlock_hash(%$self);
    return 1;
 }
 
