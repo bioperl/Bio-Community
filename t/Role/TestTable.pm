@@ -1,4 +1,4 @@
-package t::TestTableRole;
+package t::Role::TestTable;
 
 use Moose;
 

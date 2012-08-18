@@ -3,7 +3,7 @@ use warnings;
 use Bio::Root::Test;
 
 use_ok($_) for qw(
-    t::TestTableRole
+    t::Role::TestTable
 );
 
 
@@ -14,7 +14,7 @@ my $file = test_output_file();
 
 # Read linux tab-delimited file
 
-ok $in = t::TestTableRole->new(
+ok $in = t::Role::TestTable->new(
    -file => test_input_file('table.txt'),
 ), 'Read linux table';
 is $in->delim, "\t";
@@ -44,7 +44,7 @@ $in->close;
 
 # Read win32 tab-delimited file
 
-ok $in = t::TestTableRole->new(
+ok $in = t::Role::TestTable->new(
    -file => test_input_file('table_win32.txt'),
 ), 'Read win32 table';
 is $in->delim, "\t";
@@ -72,7 +72,7 @@ $in->close;
 
 # Write and read tab-delimited file
 
-ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write tab-delimited table';
+ok $out = t::Role::TestTable->new( -file => '>'.$file ), 'Write tab-delimited table';
 is $out->delim, "\t";
 is $out->_get_max_col, 0;
 is $out->_get_max_line, 0;
@@ -109,7 +109,7 @@ is $out->_get_max_col, 3;
 
 $out->close;
 
-ok $in = t::TestTableRole->new( -file => $file ), 'Re-read tab-delimited table';
+ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read tab-delimited table';
 is $in->delim, "\t";
 is $in->_get_max_col, 3;
 is $in->_get_max_line, 4;
@@ -142,7 +142,7 @@ unlink $file;
 
 # Write and read tab-delimited file (again, but in a different order)
 
-ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write tab-delimited table again';
+ok $out = t::Role::TestTable->new( -file => '>'.$file ), 'Write tab-delimited table again';
 is $out->delim, "\t";
 is $out->_get_max_col, 0;
 is $out->_get_max_line, 0;
@@ -162,7 +162,7 @@ ok $out->_set_value(2, 3,  334);
 
 $out->close;
 
-ok $in = t::TestTableRole->new( -file => $file ), 'Re-read tab-delimited table again';
+ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read tab-delimited table again';
 is $in->delim, "\t";
 is $in->_get_max_col, 3;
 is $in->_get_max_line, 4;
@@ -191,7 +191,7 @@ unlink $file;
 
 # Write and read double-space-delimited file
 
-ok $out = t::TestTableRole->new(
+ok $out = t::Role::TestTable->new(
    -file  => '>'.$file,
    -delim => '  ',
 ), 'Write double-space delimited table';
@@ -207,7 +207,7 @@ ok $out->_insert_line(4, ['Lumpy_skin_disease_virus', '', 123]);
 
 $out->close;
 
-ok $in = t::TestTableRole->new(
+ok $in = t::Role::TestTable->new(
    -file  => $file,
    -delim => '  ',
 ), 'Re-read double-space delimited table';
@@ -237,7 +237,7 @@ unlink $file;
 
 # Write and read file with specified string for missing abundance
 
-ok $out = t::TestTableRole->new(
+ok $out = t::Role::TestTable->new(
    -file           => '>'.$file,
    -missing_string => 'n/a',
 ), 'Write file with specified missing abundance string';
@@ -258,7 +258,7 @@ ok $out->_set_value(4, 3,  123);
 
 $out->close;
 
-ok $in = t::TestTableRole->new(
+ok $in = t::Role::TestTable->new(
    -file  => $file,
 ), 'Re-read file with specified missing abundance string';
 is $in->_get_max_col, 3;
@@ -286,7 +286,7 @@ unlink $file;
 
 # Write and read table with a single line
 
-ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write single-line table';
+ok $out = t::Role::TestTable->new( -file => '>'.$file ), 'Write single-line table';
 
 ok $out->_set_value(1, 1, 'sp.');
 ok $out->_set_value(1, 1, 'Species');
@@ -295,7 +295,7 @@ ok $out->_set_value(1, 3, 'soda lake');
 
 $out->close;
 
-ok $in = t::TestTableRole->new( -file => $file ), 'Re-read single-line table';
+ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read single-line table';
 is $in->delim, "\t";
 is $in->_get_max_col, 3;
 is $in->_get_max_line, 1;
@@ -313,7 +313,7 @@ unlink $file;
 
 # Write and read table with a single column
 
-ok $out = t::TestTableRole->new( -file => '>'.$file ), 'Write single-column table';
+ok $out = t::Role::TestTable->new( -file => '>'.$file ), 'Write single-column table';
 
 ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(3, 1, 'Goatpox virus');
@@ -322,7 +322,7 @@ ok $out->_set_value(4, 1, 'Lumpy skin disease virus');
 
 $out->close;
 
-ok $in = t::TestTableRole->new( -file => $file ), 'Re-read single-column table';
+ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read single-column table';
 ok $in->_read_table;
 is $in->delim, "\t";
 is $in->_get_max_col, 1;
@@ -342,7 +342,7 @@ unlink $file;
 
 # Write and read table that does not span the entire file
 
-ok $out = t::TestTableRole->new(
+ok $out = t::Role::TestTable->new(
    -file       => '>'.$file,
 ), 'Write table that does not span the entire file';
 
@@ -358,7 +358,7 @@ ok $out->_print("</table>\n");
 
 $out->close;
 
-ok $in = t::TestTableRole->new(
+ok $in = t::Role::TestTable->new(
    -file       => $file,
    -start_line => 2, 
    -end_line   => 3,
