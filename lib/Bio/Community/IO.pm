@@ -749,8 +749,9 @@ method _process_member_queue ($community) {
             $community_average_weights->[$i] += $rel_ab / 100 * $weights->[$i];
          }
       }
-      $community->_set_average_weights($community_average_weights);
    }
+
+   $community->_set_average_weights($community_average_weights);
 
    return 1;
 }
