@@ -15,8 +15,8 @@ Bio::Community::Member - The basic constituent of a biological community
 
   use Bio::Community::Member;
 
-  my $member1 = Bio::Community::Member->new( -id => 2 );
-  my $member1_id = $member1->id;
+  my $member1 = Bio::Community::Member->new( -id => 2, -desc => 'Homo sapiens' );
+  print "Got member ".$member1->desc." (ID ".$member1->id.")\n";
 
   my $member2 = Bio::Community::Member->new( );
   my $member2_id = $member2->id;
