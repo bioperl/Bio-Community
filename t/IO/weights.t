@@ -15,6 +15,7 @@ my (@communities, @methods);
 
 
 # Read generic format with arbitrary weights
+
 open $fh1, '<', test_input_file('weights_1.txt') or die "Could not open file: $!\n";
 open $fh2, '<', test_input_file('weights_2.txt') or die "Could not open file: $!\n";
 ok $in = Bio::Community::IO->new(
@@ -142,6 +143,7 @@ ok $in = Bio::Community::IO->new(
    -weight_assign => 'community_average',
 ), 'Read generic format with community-average weights';
 isa_ok $in, 'Bio::Community::IO::generic';
+
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
@@ -153,11 +155,15 @@ ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
 is $community->get_richness, 1;
 is $community->name, 'gut';
+is $community->get_average_weights->[0], 1;
+is $community->get_average_weights->[1], 200;
 
 ok $community2 = $in->next_community;
 isa_ok $community2, 'Bio::Community';
 is $community2->get_richness, 3;
 is $community2->name, 'soda lake';
+delta_ok $community2->get_average_weights->[0], 0.777252926;
+is $community2->get_average_weights->[1], 100;
 
 is $in->next_community, undef;
 

@@ -649,7 +649,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
                   if (defined $weight) {
                      # Weight found. Get ready to exit loop.
                      $self->debug("Member '".get_lineage_string(get_taxon_lineage($taxon)).
-                        "' (ID ".$member->id.") got weight from ".$lineage_arr->[-1]->node_name.
+                        "' (ID ".$member->id.") got weight number ".($i+1)." from ".$lineage_arr->[-1]->node_name.
                         ": $weight\n");
                      @$lineage_arr = ();
                   }
@@ -659,7 +659,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
                # Use the 'community_average' assignment method:
                # Correct weight will be assigned when community is 100% created
                $weight = 0;
-               $self->_member_queue->{$member->id} = $member;
+               $self->_member_queue->{$member->id}->{$i} = $member;
             }
 
          } else {
@@ -677,7 +677,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
                } elsif ($assign_method eq 'community_average') {
                   # Proper weight will be assigned when community is 100% created
                   $weight = 0;
-                  $self->_member_queue->{$member->id} = $member;
+                  $self->_member_queue->{$member->id}->{$i} = $member;
                } else {
                   # Use an arbitrary weight
                   $weight = $assign_method;
@@ -688,8 +688,8 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
 
          push @$weights, $weight;
       }
-      $member->weights($weights);
 
+      $member->weights($weights);
    }
 
    return 1;
@@ -723,20 +723,35 @@ method _process_member_queue ($community) {
    # Assign average weight to members that need it
    while ( my ($id, $count) = each %$counts) {
       # Clone member
-      my $member = $members->{$id}->clone;
+      my $trait_num = (keys %{$members->{$id}})[0];
+      my $member = $members->{$id}->{$trait_num}->clone;
       my $member_weights = $member->weights;
       # Update member weights
       for my $i (0 .. scalar @{$self->_weights} - 1) {
          if ( $member_weights->[$i] == 0 ) {
             $member_weights->[$i] = $community_average_weights->[$i];
             $self->debug("Member '".$member->desc."' (ID ".$member->id.") got ".
-               "average weight from community '".$community->name."': ".
+               "average weight number ".($i+1)." from community '".$community->name."': ".
                $community_average_weights->[$i]."\n");
          }
       }
       # Add member to community
       $community->add_member($member, $count);
    }
+
+   # If multiple weights, update averages now
+   if ( scalar @{$self->_weights} > 1 ) {
+      $community_average_weights = [];
+      while (my $member = $community->next_member) {
+         my $rel_ab  = $community->get_rel_ab($member);
+         my $weights = $member->weights;
+         for my $i (0 .. scalar @{$self->_weights} - 1) {
+            $community_average_weights->[$i] += $rel_ab / 100 * $weights->[$i];
+         }
+      }
+      $community->_set_average_weights($community_average_weights);
+   }
+
    return 1;
 }
 

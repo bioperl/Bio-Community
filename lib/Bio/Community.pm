@@ -142,6 +142,27 @@ has use_weights => (
 );
 
 
+=head2 get_average_weights
+
+ Function: If any weights have been set using Bio::Community::IO, return their
+           averages.
+ Usage   : my $averages = $community->get_average_weights;
+ Args    : none
+ Returns : Arrayref of averages (one average for each file of weights)
+
+=cut
+
+has _average_weights => (
+   is => 'ro',
+   #isa => 'PositiveNum', # too costly for an internal method
+   lazy => 1,
+   default => sub{ [] },
+   init_arg => undef,
+   reader => 'get_average_weights',
+   writer => '_set_average_weights',
+);
+
+
 =head2 get_members_count
 
  Function: Get the total number of members in the community
