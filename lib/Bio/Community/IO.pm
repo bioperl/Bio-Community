@@ -588,7 +588,7 @@ method _read_weights ($args) {
                  weights can only be done after all other members have been
                  added and is effective only if the community is built using the
                  next_community() method.
-            * ancestor: Provided the member have a taxonomic assignment, check
+            * ancestor : Provided the member have a taxonomic assignment, check
                  the taxonomic lineage of this member against each file of
                  weights. When no weight is found for this taxonomic lineage in
                  a weight file, go up the taxonomic lineage of the member and
@@ -648,8 +648,9 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
                   }
                   if (defined $weight) {
                      # Weight found. Get ready to exit loop.
-                     $self->debug(get_lineage_string(get_taxon_lineage($taxon)).
-                        " got weight from ".$lineage_arr->[-1]->node_name.": $weight\n");
+                     $self->debug("Member '".get_lineage_string(get_taxon_lineage($taxon)).
+                        "' (ID ".$member->id.") got weight from ".$lineage_arr->[-1]->node_name.
+                        ": $weight\n");
                      @$lineage_arr = ();
                   }
               } while ( pop @$lineage_arr );
@@ -728,8 +729,9 @@ method _process_member_queue ($community) {
       for my $i (0 .. scalar @{$self->_weights} - 1) {
          if ( $member_weights->[$i] == 0 ) {
             $member_weights->[$i] = $community_average_weights->[$i];
-            $self->debug($member->desc." got average weight from community '".
-               $community->name."': ".$community_average_weights->[$i]."\n");
+            $self->debug("Member '".$member->desc."' (ID ".$member->id.") got ".
+               "average weight from community '".$community->name."': ".
+               $community_average_weights->[$i]."\n");
          }
       }
       # Add member to community

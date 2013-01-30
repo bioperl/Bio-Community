@@ -98,9 +98,9 @@ my $clean_rear_re  = qr/^(?:\S__||Other|No blast hit|unidentified|uncultured|env
 =head2 split_lineage_string
 
  Function: Split a lineage string, e.g. 'Bacteria;Proteobacteria' into an
-           arraryref of its individual components using the ';' separator, e.g.
+           arrayref of its individual components using the ';' separator, e.g.
            'Bacteria' and 'Betaproteobact'. Also, clean the arrayref using
-           clean_lineage_arr().
+           clean_lineage_arr(). The opposite operation is get_lineage_string().
  Usage   : my $taxa_names = split_lineage($lineage_string);
  Args    : a lineage string
  Returns : an arrayref of taxon names
@@ -173,21 +173,26 @@ func get_taxon_lineage ($taxon) {
 }
 
 
+### Renane this join_lineage_arr (and have alias for backward compat)
+
 =head2 get_lineage_string
 
  Function: Take a lineage arrayref and return a full lineage string by joining
-           the elements using the ';' separator.
+           the elements using the ';' separator. The opposite operation is
+           split_lineage_string().
  Usage   : my $lineage = get_lineage_string(['Bacteria', 'Proteobacteria']);
              or
-           my $lineage = get_lineage_string($taxon1, $taxon2);
+           my $lineage = get_lineage_string([$taxon1, $taxon2]);
  Args    : Arrayref of taxon names or objects
+           1 to include a whitespace between each entry (in addition to the separator)
  Returns : A lineage string
 
 =cut
 
-func get_lineage_string ($lineage_arr) {
+func get_lineage_string ($lineage_arr, $space?) {
    my @names = map { ref $_ ? $_->node_name : $_ } @$lineage_arr;
-   return join $sep, @names;
+   $space = (defined($space) && $space) ? ' ' : '';
+   return join( $sep.$space, @names );
 }
 
 
