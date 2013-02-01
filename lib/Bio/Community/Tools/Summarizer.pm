@@ -82,10 +82,11 @@ methods. Internal methods are usually preceded with a _
  Usage   : my $summarizer = Bio::Community::Tools::Summarizer->new(
               -metacommunity => $meta,
            );
- Args    : -metacommunity: See metacommunity().
-           -merge_dups   : See merge_dups().
-           -by_tax_level : See by_tax_level().
-           -by_rel_ab    : See by_rel_ab().
+ Args    : -metacommunity   : See metacommunity().
+           -merge_dups      : See merge_dups().
+           -identify_dups_by: See identify_dups_by().
+           -by_tax_level    : See by_tax_level().
+           -by_rel_ab       : See by_rel_ab().
  Returns : a Bio::Community::Tools::Summarizer object
 
 =cut
@@ -128,12 +129,13 @@ has metacommunity => (
 
 =head2 merge_dups
 
- Function: Merge community members with the exact same taxonomic affiliation
-           together. For example, if your community contained several members
-           with a taxonomic lineage of 'Archaea;Euryarchaeota;Halobacteria', all
-           would be merged into a new member with the same taxonomy and the sum
-           of the counts. Note that merging duplicates takes place before grouping
-           by taxonomy level, by_tax_level().
+ Function: Merge duplicate community members into a single one. For example, if
+           your community contained several members with a taxonomic lineage of
+           'Archaea;Euryarchaeota;Halobacteria', all would be merged into a new
+           member with the same taxonomy and the sum of the counts. See the
+           identify_dups_by() method to specify what constitutes duplicates.
+           Note that merging duplicates takes place before grouping by taxonomy
+           level, by_tax_level().
  Usage   : $summarizer->merge_dups(1);
  Args    : 0 (no) or 1 (yes). Default: 1
  Returns : a positive integer
@@ -147,6 +149,26 @@ has merge_dups => (
    lazy => 1,
    default => 1,
    init_arg => '-merge_dups',
+);
+
+
+=head2 identify_dups_by
+
+ Function: Define what constitute duplicates, members have the exact same desc()
+           or same taxon().
+ Usage   : $summarizer->identify_dups_by('taxon');
+ Args    : 'desc' or 'taxon'. Default: 'desc'
+ Returns : 'desc' or 'taxon'
+
+=cut
+
+has identify_dups_by => (
+   is => 'rw',
+   isa => 'IdentifyDupsByType',
+   required => 0,
+   lazy => 1,
+   default => 'desc',
+   init_arg => '-identify_dups_by',
 );
 
 
@@ -249,6 +271,11 @@ method get_summaries () {
 
 
 method _merge_duplicates ( $meta, $merge_dups ) {
+
+   #### implement desc() or taxon() duplicates
+   if ($self->identify_dups_by eq 'desc') {
+      $self->throw('UNIMPLEMENTED');
+   }
 
    # Create fresh community objects to hold the summaries
    my $summaries = $self->_new_summaries($meta);

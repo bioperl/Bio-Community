@@ -123,11 +123,18 @@ subtype 'AlphaType'
    => message { _gen_err_msg(\@AlphaType, $_) };
 
 
-# Member identification method
+# Members identification method
 my @IdentifyMembersByType = qw(id desc);
 subtype 'IdentifyMembersByType'
    => as enum( \@IdentifyMembersByType )
    => message { _gen_err_msg(\@IdentifyMembersByType, $_) };
+
+# Duplicates identification method
+my @IdentifyDupsByType = qw(desc taxon);
+subtype 'IdentifyDupsByType'
+   => as enum( \@IdentifyDupsByType )
+   => message { _gen_err_msg(\@IdentifyDupsByType, $_) };
+
 
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 my @WeightAssignStr = qw(file_average community_average ancestor);

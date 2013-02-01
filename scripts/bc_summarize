@@ -209,8 +209,10 @@ func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
    my $summarized_meta;
 
    my $summarizer = Bio::Community::Tools::Summarizer->new(
-      -metacommunity => $meta,
-      -merge_dups    => $merge_dups,
+      -metacommunity    => $meta,
+      -merge_dups       => $merge_dups,
+      -identify_dups_by => 'taxon',
+      ### strict dups (exact same string) or interpret taxonomic string (; delimited, empty elements, etc) ###
    );
 
    if ($by_tax_level) {

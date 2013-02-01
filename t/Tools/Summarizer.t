@@ -711,8 +711,9 @@ $community1 = $in->next_community;
 $meta = Bio::Community::Meta->new(-communities => [$community1]);
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -metacommunity => $meta,
-   -merge_dups   => 1,
+   -metacommunity    => $meta,
+   -merge_dups       => 1,
+   -identify_dups_by => 'taxon',
 ), 'Merge taxonomic duplicates';
 
 ok $summary_meta = $summarizer->get_summaries;
@@ -789,10 +790,11 @@ is $summary_meta->next_community, undef;
 # Merge taxonomic duplicates, then summarize by taxonomy, then group low abundance groups
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(
-   -metacommunity => $meta,
-   -merge_dups    => 1,
-   -by_tax_level  => 5,
-   -by_rel_ab     => ['<=', 6],
+   -metacommunity    => $meta,
+   -merge_dups       => 1,
+   -identify_dups_by => 'taxon',
+   -by_tax_level     => 5,
+   -by_rel_ab        => ['<=', 6],
 ), 'Multiple summary operations';
 
 ok $summary_meta = $summarizer->get_summaries;
