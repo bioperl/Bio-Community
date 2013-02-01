@@ -33,10 +33,10 @@ bc_summarize - Summarize community composition
 This script reads a file containing biological communities and summarizes it.
 In practice, this means transforming community member counts into relative
 abundance (taking into account any weights that members could have) and merging
-members that have the same taxonomic affiliation. Other popular practices
-include grouping members with a low abundance together into an 'Other' group and
-representing the taxonomy at a higher level, such as phylum level instead of
-specied level. See L<Bio::Community::Tools::Summarizer> for more information.
+members that have the same lineage. Other popular practices include grouping
+members with a low abundance together into an 'Other' group and representing the
+taxonomy at a higher level, such as phylum level instead of specied level. See
+L<Bio::Community::Tools::Summarizer> for more information.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -106,12 +106,30 @@ weights): 1 (yes), 0 (no). Default: convert_relab.default
 
 =item -md <merge_dups> | -merge_dups <merge_dups>
 
-Merge community members with the exact same taxonomic affiliation. Default: merge_dups.default
+Merge community members with the exact same lineage. Default: merge_dups.default
 
 =for Euclid:
    merge_dups.type: integer, merge_dups == 0 || merge_dups == 1
    merge_dups.type.error: <merge_dups> must be 0 or 1 (not merge_dups)
    merge_dups.default: 1
+
+=item -td <taxo_dups> | -taxo_dups <tax_dups>
+
+By default, the lineage of species has to match character for character for them
+to be considered duplicates. When you activate this option (1:on, 0:off), their
+lineage is parsed and interpreted taxonomically. For example, these three
+members would be duplicates:
+
+  k__Bacteria; p__Proteobacteria; c__Alphaproteobacteria
+  k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria
+  k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__;f__;g__;s__
+
+Default: taxo_dups.default
+
+=for Euclid:
+   taxo_dups.type: integer, taxo_dups == 0 || taxo_dups == 1
+   taxo_dups.type.error: <taxo_dups> must be 0 or 1 (not taxo_dups)
+   taxo_dups.default: 0
 
 =item -rl <relab_lt> | -relab_lt <relab_lt>
 
@@ -175,14 +193,14 @@ Email florent.angly@gmail.com
 
 =cut
 
-summarize( $ARGV{'input_files'}  , $ARGV{'weight_files'}  , $ARGV{'weight_assign'},
-           $ARGV{'output_prefix'}, $ARGV{'convert_relab'} , $ARGV{'merge_dups'}   ,
-           $ARGV{'relab_lt'}     , $ARGV{'taxonomy_level'} );
+summarize( $ARGV{'input_files'}  , $ARGV{'weight_files'} , $ARGV{'weight_assign'} ,
+           $ARGV{'output_prefix'}, $ARGV{'convert_relab'}, $ARGV{'merge_dups'}    ,
+           $ARGV{'taxo_dups'}    , $ARGV{'relab_lt'}     , $ARGV{'taxonomy_level'}, );
 exit;
 
 
 func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
-   $convert2relab, $merge_dups, $by_rel_ab, $by_tax_level) {
+   $convert2relab, $merge_dups, $taxo_dups, $by_rel_ab, $by_tax_level) {
 
    # Read input communities and do weight assignment
    my $meta = Bio::Community::Meta->new();
@@ -211,8 +229,7 @@ func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
    my $summarizer = Bio::Community::Tools::Summarizer->new(
       -metacommunity    => $meta,
       -merge_dups       => $merge_dups,
-      -identify_dups_by => 'taxon',
-      ### strict dups (exact same string) or interpret taxonomic string (; delimited, empty elements, etc) ###
+      -identify_dups_by => $taxo_dups ? 'taxon' : 'desc',
    );
 
    if ($by_tax_level) {
