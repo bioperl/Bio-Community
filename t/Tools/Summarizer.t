@@ -844,6 +844,69 @@ is $summary->next_member, undef;
 is $summary_meta->next_community, undef;
 
 
+# Merge description duplicates
+
+ok $summarizer = Bio::Community::Tools::Summarizer->new(
+   -metacommunity    => $meta,
+   -merge_dups       => 1,
+   -identify_dups_by => 'desc',
+), 'Duplicates by description';
+
+ok $summary_meta = $summarizer->get_summaries;
+isa_ok $summary_meta, 'Bio::Community::Meta';
+is $summary_meta->get_communities_count, 1;
+
+$summary = $summary_meta->next_community;
+
+$member = $summary->next_member;
+is $member->desc, 'Eukaryota;Katablepharidophyta;Katablepharidaceae;Leucocryptos;;Leucocryptos';
+delta_ok $summary->get_count($member), 9;
+
+$member = $summary->next_member;
+is $member->desc, 'Archaea;Crenarchaeota;Miscellaneous';
+delta_ok $summary->get_count($member), 6;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae;uncultured;uncultured';
+delta_ok $summary->get_count($member), 17;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingobium;Sphingomonas';
+delta_ok $summary->get_count($member), 7;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;WCHB1-60;unidentified';
+delta_ok $summary->get_count($member), 1;
+
+$member = $summary->next_member;
+is $member->desc, 'Eukaryota;Fungi;Chytridiomycota;environmental';
+delta_ok $summary->get_count($member), 7;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter';
+delta_ok $summary->get_count($member), 1;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria; Proteobacteria; Alphaproteobacteria; Sphingomonadales; Sphingomonadaceae; Sphingomonas';
+delta_ok $summary->get_count($member), 1;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas;uncultured';
+delta_ok $summary->get_count($member), 5;
+
+$member = $summary->next_member;
+is $member->desc, 'Bacteria;Proteobacteria;Betaproteobacteria;Rhodocyclales;Rhodocyclaceae;Uliginosibacterium;Sphingomonas';
+delta_ok $summary->get_count($member), 27;
+
+$member = $summary->next_member;
+is $member->desc, 'Archaea;Euryarchaeota;Halobacteria;Halobacteriales;Miscellaneous';
+delta_ok $summary->get_count($member), 19;
+
+is $summary->next_member, undef;
+
+is $summary_meta->next_community, undef;
+
+
 done_testing();
 
 exit;

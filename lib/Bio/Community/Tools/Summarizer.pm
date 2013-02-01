@@ -271,24 +271,17 @@ method get_summaries () {
 
 
 method _merge_duplicates ( $meta, $merge_dups ) {
-
-   #### implement desc() or taxon() duplicates
-   if ($self->identify_dups_by eq 'desc') {
-      $self->throw('UNIMPLEMENTED');
-   }
-
    # Create fresh community objects to hold the summaries
    my $summaries = $self->_new_summaries($meta);
-
+   my $use_desc = $self->identify_dups_by eq 'desc' ? 1 : 0;
    my $taxa_counts = {};
    my $taxa_objs   = {};
    for my $member ( @{$meta->get_all_members} ) {
 
-      my $taxon = $member->taxon;
+      my $taxon = $use_desc ? $member->desc : $member->taxon;
       if ($taxon) {
          # Member has taxonomic information
-         my $lineage_arr = get_taxon_lineage($taxon);
-         my $lineage_str = get_lineage_string($lineage_arr);
+         my $lineage_str = $use_desc ? $taxon : get_lineage_string(get_taxon_lineage($taxon));
 
          # Save taxon object
          if (not exists $taxa_objs->{$lineage_str}) {
@@ -319,7 +312,7 @@ method _merge_duplicates ( $meta, $merge_dups ) {
    }
 
    # Add taxonomic groups to all communities
-   $self->_add_groups($taxa_objs, $taxa_counts, $summaries);
+   $self->_add_groups($taxa_objs, $taxa_counts, $summaries, $use_desc);
 
    return $summaries;
 }
@@ -477,7 +470,7 @@ method _calc_weights ($count, $weighted_count) {
 }
 
 
-method _add_groups ($taxa_objs, $taxa_counts, $summaries) {
+method _add_groups ($taxa_objs, $taxa_counts, $summaries, $use_desc = 0) {
    # Add taxonomic groups to the summary metacommunity provided
    while (my ($lineage_str, $taxon) = each %$taxa_objs) {
       my $group_id;
@@ -494,7 +487,13 @@ method _add_groups ($taxa_objs, $taxa_counts, $summaries) {
             $group_id = $group->id;
          }
          $group->desc($lineage_str);
-         $group->taxon($taxon) if $taxon;
+         if ($taxon) {
+            if ($use_desc) {
+               $group->desc($taxon);
+            } else {
+               $group->taxon($taxon);
+            }
+         }
          $group->weights( $self->_calc_weights($count, $wcount) );
          $summary->add_member($group, $count) if $count > 0;
       }
