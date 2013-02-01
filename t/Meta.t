@@ -23,7 +23,7 @@ isa_ok $meta, 'Bio::Root::RootI';
 isa_ok $meta, 'Bio::Community::Meta';
 
 is $meta->name, 'Unnamed';
-is $meta->identify_by, 'id';
+is $meta->identify_members_by, 'id';
 is $meta->next_community, undef;
 
 is_deeply [map {ref $_}   @{$meta->get_all_communities}], [];
@@ -139,8 +139,8 @@ $community2 = Bio::Community::IO->new(
    -file => test_input_file('to_merge_2.qiime'),
 )->next_community;
 
-ok $meta = Bio::Community::Meta->new( -identify_by => 'desc' );
-is $meta->identify_by, 'desc';
+ok $meta = Bio::Community::Meta->new( -identify_members_by => 'desc' );
+is $meta->identify_members_by, 'desc';
 
 ok $meta->add_communities([$community1, $community2]);
 

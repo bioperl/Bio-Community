@@ -79,9 +79,9 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::Meta object
  Usage   : my $meta = Bio::Community::Meta->new( ... );
- Args    : -name       : See name()
-           -communities: See add_communities()
-           -identify_by: See identify_by()
+ Args    : -name               : See name()
+           -communities        : See add_communities()
+           -identify_members_by: See identify_members_by()
  Returns : A new Bio::Community::Meta object
 
 =cut
@@ -129,7 +129,7 @@ has name => (
 );
 
 
-=head2 identify_by
+=head2 identify_members_by
 
  Function: Get or set how members are handled.
            In the Bio::Community modules, members with the same ID are
@@ -141,18 +141,18 @@ has name => (
            have the same ID and be counted as the same. To work around this, you
            can specify to look at the desc() of the members and give the same ID
            to members that have the same description.
- Usage   : $meta->identify_by('desc');
+ Usage   : $meta->identify_members_by('desc');
  Args    : String, either 'id' or 'desc'
  Returns : String, either 'id' (default) or 'desc'
 
 =cut
 
-has identify_by => (
+has identify_members_by => (
    is => 'rw',
-   isa => 'IdentifyByType',
+   isa => 'IdentifyMembersByType',
    lazy => 1,
    default => 'id',
-   init_arg => '-identify_by',
+   init_arg => '-identify_members_by',
 );
 
 
@@ -189,7 +189,7 @@ method add_communities ( ArrayRef[Bio::Community] $communities ) {
    for my $community (@$communities) {
 
       # Identify members by description and fix IDs
-      if ($self->identify_by eq 'desc') {
+      if ($self->identify_members_by eq 'desc') {
          my $members_lookup = $self->_members_lookup;
          for my $member (@{$community->get_all_members}) {
             my $count = $community->remove_member($member);

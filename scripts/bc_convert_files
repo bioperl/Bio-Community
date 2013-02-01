@@ -154,7 +154,7 @@ func convert ($input_files, $output_prefix, $output_format, $member_identifier,
    $split_communities) {
 
    # Read input communities
-   my $meta = Bio::Community::Meta->new( -identify_by => $member_identifier );
+   my $meta = Bio::Community::Meta->new( -identify_members_by => $member_identifier );
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new( -file => $input_file );

@@ -124,11 +124,10 @@ subtype 'AlphaType'
 
 
 # Member identification method
-my @IdentifyByType = qw(id desc);
-subtype 'IdentifyByType'
-   => as enum( \@IdentifyByType )
-   => message { _gen_err_msg(\@IdentifyByType, $_) };
-
+my @IdentifyMembersByType = qw(id desc);
+subtype 'IdentifyMembersByType'
+   => as enum( \@IdentifyMembersByType )
+   => message { _gen_err_msg(\@IdentifyMembersByType, $_) };
 
 # Weight assignment method: a number, 'average', 'median', 'taxonomy'
 my @WeightAssignStr = qw(file_average community_average ancestor);
