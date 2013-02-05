@@ -703,15 +703,8 @@ method _process_member_queue ($community) {
    my $counts  = $self->_count_queue;
    my $members = $self->_member_queue;
 
-   # Calculate average weight in community
-   my $community_average_weights;
-   while (my $member = $community->next_member) {
-      my $rel_ab  = $community->get_rel_ab($member);
-      my $weights = $member->weights;
-      for my $i (0 .. scalar @{$self->_weights} - 1) {
-         $community_average_weights->[$i] += $rel_ab / 100 * $weights->[$i];
-      }
-   }
+   # Calculate average weights in community
+   my $community_average_weights = $self->_calc_community_average_weights($community);
 
    # Default to file-average weight if needed
    for my $i (0 .. scalar @{$self->_weights} - 1) {
@@ -741,19 +734,26 @@ method _process_member_queue ($community) {
 
    # If multiple weights, update averages now
    if ( scalar @{$self->_weights} > 1 ) {
-      $community_average_weights = [];
-      while (my $member = $community->next_member) {
-         my $rel_ab  = $community->get_rel_ab($member);
-         my $weights = $member->weights;
-         for my $i (0 .. scalar @{$self->_weights} - 1) {
-            $community_average_weights->[$i] += $rel_ab / 100 * $weights->[$i];
-         }
-      }
+      $community_average_weights = $self->_calc_community_average_weights($community);
    }
 
    $community->_set_average_weights($community_average_weights);
 
    return 1;
+}
+
+
+method _calc_community_average_weights ($community) {
+   # Calculate average weights in community and return them
+   my $community_average_weights;
+   while (my $member = $community->next_member) {
+      my $rel_ab  = $community->get_rel_ab($member);
+      my $weights = $member->weights;
+      for my $i (0 .. scalar @{$self->_weights} - 1) {
+         $community_average_weights->[$i] += $rel_ab / 100 * $weights->[$i];
+      }
+   }
+   return $community_average_weights;
 }
 
 
