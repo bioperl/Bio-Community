@@ -156,11 +156,25 @@ has _average_weights => (
    is => 'ro',
    #isa => 'PositiveNum', # too costly for an internal method
    lazy => 1,
-   default => sub{ [] },
+   default => \&_calc_average_weights, # calculate avg weights if not already set
    init_arg => undef,
    reader => 'get_average_weights',
    writer => '_set_average_weights',
 );
+
+
+method _calc_average_weights () {
+   # Calculate average weights in community and return them
+   my $community_average_weights = [];
+   while (my $member = $self->next_member) {
+      my $rel_ab  = $self->get_rel_ab($member);
+      my $weights = $member->weights;
+      for my $i (0 .. scalar @$weights - 1) {
+         $community_average_weights->[$i] += $rel_ab / 100 * $weights->[$i];
+      }
+   }
+   return $community_average_weights;
+}
 
 
 =head2 get_members_count

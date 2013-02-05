@@ -704,7 +704,7 @@ method _process_member_queue ($community) {
    my $members = $self->_member_queue;
 
    # Calculate average weights in community
-   my $community_average_weights = $self->_calc_community_average_weights($community);
+   my $community_average_weights = $community->_calc_average_weights();
 
    # Default to file-average weight if needed
    for my $i (0 .. scalar @{$self->_weights} - 1) {
@@ -734,26 +734,12 @@ method _process_member_queue ($community) {
 
    # If multiple weights, update averages now
    if ( scalar @{$self->_weights} > 1 ) {
-      $community_average_weights = $self->_calc_community_average_weights($community);
+      $community_average_weights = $community->_calc_average_weights();
    }
 
    $community->_set_average_weights($community_average_weights);
 
    return 1;
-}
-
-
-method _calc_community_average_weights ($community) {
-   # Calculate average weights in community and return them
-   my $community_average_weights;
-   while (my $member = $community->next_member) {
-      my $rel_ab  = $community->get_rel_ab($member);
-      my $weights = $member->weights;
-      for my $i (0 .. scalar @{$self->_weights} - 1) {
-         $community_average_weights->[$i] += $rel_ab / 100 * $weights->[$i];
-      }
-   }
-   return $community_average_weights;
 }
 
 
@@ -807,6 +793,7 @@ has '_onthefly_taxonomy' => (
    lazy => 1,
    default => 0,
 );
+
 
 method _is_taxonomy_empty ($taxonomy) {
    # If taxonomy object is a Bio::DB::Taxonomy and contains no taxa, mark that
