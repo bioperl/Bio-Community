@@ -27,8 +27,8 @@ my $build = Module::Build->new(
                              'perl'                         => '5.10.0',
                              'Bio::Root::Version'           => '>1.006901',
                              'Bio::DB::Taxonomy'            =>  0, # >1.006901
+                             'Getopt::Euclid'               => '0.4.0',
                              'Hash::Util'                   =>  0,
-                             'Tie::IxHash'                  =>  0, # metacommunity
                              'Math::Random::MT'             =>  0, # sampler
                              'Method::Signatures'           =>  0,
                              'Moose'                        =>  0,
@@ -36,9 +36,10 @@ my $build = Module::Build->new(
                              'MooseX::NonMoose'             =>  0,
                              'MooseX::StrictConstructor'    =>  0,
                              'Parallel::Iterator'           =>  0, # community member iteration
+                             'Tie::IxHash'                  =>  0, # metacommunity
                             },
     recommends           => {
-                              # Clone objects using Bio::Root::clone(). Uses a pure-Perl way if needed.
+                              # Clone objects using Bio::Root::clone(). Uses a pure-Perl way if needed. Broken in 0.97?!
                              'Clone::Fast'                  => 0,
                             },
     script_files         => [
