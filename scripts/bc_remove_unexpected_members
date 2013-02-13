@@ -1,0 +1,188 @@
+#! /usr/bin/env perl
+
+# BioPerl script bc_remove_unexpected_members
+#
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
+#
+# Copyright Florent Angly <florent.angly@gmail.com>
+#
+# You may distribute this module under the same terms as perl itself
+
+
+use strict;
+use warnings;
+use Method::Signatures;
+use Bio::Community::IO;
+use Getopt::Euclid qw(:minimal_keys);
+
+
+=head1 NAME
+
+bc_remove_unexpected_members - Remove community members not expected to occur, based on a reference community
+
+=head1 SYNOPSIS
+
+  remove_unexpected_members -if my_communities.generic  \
+                            -op my_modified_communities \
+                            -cn theoretical
+
+=head1 DESCRIPTION
+
+This script reads a community file that contains a reference community. For
+every other community in the file, every member that is not also present in the
+reference community is removed. This is useful if you have sequenced mock
+communities and some of them have spurious members.
+
+=head1 REQUIRED ARGUMENTS
+
+=over
+
+=item -if <input_files>... | -input_files <input_files>...
+
+File containing the input communities: a reference community + communities for
+which to remove members not occuring in the reference community. When providing
+communities in a format that supports only one community per file (e.g. gaas),
+you can provide multiple input files.
+
+=for Euclid:
+   input_files.type: readable
+
+=back
+
+=head1 OPTIONAL ARGUMENTS
+
+=over
+
+=item -op <output_prefix> | -output_prefix <output_prefix>
+
+Path and prefix for the output files. Default: output_prefix.default
+
+=for Euclid:
+   output_prefix.type: string
+   output_prefix.default: 'bc_bootstrap'
+
+=item -rn <ref_name> | -ref_name <ref_name>
+
+Name of the reference community. Default: ref_name.default
+
+=for Euclid:
+   ref_name.type: string
+   ref_name.default: 'reference'
+
+=back
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this
+and other Bioperl modules. Send your comments and suggestions preferably
+to one of the Bioperl mailing lists.
+
+Your participation is much appreciated.
+
+  bioperl-l@bioperl.org                  - General discussion
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+
+=head2 Support 
+
+Please direct usage questions or support issues to the mailing list:
+
+I<bioperl-l@bioperl.org>
+
+rather than to the module maintainer directly. Many experienced and 
+reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem 
+with code and data examples if at all possible.
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
+
+  http://bugzilla.open-bio.org/
+
+=head1 AUTHOR - Florent Angly
+
+Email florent.angly@gmail.com
+
+=cut
+
+remove_unexpected_members($ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'ref_name'});
+exit;
+
+
+func remove_unexpected_members ($input_files, $output_prefix, $ref_name) {
+   # Read input communities
+   my $meta = Bio::Community::Meta->new();
+   my $format;
+   for my $input_file (@$input_files) {
+      print "Reading file '$input_file'\n";
+      my $in = Bio::Community::IO->new( -file => $input_file );
+      $format = $in->format;
+      while (my $community = $in->next_community) {
+         $meta->add_communities([$community]);
+      }
+      $in->close;
+   }
+
+   # Find reference community and reads its members 
+   my $ref_comm = $meta->get_community_by_name($ref_name);
+   if (not defined $ref_comm) {
+      die("Error: No community called '$ref_name' found in input file");
+   }
+
+   # For non-reference communities, remove members not present in reference community
+   while (my $comm = $meta->next_community) {
+      next if $comm->name eq $ref_name;
+      while (my $member = $comm->next_member) {
+         if (not defined $ref_comm->get_member_by_id($member->id)) {
+            $comm->remove_member($member);
+         }
+      }
+   }
+
+   # Write resulting communities
+   write_communities($meta, $output_prefix, $format, '');
+
+
+   return 1;
+}
+
+
+func write_communities ($meta, $output_prefix, $output_format, $type='') {
+   $type ||= '';
+   my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
+   my $num = 0;
+   my $out;
+   my $output_file = '';
+   while (my $community = $meta->next_community) {
+      if (not defined $out) {
+         if ($multiple_communities) {
+            $output_file = $output_prefix;
+         } else {
+            $num++;
+            $output_file = $output_prefix.'_'.$num;
+         }
+         if ($type) {
+            $output_file .= '_'.$type;
+         }
+         $output_file .= '.'.$output_format;
+         $out = Bio::Community::IO->new(
+            -format => $output_format,
+            -file   => '>'.$output_file,
+         );
+      }
+      print "Writing community '".$community->name."' to file '$output_file'\n";
+      $out->write_community($community);
+      if (not $multiple_communities) {
+         $out->close;
+         $out = undef;
+      }
+   }
+   if (defined $out) {
+      $out->close;
+   }
+   return 1;
+}
