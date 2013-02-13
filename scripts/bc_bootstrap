@@ -211,4 +211,5 @@ func write_communities ($meta, $output_prefix, $output_format, $type='') {
    if (defined $out) {
       $out->close;
    }
+   return 1;
 }
