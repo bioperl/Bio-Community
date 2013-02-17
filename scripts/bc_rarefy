@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bc_bootstrap
+# BioPerl script bc_rarefy
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -20,21 +20,22 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_bootstrap - Do bootstrapping to normalize community by member count
+bc_rarefy - Rarefy communities
 
 =head1 SYNOPSIS
 
-  bc_bootstrap -input_files   my_communities.generic   \
-               -output_prefix my_converted_communities \
-               -sample_size   1000
+  bc_rarefy -input_files   my_communities.generic   \
+            -output_prefix my_converted_communities \
+            -sample_size   1000
 
 =head1 DESCRIPTION
 
 This script reads a file containing biological communities and performs
 bootstrapping, i.e. repeatedly takes a random subset of the community members,
-in order to normalize communities by member count. The output is a file
-containing average communities and another containing representative communities.
-See L<Bio::Community::Tools::CountNormalizer> for more information.
+in order to normalize communities by member count. Rarefaction is useful to
+simulate an identical sampling effort for all communities. The output is a file
+containing rarefied, representative communities (integers). See
+L<Bio::Community::Tools::CountNormalizer> for more information.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -42,7 +43,7 @@ See L<Bio::Community::Tools::CountNormalizer> for more information.
 
 =item -if <input_files>... | -input_files <input_files>...
 
-Input file containing the communities to bootstrap. When providing communities
+Input file containing the communities to rarefy. When providing communities
 in a format that supports only one community per file (e.g. gaas), you can
 provide multiple input files.
 
@@ -61,7 +62,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bc_bootstrap'
+   output_prefix.default: 'bc_rarefy'
 
 =item -ss <sample_size> | -sample_size <sample_size>
 
@@ -88,6 +89,16 @@ of iterations based on a distance threshold.
 
 =for Euclid:
    num_repetitions.type: +integer
+
+=item -wa <write_average> | -write_average <write_average>
+
+Write the average bootstraped communities (decimals) in addition to the rarefied
+communities (integers): 1 is yes, 0 is no.
+
+=for Euclid:
+   write_average.type: integer, write_average == 0 || write_average == 1
+   write_average.type.error: <write_average> must be 0 or 1 (not write_average)
+   write_average.default: 0
 
 =back
 
@@ -130,13 +141,13 @@ Email florent.angly@gmail.com
 =cut
 
 
-bootstrap( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'sample_size'},
-   $ARGV{'dist_threshold'}, $ARGV{'num_repetitions'} );
+rarefy( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'sample_size'},
+   $ARGV{'dist_threshold'}, $ARGV{'num_repetitions'}, $ARGV{'write_average'} );
 exit;
 
 
-func bootstrap ($input_files, $output_prefix, $sample_size, $dist_threshold,
-   $num_repetitions) {
+func rarefy ($input_files, $output_prefix, $sample_size, $dist_threshold,
+   $num_repetitions, $write_average) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new();
@@ -168,11 +179,13 @@ func bootstrap ($input_files, $output_prefix, $sample_size, $dist_threshold,
 
    # Bootstrap and write average communities
    my $out_meta = $normalizer->get_avg_meta;
-   write_communities($out_meta, $output_prefix, $format, 'average');
+   if ($write_average) {
+      write_communities($out_meta, $output_prefix, $format, 'average');
+   }
 
-   # Calculate and write representative communities
+   # Calculate and write rarefied communities
    $out_meta = $normalizer->get_repr_meta;
-   write_communities($out_meta, $output_prefix, $format, 'representative');
+   write_communities($out_meta, $output_prefix, $format, '');
 
    return 1;
 }
