@@ -6,7 +6,7 @@ use Bio::Community;
 use Bio::Community::Meta;
 
 use_ok($_) for qw(
-    Bio::Community::Tools::CountNormalizer
+    Bio::Community::Tools::Rarefier
 );
 
 
@@ -90,13 +90,13 @@ $meta = Bio::Community::Meta->new( -communities => [$community1, $community2] );
 
 # Basic normalizer object
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
-isa_ok $normalizer, 'Bio::Community::Tools::CountNormalizer';
+ok $normalizer = Bio::Community::Tools::Rarefier->new( );
+isa_ok $normalizer, 'Bio::Community::Tools::Rarefier';
 
 
 # Normalizer with specified settings
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+ok $normalizer = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -repetitions   => 10,
    -sample_size   => 1000,
@@ -151,7 +151,7 @@ delta_within $representative->get_count($member6), $representative->get_count($m
 
 # Normalizer with manually specified threshold
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+ok $normalizer = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -threshold     => 1E-3,
    -sample_size   => 1000,
@@ -202,7 +202,7 @@ delta_within $representative->get_count($member6), $average->get_count($member6)
 
 # Normalizer with automatic sample size and repetitions overriding threshold
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+ok $normalizer = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -threshold     => 1E-3,
    -repetitions   => 10,
@@ -254,7 +254,7 @@ delta_within $representative->get_count($member6), $average->get_count($member6)
 
 # Normalizer with sample that should exclude some members from representative
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+ok $normalizer = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -repetitions   => 50,
    -sample_size   => 4,
@@ -310,7 +310,7 @@ delta_within $representative->get_count($member6), $representative->get_count($m
 
 # Normalizer with sample that should exclude some members from representative
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+ok $normalizer = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -repetitions   => 50,
    -sample_size   => 4,
@@ -366,7 +366,7 @@ delta_within $representative->get_count($member6), $representative->get_count($m
 
 # Representative of a specific average community
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
+ok $normalizer = Bio::Community::Tools::Rarefier->new( );
 
 $average = Bio::Community->new( -name => 'average' );
 $average->add_member( $member1, 1.1);
@@ -389,7 +389,7 @@ delta_ok $representative->get_count($member4), 1;
 
 # Representative of an average community (one extra using rounded)
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
+ok $normalizer = Bio::Community::Tools::Rarefier->new( );
 
 $average = Bio::Community->new( -name => 'average' );
 $average->add_member( $member1, 1.2);
@@ -412,7 +412,7 @@ delta_ok $representative->get_count($member4), 0;
 
 # Representative of an average community (missing one count using rounded)
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
+ok $normalizer = Bio::Community::Tools::Rarefier->new( );
 
 $average = Bio::Community->new( -name => 'average' );
 $average->add_member( $member1, 2.3);
@@ -435,7 +435,7 @@ delta_ok $representative->get_count($member4), 1;
 
 # Representative of an average community (missing one count using rounded)
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
+ok $normalizer = Bio::Community::Tools::Rarefier->new( );
 
 $average = Bio::Community->new( -name => 'average' );
 $average->add_member( $member1, 1.471);
@@ -458,7 +458,7 @@ delta_ok $representative->get_count($member4), 0;
 
 # Representative of an average community (missing two counts using rounded)
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
+ok $normalizer = Bio::Community::Tools::Rarefier->new( );
 
 $average = Bio::Community->new( -name => 'average' );
 $average->add_member( $member1, 90.70);
@@ -490,7 +490,7 @@ delta_ok $representative->get_count($member6),  1;
 
 # Representative of an average community (4 extras using rounded)
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new( );
+ok $normalizer = Bio::Community::Tools::Rarefier->new( );
 
 $average = Bio::Community->new( -name => 'average' );
 $average->add_member( $member1, 1743.71);
@@ -611,7 +611,7 @@ $community3->add_member( $member6, 2514);
 
 $meta = Bio::Community::Meta->new( -communities => [$community1, $community3] );
 
-ok $normalizer = Bio::Community::Tools::CountNormalizer->new(
+ok $normalizer = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -repetitions   => 10,
    -sample_size   => 1000,
