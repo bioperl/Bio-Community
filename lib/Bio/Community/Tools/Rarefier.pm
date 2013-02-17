@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::Tools::CountNormalizer
+# BioPerl module for Bio::Community::Tools::Rarefier
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -9,14 +9,14 @@
 
 =head1 NAME
 
-Bio::Community::Tools::CountNormalizer - Normalize communities by count
+Bio::Community::Tools::Rarefier - Normalize communities by count
 
 =head1 SYNOPSIS
 
-  use Bio::Community::Tools::CountNormalizer;
+  use Bio::Community::Tools::Rarefier;
 
   # Normalize communities in a metacommunity by repeatedly taking 1,000 random members
-  my $normalizer = Bio::Community::Tools::CountNormalizer->new(
+  my $normalizer = Bio::Community::Tools::Rarefier->new(
      -metacommunity => $meta,
      -sample_size   => 1000,
      -threshold     => 0.001, # When to stop iterating. Can specify repetions instead
@@ -86,17 +86,17 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Function: Create a new Bio::Community::Tool::CountNormalizer object
- Usage   : my $normalizer = Bio::Community::Tool::CountNormalizer->new( );
+ Function: Create a new Bio::Community::Tool::Rarefier object
+ Usage   : my $normalizer = Bio::Community::Tool::Rarefier->new( );
  Args    : -metacommunity: see metacommunity()
            -repetitions  : see repetitions()
            -sample_size  : see sample_size()
- Returns : a new Bio::Community::Tools::CountNormalizer object
+ Returns : a new Bio::Community::Tools::Rarefier object
 
 =cut
 
 
-package Bio::Community::Tools::CountNormalizer;
+package Bio::Community::Tools::Rarefier;
 
 use Moose;
 use MooseX::NonMoose;

@@ -43,7 +43,7 @@ my $build = Module::Build->new(
                              'Clone::Fast'                  => 0,
                             },
     script_files         => [
-                             'scripts/bc_bootstrap',
+                             'scripts/bc_rarefy',
                              'scripts/bc_clean_shrapnel',
                              'scripts/bc_convert_files',
                              'scripts/bc_get_info',

@@ -14,7 +14,7 @@ use warnings;
 use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Meta;
-use Bio::Community::Tools::CountNormalizer;
+use Bio::Community::Tools::Rarefier;
 use Getopt::Euclid qw(:minimal_keys);
 
 
@@ -31,11 +31,11 @@ bc_rarefy - Rarefy communities
 =head1 DESCRIPTION
 
 This script reads a file containing biological communities and performs
-bootstrapping, i.e. repeatedly takes a random subset of the community members,
+rarefy, i.e. repeatedly takes a random subset of the community members,
 in order to normalize communities by member count. Rarefaction is useful to
 simulate an identical sampling effort for all communities. The output is a file
 containing rarefied, representative communities (integers). See
-L<Bio::Community::Tools::CountNormalizer> for more information.
+L<Bio::Community::Tools::Rarefier> for more information.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -163,7 +163,7 @@ func rarefy ($input_files, $output_prefix, $sample_size, $dist_threshold,
    }
 
    # Prepare normalizer
-   my $normalizer = Bio::Community::Tools::CountNormalizer->new(
+   my $normalizer = Bio::Community::Tools::Rarefier->new(
       -metacommunity => $meta,
       -verbose       => 1,
    );
