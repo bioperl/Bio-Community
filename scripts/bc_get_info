@@ -23,16 +23,16 @@ bc_get_info - Get information about a community file
 
 =head1 SYNOPSIS
 
-  bc_get_info -input_files   my_communities.generic   \
-              -output_prefix my_converted_communities \
-              -info_type     'desc'
+  bc_get_info -input_files   my_communities.generic \
+              -output_prefix my_info.txt            \
+              -info_type     'members'
 
 =head1 DESCRIPTION
 
 This script reads a file containing biological communities and retrieves basic
-information from it, such as the names of the communities it contains, the ID
-and description of their members, or the file format. The information is 
-displayed on screen unless an output prefix is provided.
+information from it, such as the names of the communities it contains and their
+counts, the ID of members and their description, or the file format. The
+information is displayed on screen unless an output prefix is provided.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -66,17 +66,15 @@ output prefix is provided. Default: output_prefix.default
 
 Type of information to return, either:
 
-   'name' for  community names (in order of appearance)
-   'count' for the number of counts in each community (in order of appearance)
-   'id' for member IDs (in no specific order)
-   'desc' for member description (in no specific order)
+   'communities' for community names (in order of appearance) and their member count
+   'members' for member IDs (in no specific order) and their description
    'format' for the file format
 
 Default: info_type.default
 
 =for Euclid:
-   info_type.type: /(name|count|id|desc|format)/
-   info_type.default: 'name'
+   info_type.type: /(communities|members|format)/
+   info_type.default: 'communities'
 
 =back
 
@@ -118,17 +116,11 @@ Email florent.angly@gmail.com
 
 =cut
 
-
 get_info( $ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'info_type'} );
 exit;
 
 
 func get_info ($input_files, $output_prefix, $info_type) {
-
-   ####
-   # HANDLE INFO_TYPE eq 'count'
-   ####
-
    # Read input communities
    my $meta = Bio::Community::Meta->new();
    my $communities = [];
@@ -155,21 +147,13 @@ func get_info ($input_files, $output_prefix, $info_type) {
    }
 
    # Fetch desired info
-   if ($info_type eq 'name') {
+   if ($info_type eq 'communities') {
       while (my $community = $meta->next_community) {
-         print $out $community->name."\n";
+         print $out $community->name."\t".$community->get_members_count."\n";
       }
-   } elsif ($info_type eq 'count') {
-      while (my $community = $meta->next_community) {
-         print $out $community->get_members_count."\n";
-      }
-   } elsif ($info_type eq 'desc') {
+   } elsif ($info_type eq 'members') {
       for my $member (@{$meta->get_all_members}) {
-         print $out $member->desc."\n";
-      }
-   } elsif ($info_type eq 'id') {
-      for my $member (@{$meta->get_all_members}) {
-         print $out $member->id."\n";
+         print $out $member->id."\t".$member->desc."\n";
       }
    } elsif ($info_type eq 'format') {
       print $out $format."\n";
