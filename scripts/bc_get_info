@@ -64,13 +64,18 @@ output prefix is provided. Default: output_prefix.default
 
 =item -it <info_type> | -info_type <info_type>
 
-Type of information to return, either: 'name' to return community names (in
-order of appearance), 'desc' for members IDs (in no specific order), 'id' for
-member description (in no specific order), or 'format' for the file format.
+Type of information to return, either:
+
+   'name' for  community names (in order of appearance)
+   'count' for the number of counts in each community (in order of appearance)
+   'id' for member IDs (in no specific order)
+   'desc' for member description (in no specific order)
+   'format' for the file format
+
 Default: info_type.default
 
 =for Euclid:
-   info_type.type: /(name|id|desc|format)/
+   info_type.type: /(name|count|id|desc|format)/
    info_type.default: 'name'
 
 =back
@@ -120,6 +125,10 @@ exit;
 
 func get_info ($input_files, $output_prefix, $info_type) {
 
+   ####
+   # HANDLE INFO_TYPE eq 'count'
+   ####
+
    # Read input communities
    my $meta = Bio::Community::Meta->new();
    my $communities = [];
@@ -149,6 +158,10 @@ func get_info ($input_files, $output_prefix, $info_type) {
    if ($info_type eq 'name') {
       while (my $community = $meta->next_community) {
          print $out $community->name."\n";
+      }
+   } elsif ($info_type eq 'count') {
+      while (my $community = $meta->next_community) {
+         print $out $community->get_members_count."\n";
       }
    } elsif ($info_type eq 'desc') {
       for my $member (@{$meta->get_all_members}) {
