@@ -25,7 +25,7 @@ Bio::Community::Tools::Summarizer - Create a summary of communities
      -by_tax_level  => 2,
      -by_rel_ab     => ['<', 1],
   );
-  my $summarized_meta = $summarizer->get_summaries;
+  my $summarized_meta = $summarizer->get_summary;
 
 =head1 DESCRIPTION
 
@@ -231,53 +231,52 @@ has by_rel_ab => (
 );
 
 
-=head2 get_summaries
+=head2 get_summary
 
  Function: Summarize the communities and return an arrayref of fresh communities.
- Usage   : my $summaries = $summarizer->get_summary;
+ Usage   : my $summary = $summarizer->get_summary;
  Args    : None
  Returns : A Bio::Community::Meta object
 
 =cut
 
-method get_summaries () {
+method get_summary () {
    my $meta = $self->metacommunity;
 
    if ($meta->get_communities_count == 0) {
       $self->throw("Need to provide at least one community.");
    }
-   my $summaries = $meta;
+   my $summary = $meta;
 
    # Then merge duplicates
    my $merge_dups = $self->merge_dups();
    if ($merge_dups) {
-      $summaries = $self->_merge_duplicates($summaries, $merge_dups);
+      $summary = $self->_merge_duplicates($summary, $merge_dups);
    }
 
    # Then summarize by taxonomy
    my $tax_level = $self->by_tax_level();
    if (defined $tax_level) {
-      $summaries = $self->_group_by_taxonomic_level($summaries, $tax_level);
+      $summary = $self->_group_by_taxonomic_level($summary, $tax_level);
    }
 
    # Finally, group members by abundance
    my $rel_ab_params = $self->by_rel_ab;
    if (defined $rel_ab_params) {
-      $summaries = $self->_group_by_relative_abundance($summaries, $rel_ab_params);
+      $summary = $self->_group_by_relative_abundance($summary, $rel_ab_params);
    }
 
-   return $summaries;
+   return $summary;
 };
 
 
 method _merge_duplicates ( $meta, $merge_dups ) {
-   # Create fresh community objects to hold the summaries
-   my $summaries = $self->_new_summaries($meta);
+   # Create fresh community objects to hold the summary
+   my $summary = $self->_new_summary($meta);
    my $use_desc = $self->identify_dups_by eq 'desc' ? 1 : 0;
    my $taxa_counts = {};
    my $taxa_objs   = {};
    for my $member ( @{$meta->get_all_members} ) {
-
       my $taxon = $use_desc ? $member->desc : $member->taxon;
       if ($taxon) {
          # Member has taxonomic information
@@ -299,12 +298,12 @@ method _merge_duplicates ( $meta, $merge_dups ) {
          }
 
       } else {
-         # Member has no taxonomic assignment. Add member as-is in all summaries.
+         # Member has no taxonomic assignment. Add member as-is in the summary.
          my $i = -1;
          while (my $community = $meta->next_community) {
             $i++;
             my $count = $community->get_count($member);
-            my $summary = $summaries->get_community_by_name($community->name);
+            my $summary = $summary->get_community_by_name($community->name);
             $summary->add_member($member, $count);
          }
       }
@@ -312,21 +311,20 @@ method _merge_duplicates ( $meta, $merge_dups ) {
    }
 
    # Add taxonomic groups to all communities
-   $self->_add_groups($taxa_objs, $taxa_counts, $summaries, $use_desc);
+   $self->_add_groups($taxa_objs, $taxa_counts, $summary, $use_desc);
 
-   return $summaries;
+   return $summary;
 }
 
 
 method _group_by_taxonomic_level ( $meta, $tax_level ) {
 
-   # Create fresh community objects to hold the summaries
-   my $summaries = $self->_new_summaries($meta);
+   # Create fresh community objects to hold the summary
+   my $summary = $self->_new_summary($meta);
 
    my $taxa_counts = {};
    my $taxa_objs   = {};
    for my $member ( @{$meta->get_all_members} ) {
-
       my $taxon = $member->taxon;
       if ($taxon) {
          # Member has taxonomic information
@@ -360,12 +358,12 @@ method _group_by_taxonomic_level ( $meta, $tax_level ) {
 
          } else {
             # Member had taxonomic information at a higher level than requested.
-            # Add member as-is in all summaries.
+            # Add member as-is in the summary.
             my $i = -1;
             while (my $community = $meta->next_community) {
                $i++;
                my $count = $community->get_count($member);
-               my $summary = $summaries->get_community_by_name($community->name);
+               my $summary = $summary->get_community_by_name($community->name);
                $summary->add_member($member, $count);
             }
          }
@@ -390,9 +388,9 @@ method _group_by_taxonomic_level ( $meta, $tax_level ) {
    }
 
    # Add taxonomic groups to all communities
-   $self->_add_groups($taxa_objs, $taxa_counts, $summaries);
+   $self->_add_groups($taxa_objs, $taxa_counts, $summary);
 
-   return $summaries;
+   return $summary;
 }
 
 
@@ -414,8 +412,8 @@ method _group_by_relative_abundance ( $meta, $params ) {
       $self->throw("Invalid comparison operator provided, '$operator'.");
    }
 
-   # Create fresh community objects to hold the summaries
-   my $summaries = $self->_new_summaries($meta);
+   # Create fresh community objects to hold the summary
+   my $summary = $self->_new_summary($meta);
 
    my $taxa_counts = {};
    my $desc = "Other $operator $thresh %";
@@ -449,7 +447,7 @@ method _group_by_relative_abundance ( $meta, $params ) {
             $taxa_counts->{$desc}->{$i}->[1] += $wcount;
          } else {
             # Add member as-is, ungrouped
-            my $summary = $summaries->get_community_by_name($community->name);
+            my $summary = $summary->get_community_by_name($community->name);
             $summary->add_member($member, $count) if $count > 0;
          }
       }
@@ -457,9 +455,9 @@ method _group_by_relative_abundance ( $meta, $params ) {
    }
 
    # Add taxonomic groups to all communities
-   $self->_add_groups($taxa_objs, $taxa_counts, $summaries);
+   $self->_add_groups($taxa_objs, $taxa_counts, $summary);
 
-   return $summaries;
+   return $summary;
 }
 
 
@@ -470,12 +468,12 @@ method _calc_weights ($count, $weighted_count) {
 }
 
 
-method _add_groups ($taxa_objs, $taxa_counts, $summaries, $use_desc = 0) {
+method _add_groups ($taxa_objs, $taxa_counts, $summary, $use_desc = 0) {
    # Add taxonomic groups to the summary metacommunity provided
    while (my ($lineage_str, $taxon) = each %$taxa_objs) {
       my $group_id;
       my $i = -1;
-      while (my $summary = $summaries->next_community) {
+      while (my $summary = $summary->next_community) {
          $i++;
          my $count_info = $taxa_counts->{$lineage_str}->{$i} || next;
          my ($count, $wcount) = @{$count_info};
@@ -486,11 +484,20 @@ method _add_groups ($taxa_objs, $taxa_counts, $summaries, $use_desc = 0) {
             $group = Bio::Community::Member->new( );
             $group_id = $group->id;
          }
-         $group->desc($lineage_str);
          if ($taxon) {
             if ($use_desc) {
                $group->desc($taxon);
+
+               #### Need to make taxonomy. Ideally instead of re-making it, it should not be lost.
+               ##use Bio::Community::TaxonomyUtils qw(split_lineage_string);
+               ##my @names = @{split_lineage_string($lineage_str)};
+               ##my $taxonomy = $tax_obj->db_handle;
+               ##my $tax_obj = $self->taxonomy->get_taxon( -names => \@names );
+               ##$group->taxon($tax_obj);
+               ####
+
             } else {
+               $group->desc($lineage_str);
                $group->taxon($taxon);
             }
          }
@@ -502,23 +509,23 @@ method _add_groups ($taxa_objs, $taxa_counts, $summaries, $use_desc = 0) {
 }
 
 
-method _new_summaries ($meta) {
-   # Create a fresh metacommunity object to hold the summaries. One summary per
+method _new_summary ($meta) {
+   # Create a fresh metacommunity object to hold the summary. One summary per
    # input community.
-   my $summaries = Bio::Community::Meta->new;
+   my $summary = Bio::Community::Meta->new;
    while (my $community = $meta->next_community) {
       my $name = $community->name;
       #if ($name !~ / summarized$/) {
       #   $name .= ' summarized';
       #}
       my $use_weights = $community->use_weights;
-      my $summary = Bio::Community->new(
+      my $comm_summary = Bio::Community->new(
          -name        => $name,
          -use_weights => $use_weights,
       );
-      $summaries->add_communities([$summary]);
+      $summary->add_communities([$comm_summary]);
    }
-   return $summaries;
+   return $summary;
 }
 
 

@@ -56,7 +56,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
 is_deeply $summarizer->metacommunity, $meta;
 is_deeply $summarizer->by_rel_ab, ['<', 2];
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 2;
 
@@ -104,7 +104,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['<=', 1.9],
 ), "Operator '<='";
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -123,7 +123,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['<=', 2],
 );
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -144,7 +144,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['<', 2.1],
 ), "Operator '<'";
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -163,7 +163,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['<', 2],
 );
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -185,7 +185,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['>', 2],
 ), "Operator '>'";
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -204,7 +204,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['>', 1.9],
 );
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -225,7 +225,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['>=', 3],
 ), "Operator '>='";
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -244,7 +244,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['>=', 2],
 );
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -294,7 +294,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab     => ['<', 20],
 ), 'Multiple weighted communities';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 2;
 
@@ -395,7 +395,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_tax_level  => 1,
 ), 'Taxonomic summary (level 1)';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -426,7 +426,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_tax_level  => 2,
 ), 'Taxonomic summary (level 2)';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -469,7 +469,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_tax_level  => 6,
 ), 'Taxonomic summary (level 6)';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -530,7 +530,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_tax_level  => 7,
 ), 'Taxonomic summary (level 7)';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -602,7 +602,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_tax_level  => 5,
 ), 'Taxonomic summary from multiple communities (level 5)';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 3;
 
@@ -639,7 +639,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_tax_level  => 4,
 ), 'Taxonomic summary from multiple communities (level 4)';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 3;
 
@@ -716,7 +716,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -identify_dups_by => 'taxon',
 ), 'Merge taxonomic duplicates';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -797,7 +797,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -by_rel_ab        => ['<=', 6],
 ), 'Multiple summary operations';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 
@@ -852,7 +852,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -identify_dups_by => 'desc',
 ), 'Duplicates by description';
 
-ok $summary_meta = $summarizer->get_summaries;
+ok $summary_meta = $summarizer->get_summary;
 isa_ok $summary_meta, 'Bio::Community::Meta';
 is $summary_meta->get_communities_count, 1;
 

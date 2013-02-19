@@ -113,7 +113,7 @@ Merge community members with the exact same lineage. Default: merge_dups.default
    merge_dups.type.error: <merge_dups> must be 0 or 1 (not merge_dups)
    merge_dups.default: 1
 
-=item -td <taxo_dups> | -taxo_dups <tax_dups>
+=item -td <taxo_dups> | -taxo_dups <taxo_dups>
 
 By default, the lineage of species has to match character for character for them
 to be considered duplicates. When you activate this option (1:on, 0:off), their
@@ -146,7 +146,7 @@ threshold (in %) in ALL the communities into an 'Other' group. Default: relab_lt
 Group members belonging to the same taxonomic level. For the Greengenes taxonomy,
 level 1 represents kingdom, level 2 represents phylum, and so on, until level 7,
 representing the species level. Members without taxonomic information are
-grouped together in a Member with the description 'Unknown taxonomy'. Default:
+grouped together in a member with the description 'Unknown taxonomy'. Default:
 none
 
 =for Euclid:
@@ -240,7 +240,7 @@ func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
       $summarizer->by_rel_ab( ['<', $by_rel_ab] );
    }
 
-   $summarized_meta = $summarizer->get_summaries;
+   $summarized_meta = $summarizer->get_summary;
 
    # Write results, converting to relative abundance if desired
    write_communities($summarized_meta, $output_prefix, $format, '', $convert2relab);
