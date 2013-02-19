@@ -141,7 +141,7 @@ threshold (in %) in ALL the communities into an 'Other' group. Default: relab_lt
    relab_lt.type.error: <relab_lt> must be between 0 and 100 (not relab_lt)
    relab_lt.default: 1
 
-=item -tl <taxonomy_level> | -taxonomy_level <taxonomy_level>
+=item -tl <tax_level_min> [.. <tax_level_max>] | -tax_level <tax_level_min> [.. <tax_level_max>]
 
 Group members belonging to the same taxonomic level. For the Greengenes taxonomy,
 level 1 represents kingdom, level 2 represents phylum, and so on, until level 7,
@@ -150,8 +150,10 @@ grouped together in a member with the description 'Unknown taxonomy'. Default:
 none
 
 =for Euclid:
-   taxonomy_level.type: number, taxonomy_level > 0
-   taxonomy_level.type.error: <taxonomy_level> must be larger than 0
+   tax_level_min.type: number, tax_level_min > 0
+   tax_level_max.type: number, tax_level_max > 0
+   tax_level_min.type.error: <tax_level> must be larger than 0
+   tax_level_max.type.error: <tax_level> must be larger than 0
 
 =back
 
@@ -193,14 +195,17 @@ Email florent.angly@gmail.com
 
 =cut
 
+
 summarize( $ARGV{'input_files'}  , $ARGV{'weight_files'} , $ARGV{'weight_assign'} ,
            $ARGV{'output_prefix'}, $ARGV{'convert_relab'}, $ARGV{'merge_dups'}    ,
-           $ARGV{'taxo_dups'}    , $ARGV{'relab_lt'}     , $ARGV{'taxonomy_level'}, );
+           $ARGV{'taxo_dups'}    , $ARGV{'relab_lt'}     ,
+           $ARGV{'tax_level'}{'tax_level_min'}, $ARGV{'tax_level'}{'tax_level_max'} );
 exit;
 
 
 func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
-   $convert2relab, $merge_dups, $taxo_dups, $by_rel_ab, $by_tax_level) {
+   $convert2relab, $merge_dups, $taxo_dups, $by_rel_ab, $tax_level_min,
+   $tax_level_max) {
 
    # Read input communities and do weight assignment
    my $meta = Bio::Community::Meta->new();
@@ -223,27 +228,42 @@ func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
       $in->close;
    }
 
-   # Summarize communities
-   my $summarized_meta;
-
-   my $summarizer = Bio::Community::Tools::Summarizer->new(
-      -metacommunity    => $meta,
-      -merge_dups       => $merge_dups,
-      -identify_dups_by => $taxo_dups ? 'taxon' : 'desc',
-   );
-
-   if ($by_tax_level) {
-      $summarizer->by_tax_level($by_tax_level);
+   # Set up start and end taxonomic level
+   if (defined $tax_level_min) {
+      if (not defined $tax_level_max) {
+         $tax_level_max = $tax_level_min;
+      } else {
+         if ($tax_level_min > $tax_level_max) {
+            ($tax_level_min, $tax_level_max) = ($tax_level_max, $tax_level_min);
+         }
+      }
+   } else {
+      # Keep original taxonomic level
+      $tax_level_min = 0;
+      $tax_level_max = 0;
    }
 
-   if ($by_rel_ab) {
-      $summarizer->by_rel_ab( ['<', $by_rel_ab] );
+   # Summarize communities at all requested taxonomic levels
+   my $summarized_meta = $meta;
+   for (my $tax_level = $tax_level_max; $tax_level >= $tax_level_min; $tax_level--) {
+      my $suffix = '';
+      my $summarizer = Bio::Community::Tools::Summarizer->new(
+         -metacommunity    => $summarized_meta,
+         -merge_dups       => $merge_dups,
+         -identify_dups_by => $taxo_dups ? 'taxon' : 'desc',
+      );
+
+      if ($tax_level) {
+         $summarizer->by_tax_level($tax_level);
+         $suffix = 'L'.$tax_level;
+      }
+      if ($by_rel_ab) {
+         $summarizer->by_rel_ab( ['<', $by_rel_ab] );
+      }
+      my $summarized_meta = $summarizer->get_summary;
+      # Write results, converting to relative abundance if desired
+      write_communities($summarized_meta, $output_prefix, $format, $suffix, $convert2relab);
    }
-
-   $summarized_meta = $summarizer->get_summary;
-
-   # Write results, converting to relative abundance if desired
-   write_communities($summarized_meta, $output_prefix, $format, '', $convert2relab);
 
    return 1;
 }
