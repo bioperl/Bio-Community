@@ -484,20 +484,20 @@ method _add_groups ($taxa_objs, $taxa_counts, $summary, $use_desc = 0) {
             $group = Bio::Community::Member->new( );
             $group_id = $group->id;
          }
-         if ($taxon) {
-            if ($use_desc) {
-               $group->desc($taxon);
+         if ($use_desc) {
+            $group->desc($taxon);
 
-               #### Need to make taxonomy. Ideally instead of re-making it, it should not be lost.
-               ##use Bio::Community::TaxonomyUtils qw(split_lineage_string);
-               ##my @names = @{split_lineage_string($lineage_str)};
-               ##my $taxonomy = $tax_obj->db_handle;
-               ##my $tax_obj = $self->taxonomy->get_taxon( -names => \@names );
-               ##$group->taxon($tax_obj);
-               ####
+            #### Need to make taxonomy. Ideally instead of re-making it, it should not be lost.
+            ##use Bio::Community::TaxonomyUtils qw(split_lineage_string);
+            ##my @names = @{split_lineage_string($lineage_str)};
+            ##my $taxonomy = $tax_obj->db_handle;
+            ##my $tax_obj = $self->taxonomy->get_taxon( -names => \@names );
+            ##$group->taxon($tax_obj);
+            ####
 
-            } else {
-               $group->desc($lineage_str);
+         } else {
+            $group->desc($lineage_str);
+            if ($taxon) {
                $group->taxon($taxon);
             }
          }
