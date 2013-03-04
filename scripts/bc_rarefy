@@ -93,7 +93,7 @@ of iterations based on a distance threshold.
 =item -wa <write_average> | -write_average <write_average>
 
 Write the average bootstraped communities (decimals) in addition to the rarefied
-communities (integers): 1 is yes, 0 is no.
+communities (integers): 1 is yes, 0 is no. Default: write_average.default
 
 =for Euclid:
    write_average.type: integer, write_average == 0 || write_average == 1
