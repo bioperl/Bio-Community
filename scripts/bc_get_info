@@ -60,7 +60,7 @@ output prefix is provided. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: ''
+   output_prefix.default: 'bc_get_info'
 
 =item -it <info_type> | -info_type <info_type>
 
