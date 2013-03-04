@@ -56,11 +56,11 @@ provide multiple input files.
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
 Path and prefix for the output file. The output is displayed on screen if no 
-output prefix is provided. Default: output_prefix.default
+output prefix is provided. Default: none
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bc_get_info'
+   output_prefix.default: ''
 
 =item -it <info_type> | -info_type <info_type>
 
