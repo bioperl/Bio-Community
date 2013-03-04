@@ -100,7 +100,7 @@ my $clean_rear_re  = qr/^(?:\S__||Other|No blast hit|unidentified|uncultured|env
  Function: Split a lineage string, e.g. 'Bacteria;Proteobacteria' into an
            arrayref of its individual components using the ';' separator, e.g.
            'Bacteria' and 'Betaproteobact'. Also, clean the arrayref using
-           clean_lineage_arr(). The opposite operation is get_lineage_string().
+           clean_lineage_arr(). The reciprocal operation is get_lineage_string().
  Usage   : my $taxa_names = split_lineage($lineage_string);
  Args    : a lineage string
  Returns : an arrayref of taxon names
