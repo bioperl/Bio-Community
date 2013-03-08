@@ -1,0 +1,209 @@
+#! /usr/bin/env perl
+
+# BioPerl script bc_perc_to_count
+#
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
+#
+# Copyright Florent Angly <florent.angly@gmail.com>
+#
+# You may distribute this module under the same terms as perl itself
+
+
+use strict;
+use warnings;
+use Method::Signatures;
+use Bio::Community::IO;
+use Bio::Community::Meta;
+use Getopt::Euclid qw(:minimal_keys);
+
+
+=head1 NAME
+
+bc_perc_to_count - Transform relative abundances into counts
+
+=head1 SYNOPSIS
+
+  bc_perc_to_count -input_files   my_communities.generic \
+                   -count_file    my_counts.tsv          \
+                   -output_prefix my_results
+
+=head1 DESCRIPTION
+
+This script reads files containing biological communities and a file of counts
+for these communities. The relative abundance of each member is multiplied by
+the total count for its community.
+
+=head1 REQUIRED ARGUMENTS
+
+=over
+
+=item -if <input_files>... | -input_files <input_files>...
+
+Input files containing the communities to process. All files must have the same
+format, which can be one of generic (tab-delimited table), qiime, gaas or
+unifrac. See L<Bio::Community::IO> for more information on these format.
+
+=for Euclid:
+   input_files.type: readable
+
+=item -cf <count_file> | -count_file <count_file>
+
+File containing the total count for each community. Each line in the file should
+be tab-separated and have two columns: community name, total count.
+
+=for Euclid:
+   count_file.type: readable
+
+=back
+
+=head1 OPTIONAL ARGUMENTS
+
+=over
+
+=item -op <output_prefix> | -output_prefix <output_prefix>
+
+Path and prefix for the output files. Several output files will be created if
+the requested output format can only hold a single community. Default: output_prefix.default
+
+=for Euclid:
+   output_prefix.type: string
+   output_prefix.default: 'bc_perc_to_count'
+
+=back
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this
+and other Bioperl modules. Send your comments and suggestions preferably
+to one of the Bioperl mailing lists.
+
+Your participation is much appreciated.
+
+  bioperl-l@bioperl.org                  - General discussion
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+
+=head2 Support 
+
+Please direct usage questions or support issues to the mailing list:
+
+I<bioperl-l@bioperl.org>
+
+rather than to the module maintainer directly. Many experienced and 
+reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem 
+with code and data examples if at all possible.
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
+
+  http://bugzilla.open-bio.org/
+
+=head1 AUTHOR - Florent Angly
+
+Email florent.angly@gmail.com
+
+=cut
+
+
+perc_to_count( $ARGV{'input_files'}, $ARGV{'count_file'}, $ARGV{'output_prefix'} );
+
+exit;
+
+
+func perc_to_count ($input_files, $count_file, $output_prefix) {
+
+   # Read input communities
+   my $meta = Bio::Community::Meta->new();
+   my $communities = [];
+   my $format;
+   for my $input_file (@$input_files) {
+      my $in = Bio::Community::IO->new( -file => $input_file );
+      $format = $in->format;
+      while (my $community = $in->next_community) {
+         $meta->add_communities([$community]);
+      }
+      $in->close;
+   }
+
+   my $counts = read_count_file($count_file);
+
+   $meta = multiply($meta, $counts);
+
+   write_communities($meta, $output_prefix, $format, '');
+   return 1;
+}
+
+
+func multiply ($meta, $counts) {
+   while (my $community = $meta->next_community) {
+      my $tot_count = $counts->{$community->name};
+      if (not defined $tot_count) {
+         warn "Warn: No total count was provided for community ".$community->name.". ".
+            "Leaving this community alone...\n";
+         next;
+      }
+      for my $member (@{$community->get_all_members}) {
+         my $rel_ab = $community->get_rel_ab($member);
+         my $count = $rel_ab * $tot_count;
+         $community->add_member($member, $count - $rel_ab);
+      }
+   }
+   return $meta;
+}
+
+
+func read_count_file ($file) {
+   my %counts;
+   open my $in, '<', $file or die "Error: Could not read file $file\n$!\n";
+   while (my $line = <$in>) {
+      next if $line =~ m/^#/;
+      next if $line =~ m/^\s*$/;
+      chomp $line;
+      my ($name, $count) = split "\t", $line;
+      $counts{$name} = $count;
+   }
+   close $in;
+   return \%counts;
+}
+
+
+func write_communities ($meta, $output_prefix, $output_format, $type='') {
+   $type ||= '';
+   my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
+   my $num = 0;
+   my $out;
+   my $output_file = '';
+   while (my $community = $meta->next_community) {
+      if (not defined $out) {
+         if ($multiple_communities) {
+            $output_file = $output_prefix;
+         } else {
+            $num++;
+            $output_file = $output_prefix.'_'.$num;
+         }
+         if ($type) {
+            $output_file .= '_'.$type;
+         }
+         $output_file .= '.'.$output_format;
+         $out = Bio::Community::IO->new(
+            -format => $output_format,
+            -file   => '>'.$output_file,
+         );
+      }
+      print "Writing community '".$community->name."' to file '$output_file'\n";
+      $out->write_community($community);
+      if (not $multiple_communities) {
+         $out->close;
+         $out = undef;
+      }
+   }
+   if (defined $out) {
+      $out->close;
+   }
+   return 1;
+}
