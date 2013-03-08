@@ -125,6 +125,11 @@ func perc_to_count ($input_files, $count_file, $output_prefix) {
       my $in = Bio::Community::IO->new( -file => $input_file );
       $format = $in->format;
       while (my $community = $in->next_community) {
+         my $tot_count = $community->get_members_count;
+         if ( ($tot_count < 99.9) || ($tot_count > 100.1) ) {
+            warn "Warning: The members in community ".$community->name." did ".
+               "not add up to 100% (got $tot_count).\n";
+         }
          $meta->add_communities([$community]);
       }
       $in->close;
@@ -142,15 +147,17 @@ func perc_to_count ($input_files, $count_file, $output_prefix) {
 func multiply ($meta, $counts) {
    while (my $community = $meta->next_community) {
       my $tot_count = $counts->{$community->name};
+      print "Community ".$community->name.": total count of ".$tot_count."\n";
       if (not defined $tot_count) {
          warn "Warn: No total count was provided for community ".$community->name.". ".
             "Leaving this community alone...\n";
          next;
       }
       for my $member (@{$community->get_all_members}) {
-         my $rel_ab = $community->get_rel_ab($member);
-         my $count = $rel_ab * $tot_count;
-         $community->add_member($member, $count - $rel_ab);
+         my $old_count = $community->get_count($member);
+         my $new_count = $old_count/100 * $tot_count;
+         my $add = $new_count - $old_count;
+         $community->add_member($member, $add);
       }
    }
    return $meta;
