@@ -154,6 +154,7 @@ func convert ($input_files, $output_prefix, $output_format, $member_identifier,
    $split_communities) {
 
    # Read input communities
+   my $i = 0;
    my $meta = Bio::Community::Meta->new( -identify_members_by => $member_identifier );
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
@@ -162,6 +163,10 @@ func convert ($input_files, $output_prefix, $output_format, $member_identifier,
          $output_format = $in->format;
       }
       while (my $community = $in->next_community) {
+         if ($community->name eq '') {
+            $i++;
+            $community->name($i);
+         }
          $meta->add_communities([$community]);
       }
       $in->close;

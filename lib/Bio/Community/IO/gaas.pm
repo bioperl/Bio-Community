@@ -152,7 +152,7 @@ method _next_community_init () {
    $count++;
    if ($count <= 1) {
       $self->_count($count);
-      return 1;
+      return ''; # name of community
    } else {
       return undef;
    }
