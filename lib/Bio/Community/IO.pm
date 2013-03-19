@@ -480,9 +480,7 @@ has 'multiple_communities' => (
            read mode) containing weights to assign to the community members.
            Each file can contain a different type of weight to add. The file
            should contain two tab-delimited columns: the first one should
-           contain the description of the member (or the string representation
-           of its taxonomic lineage, when using -weight_assign => 'ancestor'),
-           and the
+           contain the ID, description or string lineage of the member and the
            second one the weight to assign to this member.
  Args    : arrayref of file names (or filehandles)
  Returns : arrayref of filehandles
@@ -563,6 +561,26 @@ method _read_weights ($args) {
    $self->_file_average_weights( $file_average_weights );
    return 1;
 }
+
+
+=head2 weight_identifier
+
+ Usage   : $in->weight_identifier('id');
+ Function: Get or set whether to lookup and assign weights to community members
+           based on the member description or their ID.
+ Args    : 'desc' (default) or 'id'
+ Returns : 'desc' or 'id'
+
+=cut
+
+has 'weight_identifier' => (
+   is => 'rw',
+   isa => 'IdentifyMembersByType',
+   required => 0,
+   lazy => 1,
+   default => 'desc',
+   init_arg => '-weight_identifier',
+);
 
 
 =head2 weight_assign
@@ -664,11 +682,11 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
 
          } else {
 
-            # Methods based on member description
-            my $desc = $member->desc;
-            if ( $desc && exists($weight_type->{$desc}) ) {
+            # Methods based on member description (or ID)
+            my $lookup = $self->weight_identifier eq 'desc' ? $member->desc : $member->id;
+            if ( $lookup && exists($weight_type->{$lookup}) ) {
                # This member has a weight
-               $weight = $weight_type->{$desc};
+               $weight = $weight_type->{$lookup};
             } else {
                # This member has no weight, provide an alternative weight
                if ($assign_method eq 'file_average') {
