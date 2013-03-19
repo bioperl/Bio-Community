@@ -19,10 +19,11 @@ my (@communities, @methods);
 open $fh1, '<', test_input_file('weights_1.txt') or die "Could not open file: $!\n";
 open $fh2, '<', test_input_file('weights_2.txt') or die "Could not open file: $!\n";
 ok $in = Bio::Community::IO->new(
-   -file          => test_input_file('generic_table.txt'),
-   -format        => 'generic',
-   -weight_files  => [ $fh1, $fh2 ],
-   -weight_assign => 1,
+   -file              => test_input_file('generic_table.txt'),
+   -format            => 'generic',
+   -weight_files      => [ $fh1, $fh2 ],
+   -weight_assign     => 1,
+   -weight_identifier => 'desc',
 ), 'Read generic format with arbitrary weights';
 isa_ok $in, 'Bio::Community::IO::generic';
 is $in->sort_members, 0;
@@ -78,10 +79,11 @@ is $community2->next_member, undef;
 # Read generic format with file-average weights
 
 ok $in = Bio::Community::IO->new(
-   -file          => test_input_file('generic_table.txt'),
-   -format        => 'generic',
-   -weight_files  => [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ],
-   -weight_assign => 'file_average',
+   -file              => test_input_file('generic_table.txt'),
+   -format            => 'generic',
+   -weight_files      => [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ],
+   -weight_assign     => 'file_average',
+   -weight_identifier => 'desc',
 ), 'Read generic format with file-average weights';
 isa_ok $in, 'Bio::Community::IO::generic';
 is $in->sort_members, 0;
@@ -134,13 +136,74 @@ delta_ok $community2->get_rel_ab($member), 10.8857206647;
 is $community2->next_member, undef;
 
 
+# Read generic format with file-average weights
+
+ok $in = Bio::Community::IO->new(
+   -file              => test_input_file('generic_table.txt'),
+   -format            => 'generic',
+   -weight_files      => [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ],
+   -weight_assign     => 'file_average',
+   -weight_identifier => 'id',
+), 'Read generic format with file-average weights';
+isa_ok $in, 'Bio::Community::IO::generic';
+is $in->sort_members, 0;
+is $in->abundance_type, 'count';
+is $in->missing_string, 0;
+isa_ok $in->weight_files->[0], 'GLOB';
+isa_ok $in->weight_files->[1], 'GLOB';
+is $in->weight_assign, 'file_average';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 1;
+is $community->name, 'gut';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 3;
+is $community2->name, 'soda lake';
+
+is $in->next_community, undef;
+
+$in->close;
+
+ok $member = $community->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Streptococcus';
+is $community->get_count($member), 241;
+is_deeply $member->weights, [1.36666666666667, 200];
+delta_ok $community->get_rel_ab($member), 100.0;
+is $community->next_member, undef;
+
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Goatpox virus';
+is $community2->get_count($member), 1023.9;
+is_deeply $member->weights, [1.36666666666667, 200];
+delta_ok $community2->get_rel_ab($member), 69.1403876;
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Streptococcus';
+is $community2->get_count($member), 334;
+is_deeply $member->weights, [1.36666666666667, 200];
+delta_ok $community2->get_rel_ab($member), 22.5538524;
+ok $member = $community2->next_member;
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Lumpy skin disease virus';
+is $community2->get_count($member), 123;
+is_deeply $member->weights, [1.36666666666667, 200];
+delta_ok $community2->get_rel_ab($member), 8.3057600;
+is $community2->next_member, undef;
+
+
 # Read generic format with community-average weights
 
 ok $in = Bio::Community::IO->new(
-   -file          => test_input_file('generic_table.txt'),
-   -format        => 'generic',
-   -weight_files  => [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ],
-   -weight_assign => 'community_average',
+   -file              => test_input_file('generic_table.txt'),
+   -format            => 'generic',
+   -weight_files      => [ test_input_file('weights_1.txt'), test_input_file('weights_2.txt') ],
+   -weight_assign     => 'community_average',
+   -weight_identifier => 'desc',
 ), 'Read generic format with community-average weights';
 isa_ok $in, 'Bio::Community::IO::generic';
 
@@ -179,10 +242,10 @@ is $community->next_member, undef;
 
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Goatpox virus';
-is $community2->get_count($member), 1023.9;
-is_deeply $member->weights, [3, 100];
-delta_ok $community2->get_rel_ab($member), 17.9131895;
+is $member->desc, 'Streptococcus';
+is $community2->get_count($member), 334;
+is_deeply $member->weights, [1, 100];
+delta_ok $community2->get_rel_ab($member), 17.5300478;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Lumpy skin disease virus';
@@ -191,21 +254,22 @@ is_deeply $member->weights, [0.1, 100];
 delta_ok $community2->get_rel_ab($member), 64.5567627;
 ok $member = $community2->next_member;
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Streptococcus';
-is $community2->get_count($member), 334;
-is_deeply $member->weights, [1, 100];
-delta_ok $community2->get_rel_ab($member), 17.5300478;
+is $member->desc, 'Goatpox virus';
+is $community2->get_count($member), 1023.9;
+is_deeply $member->weights, [3, 100];
+delta_ok $community2->get_rel_ab($member), 17.9131895;
 is $community2->next_member, undef;
 
 
 # Read qiime format with ancestor-based weights
 
 ok $in = Bio::Community::IO->new(
-   -file          => test_input_file('qiime_w_greengenes_taxo.txt'),
-   -format        => 'qiime',
-   -taxonomy      => Bio::DB::Taxonomy->new( -source => 'list' ), # on-the-fly taxonomy
-   -weight_files  => [ test_input_file('weights_taxo.txt') ],
-   -weight_assign => 'ancestor',
+   -file              => test_input_file('qiime_w_greengenes_taxo.txt'),
+   -format            => 'qiime',
+   -taxonomy          => Bio::DB::Taxonomy->new( -source => 'list' ), # on-the-fly taxonomy
+   -weight_files      => [ test_input_file('weights_taxo.txt') ],
+   -weight_assign     => 'ancestor',
+   -weight_identifier => 'desc',
 ), 'Read qiime format with ancestor-based weights';
 isa_ok $in->weight_files->[0], 'GLOB';
 is $in->weight_assign, 'ancestor';
@@ -271,8 +335,8 @@ is_deeply $member->weights, [101.739130434783];
 delta_ok $community3->get_rel_ab($member), 35.5371901;
 is $community3->next_member, undef;
 
-
 $in->close;
+
 
 done_testing();
 
