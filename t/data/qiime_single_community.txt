@@ -1,4 +1,4 @@
-#QIIME v1.3.0 OTU table		
+#QIIME v1.3.0 OTU table
 #OTU ID	20091010.FI.5m.Prefilt.libL.C	Consensus Lineage
 2335	1997	k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae;g__;s__
 2841	18	k__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Carnobacteriaceae;g__Granulicatella;s__Granulicatellaelegans

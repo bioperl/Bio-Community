@@ -383,9 +383,6 @@ func _possibly_gaas ($line, $line_num, $prev_line) {
         }
       }
    }
-
-   print "ok: $ok\n"; ###
-
    if ($ok && $prev_line) {
       my @prev_fields = split /\t/, $prev_line;
       if ($prev_fields[0] eq $fields[0]) {
@@ -445,7 +442,7 @@ func _possibly_qiime ($line, $line_num, $prev_line) {
          if ($line =~ m/^#/) {
             $ok = 1;
          }
-      } else {
+      } elsif ($line_num > 2) {
          $ok = 1;
       }
    }
