@@ -354,7 +354,7 @@ func _possibly_generic ($line, $line_num, $prev_line) {
    if ($ok && $prev_line) {
       my @prev_fields = split /\t/, $prev_line;
       if ($prev_fields[0] eq $fields[0]) {
-         # Same have same species or OTU on previous line
+         # Cannot have same species or OTU on previous line
          $ok = 0;
       }
    }
@@ -374,21 +374,18 @@ func _possibly_gaas ($line, $line_num, $prev_line) {
    my @fields = split /\t/, $line;
    if (scalar @fields == 3) {
       if ($line_num == 1) {
-        $ok = 1 if $line =~ m/^#\s*(seq*_name|tax*_name)/;
-#        if ($line =~ m/^#\s*(\S+)\s+(\S+)\s+(\S+)$/) { ###
-#           $ok = 1;
-#           ##### match 
-#           # *name  *id  *abund*
-#           # taxon_name    taxon_id        relative_abundance_%
-#           # sequence_name sequence_id     relative_abundance_%
-#           # tax_name      tax_id  rel_abund
-#         }
+        if ($line =~ m/^#\s*.+name.+id.+abund.*$/) {
+           $ok = 1;
+         }
       } else {
         if ($line !~ m/^#/) {
            $ok = 1;
         }
       }
    }
+
+   print "ok: $ok\n"; ###
+
    if ($ok && $prev_line) {
       my @prev_fields = split /\t/, $prev_line;
       if ($prev_fields[0] eq $fields[0]) {
@@ -432,30 +429,31 @@ func _possibly_qiime ($line, $line_num, $prev_line) {
    #   #OTU ID	20100302	20100304	20100823
    #   0	40	0	76
    #   1	0	142	2
-   # Note that the first (comment) line does not need to mention 'QIIME'
+   # Note that the first (comment) line has only one column and does not need to
+   # mention 'QIIME'.
    # Line 3 and after can have an extra non-numeric column containing lineage
    my $ok = 0;
-   if ($line_num == 1) {
-      if ($line =~ m/^#/) {
-         $ok = 1;
-      }
-   } else {
-      my @fields = split /\t/, $line;
-      if (scalar @fields >= 2) {
-         if ($line_num == 2) {
-            if ($line =~ m/^#/) {
-               $ok = 1;
-            }
-         } else {
+   my @fields = split /\t/, $line;
+   if (scalar @fields == 1) {
+      if ($line_num == 1) {
+         if ($line =~ m/^#/) {
             $ok = 1;
          }
       }
-      if ($ok && $prev_line) {
-         my @prev_fields = split /\t/, $prev_line;
-         if ($prev_fields[0] eq $fields[0]) {
-            # Cannot have same OTU ID on previous line
-            $ok = 0;
+   } elsif (scalar @fields >= 2) {
+      if ($line_num == 2) {
+         if ($line =~ m/^#/) {
+            $ok = 1;
          }
+      } else {
+         $ok = 1;
+      }
+   }
+   if ($ok && $prev_line) {
+      my @prev_fields = split /\t/, $prev_line;
+      if ($prev_fields[0] eq $fields[0]) {
+         # Cannot have same OTU ID on previous line
+         $ok = 0;
       }
    }
    return $ok;

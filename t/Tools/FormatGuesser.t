@@ -92,12 +92,12 @@ ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'gaas
 is $guesser->file, $file;
 is $guesser->guess, 'gaas';
 
-$file = test_input_file('gaas_other.txt');
+$file = test_input_file('gaas_seq_compo.txt');
 ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'gaas';
 
-$file = test_input_file('gaas_seq_compo.txt');
+$file = test_input_file('gaas_other.txt');
 ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'gaas';
