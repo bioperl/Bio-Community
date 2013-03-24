@@ -141,7 +141,7 @@ my %formats = (
    qiime   => \&_possibly_qiime   ,
 );
 
-my $real_re = qr/(?:(?i)(?:[+-]?)(?:(?=[.]?[0123456789])(?:[0123456789]*)(?:(?:[.])(?:[0123456789]{0,}))?)(?:(?:[E])(?:(?:[+-]?)(?:[0123456789]+))|))/;
+my $real_re = qr/^(?:(?i)(?:[+-]?)(?:(?=[.]?[0123456789])(?:[0123456789]*)(?:(?:[.])(?:[0123456789]{0,}))?)(?:(?:[E])(?:(?:[+-]?)(?:[0123456789]+))|))$/;
 # regular expression to match a real number, taken from Regexp::Common
 
 =head2 file
@@ -252,6 +252,7 @@ method guess () {
          $line = shift @lines;
       }
       last if not defined $line;
+      chomp $line;
 
       # Skip white and empty lines.
       next if $line =~ /^\s*$/;
@@ -349,14 +350,14 @@ func _possibly_generic ($line, $line_num, $prev_line) {
    if (scalar @fields >= 2) {
       if ($line_num == 1) {
         $ok = 1 if $line !~ m/^#/; #### don't like this... too restrictive
-        #$ok = 1;
+        #$ok = 1; ###
       } else {
          for my $i (1 .. scalar @fields - 1) {
-            if ($fields[$i] !~ $real_re) {
+            if ($fields[$i] =~ $real_re) {
+               $ok = 1;
+            } else {
                $ok = 0;
                last;
-            } else {
-               $ok = 1;
             }
          }
       }
@@ -460,11 +461,12 @@ func _possibly_qiime ($line, $line_num, $prev_line) {
          }
       } elsif ($line_num > 2) {
          for my $i (1 .. scalar @fields - 2) {
-            if ($fields[$i] !~ $real_re) {
+            if ($fields[$i] =~ $real_re) {
+               $ok = 1;
+            } else {
                $ok = 0;
                last;
-            } else {
-               $ok = 1;
+
             }
          }
       }
