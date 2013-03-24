@@ -44,6 +44,7 @@ is $guesser->guess, 'biom';
 
 close $fh;
 
+
 # Test input text
 
 ok $guesser = Bio::Community::Tools::FormatGuesser->new(), 'text input';
@@ -141,7 +142,7 @@ is $guesser->file, $file;
 is $guesser->guess, undef;
 
 
-# Test empty format
+# Test empty string
 
 $text = '';
 ok $guesser = Bio::Community::Tools::FormatGuesser->new( -text => $text ), 'empty text';

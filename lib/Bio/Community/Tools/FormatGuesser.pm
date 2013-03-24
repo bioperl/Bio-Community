@@ -52,6 +52,10 @@ qiime
 
 =item *
 
+unifrac
+
+=item *
+
 biom
 
 =back
@@ -135,7 +139,6 @@ my %formats = (
    unifrac => \&_possibly_unifrac ,
    generic => \&_possibly_generic ,
    qiime   => \&_possibly_qiime   ,
-
 );
 
 
@@ -183,8 +186,8 @@ has 'fh' => (
 
  Usage   : my $text = $guesser->text;
  Function: Get or set the text from which to guess the format. In most, if not
-           all cases, the first line of the file should be enough to determine
-           the format.
+           all cases, the first few lines of a text string should be enough to
+           determine the format.
  Args    : text string
  Returns : text string
 
@@ -248,7 +251,7 @@ method guess () {
       }
       last if not defined $line;
 
-      # Skip white and empty lines.      
+      # Skip white and empty lines.
       next if $line =~ /^\s*$/;
 
       # Try all formats remaining
