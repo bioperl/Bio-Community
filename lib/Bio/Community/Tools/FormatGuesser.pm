@@ -141,6 +141,8 @@ my %formats = (
    qiime   => \&_possibly_qiime   ,
 );
 
+my $real_re = qr/(?:(?i)(?:[+-]?)(?:(?=[.]?[0123456789])(?:[0123456789]*)(?:(?:[.])(?:[0123456789]{0,}))?)(?:(?:[E])(?:(?:[+-]?)(?:[0123456789]+))|))/;
+# regular expression to match a real number, taken from Regexp::Common
 
 =head2 file
 
@@ -338,9 +340,10 @@ func _possibly_biom ($line, $line_num, $prev_line) {
 
 func _possibly_generic ($line, $line_num, $prev_line) {
    # Example:
-   # Species	gut	soda lake
-   # Streptococcus	241	334
-   # ...
+   #   Species	gut	soda lake
+   #   Streptococcus	241	334
+   #   ...
+   # Columns from the second to the last must contain numbers.
    my $ok = 0;
    my @fields = split /\t/, $line;
    if (scalar @fields >= 2) {
@@ -348,7 +351,14 @@ func _possibly_generic ($line, $line_num, $prev_line) {
         $ok = 1 if $line !~ m/^#/; #### don't like this... too restrictive
         #$ok = 1;
       } else {
-        $ok = 1 if $line !~ m/^#/;
+         for my $i (1 .. scalar @fields - 1) {
+            if ($fields[$i] !~ $real_re) {
+               $ok = 0;
+               last;
+            } else {
+               $ok = 1;
+            }
+         }
       }
    }
    if ($ok && $prev_line) {
@@ -369,7 +379,7 @@ func _possibly_gaas ($line, $line_num, $prev_line) {
    # or:
    #    # sequence_name	sequence_id	relative_abundance_%
    #    Milk vetch dwarf virus segment 9, complete sequence	gi|20177473|ref|NC_003646.1|	42.6354640657824	
-   # First field contains string, second field an ID, third field a float.
+   # First field contains string, second field an ID, third field a number.
    my $ok = 0;
    my @fields = split /\t/, $line;
    if (scalar @fields == 3) {
@@ -380,6 +390,10 @@ func _possibly_gaas ($line, $line_num, $prev_line) {
       } else {
         if ($line !~ m/^#/) {
            $ok = 1;
+        } else {
+           if ($fields[-1] =~ $real_re) {
+              $ok = 1;
+           }
         }
       }
    }
@@ -413,7 +427,9 @@ func _possibly_unifrac ($line, $line_num, $prev_line) {
       if (scalar @fields == 2) {
          $ok = 1;
       } elsif (scalar @fields == 3) {
-         $ok = 1;
+         if ($fields[-1] =~ $real_re) {
+            $ok = 1;
+         }
       }
    }
    return $ok;
@@ -428,7 +444,7 @@ func _possibly_qiime ($line, $line_num, $prev_line) {
    #   1	0	142	2
    # Note that the first (comment) line has only one column and does not need to
    # mention 'QIIME'.
-   # Line 3 and after can have an extra non-numeric column containing lineage
+   # Last column can be an extra non-numeric column containing lineage
    my $ok = 0;
    my @fields = split /\t/, $line;
    if (scalar @fields == 1) {
@@ -443,7 +459,14 @@ func _possibly_qiime ($line, $line_num, $prev_line) {
             $ok = 1;
          }
       } elsif ($line_num > 2) {
-         $ok = 1;
+         for my $i (1 .. scalar @fields - 2) {
+            if ($fields[$i] !~ $real_re) {
+               $ok = 0;
+               last;
+            } else {
+               $ok = 1;
+            }
+         }
       }
    }
    if ($ok && $prev_line) {

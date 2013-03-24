@@ -138,7 +138,7 @@ ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'qiime';
 
-$file = test_input_file('qiime_single_community.txt'); # not 100% conform to QIIME format but close enough
+$file = test_input_file('qiime_single_community.txt');
 ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'qiime';
