@@ -256,11 +256,14 @@ method guess () {
       # Skip white and empty lines.
       next if $line =~ /^\s*$/;
 
+      # Split fields
+      my @fields = split /\t/, $line;
+
       # Try all formats remaining
       %ok_formats = ();
       my ($test_format, $test_function);
       while ( ($test_format, $test_function) = each (%test_formats) ) {
-         if ( &$test_function($line, $line_num) ) {
+         if ( &$test_function(\@fields, $line, $line_num) ) {
             # Line matches this format
             $ok_formats{$test_format} = undef;
          } else {
@@ -315,7 +318,7 @@ method guess () {
 }
 
 
-func _possibly_biom ($line, $line_num) {
+func _possibly_biom ($fields, $line, $line_num) {
    # Example:
    # {
    #  "id":null,
@@ -337,21 +340,21 @@ func _possibly_biom ($line, $line_num) {
 }
 
 
-func _possibly_generic ($line, $line_num) {
+func _possibly_generic ($fields, $line, $line_num) {
    # Example:
    #   Species	gut	soda lake
    #   Streptococcus	241	334
    #   ...
    # Columns from the second to the last must contain numbers.
    my $ok = 0;
-   my @fields = split /\t/, $line;
-   if (scalar @fields >= 2) {
+   my $num_fields = scalar @$fields;
+   if ($num_fields >= 2) {
       if ($line_num == 1) {
         $ok = 1 if $line !~ m/^#/; #### don't like this... too restrictive
         #$ok = 1; ###
       } else {
-         for my $i (1 .. scalar @fields - 1) {
-            if ($fields[$i] =~ $real_re) {
+         for my $i (1 .. $num_fields - 1) {
+            if ($fields->[$i] =~ $real_re) {
                $ok = 1;
             } else {
                $ok = 0;
@@ -364,7 +367,7 @@ func _possibly_generic ($line, $line_num) {
 }
 
 
-func _possibly_gaas ($line, $line_num) {
+func _possibly_gaas ($fields, $line, $line_num) {
    # Example:
    #    # tax_name	tax_id	rel_abund
    #    Streptococcus pyogenes phage 315.1	198538	0.791035649011735
@@ -373,8 +376,8 @@ func _possibly_gaas ($line, $line_num) {
    #    Milk vetch dwarf virus segment 9, complete sequence	gi|20177473|ref|NC_003646.1|	42.6354640657824	
    # First field contains string, second field an ID, third field a number.
    my $ok = 0;
-   my @fields = split /\t/, $line;
-   if (scalar @fields == 3) {
+   my $num_fields = scalar @$fields;
+   if ($num_fields == 3) {
       if ($line_num == 1) {
         if ($line =~ m/^#\s*.+name.+id.+abund.*$/) {
            $ok = 1;
@@ -383,7 +386,7 @@ func _possibly_gaas ($line, $line_num) {
         if ($line !~ m/^#/) {
            $ok = 1;
         } else {
-           if ($fields[-1] =~ $real_re) {
+           if ($fields->[-1] =~ $real_re) {
               $ok = 1;
            }
         }
@@ -393,7 +396,7 @@ func _possibly_gaas ($line, $line_num) {
 }
 
 
-func _possibly_unifrac ($line, $line_num) {
+func _possibly_unifrac ($fields, $line, $line_num) {
    # Example:
    #    Sequence.1	Sample.1	1
    # or:
@@ -401,14 +404,14 @@ func _possibly_unifrac ($line, $line_num) {
    # There are no headers. Two first fields contain strings. Optional third
    # field contains numbers. 
    my $ok = 0;
-   my @fields = split /\t/, $line;
+   my $num_fields = scalar @$fields;
    if ($line =~ m/^#/) {
       $ok = 0;
    } else {
-      if (scalar @fields == 2) {
+      if ($num_fields == 2) {
          $ok = 1;
-      } elsif (scalar @fields == 3) {
-         if ($fields[-1] =~ $real_re) {
+      } elsif ($num_fields == 3) {
+         if ($fields->[-1] =~ $real_re) {
             $ok = 1;
          }
       }
@@ -417,7 +420,7 @@ func _possibly_unifrac ($line, $line_num) {
 }
 
 
-func _possibly_qiime ($line, $line_num) {
+func _possibly_qiime ($fields, $line, $line_num) {
    # Example:
    #   # QIIME v1.3.0 OTU table
    #   #OTU ID	20100302	20100304	20100823
@@ -427,21 +430,21 @@ func _possibly_qiime ($line, $line_num) {
    # mention 'QIIME'.
    # Last column can be an extra non-numeric column containing lineage
    my $ok = 0;
-   my @fields = split /\t/, $line;
-   if (scalar @fields == 1) {
+   my $num_fields = scalar @$fields;
+   if ($num_fields == 1) {
       if ($line_num == 1) {
          if ($line =~ m/^#/) {
             $ok = 1;
          }
       }
-   } elsif (scalar @fields >= 2) {
+   } elsif ($num_fields >= 2) {
       if ($line_num == 2) {
          if ($line =~ m/^#/) {
             $ok = 1;
          }
       } elsif ($line_num > 2) {
-         for my $i (1 .. scalar @fields - 2) {
-            if ($fields[$i] =~ $real_re) {
+         for my $i (1 .. $num_fields - 2) {
+            if ($fields->[$i] =~ $real_re) {
                $ok = 1;
             } else {
                $ok = 0;
