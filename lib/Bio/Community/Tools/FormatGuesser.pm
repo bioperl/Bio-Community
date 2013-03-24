@@ -240,7 +240,6 @@ method guess () {
    my %test_formats = %formats;
    my %ok_formats;
    my $line_num  = 0;
-   my $prev_line = '';
    while (1) {
 
       # Read next line. Exit if no lines left
@@ -261,7 +260,7 @@ method guess () {
       %ok_formats = ();
       my ($test_format, $test_function);
       while ( ($test_format, $test_function) = each (%test_formats) ) {
-         if ( &$test_function($line, $line_num, $prev_line) ) {
+         if ( &$test_function($line, $line_num) ) {
             # Line matches this format
             $ok_formats{$test_format} = undef;
          } else {
@@ -269,7 +268,6 @@ method guess () {
             delete $test_formats{$test_format};
          }
       }
-      $prev_line = $line;
 
       # Exit if there was a match to only one format
       if (scalar keys %ok_formats == 1) {
@@ -317,7 +315,7 @@ method guess () {
 }
 
 
-func _possibly_biom ($line, $line_num, $prev_line) {
+func _possibly_biom ($line, $line_num) {
    # Example:
    # {
    #  "id":null,
@@ -339,7 +337,7 @@ func _possibly_biom ($line, $line_num, $prev_line) {
 }
 
 
-func _possibly_generic ($line, $line_num, $prev_line) {
+func _possibly_generic ($line, $line_num) {
    # Example:
    #   Species	gut	soda lake
    #   Streptococcus	241	334
@@ -362,18 +360,11 @@ func _possibly_generic ($line, $line_num, $prev_line) {
          }
       }
    }
-   if ($ok && $prev_line) {
-      my @prev_fields = split /\t/, $prev_line;
-      if ($prev_fields[0] eq $fields[0]) {
-         # Cannot have same species or OTU on previous line
-         $ok = 0;
-      }
-   }
    return $ok;
 }
 
 
-func _possibly_gaas ($line, $line_num, $prev_line) {
+func _possibly_gaas ($line, $line_num) {
    # Example:
    #    # tax_name	tax_id	rel_abund
    #    Streptococcus pyogenes phage 315.1	198538	0.791035649011735
@@ -398,22 +389,11 @@ func _possibly_gaas ($line, $line_num, $prev_line) {
         }
       }
    }
-   if ($ok && $prev_line) {
-      my @prev_fields = split /\t/, $prev_line;
-      if ($prev_fields[0] eq $fields[0]) {
-         # Cannot have same species name on previous line
-         $ok = 0;
-      }
-      if ($prev_fields[1] eq $fields[1]) {
-         # Cannot have same species ID on previous line
-         $ok = 0;
-      }
-   }
    return $ok;
 }
 
 
-func _possibly_unifrac ($line, $line_num, $prev_line) {
+func _possibly_unifrac ($line, $line_num) {
    # Example:
    #    Sequence.1	Sample.1	1
    # or:
@@ -437,7 +417,7 @@ func _possibly_unifrac ($line, $line_num, $prev_line) {
 }
 
 
-func _possibly_qiime ($line, $line_num, $prev_line) {
+func _possibly_qiime ($line, $line_num) {
    # Example:
    #   # QIIME v1.3.0 OTU table
    #   #OTU ID	20100302	20100304	20100823
@@ -469,13 +449,6 @@ func _possibly_qiime ($line, $line_num, $prev_line) {
 
             }
          }
-      }
-   }
-   if ($ok && $prev_line) {
-      my @prev_fields = split /\t/, $prev_line;
-      if ($prev_fields[0] eq $fields[0]) {
-         # Cannot have same OTU ID on previous line
-         $ok = 0;
       }
    }
    return $ok;
