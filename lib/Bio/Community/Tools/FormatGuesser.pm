@@ -413,20 +413,24 @@ func _possibly_unifrac ($line, $line_num, $prev_line) {
 
 func _possibly_qiime ($line, $line_num, $prev_line) {
    # Example:
-   # # QIIME v1.3.0 OTU table
-   # #OTU ID	20100302	20100304	20100823
-   # 0	40	0	76
-   # 1	0	142	2
+   #   # QIIME v1.3.0 OTU table
+   #   #OTU ID	20100302	20100304	20100823
+   #   0	40	0	76
+   #   1	0	142	2
+   # Note that the first (comment) line does not need to mention 'QIIME'
+   # Line 3 and after can have an extra non-numeric column containing lineage
    my $ok = 0;
    if ($line_num == 1) {
-      if ($line =~ m/^#\s*QIIME/) {
+      if ($line =~ m/^#/) {
          $ok = 1;
       }
    } else {
       my @fields = split /\t/, $line;
       if (scalar @fields >= 2) {
          if ($line_num == 2) {
-            $ok = 1 if $line =~ m/^#/;
+            if ($line =~ m/^#/) {
+               $ok = 1;
+            }
          } else {
             $ok = 1;
          }
