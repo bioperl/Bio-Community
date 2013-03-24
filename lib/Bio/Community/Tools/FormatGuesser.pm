@@ -273,6 +273,11 @@ method guess () {
          last;
       }
 
+      # Exit if no formats left to try
+      if (scalar keys %test_formats == 0) {
+         last;
+      }
+
       # Give up after having tested 100 lines
       if ($line_num >= 100) {
          last;
@@ -370,8 +375,18 @@ func _possibly_gaas ($line, $line_num, $prev_line) {
    if (scalar @fields == 3) {
       if ($line_num == 1) {
         $ok = 1 if $line =~ m/^#\s*(seq*_name|tax*_name)/;
+#        if ($line =~ m/^#\s*(\S+)\s+(\S+)\s+(\S+)$/) { ###
+#           $ok = 1;
+#           ##### match 
+#           # *name  *id  *abund*
+#           # taxon_name    taxon_id        relative_abundance_%
+#           # sequence_name sequence_id     relative_abundance_%
+#           # tax_name      tax_id  rel_abund
+#         }
       } else {
-        $ok = 1 if $line !~ m/^#/;
+        if ($line !~ m/^#/) {
+           $ok = 1;
+        }
       }
    }
    if ($ok && $prev_line) {
