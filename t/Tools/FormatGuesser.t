@@ -67,7 +67,7 @@ close $fh;
 # Test biom input file
 
 $file = test_input_file('biom_minimal_sparse.biom');
-ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'biom file';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'biom files';
 is $guesser->file, $file;
 is $guesser->guess, 'biom';
 
@@ -75,7 +75,7 @@ is $guesser->guess, 'biom';
 # Test generic input file
 
 $file = test_input_file('generic_table.txt');
-ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'generic file';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'generic files';
 is $guesser->file, $file;
 is $guesser->guess, 'generic';
 
@@ -88,7 +88,17 @@ is $guesser->guess, 'generic';
 # Test gaas input file
 
 $file = test_input_file('gaas_compo.txt');
-ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'gaas file';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'gaas files';
+is $guesser->file, $file;
+is $guesser->guess, 'gaas';
+
+$file = test_input_file('gaas_other.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
+is $guesser->file, $file;
+is $guesser->guess, 'gaas';
+
+$file = test_input_file('gaas_seq_compo.txt');
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'gaas';
 
@@ -96,17 +106,17 @@ is $guesser->guess, 'gaas';
 # Test unifrac input file
 
 $file = test_input_file('unifrac_qualitative.txt');
-ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'unifrac file';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'unifrac files';
 is $guesser->file, $file;
 is $guesser->guess, 'unifrac';
 
 $file = test_input_file('unifrac_quantitative.txt');
-ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'unifrac file';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'unifrac';
 
 $file = test_input_file('unifrac_quantitative_tricky.txt');
-ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'unifrac file';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'unifrac';
 
@@ -114,7 +124,7 @@ is $guesser->guess, 'unifrac';
 # Test qiime input file
 
 $file = test_input_file('qiime_w_no_taxo.txt');
-ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'qiime file';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -file => $file ), 'qiime files';
 is $guesser->file, $file;
 is $guesser->guess, 'qiime';
 
@@ -155,7 +165,7 @@ is $guesser->guess, undef;
 # Test empty string
 
 $text = '';
-ok $guesser = Bio::Community::Tools::FormatGuesser->new( -text => $text ), 'empty text';
+ok $guesser = Bio::Community::Tools::FormatGuesser->new( -text => $text ), 'empty string';
 is $guesser->text, $text;
 is $guesser->guess, undef;
 
