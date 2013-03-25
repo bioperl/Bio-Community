@@ -289,6 +289,18 @@ has '_members' => (
 );
 
 
+has '_sorted_members' => (
+   is => 'rw',
+   isa => 'HashRef', # HashRef{species}{sample} = count
+   required => 0,
+   init_arg => undef,
+   default => sub { {} },
+   lazy => 1,
+   reader => '_get_sorted_members',
+   writer => '_set_sorted_members',
+);
+
+
 method _generate_members () {
    my %members = ();
    for my $row (1 .. $self->_get_max_line) {
@@ -305,53 +317,79 @@ method _generate_members () {
          }
          $member->desc( $taxo_desc );
       }
+      if (exists $members{$id}) {
+         $self->warn("Member with ID $id is present multiple times... ".
+            "Continuing despite the perils!");
+      }
       $members{$id} = $member;
    }
+
    $self->_set_members(\%members);
+   return 1;
+}
+
+
+method _sort_members_by_community {
+   # Sort members by community to facilitate parsing
+   my %sorted_members;
+   my $json   = $self->_get_json;
+   my $matrix = $json->{'data'};
+   my $rows   = $json->{'rows'};
+   for my $i (0 .. scalar @$matrix - 1) {
+      my ($row, $sample, $count) = @{$matrix->[$i]};
+      if ($count > 0) {
+         my $species = $rows->[$row]->{'id'};
+         $sorted_members{$sample}{$species} += $count; # adding allows duplicates
+      }
+   }
+   $self->_set_sorted_members(\%sorted_members);
+   return 1;
 }
 
 
 method next_member () {
-   my ($member, $count);
+   my ($id, $member, $count);
 
-   my $line = $self->_get_line;
-   my $json = $self->_get_json;
-   my $is_sparse = $json->{'matrix_type'} eq 'sparse' ? 1 : 0;
-   my $rows      = $json->{'rows'};
-   my $matrix    = $json->{'data'};
+   my $col     = $self->_get_col;
    my $members = $self->_get_members;
+   my $json    = $self->_get_json;
+   my $is_sparse = $json->{'matrix_type'} eq 'sparse' ? 1 : 0;
 
-   print "ini line: $line  ini  is_sparse: $is_sparse\n"; ###
+   if ($is_sparse) { # sparse matrix format
 
-   while ( ++$line ) {
-      # Get the abundance of the member (undef if out-of-bounds)
-      my $id;
-      if ($is_sparse) { # sparse matrix format
-         
-      } else { # dense matrix format
-         my $col = $self->_get_col;
+      my $sorted_members = $self->_get_sorted_members;
+      my @ids = keys %{$sorted_members->{$col-1}};
+      if (scalar @ids > 0) {
+         $id = shift @ids;
+         $count = delete $sorted_members->{$col-1}->{$id};
+         $self->_set_sorted_members($sorted_members);
+      }
 
-         print "   col $col, line $line\n"; ###
+   } else { # dense matrix format
 
+      my $rows   = $json->{'rows'};
+      my $matrix = $json->{'data'};
+      my $line   = $self->_get_line;
+      while ( ++$line ) {
+         # Get the abundance of the member (undef if out-of-bounds)
          $count = $matrix->[$line-1]->[$col-1];
          if (defined $count) {
-            $id = $rows->[$line-1]->{'id'};
-            $self->_set_line($line);
+            if ($count > 0) {
+               $id = $rows->[$line-1]->{'id'};
+               $self->_set_line($line);
+               last;
+            }
          } else {
             # No more members for this community
             $self->_set_line(0);
             last;
          }
       }
-      
-      if ($count > 0) {
-         $member = $members->{$id};
 
-         print "   count $count   id $id   member $member\n"; ###
+   }
 
-         last;
-      }
-
+   if (defined $id) {
+      $member = $members->{$id};
    }
 
    return $member, $count;
@@ -379,11 +417,7 @@ method _parse_json () {
    $self->_set_max_line( $max_line );
    $self->_set_max_col( $max_col );
 
-   print "setting matrix_type to: ".$json->{'matrix_type'}."\n"; ###
-
    $self->set_matrix_type($json->{'matrix_type'});
-
-   print "getting matrix_type: ".$self->get_matrix_type."\n"; ###
 
    return $json;
 }
@@ -400,16 +434,18 @@ method _next_community_init () {
       $self->_generate_members();
    }
 
-   ###my $line = 1;
-   my $col  = $self->_get_col + 1;
+   # Sort members when reading sparse matrix
+   if ($self->get_matrix_type eq 'sparse') {
+      $self->_sort_members_by_community();
+   }
+
+   # Get community name and set column number
+   my $col = $self->_get_col + 1;
    my $name;
    if ($self->_get_col <= $self->_get_max_col) {
       $name = $self->_get_json->{'columns'}->[$col-1]->{'id'};
    }
    $self->_set_col( $col );
-   ###$self->_set_line( $line );
-
-   print "community $name\n" if defined $name; ###
 
    return $name;
 }

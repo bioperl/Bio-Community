@@ -21,6 +21,15 @@ ok $in = Bio::Community::IO->new(
 is $in->format, 'biom';
 
 
+#### Test duplicates
+
+#### Test sparse format where counts of zero where added
+
+#### Record 'comment' field
+
+#### record arbitrary community metadata
+
+
 # Read BIOM minimal dense file
 
 ok $in = Bio::Community::IO->new(
@@ -160,6 +169,150 @@ is $member->id, 'GG_OTU_4';
 is $member->desc, '';
 is $community6->get_count($member), 1;
 is $community6->get_member_by_rank(3), undef;
+
+
+# Read BIOM minimal sparse file
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('biom_minimal_sparse.txt'),
+   -format => 'biom',
+), 'Read BIOM minimal sparse file';
+isa_ok $in, 'Bio::Community::IO::biom';
+is $in->sort_members, 0;
+is $in->abundance_type, 'count';
+is $in->missing_string, 0;
+is $in->multiple_communities, 1;
+
+@methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
+for my $method (@methods) {
+   can_ok($in, $method) || diag "Method $method() not implemented";
+}
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, 'Sample1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 3;
+is $community2->name, 'Sample2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 4;
+is $community3->name, 'Sample3';
+
+ok $community4 = $in->next_community;
+isa_ok $community4, 'Bio::Community';
+is $community4->get_richness, 2;
+is $community4->name, 'Sample4';
+
+ok $community5 = $in->next_community;
+isa_ok $community5, 'Bio::Community';
+is $community5->get_richness, 2;
+is $community5->name, 'Sample5';
+
+ok $community6 = $in->next_community;
+isa_ok $community6, 'Bio::Community';
+is $community6->get_richness, 2;
+is $community6->name, 'Sample6';
+
+is $in->next_community, undef;
+
+is $in->get_matrix_type, 'sparse';
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community->get_count($member), 5;
+ok $member = $community->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, '';
+is $community->get_count($member), 2;
+is $community->get_member_by_rank(3), undef;
+
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community2->get_count($member), 3;
+ok $member = $community2->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, '';
+is $community2->get_count($member), 2;
+ok $member = $community2->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, '';
+is $community2->get_count($member), 1;
+is $community2->get_member_by_rank(4), undef;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_1';
+is $member->desc, '';
+is $community3->get_count($member), 4;
+ok $member = $community3->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community3->get_count($member), 3;
+ok $member = $community3->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, '';
+is $community3->get_count($member), 2;
+ok $member = $community3->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, '';
+is $community3->get_count($member), 1;
+is $community3->get_member_by_rank(5), undef;
+
+ok $member = $community4->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community4->get_count($member), 4;
+ok $member = $community4->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community4->get_count($member), 2;
+is $community4->get_member_by_rank(3), undef;
+
+ok $member = $community5->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community5->get_count($member), 3;
+ok $member = $community5->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community5->get_count($member), 2;
+is $community5->get_member_by_rank(3), undef;
+
+ok $member = $community6->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community6->get_count($member), 2;
+ok $member = $community6->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, '';
+is $community6->get_count($member), 1;
+is $community6->get_member_by_rank(3), undef;
+
+
+
 
 
 #### Write QIIME file without taxonomy
