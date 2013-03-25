@@ -13,7 +13,7 @@ Bio::Community::IO::dummy - Dummy driver (does nothing)
 
 =head1 SYNOPSIS
 
-   my $in = Bio::Community::IO->new( -file => 'gaas_compo.txt', -format => 'dummy' );
+   my $in = Bio::Community::IO->new( -file => 'dummy_communities.txt', -format => 'dummy' );
 
    # See Bio::Community::IO for more information
 

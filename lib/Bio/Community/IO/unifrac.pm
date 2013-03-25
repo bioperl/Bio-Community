@@ -13,7 +13,7 @@ Bio::Community::IO::unifrac - Driver to read and write files in the (Fast)Unifra
 
 =head1 SYNOPSIS
 
-   my $in = Bio::Community::IO->new( -file => 'commmunities.txt', -format => 'unifrac' );
+   my $in = Bio::Community::IO->new( -file => 'unifrac_commmunities.txt', -format => 'unifrac' );
 
    # See Bio::Community::IO for more information
 

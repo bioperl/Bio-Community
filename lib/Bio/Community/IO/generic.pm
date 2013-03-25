@@ -13,7 +13,7 @@ Bio::Community::IO::generic - Driver to read and write files in a generic tab-de
 
 =head1 SYNOPSIS
 
-   my $in = Bio::Community::IO->new( -file => 'gaas_compo.txt', -format => 'generic' );
+   my $in = Bio::Community::IO->new( -file => 'gaas_communities.txt', -format => 'generic' );
 
    # See Bio::Community::IO for more information
 

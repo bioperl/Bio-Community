@@ -13,7 +13,7 @@ Bio::Community::IO::gaas - Driver to read and write files in the GAAS format
 
 =head1 SYNOPSIS
 
-   my $in = Bio::Community::IO->new( -file => 'gaas_compo.txt', -format => 'gaas' );
+   my $in = Bio::Community::IO->new( -file => 'gaas_communities.txt', -format => 'gaas' );
 
    # See Bio::Community::IO for more information
 

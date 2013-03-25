@@ -13,7 +13,7 @@ Bio::Community::IO::qiime - Driver to read and write files in the QIIME format
 
 =head1 SYNOPSIS
 
-   my $in = Bio::Community::IO->new( -file => 'gaas_compo.txt', -format => 'qiime' );
+   my $in = Bio::Community::IO->new( -file => 'qiime_communities.txt', -format => 'qiime' );
 
    # See Bio::Community::IO for more information
 
