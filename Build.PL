@@ -27,6 +27,7 @@ my $build = Module::Build->new(
                              'perl'                         => '5.10.0',
                              'Bio::Root::Version'           => '>1.006901',
                              'Bio::DB::Taxonomy'            =>  0, # >1.006901
+                             'DateTime'                     =>  0,
                              'Getopt::Euclid'               => '0.4.0',
                              'JSON::XS'                     =>  0, # biom format
                              'Hash::Util'                   =>  0,

@@ -171,12 +171,37 @@ is $community6->get_count($member), 1;
 is $community6->get_member_by_rank(3), undef;
 
 
+# Write BIOM minimal dense file
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'biom',
+   -type   => 'dense',
+), 'Write BIOM minimal dense file';
+
+ok $out->write_community($community);
+ok $out->write_community($community2);
+ok $out->write_community($community3);
+ok $out->write_community($community4);
+ok $out->write_community($community5);
+ok $out->write_community($community6);
+$out->close;
+
+###ok $in = Bio::Community::IO->new(
+###   -file   => $output_file,
+###   -format => 'qiime',
+###), 'Re-read QIIME file';
+
+### and test again that input is correct
+
+
 # Read BIOM rich sparse file
 
 ok $in = Bio::Community::IO->new(
    -file   => test_input_file('biom_rich_sparse.txt'),
    -format => 'biom',
-), 'Read BIOM minimal sparse file';
+), 'Read BIOM rich sparse file';
 isa_ok $in, 'Bio::Community::IO::biom';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
@@ -310,6 +335,10 @@ is $member->id, 'GG_OTU_4';
 is $member->desc, 'k__Bacteria; p__Firmicutes; c__Clostridia; o__Halanaerobiales; f__Halanaerobiaceae; g__Halanaerobium; s__saccharolyticum';
 is $community6->get_count($member), 1;
 is $community6->get_member_by_rank(3), undef;
+
+
+
+
 
 
 

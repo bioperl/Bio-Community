@@ -146,35 +146,24 @@ use Moose;
 use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Member;
-use JSON qw( decode_json encode_json );
+use JSON::XS qw( decode_json encode_json );
+use DateTime;
 
 use constant BIOM_NAME => 'Biological Observation Matrix 1.0';
 use constant BIOM_URL  => 'http://biom-format.org/documentation/format_versions/biom-1.0.html';
+use constant BIOM_MATRIX_TYPE => 'sparse'; # sparse or dense
+use constant BIOM_TYPE => 'OTU table';
+# "XXX table" where XXX is Pathway, Gene, Function, Ortholog, Metabolite or Taxon
 
-
-#BIOM_TYPE
-#  "OTU table"
-#  "Pathway table"
-#  "Function table"
-#  "Ortholog table"
-#  "Gene table"
-#  "Metabolite table"
-#  "Taxon table"
-
-#BIOM_MATRIX_TYPE
-#  "sparse" : only non-zero values are specified
-#  "dense" : every element must be specified
 
 #BIOM_MATRIX_ELEMENT_TYPE
 #  "int" : integer
 #  "float" : floating point
 #  "unicode" : unicode string
 
-
 extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
-###with 'Bio::Community::Role::IO',
-###     'Bio::Community::Role::Table';
+
 
 our $multiple_communities   =  1;      # format supports several communities per file
 #### sorting only effective for first community???
@@ -189,18 +178,30 @@ our $default_missing_string =  0;      # empty members get a '0'
 ###};
 
 
-###before 'close' => sub {
-###   # Add taxonomy (desc) if available
-###   my ($self) = @_;
-###   my $col = $self->_col + 1;
-###   my $descs = $self->_line2desc;
-###   if ( scalar keys %{$descs} ) {
-###      $self->_set_value(1, $col, 'Consensus Lineage');
-###      while ( my ($line, $desc) = each %$descs ) {
-###         $self->_set_value($line, $col, $desc);
-###      }
-###   }
-###};
+before 'close' => sub {
+   my ($self) = @_;
+   if ($self->_has_first_community) {
+      # Write JSON to file, but only if fh opened for writing
+      my $rows = $self->_get_line; #### UPDATE with number of members
+      my $cols = $self->_get_col;
+      my $json = $self->_get_json;
+      $json->{'shape'} = [$rows, $cols];
+      my $writer = JSON::XS->new->pretty;
+      my $str = $writer->encode($json);
+      $self->_print($str);
+   }
+};
+
+
+has '_first_community' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   init_arg => undef,
+   default => 1,
+   predicate => '_has_first_community',
+   lazy => 1,
+);
 
 
 has 'matrix_type' => (
@@ -212,6 +213,7 @@ has 'matrix_type' => (
    lazy => 1,
    reader => 'get_matrix_type',
    writer => 'set_matrix_type',
+   predicate => '_has_matrix_type',
 );
 
 
@@ -456,7 +458,7 @@ method _next_community_finish () {
 }
 
 
-###method write_member (Bio::Community::Member $member, Count $count) {
+method write_member (Bio::Community::Member $member, Count $count) {
 ###    my $id   = $member->id;
 ###    my $line = $self->_id2line->{$id};
 ###    if (not defined $line) {
@@ -472,36 +474,43 @@ method _next_community_finish () {
 ###    $self->_set_value($line, $self->_col, $count);
 ###    $self->_line( $line + 1 );
 ###    return 1;
-###}
+}
 
 
-###method _write_community_init (Bio::Community $community) {
-###   #### set default matrix type to 'sparse' here.
-###   # If first community, write first column header
-###   if ($self->_first_community) {
-###      $self->_write_headers;
-###      $self->_first_community(0);
-###   }
-###   # Write header for that community
-###   my $line = 1;
-###   my $col  = $self->_col + 1;
-###   $self->_set_value($line, $col, $community->name);
-###   $self->_line( $line + 1);
-###   $self->_col( $col );
-###   return 1;
-###}
+method _write_community_init (Bio::Community $community) {
+   # Set default matrix type to sparse
+   if (not $self->_has_matrix_type) {
+      $self->set_matrix_type('sparse');
+
+   }
+   # If first community, write some generic header information
+   if ($self->_first_community) {
+      $self->_write_headers;
+      $self->_first_community(0);
+   }
+
+   $self->_set_col( $self->_get_col + 1);
+
+   return 1;
+}
 
 
-###method _write_headers () {
-###   $self->_print("# QIIME v1.3.0 OTU table\n");
-###   $self->_set_value(1, 1, '#OTU ID');
-###}
+method _write_headers () {
+   my $json = {};
+   $json->{'id'}           = undef;
+   $json->{'format'}       = BIOM_NAME;
+   $json->{'format_url'}   = BIOM_URL;
+   $json->{'type'}         = BIOM_TYPE;
+   $json->{'generated_by'} = 'Bio::Community version XXX'; ####
+   $json->{'date'}         = DateTime->now->datetime; # ISO 8601, e.g. 2011-12-19T19:00:00
+   $json->{'matrix_type'}  = $self->get_matrix_type;
+   $self->_set_json($json);
+}
 
 
-###method _write_community_finish (Bio::Community $community) {
-###   return 1;
-###}
-
+method _write_community_finish (Bio::Community $community) {
+   return 1;
+}
 
 
 __PACKAGE__->meta->make_immutable;
