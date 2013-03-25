@@ -108,6 +108,7 @@ extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO',
      'Bio::Community::Role::Table';
 
+
 our $multiple_communities   =  1;      # format supports several communities per file
 #### sorting only effective for first community???
 our $default_sort_members   =  0;      # unsorted
@@ -122,14 +123,16 @@ around BUILDARGS => func ($orig, $class, %args) {
 
 
 before 'close' => sub {
-   # Add taxonomy (desc) if available
    my ($self) = @_;
-   my $col = $self->_col + 1;
-   my $descs = $self->_line2desc;
-   if ( scalar keys %{$descs} ) {
-      $self->_set_value(1, $col, 'Consensus Lineage');
-      while ( my ($line, $desc) = each %$descs ) {
-         $self->_set_value($line, $col, $desc);
+   if ($self->_has_first_community) {
+      # Add taxonomy (desc) if available, but only when fh opened for reading
+      my $col = $self->_col + 1;
+      my $descs = $self->_line2desc;
+      if ( scalar keys %{$descs} ) {
+         $self->_set_value(1, $col, 'Consensus Lineage');
+         while ( my ($line, $desc) = each %$descs ) {
+            $self->_set_value($line, $col, $desc);
+         }
       }
    }
 };
@@ -141,6 +144,7 @@ has '_first_community' => (
    required => 0,
    init_arg => undef,
    default => 1,
+   predicate => '_has_first_community',
    lazy => 1,
 );
 
