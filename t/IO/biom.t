@@ -8,8 +8,8 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $community3, $member,
-   $count, $taxonomy);
+my ($in, $out, $output_file, $member, $count, $taxonomy,
+   $community, $community2, $community3, $community4, $community5, $community6 );
 my (@communities, @methods);
 
 
@@ -21,41 +21,56 @@ ok $in = Bio::Community::IO->new(
 is $in->format, 'biom';
 
 
-#### Read BIOM file without taxonomy
+# Read BIOM minimal sparse file
 
-###ok $in = Bio::Community::IO->new(
-###   -file   => test_input_file('qiime_w_no_taxo.txt'),
-###   -format => 'qiime',
-###), 'Read QIIME file';
-###isa_ok $in, 'Bio::Community::IO::qiime';
-###is $in->sort_members, 0;
-###is $in->abundance_type, 'count';
-###is $in->missing_string, 0;
-###is $in->multiple_communities, 1;
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('biom_minimal_sparse.txt'),
+   -format => 'biom',
+), 'Read BIOM minimal sparse file';
+isa_ok $in, 'Bio::Community::IO::biom';
+is $in->sort_members, 0;
+is $in->abundance_type, 'count';
+is $in->missing_string, 0;
+is $in->multiple_communities, 1;
 
-###@methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
-###for my $method (@methods) {
-###   can_ok($in, $method) || diag "Method $method() not implemented";
-###}
+@methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
+for my $method (@methods) {
+   can_ok($in, $method) || diag "Method $method() not implemented";
+}
 
-###ok $community = $in->next_community;
-###isa_ok $community, 'Bio::Community';
-###is $community->get_richness, 2;
-###is $community->name, '20100302';
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, 'Sample1';
 
-###ok $community2 = $in->next_community;
-###isa_ok $community2, 'Bio::Community';
-###is $community2->get_richness, 1;
-###is $community2->name, '20100304';
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 3;
+is $community2->name, 'Sample2';
 
-###ok $community3 = $in->next_community;
-###isa_ok $community3, 'Bio::Community';
-###is $community3->get_richness, 3;
-###is $community3->name, '20100823';
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 4;
+is $community3->name, 'Sample3';
 
-###is $in->next_community, undef;
+ok $community4 = $in->next_community;
+isa_ok $community4, 'Bio::Community';
+is $community4->get_richness, 2;
+is $community4->name, 'Sample4';
 
-###$in->close;
+ok $community5 = $in->next_community;
+isa_ok $community5, 'Bio::Community';
+is $community5->get_richness, 2;
+is $community5->name, 'Sample5';
+
+ok $community6 = $in->next_community;
+isa_ok $community6, 'Bio::Community';
+is $community6->get_richness, 2;
+is $community6->name, 'Sample6';
+
+is $in->next_community, undef;
+
+$in->close;
 
 ###ok $member = $community->next_member;
 ###isa_ok $member, 'Bio::Community::Member';

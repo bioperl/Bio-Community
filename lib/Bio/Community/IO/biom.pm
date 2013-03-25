@@ -67,9 +67,7 @@ Here is an example of minimal sparse BIOM file:
              ]
   }
 
-Rows and columns can be expressed in a richer way, e.g.:
-
-  {"id":"GG_OTU_1", "metadata":{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}},
+Columns (i.e. communities) can be expressed in a richer way, e.g.:
 
   {"id":"Sample1", "metadata":{
                            "BarcodeSequence":"CGCTTATCGAGA",
@@ -77,9 +75,15 @@ Rows and columns can be expressed in a richer way, e.g.:
                            "BODY_SITE":"gut",
                            "Description":"human gut"}},
 
-###For each Bio::Community::Member $member generated from a QIIME file, $member->id()
-###contains the OTU ID, while $member->desc() holds the content of the consensus
-###lineage field.
+The 'id' can be recovered from the id() method of the resulting Bio::Community,
+while the 'Description' is obtained from the desc() method.
+
+Rows can also be expressed in a richer form:
+
+  {"id":"GG_OTU_1", "metadata":{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}},
+
+For each Bio::Community::Member generated, the id() method contains the 'id' and
+desc() holds a concantenated version of the 'taxonomy'.
 
 =head1 CONSTRUCTOR
 
@@ -132,6 +136,29 @@ use namespace::autoclean;
 use Bio::Community::Member;
 use JSON qw( decode_json encode_json );
 
+use constant BIOM_NAME => 'Biological Observation Matrix 1.0';
+use constant BIOM_URL  => 'http://biom-format.org/documentation/format_versions/biom-1.0.html';
+
+
+#BIOM_TYPE
+#  "OTU table"
+#  "Pathway table"
+#  "Function table"
+#  "Ortholog table"
+#  "Gene table"
+#  "Metabolite table"
+#  "Taxon table"
+
+#BIOM_MATRIX_TYPE
+#  "sparse" : only non-zero values are specified
+#  "dense" : every element must be specified
+
+#BIOM_MATRIX_ELEMENT_TYPE
+#  "int" : integer
+#  "float" : floating point
+#  "unicode" : unicode string
+
+
 extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
 ###with 'Bio::Community::Role::IO',
@@ -164,6 +191,43 @@ our $default_missing_string =  0;      # empty members get a '0'
 ###};
 
 
+has '_json' => (
+   is => 'rw',
+   #isa => 'JSON::XS',
+   required => 0,
+   init_arg => undef,
+   default => undef,
+   lazy => 1,
+   predicate => '_has_json',
+   reader => '_get_json',
+   writer => '_set_json',
+);
+
+
+has '_max_line' => (
+   is => 'rw',
+   #isa => 'StrictlyPositiveInt',
+   required => 0,
+   init_arg => undef,
+   lazy => 1,
+   default => 0,
+   reader => '_get_max_line',
+   writer => '_set_max_line',
+);
+
+
+has '_max_col' => (
+   is => 'rw',
+   #isa => 'StrictlyPositiveInt',
+   required => 0,
+   init_arg => undef,
+   lazy => 1,
+   default => 0,
+   reader => '_get_max_col',
+   writer => '_set_max_col',
+);
+
+
 ###has '_first_community' => (
 ###   is => 'rw',
 ###   isa => 'Bool',
@@ -179,19 +243,21 @@ our $default_missing_string =  0;      # empty members get a '0'
 ###   isa => 'PositiveInt',
 ###   required => 0,
 ###   init_arg => undef,
-###   default => 1,
+###   default => 0,
 ###   lazy => 1,
 ###);
 
 
-###has '_col' => (
-###   is => 'rw',
-###   isa => 'PositiveInt',
-###   required => 0,
-###   init_arg => undef,
-###   default => 1,
-###   lazy => 1,
-###);
+has '_col' => (
+   is => 'rw',
+   isa => 'PositiveInt',
+   required => 0,
+   init_arg => undef,
+   default => 0,
+   lazy => 1,
+   reader => '_get_col',
+   writer => '_set_col',
+);
 
 
 ###has '_skip_last_col' => (
@@ -315,9 +381,58 @@ our $default_missing_string =  0;      # empty members get a '0'
 ###}
 
 
-###method _next_community_finish () {
-###   return 1;
-###}
+method _parse_json () {
+   # Parse JSON string incrementally
+   my $parser = JSON::XS->new();
+   while (my $line = $self->_readline(-raw => 1)) {
+      $parser->incr_parse( $line );
+   }
+   my $json = $parser->incr_parse();
+
+   #### Parse JSON string at once
+   ###my $str = '';
+   ###while (my $line = $self->_readline(-raw => 1)) {
+   ###   $str .= $line;
+   ###}
+   ###my $json = $parser->decode($str);
+
+   $self->_set_json($json);
+
+   my ($max_line, $max_col) = @{$json->{'shape'}};
+   $self->_set_max_line( $max_line );
+   $self->_set_max_col( $max_col );
+
+   return $json;
+}
+
+
+method _next_community_init () {
+   # First time, parse the JSON string and generate the members
+   if (not $self->_has_json) {
+      $self->_parse_json();
+   }
+
+   #### Generate members
+   ###if (not $self->_has_members) {
+   ###   $self->_generate_members();
+   ###}
+
+   ###my $line = 1;
+   my $col  = $self->_get_col + 1;
+   my $name = undef;
+   if ($self->_get_col <= $self->_get_max_col) {
+      $name = $self->_get_json->{'columns'}->[$col-1]->{'id'};
+   }
+   $self->_set_col( $col );
+   ###$self->_line( $line );
+
+   return $name;
+}
+
+
+method _next_community_finish () {
+   return 1;
+}
 
 
 ###method write_member (Bio::Community::Member $member, Count $count) {

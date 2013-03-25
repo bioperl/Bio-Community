@@ -317,7 +317,7 @@ method _read_table () {
    my $file_offset = 0;
    my $num_eol_chars;
 
-   while (my $line = $self->_readline(-raw => 1)) {
+   while (my $line = $self->_readline(-raw => 1)) { # _readline is from Bio::Root::IO
 
       next if $line =~ m/^\s*$/;
 
