@@ -238,14 +238,16 @@ has '_max_col' => (
 ###);
 
 
-###has '_line' => (
-###   is => 'rw',
-###   isa => 'PositiveInt',
-###   required => 0,
-###   init_arg => undef,
-###   default => 0,
-###   lazy => 1,
-###);
+has '_line' => (
+   is => 'rw',
+   isa => 'PositiveInt',
+   required => 0,
+   init_arg => undef,
+   default => 0,
+   lazy => 1,
+   reader => '_get_line',
+   writer => '_set_line',
+);
 
 
 has '_col' => (
@@ -270,15 +272,15 @@ has '_col' => (
 ###);
 
 
-###has '_members' => (
-###   is => 'rw',
-###   isa => 'ArrayRef', # ArrayRef[Bio::Community::Member] but keep it lean
-###   required => 0,
-###   init_arg => undef,
-###   default => sub { [] },
-###   lazy => 1,
-###   predicate => '_has_members',
-###);
+has '_members' => (
+   is => 'rw',
+   isa => 'HashRef', # HashRef{id} = Bio::Community::Member
+   required => 0,
+   init_arg => undef,
+   default => sub { [] },
+   lazy => 1,
+   predicate => '_has_members',
+);
 
 
 ###has '_id2line' => (
@@ -340,6 +342,29 @@ has '_col' => (
 ###}
 
 
+method _generate_members () {
+   my %members = ();
+   for my $row (1 .. $self->_get_max_line) {
+      my $json = $self->_get_json->{'rows'}->[$row-1];
+      my $id = $json->{'id'};
+      my $member = Bio::Community::Member->new( -id => $id );
+      my $metadata = $json->{'metadata'};
+      if (exists $metadata->{'taxonomy'}) {
+         my $taxo_desc;
+         if (ref($metadata->{'taxonomy'}) eq 'SCALAR') {
+            $taxo_desc = $metadata->{'taxonomy'};
+         } elsif (ref($metadata->{'taxonomy'}) eq 'ARRAY') {
+            $taxo_desc = join '; ', @{$metadata->{'taxonomy'}};
+         }
+         ### check if there is an attribute called 'name' or 'description'
+         $member->desc( $taxo_desc );
+      }
+      $members{$id} = $member;
+   }
+   $self->_members(\%members);
+}
+
+
 ###method next_member () {
 ###   my ($member, $count);
 ###   my $line = $self->_line;
@@ -360,27 +385,6 @@ has '_col' => (
 ###}
 
 
-###method _next_community_init () {
-###   # Go to start of next column and return name of new community or undef.
-###   # The first time, initialize the read process by generating all community members.
-###   if (not $self->_has_members) {
-###      $self->_generate_members();
-###   }
-###   my $col  = $self->_col + 1;
-###   my $line = 1;
-###   my $name;
-###   if ( $self->_skip_last_col && ($col == $self->_get_max_col) ) {
-###      # At the taxonomy column. All communities were visited. Get out of the table
-###      $col++;
-###   } else {
-###      $name = $self->_get_value($line, $col);
-###   }
-###   $self->_col( $col );
-###   $self->_line( $line );
-###   return $name;
-###}
-
-
 method _parse_json () {
    # Parse JSON string incrementally
    my $parser = JSON::XS->new();
@@ -389,7 +393,7 @@ method _parse_json () {
    }
    my $json = $parser->incr_parse();
 
-   #### Parse JSON string at once
+   #### Parse JSON string in one step
    ###my $str = '';
    ###while (my $line = $self->_readline(-raw => 1)) {
    ###   $str .= $line;
@@ -407,24 +411,24 @@ method _parse_json () {
 
 
 method _next_community_init () {
-   # First time, parse the JSON string and generate the members
+   # First time, parse the JSON string
    if (not $self->_has_json) {
       $self->_parse_json();
    }
 
-   #### Generate members
-   ###if (not $self->_has_members) {
-   ###   $self->_generate_members();
-   ###}
+   # Generate all members
+   if (not $self->_has_members) {
+      $self->_generate_members();
+   }
 
-   ###my $line = 1;
+   my $line = 1;
    my $col  = $self->_get_col + 1;
    my $name = undef;
    if ($self->_get_col <= $self->_get_max_col) {
       $name = $self->_get_json->{'columns'}->[$col-1]->{'id'};
    }
    $self->_set_col( $col );
-   ###$self->_line( $line );
+   $self->_set_line( $line );
 
    return $name;
 }
