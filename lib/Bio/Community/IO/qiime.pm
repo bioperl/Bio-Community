@@ -228,10 +228,9 @@ method _generate_members () {
    my $col = 1;
    my $line = 1; # first line of the table is a header
    for my $line (2 .. $self->_get_max_line) {
-      my $member;
       # Get OTU ID if possible
       my $otu_id = $self->_get_value($line, $col);
-      $member = Bio::Community::Member->new( -id => $otu_id );
+      my $member = Bio::Community::Member->new( -id => $otu_id );
       # Get taxonomic assignment if possible
       if (defined $taxo_col) {
          my $taxo_desc = $self->_get_value($line, $taxo_col);
