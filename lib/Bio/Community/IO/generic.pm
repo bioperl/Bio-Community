@@ -19,9 +19,9 @@ Bio::Community::IO::generic - Driver to read and write files in a generic tab-de
 
 =head1 DESCRIPTION
 
-This Bio::Community::IO driver reads and writes files in a generic format. Multiple
-communities can be written in a file to generate a site-by-species table (OTU
-table), in which the entries are tab-delimited. Example:
+This Bio::Community::IO::generic driver reads and writes files in a generic
+format. Multiple communities can be written in a file to generate a site-by-
+species table (OTU table), in which the entries are tab-delimited. Example:
 
   Species	site A	site B
   species 1	321	94

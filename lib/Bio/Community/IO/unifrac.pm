@@ -19,8 +19,8 @@ Bio::Community::IO::unifrac - Driver to read and write files in the (Fast)Unifra
 
 =head1 DESCRIPTION
 
-This Bio::Community::IO driver reads and writes Unifrac environment files and
-FastUnifrac sample ID mapping files, whose format is described at
+This Bio::Community::IO::unifrac driver reads and writes Unifrac environment
+files and FastUnifrac sample ID mapping files, whose format is described at
 L<http://bmf2.colorado.edu/unifrac/help.psp#env_file> and
 L<http://bmf2.colorado.edu/fastunifrac/help.psp#sample_id_mapping_file>. In this
 tab-delimited format, the first column is a sequence ID, the second is the name
