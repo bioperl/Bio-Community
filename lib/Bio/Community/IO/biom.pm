@@ -13,7 +13,19 @@ Bio::Community::IO::biom - Driver to read and write files in the sparse BIOM for
 
 =head1 SYNOPSIS
 
-   my $in = Bio::Community::IO->new( -file => 'biom_communities.txt', -format => 'biom' );
+   # Reading
+   my $in = Bio::Community::IO->new(
+      -file   => 'biom_communities.txt',
+      -format => 'biom'
+   );
+   my $type = $in->get_matrix_type; # either dense or sparse
+
+   # Writing
+   my $out = Bio::Community::IO->new(
+      -file        => 'biom_communities.txt',
+      -format      => 'biom',
+      -matrix_type => 'sparse', # default matrix type
+   );
 
    # See Bio::Community::IO for more information
 
@@ -191,6 +203,18 @@ our $default_missing_string =  0;      # empty members get a '0'
 ###};
 
 
+has 'matrix_type' => (
+   is => 'rw',
+   #isa => 'Bool', ### either sparse or dense ### need type checking
+   required => 0,
+   init_arg => '-matrix_type',
+   default => undef,
+   lazy => 1,
+   reader => 'get_matrix_type',
+   writer => 'set_matrix_type',
+);
+
+
 has '_json' => (
    is => 'rw',
    #isa => 'JSON::XS',
@@ -228,16 +252,6 @@ has '_max_col' => (
 );
 
 
-###has '_first_community' => (
-###   is => 'rw',
-###   isa => 'Bool',
-###   required => 0,
-###   init_arg => undef,
-###   default => 1,
-###   lazy => 1,
-###);
-
-
 has '_line' => (
    is => 'rw',
    isa => 'PositiveInt',
@@ -262,16 +276,6 @@ has '_col' => (
 );
 
 
-###has '_skip_last_col' => (
-###   is => 'rw',
-###   isa => 'Bool',
-###   required => 0,
-###   init_arg => undef,
-###   default => 0,
-###   lazy => 1,
-###);
-
-
 has '_members' => (
    is => 'rw',
    isa => 'HashRef', # HashRef{id} = Bio::Community::Member
@@ -280,66 +284,9 @@ has '_members' => (
    default => sub { [] },
    lazy => 1,
    predicate => '_has_members',
+   reader => '_get_members',
+   writer => '_set_members',
 );
-
-
-###has '_id2line' => (
-###   is => 'rw',
-###   isa => 'HashRef', # HashRef[String] but keep it lean
-###   required => 0,
-###   init_arg => undef,
-###   default => sub { {} },
-###   lazy => 1,
-###);
-
-
-###has '_line2desc' => (
-###   is => 'rw',
-###   #isa => 'HashRef', # HashRef[PositiveInt] but keep it lean
-###   required => 0,
-###   init_arg => undef,
-###   default => sub { {} },
-###   lazy => 1,
-###);
-
-
-###method _generate_members () {
-###   # Make members from the first column. Also, find out if they have a taxonomy.
-
-###   # Does the last column contain the taxonomy?
-###   my $first_col_header = $self->_get_value(1, 1);
-###   my $taxo_col;
-###   if ($first_col_header =~ m/OTU ID/i) {
-###      my $last_col_header = $self->_get_value(1, $self->_get_max_col);
-###      if ( (defined $last_col_header) && ($last_col_header =~ m/consensus\s*lineage/i) ) {
-###         $taxo_col = $self->_get_max_col;
-###         $self->_skip_last_col(1);
-###      }
-###   } else {
-###      $self->warn("Could not recognize the headers of the QIIME OTU table, but ".
-###         "assuming that a valid table was provided\n");
-###   }
-
-###   # What are the members?
-###   my @members;
-###   my $col = 1;
-###   my $line = 1; # first line of the table is a header
-###   for my $line (2 .. $self->_get_max_line) {
-###      my $member;
-###      # Get OTU ID if possible
-###      my $otu_id = $self->_get_value($line, $col);
-###      $member = Bio::Community::Member->new( -id => $otu_id );
-###      # Get taxonomic assignment if possible
-###      if (defined $taxo_col) {
-###         my $taxo_desc = $self->_get_value($line, $taxo_col);
-###         $member->desc( $taxo_desc );
-###         $self->_attach_taxon($member, $taxo_desc, 1);
-###      }
-###      $self->_attach_weights($member);
-###      push @members, $member;
-###   }
-###   $self->_members(\@members);
-###}
 
 
 method _generate_members () {
@@ -356,33 +303,59 @@ method _generate_members () {
          } elsif (ref($metadata->{'taxonomy'}) eq 'ARRAY') {
             $taxo_desc = join '; ', @{$metadata->{'taxonomy'}};
          }
-         ### check if there is an attribute called 'name' or 'description'
          $member->desc( $taxo_desc );
       }
       $members{$id} = $member;
    }
-   $self->_members(\%members);
+   $self->_set_members(\%members);
 }
 
 
-###method next_member () {
-###   my ($member, $count);
-###   my $line = $self->_line;
-###   while ( $line++ ) {
-###      # Get the abundance of the member (undef if out-of-bounds)
-###      $count = $self->_get_value($line, $self->_col);
-###      # No more members for this community.
-###      last if not defined $count;
-###      # Skip members with no abundance
-###      next if not $count;  # e.g. ''
-###      next if $count == 0; # e.g. 0.0
-###      # Get the member itself
-###      $member = $self->_members->[$line - 2];
-###      $self->_line($line);
-###      last;
-###   }
-###   return $member, $count;
-###}
+method next_member () {
+   my ($member, $count);
+
+   my $line = $self->_get_line;
+   my $json = $self->_get_json;
+   my $is_sparse = $json->{'matrix_type'} eq 'sparse' ? 1 : 0;
+   my $rows      = $json->{'rows'};
+   my $matrix    = $json->{'data'};
+   my $members = $self->_get_members;
+
+   print "ini line: $line  ini  is_sparse: $is_sparse\n"; ###
+
+   while ( ++$line ) {
+      # Get the abundance of the member (undef if out-of-bounds)
+      my $id;
+      if ($is_sparse) { # sparse matrix format
+         
+      } else { # dense matrix format
+         my $col = $self->_get_col;
+
+         print "   col $col, line $line\n"; ###
+
+         $count = $matrix->[$line-1]->[$col-1];
+         if (defined $count) {
+            $id = $rows->[$line-1]->{'id'};
+            $self->_set_line($line);
+         } else {
+            # No more members for this community
+            $self->_set_line(0);
+            last;
+         }
+      }
+      
+      if ($count > 0) {
+         $member = $members->{$id};
+
+         print "   count $count   id $id   member $member\n"; ###
+
+         last;
+      }
+
+   }
+
+   return $member, $count;
+}
 
 
 method _parse_json () {
@@ -406,6 +379,12 @@ method _parse_json () {
    $self->_set_max_line( $max_line );
    $self->_set_max_col( $max_col );
 
+   print "setting matrix_type to: ".$json->{'matrix_type'}."\n"; ###
+
+   $self->set_matrix_type($json->{'matrix_type'});
+
+   print "getting matrix_type: ".$self->get_matrix_type."\n"; ###
+
    return $json;
 }
 
@@ -421,14 +400,16 @@ method _next_community_init () {
       $self->_generate_members();
    }
 
-   my $line = 1;
+   ###my $line = 1;
    my $col  = $self->_get_col + 1;
-   my $name = undef;
+   my $name;
    if ($self->_get_col <= $self->_get_max_col) {
       $name = $self->_get_json->{'columns'}->[$col-1]->{'id'};
    }
    $self->_set_col( $col );
-   $self->_set_line( $line );
+   ###$self->_set_line( $line );
+
+   print "community $name\n" if defined $name; ###
 
    return $name;
 }
@@ -459,6 +440,7 @@ method _next_community_finish () {
 
 
 ###method _write_community_init (Bio::Community $community) {
+###   #### set default matrix type to 'sparse' here.
 ###   # If first community, write first column header
 ###   if ($self->_first_community) {
 ###      $self->_write_headers;
