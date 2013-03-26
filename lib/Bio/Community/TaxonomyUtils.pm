@@ -103,13 +103,16 @@ my $clean_rear_re  = qr/^(?:\S__||Other|No blast hit|unidentified|uncultured|env
            clean_lineage_arr(). The reciprocal operation is get_lineage_string().
  Usage   : my $taxa_names = split_lineage($lineage_string);
  Args    : a lineage string
+           whether to clean taxonomy or not (default is to clean)
  Returns : an arrayref of taxon names
 
 =cut
 
-func split_lineage_string ($lineage_str) {
+func split_lineage_string ($lineage_str, $clean=1) {
    my $names = [ split $sep_re, $lineage_str ];
-   $names = clean_lineage_arr($names);
+   if ($clean) {
+      $names = clean_lineage_arr($names);
+   }
    return $names;
 }
 

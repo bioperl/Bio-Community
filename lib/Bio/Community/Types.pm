@@ -145,6 +145,11 @@ subtype 'WeightAssignType'
    => as 'WeightAssignStr | Num'
    => message { _gen_err_msg( ['a number', @WeightAssignStr], $_) };
 
+# Biom matrix type
+my @BiomMatrixType = qw(sparse dense);
+subtype 'BiomMatrixType'
+   => as enum( \@BiomMatrixType )
+   => message { _gen_err_msg(\@BiomMatrixType, $_) };
 
 # A readable file
 subtype 'ReadableFile'

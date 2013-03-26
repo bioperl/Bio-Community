@@ -31,6 +31,7 @@ is $in->format, 'biom';
 
 ### Test int vs float
 
+
 # Read BIOM minimal dense file
 
 ok $in = Bio::Community::IO->new(
@@ -175,9 +176,6 @@ is $community6->get_member_by_rank(3), undef;
 # Write BIOM minimal dense file
 
 $output_file = test_output_file();
-$output_file = 'dense.biom'; ###
-print "WRITING TO: $output_file\n"; ###
-
 ok $out = Bio::Community::IO->new(
    -file        => '>'.$output_file,
    -format      => 'biom',
@@ -198,7 +196,129 @@ ok $in = Bio::Community::IO->new(
    -matrix_type => 'dense',
 ), 'Re-read BIOM file';
 
-### and test again that input is correct
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, 'Sample1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 3;
+is $community2->name, 'Sample2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 4;
+is $community3->name, 'Sample3';
+
+ok $community4 = $in->next_community;
+isa_ok $community4, 'Bio::Community';
+is $community4->get_richness, 2;
+is $community4->name, 'Sample4';
+
+ok $community5 = $in->next_community;
+isa_ok $community5, 'Bio::Community';
+is $community5->get_richness, 2;
+is $community5->name, 'Sample5';
+
+ok $community6 = $in->next_community;
+isa_ok $community6, 'Bio::Community';
+is $community6->get_richness, 2;
+is $community6->name, 'Sample6';
+
+is $in->next_community, undef;
+
+is $in->get_matrix_type, 'dense';
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community->get_count($member), 5;
+ok $member = $community->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, '';
+is $community->get_count($member), 2;
+is $community->get_member_by_rank(3), undef;
+
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community2->get_count($member), 3;
+ok $member = $community2->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, '';
+is $community2->get_count($member), 2;
+ok $member = $community2->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, '';
+is $community2->get_count($member), 1;
+is $community2->get_member_by_rank(4), undef;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_1';
+is $member->desc, '';
+is $community3->get_count($member), 4;
+ok $member = $community3->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community3->get_count($member), 3;
+ok $member = $community3->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, '';
+is $community3->get_count($member), 2;
+ok $member = $community3->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, '';
+is $community3->get_count($member), 1;
+is $community3->get_member_by_rank(5), undef;
+
+ok $member = $community4->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community4->get_count($member), 4;
+ok $member = $community4->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community4->get_count($member), 2;
+is $community4->get_member_by_rank(3), undef;
+
+ok $member = $community5->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community5->get_count($member), 3;
+ok $member = $community5->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community5->get_count($member), 2;
+is $community5->get_member_by_rank(3), undef;
+
+ok $member = $community6->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community6->get_count($member), 2;
+ok $member = $community6->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, '';
+is $community6->get_count($member), 1;
+is $community6->get_member_by_rank(3), undef;
 
 
 # Read BIOM rich sparse file
@@ -345,9 +465,6 @@ is $community6->get_member_by_rank(3), undef;
 # Write BIOM rich sparse file
 
 $output_file = test_output_file();
-$output_file = 'sparse.biom'; ###
-print "WRITING TO: $output_file\n"; ###
-
 ok $out = Bio::Community::IO->new(
    -file        => '>'.$output_file,
    -format      => 'biom',
@@ -368,7 +485,129 @@ ok $in = Bio::Community::IO->new(
    -matrix_type => 'sparse',
 ), 'Re-read BIOM file';
 
-### and test again that input is correct
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, 'Sample1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 3;
+is $community2->name, 'Sample2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 4;
+is $community3->name, 'Sample3';
+
+ok $community4 = $in->next_community;
+isa_ok $community4, 'Bio::Community';
+is $community4->get_richness, 2;
+is $community4->name, 'Sample4';
+
+ok $community5 = $in->next_community;
+isa_ok $community5, 'Bio::Community';
+is $community5->get_richness, 2;
+is $community5->name, 'Sample5';
+
+ok $community6 = $in->next_community;
+isa_ok $community6, 'Bio::Community';
+is $community6->get_richness, 2;
+is $community6->name, 'Sample6';
+
+is $in->next_community, undef;
+
+is $in->get_matrix_type, 'sparse';
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, 'k__Bacteria; p__Cyanobacteria; c__Nostocophycideae; o__Nostocales; f__Nostocaceae; g__Dolichospermum; s__';
+is $community->get_count($member), 5;
+ok $member = $community->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, 'k__Bacteria; p__Firmicutes; c__Clostridia; o__Halanaerobiales; f__Halanaerobiaceae; g__Halanaerobium; s__saccharolyticum';
+is $community->get_count($member), 2;
+is $community->get_member_by_rank(3), undef;
+
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, 'k__Bacteria; p__Cyanobacteria; c__Nostocophycideae; o__Nostocales; f__Nostocaceae; g__Dolichospermum; s__';
+is $community2->get_count($member), 3;
+ok $member = $community2->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, 'k__Bacteria; p__Firmicutes; c__Clostridia; o__Halanaerobiales; f__Halanaerobiaceae; g__Halanaerobium; s__saccharolyticum';
+is $community2->get_count($member), 2;
+ok $member = $community2->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Gammaproteobacteria; o__Enterobacteriales; f__Enterobacteriaceae; g__Escherichia; s__';
+is $community2->get_count($member), 1;
+is $community2->get_member_by_rank(4), undef;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_1';
+is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Gammaproteobacteria; o__Enterobacteriales; f__Enterobacteriaceae; g__Escherichia; s__';
+is $community3->get_count($member), 4;
+ok $member = $community3->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, 'k__Archaea; p__Euryarchaeota; c__Methanomicrobia; o__Methanosarcinales; f__Methanosarcinaceae; g__Methanosarcina; s__';
+is $community3->get_count($member), 3;
+ok $member = $community3->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, 'k__Bacteria; p__Firmicutes; c__Clostridia; o__Halanaerobiales; f__Halanaerobiaceae; g__Halanaerobium; s__saccharolyticum';
+is $community3->get_count($member), 2;
+ok $member = $community3->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Gammaproteobacteria; o__Enterobacteriales; f__Enterobacteriaceae; g__Escherichia; s__';
+is $community3->get_count($member), 1;
+is $community3->get_member_by_rank(5), undef;
+
+ok $member = $community4->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, 'k__Archaea; p__Euryarchaeota; c__Methanomicrobia; o__Methanosarcinales; f__Methanosarcinaceae; g__Methanosarcina; s__';
+is $community4->get_count($member), 4;
+ok $member = $community4->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, 'k__Bacteria; p__Cyanobacteria; c__Nostocophycideae; o__Nostocales; f__Nostocaceae; g__Dolichospermum; s__';
+is $community4->get_count($member), 2;
+is $community4->get_member_by_rank(3), undef;
+
+ok $member = $community5->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, 'k__Bacteria; p__Cyanobacteria; c__Nostocophycideae; o__Nostocales; f__Nostocaceae; g__Dolichospermum; s__';
+is $community5->get_count($member), 3;
+ok $member = $community5->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, 'k__Archaea; p__Euryarchaeota; c__Methanomicrobia; o__Methanosarcinales; f__Methanosarcinaceae; g__Methanosarcina; s__';
+is $community5->get_count($member), 2;
+is $community5->get_member_by_rank(3), undef;
+
+ok $member = $community6->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, 'k__Bacteria; p__Cyanobacteria; c__Nostocophycideae; o__Nostocales; f__Nostocaceae; g__Dolichospermum; s__';
+is $community6->get_count($member), 2;
+ok $member = $community6->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_4';
+is $member->desc, 'k__Bacteria; p__Firmicutes; c__Clostridia; o__Halanaerobiales; f__Halanaerobiaceae; g__Halanaerobium; s__saccharolyticum';
+is $community6->get_count($member), 1;
+is $community6->get_member_by_rank(3), undef;
+
 
 
 

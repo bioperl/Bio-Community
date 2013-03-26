@@ -146,6 +146,7 @@ use Moose;
 use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Member;
+use Bio::Community::TaxonomyUtils;
 use JSON::XS qw( decode_json encode_json );
 use DateTime;
 
@@ -160,26 +161,9 @@ with 'Bio::Community::Role::IO';
 
 
 our $multiple_communities   =  1;      # format supports several communities per file
-#### sorting only effective for first community???
 our $default_sort_members   =  0;      # unsorted
 our $default_abundance_type = 'count'; # absolute count (positive integer)
 our $default_missing_string =  0;      # empty members get a '0'
-
-
-before 'close' => sub {
-   my ($self) = @_;
-   if ($self->_has_first_community) {
-      # Write JSON to file, but only if fh opened for writing
-      my $rows = $self->_get_line;
-      my $cols = $self->_get_col;
-      my $json = $self->_get_json;
-      $json->{'shape'} = [$rows+0, $cols+0];
-      $json->{'matrix_element_type'} = $self->_get_matrix_element_type;
-      my $writer = JSON::XS->new->pretty;  #### try a bit more compact
-      my $str = $writer->encode($json);
-      $self->_print($str);
-   }
-};
 
 
 has '_first_community' => (
@@ -195,7 +179,7 @@ has '_first_community' => (
 
 has 'matrix_type' => (
    is => 'rw',
-   #isa => 'Bool', ### either sparse or dense ### need type checking
+   isa => 'BiomMatrixType',
    required => 0,
    init_arg => '-matrix_type',
    default => undef,
@@ -208,7 +192,7 @@ has 'matrix_type' => (
 
 has 'matrix_element_type' => (
    is => 'rw',
-   #isa => 'Bool', ### either int, float or unicode
+   #isa => 'Str', # either int, float or unicode
    required => 0,
    init_arg => undef,
    default => 'int', # assume integer until proven otherwise
@@ -314,6 +298,61 @@ has '_id2line' => (
 );
 
 
+method _next_community_init () {
+   # First time, parse the JSON string
+   if (not $self->_has_json) {
+      $self->_parse_json();
+   }
+
+   # Generate all members
+   if (not $self->_has_members) {
+      $self->_generate_members();
+   }
+
+   # Sort members when reading sparse matrix
+   if ($self->get_matrix_type eq 'sparse') {
+      $self->_sort_members_by_community();
+   }
+
+   # Get community name and set column number
+   my $col = $self->_get_col + 1;
+   my $name;
+   if ($self->_get_col <= $self->_get_max_col) {
+      $name = $self->_get_json->{'columns'}->[$col-1]->{'id'};
+   }
+   $self->_set_col( $col );
+
+   return $name;
+}
+
+
+method _parse_json () {
+   # Parse JSON string incrementally
+   my $parser = JSON::XS->new();
+   while (my $line = $self->_readline(-raw => 1)) {
+      $parser->incr_parse( $line );
+   }
+   my $json = $parser->incr_parse();
+
+   ## ... or Parse JSON string in one step
+   #my $str = '';
+   #while (my $line = $self->_readline(-raw => 1)) {
+   #   $str .= $line;
+   #}
+   #my $json = $parser->decode($str);
+
+   $self->_set_json($json);
+
+   my ($max_line, $max_col) = @{$json->{'shape'}};
+   $self->_set_max_line( $max_line );
+   $self->_set_max_col( $max_col );
+
+   $self->set_matrix_type($json->{'matrix_type'});
+
+   return $json;
+}
+
+
 method _generate_members () {
    my %members = ();
    for my $row (1 .. $self->_get_max_line) {
@@ -326,7 +365,7 @@ method _generate_members () {
          if (ref($metadata->{'taxonomy'}) eq 'SCALAR') {
             $taxo_desc = $metadata->{'taxonomy'};
          } elsif (ref($metadata->{'taxonomy'}) eq 'ARRAY') {
-            $taxo_desc = join '; ', @{$metadata->{'taxonomy'}}; ### use TaxonomyUtils
+            $taxo_desc = get_lineage_string($metadata->{'taxonomy'}, 1);
          }
          $member->desc( $taxo_desc );
       }
@@ -366,9 +405,8 @@ method next_member () {
    my $col     = $self->_get_col;
    my $members = $self->_get_members;
    my $json    = $self->_get_json;
-   my $is_sparse = $json->{'matrix_type'} eq 'sparse' ? 1 : 0;
 
-   if ($is_sparse) { # sparse matrix format
+   if ($json->{'matrix_type'} eq 'sparse') { # sparse matrix format
 
       my $sorted_members = $self->_get_sorted_members;
       my @ids = keys %{$sorted_members->{$col-1}};
@@ -409,63 +447,40 @@ method next_member () {
 }
 
 
-method _parse_json () {
-   # Parse JSON string incrementally
-   my $parser = JSON::XS->new();
-   while (my $line = $self->_readline(-raw => 1)) {
-      $parser->incr_parse( $line );
-   }
-   my $json = $parser->incr_parse();
-
-   #### Parse JSON string in one step
-   ###my $str = '';
-   ###while (my $line = $self->_readline(-raw => 1)) {
-   ###   $str .= $line;
-   ###}
-   ###my $json = $parser->decode($str);
-
-   $self->_set_json($json);
-
-   my ($max_line, $max_col) = @{$json->{'shape'}};
-   $self->_set_max_line( $max_line );
-   $self->_set_max_col( $max_col );
-
-   $self->set_matrix_type($json->{'matrix_type'});
-
-   return $json;
-}
-
-
-method _next_community_init () {
-   # First time, parse the JSON string
-   if (not $self->_has_json) {
-      $self->_parse_json();
-   }
-
-   # Generate all members
-   if (not $self->_has_members) {
-      $self->_generate_members();
-   }
-
-   # Sort members when reading sparse matrix
-   if ($self->get_matrix_type eq 'sparse') {
-      $self->_sort_members_by_community();
-   }
-
-   # Get community name and set column number
-   my $col = $self->_get_col + 1;
-   my $name;
-   if ($self->_get_col <= $self->_get_max_col) {
-      $name = $self->_get_json->{'columns'}->[$col-1]->{'id'};
-   }
-   $self->_set_col( $col );
-
-   return $name;
-}
-
-
 method _next_community_finish () {
    return 1;
+}
+
+
+method _write_community_init (Bio::Community $community) {
+   # Set default matrix type to sparse
+   if (not $self->_has_matrix_type) {
+      $self->set_matrix_type('sparse');
+   }
+   # If first community, write some generic header information
+   if ($self->_first_community) {
+      $self->_write_headers;
+      $self->_first_community(0);
+   }
+   # Write community information
+   my $json = $self->_get_json;
+   push @{$json->{'columns'}}, { 'id' => $community->name, 'metadata' => undef };
+   $self->_set_json($json);
+   $self->_set_col( $self->_get_col + 1);
+   return 1;
+}
+
+
+method _write_headers () {
+   my $json = {};
+   $json->{'id'}           = undef;
+   $json->{'format'}       = BIOM_NAME;
+   $json->{'format_url'}   = BIOM_URL;
+   $json->{'type'}         = BIOM_TYPE;
+   $json->{'generated_by'} = 'Bio::Community version XXX'; #### TODO
+   $json->{'date'}         = DateTime->now->datetime; # ISO 8601, e.g. 2011-12-19T19:00:00
+   $json->{'matrix_type'}  = $self->get_matrix_type;
+   $self->_set_json($json);
 }
 
 
@@ -488,63 +503,66 @@ method write_member (Bio::Community::Member $member, Count $count) {
       my $member_rec = { 'id' => $id, 'metadata' => undef };
       my $desc = $member->desc;
       if (not $desc eq '') {
-         my @taxonomy = split /;\s*/, $desc; ### use taxonomyutils
-         $member_rec->{'metadata'}->{'taxonomy'} = \@taxonomy;
+         my $taxonomy = Bio::Community::TaxonomyUtils::split_lineage_string($desc, 0);
+         $member_rec->{'metadata'}->{'taxonomy'} = $taxonomy;
       }
       push @{$json->{'rows'}}, $member_rec;
       $self->_id2line->{$id} = $line;
       $self->_set_line( $line );
    }
 
-   # Update 'data' records
+   # Update 'data' records: use +0 to make counts be used as numbers (not strings)
+   my $col = $self->_get_col;
    if ($self->get_matrix_type eq 'sparse') {
-      my $col = $self->_get_col;
-      push @{$json->{'data'}}, [$line+0, $col+0, $count+0];
+      push @{$json->{'data'}}, [$line-1, $col-1, $count+0];
    } else {
-      ### TODO: writing dense matrix
+      $json->{'data'}->[$line-1]->[$col-1] = $count+0;
    }
    $self->_set_json($json);
 
    return 1;
-}
-
-
-method _write_community_init (Bio::Community $community) {
-   # Set default matrix type to sparse
-   if (not $self->_has_matrix_type) {
-      $self->set_matrix_type('sparse');
-
-   }
-   # If first community, write some generic header information
-   if ($self->_first_community) {
-      $self->_write_headers;
-      $self->_first_community(0);
-   }
-   # Write community information
-   my $json = $self->_get_json;
-   push @{$json->{'columns'}}, { 'id' => $community->name, 'metadata' => undef };
-   $self->_set_json($json);
-   $self->_set_col( $self->_get_col + 1);
-   return 1;
-}
-
-
-method _write_headers () {
-   my $json = {};
-   $json->{'id'}           = undef;
-   $json->{'format'}       = BIOM_NAME;
-   $json->{'format_url'}   = BIOM_URL;
-   $json->{'type'}         = BIOM_TYPE;
-   $json->{'generated_by'} = 'Bio::Community version XXX'; ####
-   $json->{'date'}         = DateTime->now->datetime; # ISO 8601, e.g. 2011-12-19T19:00:00
-   $json->{'matrix_type'}  = $self->get_matrix_type;
-   $self->_set_json($json);
 }
 
 
 method _write_community_finish (Bio::Community $community) {
    return 1;
 }
+
+
+method _fill_missing () { 
+   my $json = $self->_get_json;
+   my $data = $json->{'data'};
+   my $max_col = $self->_get_col - 1;
+   for my $row (0 .. scalar @$data - 1) {
+      my $row_data = $data->[$row];
+      for my $col (0 .. $max_col) {
+         if (not defined $row_data->[$col]) {
+            $row_data->[$col] = $default_missing_string;
+         }
+      }
+   }
+   $self->_set_json($json);
+   return 1;
+}
+
+
+before 'close' => sub {
+   my ($self) = @_;
+   if ($self->_has_first_community) {
+      # Write JSON to file, but only if fh opened for writing
+      my $rows = $self->_get_line;
+      my $cols = $self->_get_col;
+      my $json = $self->_get_json;
+      $json->{'shape'} = [$rows+0, $cols+0];
+      $json->{'matrix_element_type'} = $self->_get_matrix_element_type;
+      if ($self->get_matrix_type eq 'dense') {
+         $self->_fill_missing();
+      }
+      my $writer = JSON::XS->new->pretty;
+      my $str = $writer->encode($json);
+      $self->_print($str);
+   }
+};
 
 
 __PACKAGE__->meta->make_immutable;
