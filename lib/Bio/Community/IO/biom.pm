@@ -95,7 +95,7 @@ Rows can also be expressed in a richer form:
   {"id":"GG_OTU_1", "metadata":{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}},
 
 For each Bio::Community::Member generated, the id() method contains the 'id' and
-desc() holds a concantenated version of the 'taxonomy'.
+desc() holds a concatenated version of the 'taxonomy'.
 
 =head1 CONSTRUCTOR
 
@@ -149,17 +149,11 @@ use Bio::Community::Member;
 use JSON::XS qw( decode_json encode_json );
 use DateTime;
 
-use constant BIOM_NAME => 'Biological Observation Matrix 1.0';
-use constant BIOM_URL  => 'http://biom-format.org/documentation/format_versions/biom-1.0.html';
+use constant BIOM_NAME        => 'Biological Observation Matrix 1.0';
+use constant BIOM_URL         => 'http://biom-format.org/documentation/format_versions/biom-1.0.html';
 use constant BIOM_MATRIX_TYPE => 'sparse'; # sparse or dense
-use constant BIOM_TYPE => 'OTU table';
-# "XXX table" where XXX is Pathway, Gene, Function, Ortholog, Metabolite or Taxon
-
-
-#BIOM_MATRIX_ELEMENT_TYPE
-#  "int" : integer
-#  "float" : floating point
-#  "unicode" : unicode string
+use constant BIOM_TYPE        => 'OTU table';
+# "XYZ table" where XYZ is Pathway, Gene, Function, Ortholog, Metabolite or Taxon
 
 extends 'Bio::Community::IO';
 with 'Bio::Community::Role::IO';
@@ -172,21 +166,16 @@ our $default_abundance_type = 'count'; # absolute count (positive integer)
 our $default_missing_string =  0;      # empty members get a '0'
 
 
-###around BUILDARGS => func ($orig, $class, %args) {
-###   $args{-start_line} = 2; 
-###   return $class->$orig(%args);
-###};
-
-
 before 'close' => sub {
    my ($self) = @_;
    if ($self->_has_first_community) {
       # Write JSON to file, but only if fh opened for writing
-      my $rows = $self->_get_line; #### UPDATE with number of members
+      my $rows = $self->_get_line;
       my $cols = $self->_get_col;
       my $json = $self->_get_json;
-      $json->{'shape'} = [$rows, $cols];
-      my $writer = JSON::XS->new->pretty;
+      $json->{'shape'} = [$rows+0, $cols+0];
+      $json->{'matrix_element_type'} = $self->_get_matrix_element_type;
+      my $writer = JSON::XS->new->pretty;  #### try a bit more compact
       my $str = $writer->encode($json);
       $self->_print($str);
    }
@@ -214,6 +203,18 @@ has 'matrix_type' => (
    reader => 'get_matrix_type',
    writer => 'set_matrix_type',
    predicate => '_has_matrix_type',
+);
+
+
+has 'matrix_element_type' => (
+   is => 'rw',
+   #isa => 'Bool', ### either int, float or unicode
+   required => 0,
+   init_arg => undef,
+   default => 'int', # assume integer until proven otherwise
+   lazy => 1,
+   reader => '_get_matrix_element_type',
+   writer => '_set_matrix_element_type',
 );
 
 
@@ -303,6 +304,16 @@ has '_sorted_members' => (
 );
 
 
+has '_id2line' => (
+   is => 'rw',
+   isa => 'HashRef', # HashRef[String] but keep it lean
+   required => 0,
+   init_arg => undef,
+   default => sub { {} },
+   lazy => 1,
+);
+
+
 method _generate_members () {
    my %members = ();
    for my $row (1 .. $self->_get_max_line) {
@@ -315,7 +326,7 @@ method _generate_members () {
          if (ref($metadata->{'taxonomy'}) eq 'SCALAR') {
             $taxo_desc = $metadata->{'taxonomy'};
          } elsif (ref($metadata->{'taxonomy'}) eq 'ARRAY') {
-            $taxo_desc = join '; ', @{$metadata->{'taxonomy'}};
+            $taxo_desc = join '; ', @{$metadata->{'taxonomy'}}; ### use TaxonomyUtils
          }
          $member->desc( $taxo_desc );
       }
@@ -459,21 +470,42 @@ method _next_community_finish () {
 
 
 method write_member (Bio::Community::Member $member, Count $count) {
-###    my $id   = $member->id;
-###    my $line = $self->_id2line->{$id};
-###    if (not defined $line) {
-###        # This member has not been written previously for another community
-###        $line = $self->_get_max_line + 1;
-###        $self->_set_value( $line, 1, $member->id );
-###        $self->_id2line->{$id} = $line;
-###    }
-###    if ( $member->desc) {
-###       # We'll have to write the description (taxonomy) if it is given
-###       $self->_line2desc->{$line} = $member->desc;
-###    }
-###    $self->_set_value($line, $self->_col, $count);
-###    $self->_line( $line + 1 );
-###    return 1;
+   my $json = $self->_get_json;
+   my $id = $member->id;
+
+   # Check if count is integer or float
+   if ($self->_get_matrix_element_type eq 'int') {
+      if ($count !~ /^\D+$/) {
+         $self->_set_matrix_element_type('float');
+      }
+   }
+
+   # Update 'rows' records if needed
+   my $line = $self->_id2line->{$id};
+   if (not defined $line) {
+      # This member has not been written previously for another community
+      $line = $self->_get_line + 1;
+      my $member_rec = { 'id' => $id, 'metadata' => undef };
+      my $desc = $member->desc;
+      if (not $desc eq '') {
+         my @taxonomy = split /;\s*/, $desc; ### use taxonomyutils
+         $member_rec->{'metadata'}->{'taxonomy'} = \@taxonomy;
+      }
+      push @{$json->{'rows'}}, $member_rec;
+      $self->_id2line->{$id} = $line;
+      $self->_set_line( $line );
+   }
+
+   # Update 'data' records
+   if ($self->get_matrix_type eq 'sparse') {
+      my $col = $self->_get_col;
+      push @{$json->{'data'}}, [$line+0, $col+0, $count+0];
+   } else {
+      ### TODO: writing dense matrix
+   }
+   $self->_set_json($json);
+
+   return 1;
 }
 
 
@@ -488,9 +520,11 @@ method _write_community_init (Bio::Community $community) {
       $self->_write_headers;
       $self->_first_community(0);
    }
-
+   # Write community information
+   my $json = $self->_get_json;
+   push @{$json->{'columns'}}, { 'id' => $community->name, 'metadata' => undef };
+   $self->_set_json($json);
    $self->_set_col( $self->_get_col + 1);
-
    return 1;
 }
 

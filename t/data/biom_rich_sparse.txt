@@ -1,5 +1,6 @@
 {
  "id":null,
+ "comment": "This is an optional comment",
  "format": "Biological Observation Matrix 0.9.1-dev",
  "format_url": "http://biom-format.org/documentation/format_versions/biom-1.0.html",
  "type": "OTU table",
