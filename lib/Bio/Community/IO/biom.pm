@@ -415,10 +415,10 @@ method _generate_members () {
          }
          $member->desc( $taxo_desc );
       }
-      if (exists $members{$id}) {
-         $self->warn("Member with ID $id is present multiple times... ".
-            "Continuing despite the perils!");
-      }
+      #if (exists $members{$id}) {
+      #   $self->warn("Member with ID $id is present multiple times... ".
+      #      "Continuing despite the perils!");
+      #}
       $members{$id} = $member;
    }
 
