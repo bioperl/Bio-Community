@@ -20,6 +20,7 @@ ok $in = Bio::Community::IO->new(
 ), 'Format detection';
 is $in->format, 'biom';
 
+
 #### Test duplicates
 
 #### Test sparse format where counts of zero where added
@@ -614,7 +615,7 @@ ok $in = Bio::Community::IO->new(
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
-is $community->get_richness, 10;
+is $community->get_richness, 9;
 is $community->name, 'replicate_1';
 
 ok $community2 = $in->next_community;
@@ -678,7 +679,7 @@ ok $in = Bio::Community::IO->new(
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
-is $community->get_richness, 10;
+is $community->get_richness, 9;
 is $community->name, 'replicate_1';
 
 ok $community2 = $in->next_community;

@@ -524,7 +524,7 @@ method _write_headers () {
    $json->{'format'}       = BIOM_NAME;
    $json->{'format_url'}   = BIOM_URL;
    $json->{'type'}         = BIOM_TYPE;
-   $json->{'generated_by'} = 'Bio::Community version '.$Bio::Community::VERSION; #### TODO
+   $json->{'generated_by'} = 'Bio::Community version '.$Bio::Community::VERSION;
    $json->{'date'}         = DateTime->now->datetime; # ISO 8601, e.g. 2011-12-19T19:00:00
    $json->{'matrix_type'}  = $self->get_matrix_type;
    $self->_set_json($json);

@@ -6,7 +6,7 @@ use Module::Build;
 
 my $build = Module::Build->new(
     dist_name            => 'Bio-Community',
-    module_name          => 'Bio::Community', # look here for version number resides
+    module_name          => 'Bio::Community', # look here for version number
     dist_author          => 'BioPerl Team <bioperl-l@bioperl.org>',
     dist_abstract        => 'Bio::Community - Represent and manipulate communities of biological organisms',
     license              => 'perl',
