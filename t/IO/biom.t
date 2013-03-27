@@ -23,8 +23,6 @@ is $in->format, 'biom';
 
 #### Test duplicates
 
-#### Test sparse format where counts of zero where added
-
 #### Record 'comment' field
 
 #### record arbitrary community metadata
