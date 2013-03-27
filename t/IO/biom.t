@@ -716,6 +716,262 @@ is $member->desc, 'k__Bacteria; p__Verrucomicrobia; c__Opitutae; o__Opitutales; 
 is $community3->get_count($member), 5719.78392977718;
 
 
+# Read BIOM file with duplicates
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('biom_dups.txt'),
+   -format => 'biom',
+), 'Read BIOM file with duplicates';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 1;
+is $community->name, 'Sample1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 2;
+is $community2->name, 'Sample2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 4;
+is $community3->name, 'Sample3';
+
+ok $community4 = $in->next_community;
+isa_ok $community4, 'Bio::Community';
+is $community4->get_richness, 2;
+is $community4->name, 'Sample4';
+
+ok $community5 = $in->next_community;
+isa_ok $community5, 'Bio::Community';
+is $community5->get_richness, 2;
+is $community5->name, 'Sample5';
+
+ok $community6 = $in->next_community;
+isa_ok $community6, 'Bio::Community';
+is $community6->get_richness, 1;
+is $community6->name, 'Sample6';
+
+is $in->next_community, undef;
+
+is $in->get_matrix_type, 'dense';
+is $in->_get_matrix_element_type, 'int';
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community->get_count($member), 7;
+is $community->get_member_by_rank(2), undef;
+
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community2->get_count($member), 5;
+ok $member = $community2->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, '';
+is $community2->get_count($member), 1;
+is $community2->get_member_by_rank(3), undef;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_1';
+is $member->desc, '';
+is $community3->get_count($member), 4;
+ok $member = $community3->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community3->get_count($member), 3;
+ok $member = $community3->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community3->get_count($member), 2;
+ok $member = $community3->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, '';
+is $community3->get_count($member), 1;
+is $community3->get_member_by_rank(5), undef;
+
+ok $member = $community4->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community4->get_count($member), 4;
+ok $member = $community4->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community4->get_count($member), 2;
+is $community4->get_member_by_rank(3), undef;
+
+ok $member = $community5->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community5->get_count($member), 3;
+ok $member = $community5->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community5->get_count($member), 2;
+is $community5->get_member_by_rank(3), undef;
+
+ok $member = $community6->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community6->get_count($member), 3;
+is $community6->get_member_by_rank(2), undef;
+
+
+# Write BIOM file with duplicates
+
+$output_file = test_output_file();
+
+$output_file = "dups.biom";   ###
+print "FILE: $output_file\n"; ###
+
+ok $out = Bio::Community::IO->new(
+   -file        => '>'.$output_file,
+   -format      => 'biom',
+   -matrix_type => 'sparse',
+), 'Write BIOM file with duplicates';
+
+ok $out->write_community($community);
+ok $out->write_community($community2);
+ok $out->write_community($community3);
+ok $out->write_community($community4);
+ok $out->write_community($community5);
+ok $out->write_community($community6);
+is $out->get_matrix_type, 'sparse';
+is $out->_get_matrix_element_type, 'int';
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file        => $output_file,
+   -format      => 'biom',
+   -matrix_type => 'sparse',
+), 'Re-read BIOM file';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 1;
+is $community->name, 'Sample1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 2;
+is $community2->name, 'Sample2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 4;
+is $community3->name, 'Sample3';
+
+ok $community4 = $in->next_community;
+isa_ok $community4, 'Bio::Community';
+is $community4->get_richness, 2;
+is $community4->name, 'Sample4';
+
+ok $community5 = $in->next_community;
+isa_ok $community5, 'Bio::Community';
+is $community5->get_richness, 2;
+is $community5->name, 'Sample5';
+
+ok $community6 = $in->next_community;
+isa_ok $community6, 'Bio::Community';
+is $community6->get_richness, 1;
+is $community6->name, 'Sample6';
+
+is $in->next_community, undef;
+
+is $in->get_matrix_type, 'sparse';
+is $in->_get_matrix_element_type, 'int';
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community->get_count($member), 7;
+is $community->get_member_by_rank(2), undef;
+
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community2->get_count($member), 5;
+ok $member = $community2->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, '';
+is $community2->get_count($member), 1;
+is $community2->get_member_by_rank(3), undef;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_1';
+is $member->desc, '';
+is $community3->get_count($member), 4;
+ok $member = $community3->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community3->get_count($member), 3;
+ok $member = $community3->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community3->get_count($member), 2;
+ok $member = $community3->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_5';
+is $member->desc, '';
+is $community3->get_count($member), 1;
+is $community3->get_member_by_rank(5), undef;
+
+ok $member = $community4->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community4->get_count($member), 4;
+ok $member = $community4->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community4->get_count($member), 2;
+is $community4->get_member_by_rank(3), undef;
+
+ok $member = $community5->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community5->get_count($member), 3;
+ok $member = $community5->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_3';
+is $member->desc, '';
+is $community5->get_count($member), 2;
+is $community5->get_member_by_rank(3), undef;
+
+ok $member = $community6->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 'GG_OTU_2';
+is $member->desc, '';
+is $community6->get_count($member), 3;
+is $community6->get_member_by_rank(2), undef;
+
+
 # Test invalid biom file
 
 ok $in = Bio::Community::IO->new(

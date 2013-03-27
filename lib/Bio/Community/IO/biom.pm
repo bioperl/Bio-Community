@@ -435,7 +435,7 @@ method _sort_members_by_community {
       my ($row, $sample, $count) = @{$matrix->[$i]};
       if ($count > 0) {
          my $species = $rows->[$row]->{'id'};
-         $sorted_members{$sample}{$species} += $count; # adding allows duplicates
+         $sorted_members{$sample}{$species} += $count; # merge duplicates
       }
    }
    $self->_set_sorted_members(\%sorted_members);
