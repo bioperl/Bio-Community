@@ -21,6 +21,10 @@ ok $in = Bio::Community::IO->new(
 is $in->format, 'biom';
 
 
+#### Test invalid biom file
+
+#### Test float
+
 #### Test duplicates
 
 #### Test sparse format where counts of zero where added
@@ -29,7 +33,7 @@ is $in->format, 'biom';
 
 #### record arbitrary community metadata
 
-### Test int vs float
+
 
 
 # Read BIOM minimal dense file
@@ -609,6 +613,14 @@ is $community6->get_count($member), 1;
 is $community6->get_member_by_rank(3), undef;
 
 
+# Test invalid biom file
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('biom_invalid.txt'),
+   -format => 'biom',
+), 'Read invalid BIOM file';
+
+throws_ok { $in->next_metacommunity } qr/EXCEPTION/, 'Invalid biom file detected';
 
 
 done_testing();
