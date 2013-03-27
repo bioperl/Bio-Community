@@ -28,7 +28,7 @@ ok $in = Bio::Community::IO->new(
    -file   => test_input_file('generic_table.txt'),
    -format => 'generic',
 ), 'Read generic format';
-isa_ok $in, 'Bio::Community::IO::generic';
+isa_ok $in, 'Bio::Community::IO::Driver::generic';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;

@@ -45,6 +45,10 @@ generic tab-separated tables. The format should be automatically detected though
 it can be manually specified. This module can also convert community member
 abundance between counts, fraction and relative abundance.
 
+Bio::Community::IO provides the higher-level organisation to read and write
+community files, but it is the modules located in the Bio::Community::IO::Driver::*
+namespaces that do the low-level format-specific work.
+
 =back
 
 =head1 FEEDBACK
@@ -153,7 +157,7 @@ func new ($class, @args) {
    }
 
    # Use the real driver class here
-   $real_class = __PACKAGE__.'::'.$format;
+   $real_class = __PACKAGE__.'::Driver::'.$format;
    Class::MOP::load_class($real_class);
    $class->throw("Module $real_class does not implement a community IO stream")
        unless $real_class->does('Bio::Community::Role::IO');

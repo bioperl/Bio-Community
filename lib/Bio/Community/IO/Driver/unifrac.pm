@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::IO::unifrac
+# BioPerl module for Bio::Community::IO::Driver::unifrac
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Community::IO::unifrac - Driver to read and write files in the (Fast)Unifrac format
+Bio::Community::IO::Driver::unifrac - Driver to read and write files in the (Fast)Unifrac format
 
 =head1 SYNOPSIS
 
@@ -19,7 +19,7 @@ Bio::Community::IO::unifrac - Driver to read and write files in the (Fast)Unifra
 
 =head1 DESCRIPTION
 
-This Bio::Community::IO::unifrac driver reads and writes Unifrac environment
+This Bio::Community::IO::Driver::unifrac driver reads and writes Unifrac environment
 files and FastUnifrac sample ID mapping files, whose format is described at
 L<http://bmf2.colorado.edu/unifrac/help.psp#env_file> and
 L<http://bmf2.colorado.edu/fastunifrac/help.psp#sample_id_mapping_file>. In this
@@ -103,7 +103,7 @@ Email florent.angly@gmail.com
 =cut
 
 
-package Bio::Community::IO::unifrac;
+package Bio::Community::IO::Driver::unifrac;
 
 use Moose;
 use Method::Signatures;

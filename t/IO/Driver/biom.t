@@ -27,7 +27,7 @@ ok $in = Bio::Community::IO->new(
    -file   => test_input_file('biom_minimal_dense.txt'),
    -format => 'biom',
 ), 'Read BIOM minimal dense file';
-isa_ok $in, 'Bio::Community::IO::biom';
+isa_ok $in, 'Bio::Community::IO::Driver::biom';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
@@ -829,10 +829,6 @@ is $community6->get_member_by_rank(2), undef;
 # Write BIOM file with duplicates
 
 $output_file = test_output_file();
-
-$output_file = "dups.biom";   ###
-print "FILE: $output_file\n"; ###
-
 ok $out = Bio::Community::IO->new(
    -file        => '>'.$output_file,
    -format      => 'biom',

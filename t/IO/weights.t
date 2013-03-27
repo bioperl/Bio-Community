@@ -25,7 +25,7 @@ ok $in = Bio::Community::IO->new(
    -weight_assign     => 1,
    -weight_identifier => 'desc',
 ), 'Read generic format with arbitrary weights';
-isa_ok $in, 'Bio::Community::IO::generic';
+isa_ok $in, 'Bio::Community::IO::Driver::generic';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
@@ -85,7 +85,7 @@ ok $in = Bio::Community::IO->new(
    -weight_assign     => 'file_average',
    -weight_identifier => 'desc',
 ), 'Read generic format with file-average weights';
-isa_ok $in, 'Bio::Community::IO::generic';
+isa_ok $in, 'Bio::Community::IO::Driver::generic';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
@@ -145,7 +145,7 @@ ok $in = Bio::Community::IO->new(
    -weight_assign     => 'file_average',
    -weight_identifier => 'id',
 ), 'Read generic format with file-average weights';
-isa_ok $in, 'Bio::Community::IO::generic';
+isa_ok $in, 'Bio::Community::IO::Driver::generic';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
@@ -205,7 +205,7 @@ ok $in = Bio::Community::IO->new(
    -weight_assign     => 'community_average',
    -weight_identifier => 'desc',
 ), 'Read generic format with community-average weights';
-isa_ok $in, 'Bio::Community::IO::generic';
+isa_ok $in, 'Bio::Community::IO::Driver::generic';
 
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';

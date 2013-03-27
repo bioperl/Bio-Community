@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::IO::biom
+# BioPerl module for Bio::Community::IO::Driver::biom
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Community::IO::biom - Driver to read and write files in the sparse BIOM format
+Bio::Community::IO::Driver::biom - Driver to read and write files in the sparse BIOM format
 
 =head1 SYNOPSIS
 
@@ -31,7 +31,7 @@ Bio::Community::IO::biom - Driver to read and write files in the sparse BIOM for
 
 =head1 DESCRIPTION
 
-This Bio::Community::IO::biom driver reads and writes files in the BIOM format
+This Bio::Community::IO::Driver::biom driver reads and writes files in the BIOM format
 version 1.0 described at L<http://biom-format.org/documentation/format_versions/biom-1.0.html>.
 Multiple communities and additional metadata can be recorded in a BIOM file.
 Here is an example of minimal sparse BIOM file:
@@ -142,7 +142,7 @@ Email florent.angly@gmail.com
 =cut
 
 
-package Bio::Community::IO::biom;
+package Bio::Community::IO::Driver::biom;
 
 use Moose;
 use Method::Signatures;

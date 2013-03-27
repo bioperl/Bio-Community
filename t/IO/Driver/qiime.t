@@ -27,7 +27,7 @@ ok $in = Bio::Community::IO->new(
    -file   => test_input_file('qiime_w_no_taxo.txt'),
    -format => 'qiime',
 ), 'Read QIIME file';
-isa_ok $in, 'Bio::Community::IO::qiime';
+isa_ok $in, 'Bio::Community::IO::Driver::qiime';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;

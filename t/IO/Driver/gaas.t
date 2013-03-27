@@ -36,7 +36,7 @@ ok $in = Bio::Community::IO->new(
    -format   => 'gaas',
 ###   -taxonomy => $taxonomy,
 ), 'Read GAAS format';
-isa_ok $in, 'Bio::Community::IO::gaas';
+isa_ok $in, 'Bio::Community::IO::Driver::gaas';
 is $in->sort_members, -1;
 is $in->abundance_type, 'fraction';
 is $in->missing_string, 0;

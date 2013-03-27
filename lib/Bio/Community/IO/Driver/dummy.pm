@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::IO::dummy
+# BioPerl module for Bio::Community::IO::Driver::dummy
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Community::IO::dummy - Dummy driver (does nothing)
+Bio::Community::IO::Driver::dummy - Dummy driver (does nothing)
 
 =head1 SYNOPSIS
 
@@ -65,7 +65,7 @@ Email florent.angly@gmail.com
 =cut
 
 
-package Bio::Community::IO::dummy;
+package Bio::Community::IO::Driver::dummy;
 
 use Moose;
 use namespace::autoclean;

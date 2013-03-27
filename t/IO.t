@@ -20,7 +20,7 @@ ok $in = Bio::Community::IO->new(
 isa_ok $in, 'Bio::Root::RootI';
 isa_ok $in, 'Bio::Root::IO';
 isa_ok $in, 'Bio::Community::IO';
-isa_ok $in, 'Bio::Community::IO::dummy';
+isa_ok $in, 'Bio::Community::IO::Driver::dummy';
 is $in->format, 'dummy';
 is $in->sort_members, 0;
 

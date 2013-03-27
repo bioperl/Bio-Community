@@ -28,7 +28,7 @@ ok $in = Bio::Community::IO->new(
    -file   => test_input_file('unifrac_quantitative.txt'),
    -format => 'unifrac',
 ), 'Read Unifrac quantitative format';
-isa_ok $in, 'Bio::Community::IO::unifrac';
+isa_ok $in, 'Bio::Community::IO::Driver::unifrac';
 is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
