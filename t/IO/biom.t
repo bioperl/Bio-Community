@@ -21,13 +21,6 @@ ok $in = Bio::Community::IO->new(
 is $in->format, 'biom';
 
 
-#### Test duplicates
-
-#### Record 'comment' field
-
-#### record arbitrary community metadata
-
-
 # Read BIOM minimal dense file
 
 ok $in = Bio::Community::IO->new(

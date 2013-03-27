@@ -40,10 +40,10 @@ Bio::Community::IO - Read and write files that describe communities
 =head1 DESCRIPTION
 
 A Bio::Community::IO object implement methods to read and write communities in
-formats used by popular programs such as GAAS, QIIME, Unifrac, or as generic tab-
-separated tables. The format should be automatically detected though it can be
-manually specified. This moddule can also convert community member abundance
-between counts, fraction and relative abundance.
+formats used by popular programs such as BIOM, GAAS, QIIME, Unifrac, or as
+generic tab-separated tables. The format should be automatically detected though
+it can be manually specified. This module can also convert community member
+abundance between counts, fraction and relative abundance.
 
 =back
 
@@ -97,9 +97,10 @@ methods. Internal methods are usually preceded with a _
            my $out = Bio::Community::IO->new( -file => '>community.txt',
                                               -format => 'generic'       );
  Args    : -file : Path of a community file. See file() in Bio::Root::IO.
-           -format : Format of the file: 'generic', 'gaas', 'qiime', 'unifrac'.
-               This is optional when reading a community file because the format
-               is automatically detected. See also format() in Bio::Root::IO.
+           -format : Format of the file, either 'generic', 'biom', 'gaas',
+               'qiime' or 'unifrac'. This is optional when reading a community
+               file because the format is automatically detected. See also
+               format() in Bio::Root::IO.
            -weight_files : Arrayref of files (or filehandles) that contain
                weights to assign to members. See weight_files().
            -weight_assign : When using files of weights, define what to do for

@@ -48,7 +48,7 @@ in all communities.
 =item -if <input_files>... | -input_files <input_files>...
 
 Input files containing the communities to convert. All files must have the same
-format, which can be one of generic (tab-delimited table), qiime, gaas or
+format, which can be one of generic (tab-delimited table), biom, qiime, gaas or
 unifrac. See L<Bio::Community::IO> for more information on these format. Take
 note of the <member_identifier> option if you provide multiple input files.
 

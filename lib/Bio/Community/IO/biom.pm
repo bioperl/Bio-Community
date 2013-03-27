@@ -97,6 +97,8 @@ Rows can also be expressed in a richer form:
 For each Bio::Community::Member generated, the id() method contains the 'id' and
 desc() holds a concatenated version of the 'taxonomy' field.
 
+Note that the 'comment' field of biom files is ignored.
+
 =head1 CONSTRUCTOR
 
 See L<Bio::Community::IO>.
