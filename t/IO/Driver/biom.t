@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Bio::Root::Test;
+use Test::Number::Delta;
 use Bio::DB::Taxonomy;
 
 use_ok($_) for qw(
@@ -630,19 +631,19 @@ ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->id, '84';
 is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Deltaproteobacteria; o__Myxococcales; f__; g__; s__';
-is $community2->get_count($member), 3714.82697742678;
+delta_ok $community2->get_count($member), 3714.82697742678;
 
 ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->id, '84';
 is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Deltaproteobacteria; o__Myxococcales; f__; g__; s__';
-is $community2->get_count($member), 3714.82697742678;
+delta_ok $community2->get_count($member), 3714.82697742678;
 
 ok $member = $community3->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->id, '118';
 is $member->desc, 'k__Bacteria; p__Verrucomicrobia; c__Opitutae; o__Opitutales; f__Opitutaceae; g__Opitutus; s__';
-is $community3->get_count($member), 5719.78392977718;
+delta_ok $community3->get_count($member), 5719.78392977718;
 
 
 # Write BIOM file with decimals
@@ -694,19 +695,19 @@ ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->id, '84';
 is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Deltaproteobacteria; o__Myxococcales; f__; g__; s__';
-is $community2->get_count($member), 3714.82697742678;
+delta_ok $community2->get_count($member), 3714.82697742678;
 
 ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->id, '84';
 is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Deltaproteobacteria; o__Myxococcales; f__; g__; s__';
-is $community2->get_count($member), 3714.82697742678;
+delta_ok $community2->get_count($member), 3714.82697742678;
 
 ok $member = $community3->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->id, '118';
 is $member->desc, 'k__Bacteria; p__Verrucomicrobia; c__Opitutae; o__Opitutales; f__Opitutaceae; g__Opitutus; s__';
-is $community3->get_count($member), 5719.78392977718;
+delta_ok $community3->get_count($member), 5719.78392977718;
 
 
 # Read BIOM file with duplicates
