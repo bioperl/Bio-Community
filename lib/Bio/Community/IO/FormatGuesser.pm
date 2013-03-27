@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::Tools::FormatGuesser
+# BioPerl module for Bio::Community::IO::FormatGuesser
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -9,13 +9,13 @@
 
 =head1 NAME
 
-Bio::Community::Tools::FormatGuesser - Determine the format used by a community file
+Bio::Community::IO::FormatGuesser - Determine the format used by a community file
 
 =head1 SYNOPSIS
 
-  use Bio::Community::Tools::FormatGuesser;
+  use Bio::Community::IO::FormatGuesser;
 
-  my $guesser = Bio::Community::Tools::FormatGuesser->new(
+  my $guesser = Bio::Community::IO::FormatGuesser->new(
      -file => 'file.txt',
   );
   my $format = $guesser->guess;
@@ -28,9 +28,9 @@ used by examining the file content (not by looking at the file name).
 The guess() method will examine the data, line by line, until it finds a line
 that is specific to a format. If no conclusive guess can be made, undef is returned.
 
-If the Bio::Community::Tools::GuessSeqFormat object is given a filehandle
-which is seekable, it will be restored to its original position
-on return from the guess() method.
+If the Bio::Community::IO::FormatGuesser object is given a filehandle which is
+seekable, it will be restored to its original position on return from the
+guess() method.
 
 =head2 Formats
 
@@ -101,9 +101,8 @@ web:
 
 Email florent.angly@gmail.com
 
-This module was inspired and based on the Bio::Tools::GuessSeqFormat module
-written by Andreas Kähäri <andreas.kahari@ebi.ac.uk> and contributors. Thanks to
-them!
+This module was inspired and based on the Bio::IO::GuessSeqFormat module written
+by Andreas Kähäri <andreas.kahari@ebi.ac.uk> and contributors. Thanks to them!
 
 =head1 APPENDIX
 
@@ -117,12 +116,12 @@ methods. Internal methods are usually preceded with a _
  Args    : -text, -file or -fh. If more than one of these arguments was
            provided, only one is used: -text has precendence over -file, which
            has precedence over -fh.
- Returns : a new Bio::Community::Tools::FormatGuesser object
+ Returns : a new Bio::Community::IO::FormatGuesser object
 
 =cut
 
 
-package Bio::Community::Tools::FormatGuesser;
+package Bio::Community::IO::FormatGuesser;
 
 use Moose;
 use MooseX::NonMoose;
