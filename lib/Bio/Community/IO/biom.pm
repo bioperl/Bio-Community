@@ -87,15 +87,15 @@ Columns (i.e. communities) can be expressed in a richer way, e.g.:
                            "BODY_SITE":"gut",
                            "Description":"human gut"}},
 
-The 'id' can be recovered from the id() method of the resulting Bio::Community,
-while the 'Description' is obtained from the desc() method.
+The 'id' can be recovered from the name() method of the resulting Bio::Community.
+Metadata fields are not recorded at this time, but will be in a future release.
 
 Rows can also be expressed in a richer form:
 
   {"id":"GG_OTU_1", "metadata":{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}},
 
 For each Bio::Community::Member generated, the id() method contains the 'id' and
-desc() holds a concatenated version of the 'taxonomy'.
+desc() holds a concatenated version of the 'taxonomy' field.
 
 =head1 CONSTRUCTOR
 
@@ -351,6 +351,7 @@ method _parse_json () {
    $self->_set_max_col( $max_col );
 
    $self->set_matrix_type($json->{'matrix_type'});
+   $self->_set_matrix_element_type($json->{'matrix_element_type'});
 
    return $json;
 }
@@ -536,7 +537,8 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
    # Check if count is integer or float
    if ($self->_get_matrix_element_type eq 'int') {
-      if ($count !~ /^\D+$/) {
+      if ($count =~ /\D/) {
+         # Count has at least one non-digit character
          $self->_set_matrix_element_type('float');
       }
    }

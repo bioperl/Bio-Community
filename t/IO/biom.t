@@ -20,11 +20,6 @@ ok $in = Bio::Community::IO->new(
 ), 'Format detection';
 is $in->format, 'biom';
 
-
-#### Test invalid biom file
-
-#### Test float
-
 #### Test duplicates
 
 #### Test sparse format where counts of zero where added
@@ -32,8 +27,6 @@ is $in->format, 'biom';
 #### Record 'comment' field
 
 #### record arbitrary community metadata
-
-
 
 
 # Read BIOM minimal dense file
@@ -86,6 +79,7 @@ is $community6->name, 'Sample6';
 is $in->next_community, undef;
 
 is $in->get_matrix_type, 'dense';
+is $in->_get_matrix_element_type, 'int';
 
 $in->close;
 
@@ -192,6 +186,8 @@ ok $out->write_community($community3);
 ok $out->write_community($community4);
 ok $out->write_community($community5);
 ok $out->write_community($community6);
+is $out->get_matrix_type, 'dense';
+is $out->_get_matrix_element_type, 'int';
 $out->close;
 
 ok $in = Bio::Community::IO->new(
@@ -234,6 +230,7 @@ is $community6->name, 'Sample6';
 is $in->next_community, undef;
 
 is $in->get_matrix_type, 'dense';
+is $in->_get_matrix_element_type, 'int';
 
 $in->close;
 
@@ -331,16 +328,6 @@ ok $in = Bio::Community::IO->new(
    -file   => test_input_file('biom_rich_sparse.txt'),
    -format => 'biom',
 ), 'Read BIOM rich sparse file';
-isa_ok $in, 'Bio::Community::IO::biom';
-is $in->sort_members, 0;
-is $in->abundance_type, 'count';
-is $in->missing_string, 0;
-is $in->multiple_communities, 1;
-
-@methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
-for my $method (@methods) {
-   can_ok($in, $method) || diag "Method $method() not implemented";
-}
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
@@ -375,6 +362,7 @@ is $community6->name, 'Sample6';
 is $in->next_community, undef;
 
 is $in->get_matrix_type, 'sparse';
+is $in->_get_matrix_element_type, 'int';
 
 $in->close;
 
@@ -481,6 +469,8 @@ ok $out->write_community($community3);
 ok $out->write_community($community4);
 ok $out->write_community($community5);
 ok $out->write_community($community6);
+is $out->get_matrix_type, 'sparse';
+is $out->_get_matrix_element_type, 'int';
 $out->close;
 
 ok $in = Bio::Community::IO->new(
@@ -522,6 +512,7 @@ is $community6->name, 'Sample6';
 is $in->next_community, undef;
 
 is $in->get_matrix_type, 'sparse';
+is $in->_get_matrix_element_type, 'int';
 
 $in->close;
 
@@ -611,6 +602,119 @@ is $member->id, 'GG_OTU_4';
 is $member->desc, 'k__Bacteria; p__Firmicutes; c__Clostridia; o__Halanaerobiales; f__Halanaerobiaceae; g__Halanaerobium; s__saccharolyticum';
 is $community6->get_count($member), 1;
 is $community6->get_member_by_rank(3), undef;
+
+
+# Read BIOM file with decimals
+
+ok $in = Bio::Community::IO->new(
+   -file        => test_input_file('biom_float.txt'),
+   -format      => 'biom',
+   -matrix_type => 'sparse'
+), 'Read BIOM file with decimals';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 10;
+is $community->name, 'replicate_1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 10;
+is $community2->name, 'replicate_2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 10;
+is $community3->name, 'replicate_3';
+
+is $in->next_community, undef;
+
+is $in->get_matrix_type, 'sparse';
+is $in->_get_matrix_element_type, 'float';
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, '84';
+is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Deltaproteobacteria; o__Myxococcales; f__; g__; s__';
+is $community2->get_count($member), 3714.82697742678;
+
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, '84';
+is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Deltaproteobacteria; o__Myxococcales; f__; g__; s__';
+is $community2->get_count($member), 3714.82697742678;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, '118';
+is $member->desc, 'k__Bacteria; p__Verrucomicrobia; c__Opitutae; o__Opitutales; f__Opitutaceae; g__Opitutus; s__';
+is $community3->get_count($member), 5719.78392977718;
+
+
+# Write BIOM file with decimals
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file        => '>'.$output_file,
+   -format      => 'biom',
+   -matrix_type => 'sparse',
+), 'Write BIOM file with decimals';
+
+ok $out->write_community($community);
+ok $out->write_community($community2);
+ok $out->write_community($community3);
+is $out->get_matrix_type, 'sparse';
+is $out->_get_matrix_element_type, 'float';
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file        => $output_file,
+   -format      => 'biom',
+   -matrix_type => 'sparse',
+), 'Re-read BIOM file';
+
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 10;
+is $community->name, 'replicate_1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 10;
+is $community2->name, 'replicate_2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 10;
+is $community3->name, 'replicate_3';
+
+is $in->next_community, undef;
+
+is $in->get_matrix_type, 'sparse';
+is $in->_get_matrix_element_type, 'float';
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, '84';
+is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Deltaproteobacteria; o__Myxococcales; f__; g__; s__';
+is $community2->get_count($member), 3714.82697742678;
+
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, '84';
+is $member->desc, 'k__Bacteria; p__Proteobacteria; c__Deltaproteobacteria; o__Myxococcales; f__; g__; s__';
+is $community2->get_count($member), 3714.82697742678;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, '118';
+is $member->desc, 'k__Bacteria; p__Verrucomicrobia; c__Opitutae; o__Opitutales; f__Opitutaceae; g__Opitutus; s__';
+is $community3->get_count($member), 5719.78392977718;
 
 
 # Test invalid biom file
