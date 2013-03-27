@@ -341,6 +341,9 @@ method _parse_json () {
    #}
    #my $json = $parser->decode($str);
 
+
+   $self->_validate_biom($json);
+
    $self->_set_json($json);
 
    my ($max_line, $max_col) = @{$json->{'shape'}};
@@ -350,6 +353,49 @@ method _parse_json () {
    $self->set_matrix_type($json->{'matrix_type'});
 
    return $json;
+}
+
+
+method _validate_biom ($biom) {
+   # Check that the biom content has all the mandatory fields. Also do some
+   # basic validation to ensure that parsing will be successful. It is not a
+   # comprehensive validation of the file format!
+
+   my $msg = 'Biom file is invalid:';
+
+   my @mandatory = qw( id format format_url type generated_by date rows columns
+      matrix_type matrix_element_type shape data );
+   for my $field (@mandatory) {
+      if (not exists $biom->{$field}) {
+         $self->throw("$msg missing mandatory '$field' field");
+      }
+   }
+
+   for my $field (qw(rows columns)) {
+      for my $subfield (qw(id metadata)) {
+         for my $entry (@{$biom->{$field}}) {
+            if (not exists $entry->{$subfield}) {
+               $self->throw("$msg missing mandatory '$subfield' subfield of '$field' field");
+            }
+         }
+      }
+   }
+
+   my $shape_rows = $biom->{'shape'}->[0];
+   my $rows = scalar @{$biom->{'rows'}};
+   if ($shape_rows != $rows) {
+      $self->throw("$msg inconsistent number of rows between 'rows' ($rows) and 'shape' ($shape_rows)");
+   }
+
+   my $shape_cols = $biom->{'shape'}->[1];
+   my $cols = scalar @{$biom->{'columns'}};
+   if ($shape_cols != $cols) {
+      $self->throw("$msg inconsistent number of columns between 'columns' ($cols) and 'shape' ($shape_cols)");
+   }
+
+   ### Validate that 'data' has the right shape?
+
+   return 1;
 }
 
 
