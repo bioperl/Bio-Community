@@ -47,33 +47,33 @@ is $in->next_community, undef;
 
 $in->close;
 
-ok $member = $community->next_member;
+ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Streptococcus';
 is $community->get_count($member), 241;
 is_deeply $member->weights, [1, 1];
 delta_ok $community->get_rel_ab($member), 100.0;
-is $community->next_member, undef;
+is $community->get_member_by_rank(2), undef;
 
-ok $member = $community2->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Streptococcus';
-is $community2->get_count($member), 334;
-is_deeply $member->weights, [1, 1];
-delta_ok $community2->get_rel_ab($member), 48.5747527632;
-ok $member = $community2->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Lumpy skin disease virus';
-is $community2->get_count($member), 123;
-is_deeply $member->weights, [0.1, 100];
-delta_ok $community2->get_rel_ab($member), 1.7888307155;
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Goatpox virus';
 is $community2->get_count($member), 1023.9;
 is_deeply $member->weights, [3, 1];
 delta_ok $community2->get_rel_ab($member), 49.6364165212;
-is $community2->next_member, undef;
+ok $member = $community2->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Streptococcus';
+is $community2->get_count($member), 334;
+is_deeply $member->weights, [1, 1];
+delta_ok $community2->get_rel_ab($member), 48.5747527632;
+ok $member = $community2->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Lumpy skin disease virus';
+is $community2->get_count($member), 123;
+is_deeply $member->weights, [0.1, 100];
+delta_ok $community2->get_rel_ab($member), 1.7888307155;
+is $community2->get_member_by_rank(4), undef;
 
 
 # Read generic format with file-average weights
@@ -107,33 +107,33 @@ is $in->next_community, undef;
 
 $in->close;
 
-ok $member = $community->next_member;
+ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Streptococcus';
 is $community->get_count($member), 241;
 is_deeply $member->weights, [1, 200];
 delta_ok $community->get_rel_ab($member), 100.0;
-is $community->next_member, undef;
+is $community->get_member_by_rank(2), undef;
 
-ok $member = $community2->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Streptococcus';
-is $community2->get_count($member), 334;
-is_deeply $member->weights, [1, 200];
-delta_ok $community2->get_rel_ab($member), 10.6528880809;
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Lumpy skin disease virus';
 is $community2->get_count($member), 123;
 is_deeply $member->weights, [0.1, 100];
 delta_ok $community2->get_rel_ab($member), 78.4613912544;
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Goatpox virus';
 is $community2->get_count($member), 1023.9;
 is_deeply $member->weights, [3, 200];
 delta_ok $community2->get_rel_ab($member), 10.8857206647;
-is $community2->next_member, undef;
+ok $member = $community2->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Streptococcus';
+is $community2->get_count($member), 334;
+is_deeply $member->weights, [1, 200];
+delta_ok $community2->get_rel_ab($member), 10.6528880809;
+is $community2->get_member_by_rank(4), undef;
 
 
 # Read generic format with file-average weights
@@ -167,33 +167,33 @@ is $in->next_community, undef;
 
 $in->close;
 
-ok $member = $community->next_member;
+ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Streptococcus';
 is $community->get_count($member), 241;
 is_deeply $member->weights, [1.36666666666667, 200];
 delta_ok $community->get_rel_ab($member), 100.0;
-is $community->next_member, undef;
+is $community->get_member_by_rank(2), undef;
 
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Goatpox virus';
 is $community2->get_count($member), 1023.9;
 is_deeply $member->weights, [1.36666666666667, 200];
 delta_ok $community2->get_rel_ab($member), 69.1403876;
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Streptococcus';
 is $community2->get_count($member), 334;
 is_deeply $member->weights, [1.36666666666667, 200];
 delta_ok $community2->get_rel_ab($member), 22.5538524;
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(3);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Lumpy skin disease virus';
 is $community2->get_count($member), 123;
 is_deeply $member->weights, [1.36666666666667, 200];
 delta_ok $community2->get_rel_ab($member), 8.3057600;
-is $community2->next_member, undef;
+is $community2->get_member_by_rank(4), undef;
 
 
 # Read generic format with community-average weights
@@ -232,33 +232,33 @@ is $in->next_community, undef;
 
 $in->close;
 
-ok $member = $community->next_member;
+ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Streptococcus';
 is $community->get_count($member), 241;
 is_deeply $member->weights, [1, 200];
 delta_ok $community->get_rel_ab($member), 100.0;
-is $community->next_member, undef;
+is $community->get_member_by_rank(2), undef;
 
-ok $member = $community2->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Streptococcus';
-is $community2->get_count($member), 334;
-is_deeply $member->weights, [1, 100];
-delta_ok $community2->get_rel_ab($member), 17.5300478;
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Lumpy skin disease virus';
 is $community2->get_count($member), 123;
 is_deeply $member->weights, [0.1, 100];
 delta_ok $community2->get_rel_ab($member), 64.5567627;
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Goatpox virus';
 is $community2->get_count($member), 1023.9;
 is_deeply $member->weights, [3, 100];
 delta_ok $community2->get_rel_ab($member), 17.9131895;
-is $community2->next_member, undef;
+ok $member = $community2->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Streptococcus';
+is $community2->get_count($member), 334;
+is_deeply $member->weights, [1, 100];
+delta_ok $community2->get_rel_ab($member), 17.5300478;
+is $community2->get_member_by_rank(4), undef;
 
 
 # Read qiime format with ancestor-based weights
@@ -293,47 +293,47 @@ is $in->next_community, undef;
 
 $in->close;
 
-ok $member = $community->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
-is $community->get_count($member), 40;
-is_deeply $member->weights, [100];
-delta_ok $community->get_rel_ab($member), 49.3827160;
-ok $member = $community->next_member;
+ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'No blast hit';
 is $community->get_count($member), 41;
 is_deeply $member->weights, [100];
 delta_ok $community->get_rel_ab($member), 50.6172840;
-is $community->next_member, undef;
+ok $member = $community->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
+is $community->get_count($member), 40;
+is_deeply $member->weights, [100];
+delta_ok $community->get_rel_ab($member), 49.3827160;
+is $community->get_member_by_rank(3), undef;
 
-ok $member = $community2->next_member;
+ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__';
 is $community2->get_count($member), 142;
 is_deeply $member->weights, [300];
 delta_ok $community2->get_rel_ab($member), 100;
-is $community2->next_member, undef;
+is $community2->get_member_by_rank(2), undef;
 
-ok $member = $community3->next_member;
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__';
-is $community3->get_count($member), 2;
-is_deeply $member->weights, [300];
-delta_ok $community3->get_rel_ab($member), 0.5605462;
-ok $member = $community3->next_member;
+ok $member = $community3->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
 is $community3->get_count($member), 76;
 is_deeply $member->weights, [100];
 delta_ok $community3->get_rel_ab($member), 63.9022637;
-ok $member = $community3->next_member;
+ok $member = $community3->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'No blast hit';
 is $community3->get_count($member), 43;
 is_deeply $member->weights, [101.739130434783];
 delta_ok $community3->get_rel_ab($member), 35.5371901;
-is $community3->next_member, undef;
+ok $member = $community3->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__';
+is $community3->get_count($member), 2;
+is_deeply $member->weights, [300];
+delta_ok $community3->get_rel_ab($member), 0.5605462;
+is $community3->get_member_by_rank(4), undef;
 
 $in->close;
 

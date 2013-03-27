@@ -153,37 +153,37 @@ ok $meta->add_communities([$community1, $community2]);
 
 ok $community1 = $meta->next_community;
 
-$member = $community1->next_member;
-is $member->desc, 'k__Bacteria;p__Firmicutes';
-$ids{$member->desc} = $member->id;
-is $community1->get_count($member), 91;
-$member = $community1->next_member;
-is $member->desc, 'k__Bacteria;p__Actinobacteria';
-$ids{$member->desc} = $member->id;
-is $community1->get_count($member), 195;
-$member = $community1->next_member;
-is $member->desc, 'k__Bacteria;p__Bacteroidetes';
-$ids{$member->desc} = $member->id;
-is $community1->get_count($member), 123;
-$member = $community1->next_member;
+$member = $community1->get_member_by_rank(1);
 is $member->desc, 'k__Bacteria;p__Proteobacteria';
 $ids{$member->desc} = $member->id;
 is $community1->get_count($member), 527;
-is $community1->next_member, undef;
+$member = $community1->get_member_by_rank(2);
+is $member->desc, 'k__Bacteria;p__Actinobacteria';
+$ids{$member->desc} = $member->id;
+is $community1->get_count($member), 195;
+$member = $community1->get_member_by_rank(3);
+is $member->desc, 'k__Bacteria;p__Bacteroidetes';
+$ids{$member->desc} = $member->id;
+is $community1->get_count($member), 123;
+$member = $community1->get_member_by_rank(4);
+is $member->desc, 'k__Bacteria;p__Firmicutes';
+$ids{$member->desc} = $member->id;
+is $community1->get_count($member), 91;
+is $community1->get_member_by_rank(5), undef;
 
 ok $community2 = $meta->next_community;
 
-$member = $community2->next_member;
+$member = $community2->get_member_by_rank(1);
 is $member->desc, 'k__Bacteria;p__Firmicutes';
 is $ids{$member->desc}, $member->id;
 is $community2->get_count($member), 446;
-$member = $community2->next_member;
-is $member->desc, 'k__Bacteria;p__Actinobacteria';
-is $community2->get_count($member), 69;
-$member = $community2->next_member;
+$member = $community2->get_member_by_rank(2);
 is $member->desc, 'k__Archaea';
 is $community2->get_count($member), 87;
-is $community2->next_member, undef;
+$member = $community2->get_member_by_rank(3);
+is $member->desc, 'k__Bacteria;p__Actinobacteria';
+is $community2->get_count($member), 69;
+is $community2->get_member_by_rank(4), undef;
 
 is $meta->next_community, undef;
 
