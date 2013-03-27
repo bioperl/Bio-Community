@@ -327,29 +327,26 @@ method _next_community_init () {
 
 
 method _parse_json () {
-   # Parse JSON string incrementally
-   my $parser = JSON::XS->new();
+   # Retrieve all text content
+   my $str = '';
    while (my $line = $self->_readline(-raw => 1)) {
-      $parser->incr_parse( $line );
+      $str .= $line;
    }
-   my $json = $parser->incr_parse();
 
-   ## ... or Parse JSON string in one step
-   #my $str = '';
-   #while (my $line = $self->_readline(-raw => 1)) {
-   #   $str .= $line;
-   #}
-   #my $json = $parser->decode($str);
-
-
+   # Parse JSON string
+   my $parser = JSON::XS->new();
+   my $json;
+   eval { $json = $parser->decode($str) };
+   if ($@) {
+      $self->throw("Biom file is not properly JSON-formatted: $@");
+   }
    $self->_validate_biom($json);
-
    $self->_set_json($json);
 
+   # Retrieve and store some information
    my ($max_line, $max_col) = @{$json->{'shape'}};
    $self->_set_max_line( $max_line );
    $self->_set_max_col( $max_col );
-
    $self->set_matrix_type($json->{'matrix_type'});
    $self->_set_matrix_element_type($json->{'matrix_element_type'});
 
