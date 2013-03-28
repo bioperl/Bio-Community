@@ -111,6 +111,8 @@ methods. Internal methods are usually preceded with a _
                community members that do not have weights. See weight_assign().
            -taxonomy: Given a Bio::DB::Taxonomy object, try to place the community
                members in this taxonomy. See taxonomy().
+           -skip_empty_communities: Skip communities with no members. See
+               skip_empty_communities()
            See Bio::Root::IO for other accepted constructors, like -fh.
  Returns : A Bio::Community::IO object
 
@@ -209,6 +211,9 @@ method next_member () {
 
 method next_community () {
    my $community;
+
+   my $keep_empty = 1;
+
    while ( 1 ) { # Skip communities with no members
 
       # Initialize driver for next community and set community name
@@ -248,7 +253,7 @@ method next_community () {
 
       $self->_next_community_finish;
 
-      if ($community->get_richness > 0) {
+      if ( ($community->get_richness > 0) || (not $self->skip_empty_communities) ) {
          last;
       } else {
          $community = undef;
@@ -321,6 +326,9 @@ method write_member (Bio::Community::Member $member, Count $count) {
 =cut
 
 method write_community (Bio::Community $community) {
+
+   ### skip empty if needed
+
    $self->_write_community_init($community);
    my $sort_members = $self->sort_members;
    if ($sort_members == 1) {
@@ -393,6 +401,26 @@ method _process_member ($member, $community) {
    $self->write_member($member, $ab_value);
    return 1;
 }
+
+
+=head2 skip_empty_communities
+
+ Usage   : $in->skip_empty_communities;
+ Function: Get or set whether empty communities (with no members) should be
+           read/written or skipped.
+ Args    : 0 or 1
+ Returns : 0 or 1
+
+=cut
+
+has 'skip_empty_communities' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   lazy => 1,
+   default => 0,
+   init_arg => '-skip_empty_communities',
+);
 
 
 =head2 sort_members

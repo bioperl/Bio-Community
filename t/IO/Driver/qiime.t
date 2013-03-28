@@ -321,8 +321,9 @@ is $community3->get_member_by_rank(4), undef;
 # in any community
 
 ok $in = Bio::Community::IO->new(
-   -file   => test_input_file('qiime_w_missing.txt'),
-   -format => 'qiime',
+   -file                   => test_input_file('qiime_w_missing.txt'),
+   -format                 => 'qiime',
+   -skip_empty_communities => 1,
 ), 'Read QIIME file with missing element';
 
 ok $community = $in->next_community;
@@ -359,7 +360,7 @@ is $community2->get_count($member), 76;
 is $community2->get_member_by_rank(2), undef;
 
 
-# Read QIIME file where a taxonomy has root and Consensuslineage is spelt differently
+# Read QIIME file where a taxonomy has root and Consensuslineage is spelled differently
 
 ok $in = Bio::Community::IO->new(
    -file     => test_input_file('qiime_w_root.txt'),

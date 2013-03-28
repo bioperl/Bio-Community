@@ -90,14 +90,16 @@ Columns (i.e. communities) can be expressed in a richer way, e.g.:
 The 'id' can be recovered from the name() method of the resulting Bio::Community.
 Metadata fields are not recorded at this time, but will be in a future release.
 
-Rows can also be expressed in a richer form:
+Rows (i.e. community members) can also be expressed in a richer form:
 
   {"id":"GG_OTU_1", "metadata":{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}},
 
 For each Bio::Community::Member generated, the id() method contains the 'id' and
-desc() holds a concatenated version of the 'taxonomy' field.
+desc() holds a concatenated version of the 'taxonomy' field. Note that you can
+omit members entirely from a biom file and simply have community names and
+metadata.
 
-Note that the 'comment' field of biom files is ignored.
+The 'comment' field of biom files is not recorded and simply ignored.
 
 =head1 CONSTRUCTOR
 
@@ -181,7 +183,7 @@ has '_first_community' => (
 
 has 'matrix_type' => (
    is => 'rw',
-   isa => 'BiomMatrixType',
+   isa => 'Maybe[BiomMatrixType]',
    required => 0,
    init_arg => '-matrix_type',
    default => undef,
@@ -312,7 +314,9 @@ method _next_community_init () {
    }
 
    # Sort members when reading sparse matrix
-   if ($self->get_matrix_type eq 'sparse') {
+   # (if there are no species in the biom file yet, matrix type is not defined)
+   my $matrix_type = $self->get_matrix_type;
+   if ( (defined $matrix_type) && ($matrix_type eq 'sparse') ) {
       $self->_sort_members_by_community();
    }
 
@@ -452,37 +456,38 @@ method next_member () {
    my $members = $self->_get_members;
    my $json    = $self->_get_json;
 
-   if ($json->{'matrix_type'} eq 'sparse') { # sparse matrix format
+   if (defined $json->{'matrix_type'}) {
+      if ($json->{'matrix_type'} eq 'sparse') { # sparse matrix format
 
-      my $sorted_members = $self->_get_sorted_members;
-      my @ids = keys %{$sorted_members->{$col-1}};
-      if (scalar @ids > 0) {
-         $id = shift @ids;
-         $count = delete $sorted_members->{$col-1}->{$id};
-         $self->_set_sorted_members($sorted_members);
-      }
+         my $sorted_members = $self->_get_sorted_members;
+         my @ids = keys %{$sorted_members->{$col-1}};
+         if (scalar @ids > 0) {
+            $id = shift @ids;
+            $count = delete $sorted_members->{$col-1}->{$id};
+            $self->_set_sorted_members($sorted_members);
+         }
 
-   } else { # dense matrix format
+      } else { # dense matrix format
 
-      my $rows   = $json->{'rows'};
-      my $matrix = $json->{'data'};
-      my $line   = $self->_get_line;
-      while ( ++$line ) {
-         # Get the abundance of the member (undef if out-of-bounds)
-         $count = $matrix->[$line-1]->[$col-1];
-         if (defined $count) {
-            if ($count > 0) {
-               $id = $rows->[$line-1]->{'id'};
-               $self->_set_line($line);
+         my $rows   = $json->{'rows'};
+         my $matrix = $json->{'data'};
+         my $line   = $self->_get_line;
+         while ( ++$line ) {
+            # Get the abundance of the member (undef if out-of-bounds)
+            $count = $matrix->[$line-1]->[$col-1];
+            if (defined $count) {
+               if ($count > 0) {
+                  $id = $rows->[$line-1]->{'id'};
+                  $self->_set_line($line);
+                  last;
+               }
+            } else {
+               # No more members for this community
+               $self->_set_line(0);
                last;
             }
-         } else {
-            # No more members for this community
-            $self->_set_line(0);
-            last;
          }
       }
-
    }
 
    if (defined $id) {
