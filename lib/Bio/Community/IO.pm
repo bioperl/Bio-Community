@@ -45,9 +45,60 @@ generic tab-separated tables. The format should be automatically detected though
 it can be manually specified. This module can also convert community member
 abundance between counts, fraction and relative abundance.
 
+When reading communities, the next_member() method is called by next_community(),
+which itself is called by next_metacommunity(). Similarly, when writing,
+write_member() is called by write_community(), which is called by
+write_metacommunity().
+
+=head2 DRIVER IMPLEMENTATION
+
 Bio::Community::IO provides the higher-level organisation to read and write
 community files, but it is the modules located in the Bio::Community::IO::Driver::*
 namespaces that do the low-level format-specific work.
+
+All drivers are expected to implement specific methods, e.g. for reading:
+
+=over
+
+=item _next_community_init()
+
+A private hook called at the beginning of next_community() and returns the name
+of the community. It allows drivers to do an action before the current community
+is read.
+
+=item next_member()
+
+A public method that returns a Bio::Community::Member and its count in the
+community being read.
+
+=item _next_community_finish()
+
+A private hook called at the end of next_community(). It allows drivers to do
+an action after the current community has been read.
+
+=back
+
+Similarly, for a driver to write community information to a file or stream,
+these methods should be implemented:
+
+=over
+
+=item write_member()
+
+A public method that accepts as arguments a Bio::Community::Member and its count
+in the community being written, and processes them.
+
+=item _write_community_init()
+
+A private hook called at the beginning of write_community() and that accepts
+a Bio::Community as argument. It allows drivers to do an action before the
+current community is written.
+
+=back _write_community_finish()
+
+A private hook called at the end of write_community() and that accepts a
+Bio::Community as argument. It allows drivers to do an action after the
+current community has been written.
 
 =back
 
@@ -182,9 +233,9 @@ method BUILD ($args) {
 =head2 next_member
 
  Usage   : my ($member, $count) = $in->next_member;
- Function: Get the next member from the community and its abundance. This function
-           relies on the _next_member method provided by a driver specific to
-           fille format requested.
+ Function: Get the next member from the community and its abundance. This
+           function is implemented by the Bio::Community::IO::Driver used to
+           parse the given file format.
  Args    : None
  Returns : An array containing:
              A Bio::Community::Member object (or undef)
@@ -303,8 +354,8 @@ method next_metacommunity () {
 
  Usage   : $out->write_member($member, $abundance);
  Function: Write the next member from the community and its count or relative
-           abundance. This function is provided by a driver specific to each file
-           format.
+           abundance. This function is implemented by a Bio::Community::IO::Driver
+           specific to the given file format.
  Args    : A Bio::Community::Member object
            A positive number
  Returns : 1 for success
