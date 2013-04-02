@@ -199,7 +199,7 @@ has 'matrix_element_type' => (
    #isa => 'Str', # either int, float or unicode
    required => 0,
    init_arg => undef,
-   default => 'int', # assume integer until proven otherwise
+   default => undef,
    lazy => 1,
    reader => '_get_matrix_element_type',
    writer => '_set_matrix_element_type',
@@ -524,6 +524,8 @@ method _write_community_init (Bio::Community $community) {
 
 method _write_headers () {
    my $json = {};
+
+   # Write some generic information
    $json->{'id'}           = undef;
    $json->{'format'}       = BIOM_NAME;
    $json->{'format_url'}   = BIOM_URL;
@@ -531,7 +533,14 @@ method _write_headers () {
    $json->{'generated_by'} = 'Bio::Community version '.$Bio::Community::VERSION;
    $json->{'date'}         = DateTime->now->datetime; # ISO 8601, e.g. 2011-12-19T19:00:00
    $json->{'matrix_type'}  = $self->get_matrix_type;
+
+   # Also create a couple of mandatory fields (but leave them empty)
+   $json->{'rows'}         = undef;
+   $json->{'columns'}      = undef;
+   $json->{'data'}         = undef;
+
    $self->_set_json($json);
+   return 1;
 }
 
 
@@ -540,6 +549,10 @@ method write_member (Bio::Community::Member $member, Count $count) {
    my $id = $member->id;
 
    # Check if count is integer or float
+   if (not defined $self->_get_matrix_element_type) {
+      # assume integer until proven otherwise
+      $self->_set_matrix_element_type('int'); 
+   }
    if ($self->_get_matrix_element_type eq 'int') {
       if ($count =~ /\D/) {
          # Count has at least one non-digit character
@@ -604,10 +617,17 @@ before 'close' => sub {
       # Write JSON to file, but only if fh opened for writing
       my $rows = $self->_get_line;
       my $cols = $self->_get_col;
+
+      if ($rows == 0) {
+         $self->_set_matrix_element_type( undef );
+         $self->set_matrix_type( undef );
+      }
+
       my $json = $self->_get_json;
       $json->{'shape'} = [$rows+0, $cols+0];
       $json->{'matrix_element_type'} = $self->_get_matrix_element_type;
-      if ($self->get_matrix_type eq 'dense') {
+      $json->{'matrix_type'} = $self->get_matrix_type;
+      if ((defined $self->get_matrix_type) && ($self->get_matrix_type eq 'dense')) {
          $self->_fill_missing();
       }
       my $writer = JSON::XS->new->pretty;

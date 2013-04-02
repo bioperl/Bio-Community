@@ -327,31 +327,34 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 method write_community (Bio::Community $community) {
 
-   ### skip empty if needed
+   # Skip empty community if desired
+   if ( ($community->get_richness > 0) || (not $self->skip_empty_communities) ) {
 
-   $self->_write_community_init($community);
-   my $sort_members = $self->sort_members;
-   if ($sort_members == 1) {
-      my $rank = $community->get_richness;
-      while ( my $member = $community->get_member_by_rank($rank) ) {
-         $self->_process_member($member, $community);
-         $rank--;
-         last if $rank == 0;
+      $self->_write_community_init($community);
+      my $sort_members = $self->sort_members;
+      if ($sort_members == 1) {
+         my $rank = $community->get_richness;
+         while ( my $member = $community->get_member_by_rank($rank) ) {
+            $self->_process_member($member, $community);
+            $rank--;
+            last if $rank == 0;
+         }
+      } elsif ($sort_members == -1) {
+         my $rank = 1;
+         while ( my $member = $community->get_member_by_rank($rank) ) {
+            $self->_process_member($member, $community);
+            $rank++;
+         }
+      } elsif ($sort_members == 0) {
+         while ( my $member = $community->next_member('_write_community_ite') ) {
+            $self->_process_member($member, $community);
+         }
+      } else {
+         $self->throw("Error: $sort_members is not a valid sort value.\n");
       }
-   } elsif ($sort_members == -1) {
-      my $rank = 1;
-      while ( my $member = $community->get_member_by_rank($rank) ) {
-         $self->_process_member($member, $community);
-         $rank++;
-      }
-   } elsif ($sort_members == 0) {
-      while ( my $member = $community->next_member('_write_community_ite') ) {
-         $self->_process_member($member, $community);
-      }
-   } else {
-      $self->throw("Error: $sort_members is not a valid sort value.\n");
+      $self->_write_community_finish($community);
    }
-   $self->_write_community_finish($community);
+
    return 1;
 }
 

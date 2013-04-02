@@ -962,12 +962,83 @@ is $community6->get_count($member), 3;
 is $community6->get_member_by_rank(2), undef;
 
 
-# Test biom containing no species, just sample names and metadata
+# Write BIOM containing no species, just sample names and metadata
 
 ok $in = Bio::Community::IO->new(
    -file   => test_input_file('biom_no_spp.txt'),
    -format => 'biom',
 ), 'Read BIOM file with no species';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 0;
+is $community->name, 'Sample1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 0;
+is $community2->name, 'Sample2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 0;
+is $community3->name, 'Sample3';
+
+ok $community4 = $in->next_community;
+isa_ok $community4, 'Bio::Community';
+is $community4->get_richness, 0;
+is $community4->name, 'Sample4';
+
+ok $community5 = $in->next_community;
+isa_ok $community5, 'Bio::Community';
+is $community5->get_richness, 0;
+is $community5->name, 'Sample5';
+
+ok $community6 = $in->next_community;
+isa_ok $community6, 'Bio::Community';
+is $community6->get_richness, 0;
+is $community6->name, 'Sample6';
+
+is $in->next_community, undef;
+
+is $in->get_matrix_type, undef;
+is $in->_get_matrix_element_type, undef;
+
+$in->close;
+
+is $member = $community->get_member_by_rank(1), undef;
+is $member = $community2->get_member_by_rank(1), undef;
+is $member = $community3->get_member_by_rank(1), undef;
+is $member = $community4->get_member_by_rank(1), undef;
+is $member = $community5->get_member_by_rank(1), undef;
+is $member = $community6->get_member_by_rank(1), undef;
+
+
+# Write BIOM file with no species
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file        => '>'.$output_file,
+   -format      => 'biom',
+   -matrix_type => 'sparse',   
+), 'Write BIOM file with duplicates';
+
+ok $out->write_community($community);
+ok $out->write_community($community2);
+ok $out->write_community($community3);
+ok $out->write_community($community4);
+ok $out->write_community($community5);
+ok $out->write_community($community6);
+is $out->get_matrix_type, 'sparse';
+is $out->_get_matrix_element_type, undef;
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file        => $output_file,
+   -format      => 'biom',
+   -matrix_type => 'sparse',
+), 'Re-read BIOM file';
+
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
