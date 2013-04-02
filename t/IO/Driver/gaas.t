@@ -43,7 +43,10 @@ is $in->missing_string, 0;
 is $in->multiple_communities, 0;
 ###is $in->taxonomy, $taxonomy;
 
-@methods = qw(next_member write_member _next_community_init _next_community_finish _write_community_init _write_community_finish);
+@methods = qw(
+  _next_metacommunity_init _next_community_init next_member _next_community_finish _next_metacommunity_finish
+  _write_metacommunity_init _write_community_init write_member _write_community_finish _write_metacommunity_finish)
+;
 for my $method (@methods) {
    can_ok($in, $method) || diag "Method $method() not implemented";
 }

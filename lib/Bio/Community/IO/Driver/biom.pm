@@ -503,6 +503,17 @@ method _next_community_finish () {
 }
 
 
+method _next_metacommunity_init () {
+   my $name = ''; # no provision for metacommunity name in this format
+   return $name;
+}
+
+
+method _next_metacommunity_finish () {
+   return 1;
+}
+
+
 method _write_community_init (Bio::Community $community) {
    # Set default matrix type to sparse
    if (not $self->_has_matrix_type) {
@@ -635,6 +646,17 @@ before 'close' => sub {
       $self->_print($str);
    }
 };
+
+
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
+   return 1;
+}
+
+
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
+   return 1;
+}
+
 
 
 __PACKAGE__->meta->make_immutable;

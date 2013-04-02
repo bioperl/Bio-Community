@@ -294,6 +294,17 @@ method _next_community_finish () {
 }
 
 
+method _next_metacommunity_init () {
+   my $name = ''; # no provision for metacommunity name in this format
+   return $name;
+}
+
+
+method _next_metacommunity_finish () {
+   return 1;
+}
+
+
 method write_member (Bio::Community::Member $member, Count $count) {
     my $id   = $member->id;
     my $line = $self->_id2line->{$id};
@@ -336,6 +347,16 @@ method _write_headers () {
 
 
 method _write_community_finish (Bio::Community $community) {
+   return 1;
+}
+
+
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
+   return 1;
+}
+
+
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    return 1;
 }
 

@@ -298,6 +298,17 @@ method _next_community_finish () {
 }
 
 
+method _next_metacommunity_init () {
+   my $name = ''; # no provision for metacommunity name in this format
+   return $name;
+}
+
+
+method _next_metacommunity_finish () {
+   return 1;
+}
+
+
 method write_member (Bio::Community::Member $member, Count $count) {
 
    # Replace spaces by dot in description
@@ -365,6 +376,16 @@ method _write_community_finish (Bio::Community $community) {
       $self->_delete_col(3);
    }
 
+   return 1;
+}
+
+
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
+   return 1;
+}
+
+
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    return 1;
 }
 

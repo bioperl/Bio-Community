@@ -60,11 +60,17 @@ All drivers are expected to implement specific methods, e.g. for reading:
 
 =over
 
+=item _next_metacommunity_init()
+
+A private hook called at the beginning of next_metacommunity() that returns the
+name of the metacommunity (if applicable). It also allows drivers to do an
+action before the metacommunity is read.
+
 =item _next_community_init()
 
-A private hook called at the beginning of next_community() and returns the name
-of the community. It allows drivers to do an action before the current community
-is read.
+A private hook called at the beginning of next_community() that returns the name
+of the community. It also allows drivers to do an action before the current
+community is read.
 
 =item next_member()
 
@@ -76,17 +82,23 @@ community being read.
 A private hook called at the end of next_community(). It allows drivers to do
 an action after the current community has been read.
 
+=item _next_metacommunity_finish()
+
+A private hook called at the end of next_metacommunity(). It allows drivers to
+do an action after the metacommunity has been read.
+
 =back
 
 Similarly, for a driver to write community information to a file or stream,
-these methods should be implemented:
+it should implement these methods:
 
 =over
 
-=item write_member()
+=item _write_metacommunity_init()
 
-A public method that accepts as arguments a Bio::Community::Member and its count
-in the community being written, and processes them.
+A private hook called at the beginning of write_metacommunity() and that accepts
+a Bio::Community::Meta as argument. It allows drivers to do an action before the
+metacommunity is written.
 
 =item _write_community_init()
 
@@ -94,11 +106,22 @@ A private hook called at the beginning of write_community() and that accepts
 a Bio::Community as argument. It allows drivers to do an action before the
 current community is written.
 
-=back _write_community_finish()
+=item write_member()
+
+A public method that accepts as arguments a Bio::Community::Member and its count
+in the community being written, and processes them.
+
+=item _write_community_finish()
 
 A private hook called at the end of write_community() and that accepts a
 Bio::Community as argument. It allows drivers to do an action after the
 current community has been written.
+
+=back _write_metacommunity_finish()
+
+A private hook called at the end of write_metacommunity() and that accepts a
+Bio::Community::Meta as argument. It allows drivers to do an action after the
+metacommunity has been written.
 
 =back
 
@@ -343,10 +366,27 @@ method _next_community_finish () {
 
 method next_metacommunity () {
    my $meta = Bio::Community::Meta->new();
+   my $name = $self->_next_metacommunity_init;
+   if (defined $name) {
+      $meta->name($name);
+   }
    while (my $community = $self->next_community) {
       $meta->add_communities([$community]);
    }
+   $self->_next_metacommunity_finish;
    return $meta;
+}
+
+
+method _next_metacommunity_init () {
+   # Driver-side method to initialize new metacommunity and return its name
+   $self->throw_not_implemented;
+}
+
+
+method _next_metacommunity_finish () {
+   # Driver-side method to finalize reading a metacommunity
+   $self->throw_not_implemented;
 }
 
 
@@ -432,10 +472,24 @@ method _write_community_finish (Bio::Community $community) {
 =cut
 
 method write_metacommunity (Bio::Community::Meta $meta) {
+   $self->_write_metacommunity_init($meta);
    while (my $community = $meta->next_community) {
       $self->write_community($community);
    }
+   $self->_write_metacommunity_finish($meta);
    return 1;
+}
+
+
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
+   # Driver-side method to initialize writing a metacommunity
+   $self->throw_not_implemented;
+}
+
+
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
+   # Driver-side method to finalize writing a metacommunity
+   $self->throw_not_implemented;
 }
 
 
