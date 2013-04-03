@@ -111,8 +111,8 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Function: Create a new Bio::Community::Tool::FormatGuesser object
- Usage   : my $guesser = Bio::Community::Tool::FormatGuesser->new( );
+ Function: Create a new Bio::Community::IO::FormatGuesser object
+ Usage   : my $guesser = Bio::Community::IO::FormatGuesser->new( );
  Args    : -text, -file or -fh. If more than one of these arguments was
            provided, only one is used: -text has precendence over -file, which
            has precedence over -fh.

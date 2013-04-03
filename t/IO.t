@@ -49,6 +49,7 @@ ok $in = Bio::Community::IO->new(
 
 ok $meta = $in->next_metacommunity;
 isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, '';
 is $meta->get_members_count, 1721.9;
 is $meta->get_communities_count, 2;
 is $meta->get_richness, 3;
@@ -62,6 +63,16 @@ ok $out = Bio::Community::IO->new(
 
 ok $out->write_metacommunity($meta);
 $out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+);
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, '';
+is $meta->get_members_count, 1721.9;
+is $meta->get_communities_count, 2;
+is $meta->get_richness, 3;
+$in->close;
 
 
 # -weight_files is tested in t/IO/weights.t

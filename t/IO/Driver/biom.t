@@ -9,7 +9,7 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $member, $count, $taxonomy,
+my ($in, $out, $meta, $output_file, $member, $count, $taxonomy,
    $community, $community2, $community3, $community4, $community5, $community6 );
 my (@communities, @methods);
 
@@ -191,7 +191,6 @@ ok $in = Bio::Community::IO->new(
    -format      => 'biom',
    -matrix_type => 'dense',
 ), 'Re-read BIOM file';
-
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
@@ -965,7 +964,7 @@ is $community6->get_count($member), 3;
 is $community6->get_member_by_rank(2), undef;
 
 
-# Write BIOM containing no species, just sample names and metadata
+# Read BIOM containing no species, just sample names and metadata
 
 ok $in = Bio::Community::IO->new(
    -file   => test_input_file('biom_no_spp.txt'),
@@ -1088,14 +1087,53 @@ is $member = $community5->get_member_by_rank(1), undef;
 is $member = $community6->get_member_by_rank(1), undef;
 
 
+# Read biom metacommunity with name
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('biom_rich_sparse.txt'),
+   -format => 'biom',
+), 'Read biom metacommunity with a name';
+
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, 'Human microbiomes';
+is $meta->get_members_count, 37;
+is $meta->get_communities_count, 6;
+is $meta->get_richness, 5;
+$in->close;
+
+
+# Write biom metacommunity with name
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'biom',
+), 'Write biom metacommunity with a name';
+
+ok $out->write_metacommunity($meta);
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+);
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, 'Human microbiomes';
+is $meta->get_members_count, 37;
+is $meta->get_communities_count, 6;
+is $meta->get_richness, 5;
+$in->close;
+
+
 # Test invalid biom file
 
 ok $in = Bio::Community::IO->new(
    -file   => test_input_file('biom_invalid.txt'),
    -format => 'biom',
-), 'Read invalid BIOM file';
+);
 
-throws_ok { $in->next_metacommunity } qr/EXCEPTION/, 'Invalid biom file detected';
+throws_ok { $in->next_metacommunity } qr/EXCEPTION/, 'Invalid biom file';
 
 
 done_testing();

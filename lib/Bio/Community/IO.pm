@@ -29,7 +29,7 @@ Bio::Community::IO - Read and write files that describe communities
      -file   => '>new_otu_table.generic',
      -format => 'generic',
   );
-  $out->write_community;
+  $out->write_community($community);
   $out->close;
 
   # Re-read communities, but all at once
@@ -177,8 +177,9 @@ methods. Internal methods are usually preceded with a _
  Args    : -file : Path of a community file. See file() in Bio::Root::IO.
            -format : Format of the file, either 'generic', 'biom', 'gaas',
                'qiime' or 'unifrac'. This is optional when reading a community
-               file because the format is automatically detected. See also
-               format() in Bio::Root::IO.
+               file because the format is automatically detected by the
+               Bio::Community::IO::FormatGuesser module. See also format() in
+               Bio::Root::IO.
            -weight_files : Arrayref of files (or filehandles) that contain
                weights to assign to members. See weight_files().
            -weight_assign : When using files of weights, define what to do for
@@ -187,7 +188,8 @@ methods. Internal methods are usually preceded with a _
                members in this taxonomy. See taxonomy().
            -skip_empty_communities: Skip communities with no members. See
                skip_empty_communities()
-           See Bio::Root::IO for other accepted constructors, like -fh.
+           See the documentation for _initialize_io() in Bio::Root::IO for other
+           accepted constructors like -fh, -string, -input, or -url.
  Returns : A Bio::Community::IO object
 
 =cut
@@ -196,18 +198,29 @@ methods. Internal methods are usually preceded with a _
 package Bio::Community::IO;
 
 use Moose;
+use Moose::Util qw/does_role/;
 use MooseX::NonMoose;
 use namespace::autoclean;
 use Method::Signatures;
 use Bio::Community;
 use Bio::Community::Meta;
 use Bio::Community::Types;
-use Bio::Community::Tools::FormatGuesser;
+use Bio::Community::IO::FormatGuesser;
 use Bio::Community::TaxonomyUtils
    qw(split_lineage_string get_taxon_lineage get_lineage_string clean_lineage_arr);
 
 extends 'Bio::Root::Root',
         'Bio::Root::IO';
+
+
+has '_meta' => (
+   is => 'rw',
+   #isa => undef, # Bio::Community::Meta
+   required => 0,
+   init_arg => undef,
+   default => undef,
+   lazy => 1,
+);
 
 
 # Overriding new... Is there a better alternative?
@@ -220,7 +233,7 @@ func new ($class, @args) {
    my $format = delete $params->{'-format'};
    if (not defined $format) {
       # Try to guess format
-      my $guesser = Bio::Community::Tools::FormatGuesser->new();
+      my $guesser = Bio::Community::IO::FormatGuesser->new();
       if ($params->{'-file'}) {
          $guesser->file( $params->{'-file'} );
       } elsif ($params->{'-fh'}) {
@@ -286,7 +299,10 @@ method next_member () {
 method next_community () {
    my $community;
 
-   my $keep_empty = 1;
+   if (not defined $self->_meta) {
+      $self->_next_metacommunity_init( );
+      $self->_meta(Bio::Community::Meta->new);
+   }
 
    while ( 1 ) { # Skip communities with no members
 
@@ -334,7 +350,6 @@ method next_community () {
       }
 
    }
-
    # Community is undef if all communities have been seen
    return $community;
 }
@@ -370,11 +385,12 @@ method next_metacommunity () {
    if (defined $name) {
       $meta->name($name);
    }
+   $self->_meta($meta);
    while (my $community = $self->next_community) {
-      $meta->add_communities([$community]);
+      $self->_meta->add_communities([$community]);
    }
-   $self->_next_metacommunity_finish;
-   return $meta;
+   # _next_metacommunity_finish will happen before close()
+   return $self->_meta;
 }
 
 
@@ -417,8 +433,13 @@ method write_member (Bio::Community::Member $member, Count $count) {
 =cut
 
 method write_community (Bio::Community $community) {
-
    # Skip empty community if desired
+
+   if (not defined $self->_meta) {
+      $self->_write_metacommunity_init( );
+      $self->_meta(Bio::Community::Meta->new);
+   }
+
    if ( ($community->get_richness > 0) || (not $self->skip_empty_communities) ) {
 
       $self->_write_community_init($community);
@@ -445,7 +466,6 @@ method write_community (Bio::Community $community) {
       }
       $self->_write_community_finish($community);
    }
-
    return 1;
 }
 
@@ -472,25 +492,42 @@ method _write_community_finish (Bio::Community $community) {
 =cut
 
 method write_metacommunity (Bio::Community::Meta $meta) {
+   $self->_meta($meta);
    $self->_write_metacommunity_init($meta);
    while (my $community = $meta->next_community) {
       $self->write_community($community);
    }
-   $self->_write_metacommunity_finish($meta);
+   # _write_metacommunity_finish will happen before close()
    return 1;
 }
 
 
-method _write_metacommunity_init (Bio::Community::Meta $meta) {
+method _write_metacommunity_init (Bio::Community::Meta $meta?) {
    # Driver-side method to initialize writing a metacommunity
    $self->throw_not_implemented;
 }
 
 
-method _write_metacommunity_finish (Bio::Community::Meta $meta) {
+method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
    # Driver-side method to finalize writing a metacommunity
    $self->throw_not_implemented;
 }
+
+
+before 'close' => sub {
+   my $self = shift;
+   if ($self->mode eq 'r') {
+      $self->_next_metacommunity_finish();
+   } else {
+      # Finish preparing the metacommunity for writing
+      $self->_write_metacommunity_finish($self->_meta);
+      # For objects consuming Bio::Community::Role::Table, write the table now
+      if (does_role($self, 'Bio::Community::Role::Table')) {
+         $self->_write_table;
+      }
+   }
+   return 1;
+};
 
 
 #method _process_member (Bio::Community::Member $member, Bio::Community $community) {

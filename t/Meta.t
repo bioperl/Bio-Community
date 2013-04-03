@@ -22,7 +22,7 @@ ok $meta = Bio::Community::Meta->new( ), 'Bare object';
 isa_ok $meta, 'Bio::Root::RootI';
 isa_ok $meta, 'Bio::Community::Meta';
 
-is $meta->name, 'Unnamed';
+is $meta->name, '';
 is $meta->identify_members_by, 'id';
 is $meta->next_community, undef;
 

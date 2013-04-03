@@ -122,33 +122,6 @@ around BUILDARGS => func ($orig, $class, %args) {
 };
 
 
-before 'close' => sub {
-   my ($self) = @_;
-   if ($self->_has_first_community) {
-      # Add taxonomy (desc) if available, but only when fh opened for reading
-      my $col = $self->_col + 1;
-      my $descs = $self->_line2desc;
-      if ( scalar keys %{$descs} ) {
-         $self->_set_value(1, $col, 'Consensus Lineage');
-         while ( my ($line, $desc) = each %$descs ) {
-            $self->_set_value($line, $col, $desc);
-         }
-      }
-   }
-};
-
-
-has '_first_community' => (
-   is => 'rw',
-   isa => 'Bool',
-   required => 0,
-   init_arg => undef,
-   default => 1,
-   predicate => '_has_first_community',
-   lazy => 1,
-);
-
-
 has '_line' => (
    is => 'rw',
    isa => 'PositiveInt',
@@ -270,10 +243,6 @@ method next_member () {
 
 method _next_community_init () {
    # Go to start of next column and return name of new community or undef.
-   # The first time, initialize the read process by generating all community members.
-   if (not $self->_has_members) {
-      $self->_generate_members();
-   }
    my $col  = $self->_col + 1;
    my $line = 1;
    my $name;
@@ -295,6 +264,8 @@ method _next_community_finish () {
 
 
 method _next_metacommunity_init () {
+   # Initialize the read process by generating all community members.
+   $self->_generate_members();
    my $name = ''; # no provision for metacommunity name in this format
    return $name;
 }
@@ -325,11 +296,6 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 
 method _write_community_init (Bio::Community $community) {
-   # If first community, write first column header
-   if ($self->_first_community) {
-      $self->_write_headers;
-      $self->_first_community(0);
-   }
    # Write header for that community
    my $line = 1;
    my $col  = $self->_col + 1;
@@ -351,12 +317,23 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
-method _write_metacommunity_init (Bio::Community::Meta $meta) {
+method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+   # Write first column header
+   $self->_write_headers;
    return 1;
 }
 
 
-method _write_metacommunity_finish (Bio::Community::Meta $meta) {
+method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
+   # Add taxonomy (desc) if available, but only when fh opened for reading
+   my $col = $self->_col + 1;
+   my $descs = $self->_line2desc;
+   if ( scalar keys %{$descs} ) {
+      $self->_set_value(1, $col, 'Consensus Lineage');
+      while ( my ($line, $desc) = each %$descs ) {
+         $self->_set_value($line, $col, $desc);
+      }
+   }
    return 1;
 }
 

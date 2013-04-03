@@ -243,16 +243,6 @@ method BUILD ($args) {
 }
 
 
-before 'close' =>  sub {
-   # Before closing filehandle, write the table if filehandle is writable and
-   # the table was not already written.
-   my $self = shift;
-   if ( ($self->mode eq 'w') && (not $self->_was_written) ) {
-      $self->_write_table;
-   }
-};
-
-
 # Index of the location of the cells (when reading a table)
 has '_index' => (
    is => 'rw',
@@ -529,6 +519,7 @@ method _insert_line ($line, $insert_values) {  # this function is called a lot, 
 
 #method _delete_col (StrictlyPositiveInt $col) {
 method _delete_col ($col) {  # this function is called a lot, keep it lean
+
    my $max_cols = $self->_get_max_col;
    if ( $col > $max_cols ) {
       $self->throw("Could not delete column $col because the table has only $max_cols columns.");
@@ -555,8 +546,7 @@ method _delete_col ($col) {  # this function is called a lot, keep it lean
 =head2 _write_table
 
  Usage   : $out->_write_table;
- Function: Write the content of the cells in the table to a file. This method is
-           called automatically when the filehandle is closed: $out->close;
+ Function: Write the content of the cells in the table to a file.
            If you want header lines before the table, it is your responsability
            to write them to file using the _print() method of Bio::Root::IO
            prior to calling _write_table().

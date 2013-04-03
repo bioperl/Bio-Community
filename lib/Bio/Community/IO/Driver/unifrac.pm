@@ -122,16 +122,6 @@ our $default_abundance_type = 'count'; # absolute count (positive integer)
 our $default_missing_string =  0;      # empty members get a '0'
 
 
-has '_first_community' => (
-   is => 'rw',
-   isa => 'Bool',
-   required => 0,
-   init_arg => undef,
-   default => 1,
-   lazy => 1,
-);
-
-
 has '_line' => (
    is => 'rw',
    isa => 'PositiveInt',
@@ -196,7 +186,7 @@ has '_desc2line' => (
 
 has '_qualitative_unifrac' => (
    is => 'rw',
-   isa => 'Bool',
+   isa => 'Bool', # automatically detect if it's qualitative Unifrac
    required => 0,
    init_arg => undef,
    default => 1,
@@ -277,15 +267,7 @@ method next_member () {
 
 
 method _next_community_init () {
-   # Go to start of next column and return name of new community. The first time,
-   # generate all community members and read all community names
-   if (not $self->_has_community_names) {
-      $self->_generate_community_names();
-   }
-   if (not $self->_has_members) {
-      $self->_generate_members();
-   }
-
+   # Go to start of next column and return name of new community
    my $name = shift @{$self->_community_names};
    $self->_current_name($name) if defined $name;
    $self->_line(0);
@@ -299,6 +281,9 @@ method _next_community_finish () {
 
 
 method _next_metacommunity_init () {
+   # Generate all community members and read all community names
+   $self->_generate_community_names();
+   $self->_generate_members();
    my $name = ''; # no provision for metacommunity name in this format
    return $name;
 }
@@ -320,18 +305,12 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
    my $values = [$desc, $self->_current_name, $count];
 
-   ### not needed if column removal is done at the end
-   my $max_cols = $self->_get_max_col;
-   if ($max_cols > 0 && (scalar @$values > $max_cols) ) {
-      pop @$values;
-   }
-
    if (not defined $line) {
 
       # This member has not been written previously for another community
       # append to table
       $line = $self->_get_max_line + 1;
-      $self->_insert_line($line, $values );
+      $self->_insert_line($line, $values);
       $desc2line->{$desc} = $line;
 
    } else {
@@ -369,23 +348,20 @@ method _write_community_init (Bio::Community $community) {
 
 
 method _write_community_finish (Bio::Community $community) {
+   return 1;
+}
 
-   ### Do it at very end, not after each community
+
+method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+   return 1;
+}
+
+
+method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
    if ( ($self->_get_max_col == 3) && $self->_qualitative_unifrac ) {
       # Delete last column (the counts)
       $self->_delete_col(3);
    }
-
-   return 1;
-}
-
-
-method _write_metacommunity_init (Bio::Community::Meta $meta) {
-   return 1;
-}
-
-
-method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    return 1;
 }
 

@@ -170,17 +170,6 @@ our $default_abundance_type = 'count'; # absolute count (positive integer)
 our $default_missing_string =  0;      # empty members get a '0'
 
 
-has '_first_community' => (
-   is => 'rw',
-   isa => 'Bool',
-   required => 0,
-   init_arg => undef,
-   default => 1,
-   predicate => '_has_first_community',
-   lazy => 1,
-);
-
-
 has 'matrix_type' => (
    is => 'rw',
    isa => 'Maybe[BiomMatrixType]',
@@ -303,23 +292,6 @@ has '_id2line' => (
 
 
 method _next_community_init () {
-   # First time, parse the JSON string
-   if (not $self->_has_json) {
-      $self->_parse_json();
-   }
-
-   # Generate all members
-   if (not $self->_has_members) {
-      $self->_generate_members();
-   }
-
-   # Sort members when reading sparse matrix
-   # (if there are no species in the biom file yet, matrix type is not defined)
-   my $matrix_type = $self->get_matrix_type;
-   if ( (defined $matrix_type) && ($matrix_type eq 'sparse') ) {
-      $self->_sort_members_by_community();
-   }
-
    # Get community name and set column number
    my $col = $self->_get_col + 1;
    my $name;
@@ -327,7 +299,6 @@ method _next_community_init () {
       $name = $self->_get_json->{'columns'}->[$col-1]->{'id'};
    }
    $self->_set_col( $col );
-
    return $name;
 }
 
@@ -451,11 +422,9 @@ method _sort_members_by_community {
 
 method next_member () {
    my ($id, $member, $count);
-
    my $col     = $self->_get_col;
    my $members = $self->_get_members;
    my $json    = $self->_get_json;
-
    if (defined $json->{'matrix_type'}) {
       if ($json->{'matrix_type'} eq 'sparse') { # sparse matrix format
 
@@ -489,11 +458,9 @@ method next_member () {
          }
       }
    }
-
    if (defined $id) {
       $member = $members->{$id};
    }
-
    return $member, $count;
 }
 
@@ -504,7 +471,15 @@ method _next_community_finish () {
 
 
 method _next_metacommunity_init () {
-   my $name = ''; # no provision for metacommunity name in this format
+   $self->_parse_json(); # Parse the JSON string
+   $self->_generate_members(); # Generate all Bio::Community::Members
+   # Sort members when reading sparse matrix
+   # (if there are no species in the biom file yet, matrix type is not defined)
+   my $matrix_type = $self->get_matrix_type;
+   if ( (defined $matrix_type) && ($matrix_type eq 'sparse') ) {
+      $self->_sort_members_by_community();
+   }
+   my $name = $self->_get_json->{'id'};
    return $name;
 }
 
@@ -515,15 +490,6 @@ method _next_metacommunity_finish () {
 
 
 method _write_community_init (Bio::Community $community) {
-   # Set default matrix type to sparse
-   if (not $self->_has_matrix_type) {
-      $self->set_matrix_type('sparse');
-   }
-   # If first community, write some generic header information
-   if ($self->_first_community) {
-      $self->_write_headers;
-      $self->_first_community(0);
-   }
    # Write community information
    my $json = $self->_get_json;
    push @{$json->{'columns'}}, { 'id' => $community->name, 'metadata' => undef };
@@ -533,23 +499,20 @@ method _write_community_init (Bio::Community $community) {
 }
 
 
-method _write_headers () {
+method _write_headers ($name) {
    my $json = {};
-
    # Write some generic information
-   $json->{'id'}           = undef;
+   $json->{'id'}           = $name;
    $json->{'format'}       = BIOM_NAME;
    $json->{'format_url'}   = BIOM_URL;
    $json->{'type'}         = BIOM_TYPE;
    $json->{'generated_by'} = 'Bio::Community version '.$Bio::Community::VERSION;
    $json->{'date'}         = DateTime->now->datetime; # ISO 8601, e.g. 2011-12-19T19:00:00
    $json->{'matrix_type'}  = $self->get_matrix_type;
-
    # Also create a couple of mandatory fields (but leave them empty)
    $json->{'rows'}         = undef;
    $json->{'columns'}      = undef;
    $json->{'data'}         = undef;
-
    $self->_set_json($json);
    return 1;
 }
@@ -605,6 +568,43 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
+method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+   # Set default matrix type to sparse
+   if (not $self->_has_matrix_type) {
+      $self->set_matrix_type('sparse');
+   }
+   # Write some generic header information
+   my $name;
+   if (defined $meta) {
+      $name = $meta->name;
+   }
+   $self->_write_headers($name);
+   return 1;
+}
+
+
+method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
+   # Write JSON to file
+   my $rows = $self->_get_line;
+   my $cols = $self->_get_col;
+   if ($rows == 0) {
+      $self->_set_matrix_element_type( undef );
+      $self->set_matrix_type( undef );
+   }
+   my $json = $self->_get_json;
+   $json->{'shape'} = [$rows+0, $cols+0];
+   $json->{'matrix_element_type'} = $self->_get_matrix_element_type;
+   $json->{'matrix_type'} = $self->get_matrix_type;
+   if ((defined $self->get_matrix_type) && ($self->get_matrix_type eq 'dense')) {
+      $self->_fill_missing();
+   }
+   my $writer = JSON::XS->new->pretty;
+   my $str = $writer->encode($json);
+   $self->_print($str);
+   return 1;
+}
+
+
 method _fill_missing () { 
    my $json = $self->_get_json;
    my $data = $json->{'data'};
@@ -618,42 +618,6 @@ method _fill_missing () {
       }
    }
    $self->_set_json($json);
-   return 1;
-}
-
-
-before 'close' => sub {
-   my ($self) = @_;
-   if ($self->_has_first_community) {
-      # Write JSON to file, but only if fh opened for writing
-      my $rows = $self->_get_line;
-      my $cols = $self->_get_col;
-
-      if ($rows == 0) {
-         $self->_set_matrix_element_type( undef );
-         $self->set_matrix_type( undef );
-      }
-
-      my $json = $self->_get_json;
-      $json->{'shape'} = [$rows+0, $cols+0];
-      $json->{'matrix_element_type'} = $self->_get_matrix_element_type;
-      $json->{'matrix_type'} = $self->get_matrix_type;
-      if ((defined $self->get_matrix_type) && ($self->get_matrix_type eq 'dense')) {
-         $self->_fill_missing();
-      }
-      my $writer = JSON::XS->new->pretty;
-      my $str = $writer->encode($json);
-      $self->_print($str);
-   }
-};
-
-
-method _write_metacommunity_init (Bio::Community::Meta $meta) {
-   return 1;
-}
-
-
-method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    return 1;
 }
 

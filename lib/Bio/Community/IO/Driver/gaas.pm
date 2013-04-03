@@ -97,16 +97,6 @@ our $default_abundance_type  = 'fraction'; # fractional number between 0 and 1
 our $default_missing_string  =  0;         # empty members get a '0'
 
 
-has '_first_community' => (
-   is => 'rw',
-   isa => 'Bool',
-   required => 0,
-   init_arg => undef,
-   default => 1,
-   lazy => 1,
-);
-
-
 has '_count' => (
    is => 'rw',
    isa => 'PositiveInt',
@@ -183,11 +173,6 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 
 method _write_community_init (Bio::Community $community) {
-   # If first community, write first column header
-   if ($self->_first_community) {
-      $self->_write_headers;
-      $self->_first_community(0);
-   }
    return 1;
 }
 
@@ -204,12 +189,14 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
-method _write_metacommunity_init (Bio::Community::Meta $meta) {
+method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+   # Write first column header
+   $self->_write_headers;
    return 1;
 }
 
 
-method _write_metacommunity_finish (Bio::Community::Meta $meta) {
+method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
    return 1;
 }
 

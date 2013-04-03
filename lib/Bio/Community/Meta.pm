@@ -124,7 +124,7 @@ has name => (
    is => 'rw',
    isa => 'Str',
    lazy => 1,
-   default => 'Unnamed',
+   default => '',
    init_arg => '-name',
 );
 
