@@ -43,6 +43,22 @@ is $in->_get_value(1, 10), undef;
 $in->close;
 
 
+# Read linux tab-delimited file with extra line
+
+ok $in = t::Role::TestTable->new(
+   -file => test_input_file('table_extra_line.txt'),
+   -start_line => 2,
+), 'Read linux table with extra line';
+
+isa_ok $in, 't::Role::TestTable';
+is $in->delim, "\t";
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
+is $in->_get_start_content, "--- content below ---\n";
+
+$in->close;
+
+
 # Read win32 tab-delimited file
 
 ok $in = t::Role::TestTable->new(

@@ -193,6 +193,27 @@ has 'missing_string' => (
 );
 
 
+=head2 _get_start_content
+
+ Usage   : my $txt = $in->_get_start_content;
+ Function: After the table has been parsed, this returns everything before -start_line
+ Args    : A strictly positive number
+ Returns : A strictly positive number
+
+=cut
+
+has '_start_content' => (
+   is => 'ro',
+   isa => 'Maybe[Str]',
+   required => 0,
+   init_arg => undef,
+   lazy => 1,
+   default => '',
+   reader => '_get_start_content',
+   writer => '_set_start_content',
+);
+
+
 =head2 _get_max_line
 
  Usage   : my $num_lines = $in->_get_max_line;
@@ -321,6 +342,7 @@ method _read_table () {
 
       # Do not index the line if it is before or after the table
       if ($. < $start_line) {
+         $self->_set_start_content( $self->_get_start_content . $line );
          $file_offset += $line_length;
          next;
       }
