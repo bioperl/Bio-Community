@@ -30,9 +30,10 @@ file. Here is an example of QIIME OTU table file:
   2	0	230	110
   3	0	30	80
 
-The same OTU table with assignments to the GreenGenes taxonomy:
+The same OTU table with a given metacommunity name (the first line) and
+assignments to the GreenGenes taxonomy:
 
-  # QIIME v1.3.0 OTU table
+  # biome_comparison_2013
   #OTU ID	soil	marine	freshwater	Consensus Lineage
   0	3	11	0	k__Bacteria;p__Cyanobacteria;c__;o__Chroococcales;f__;g__Synechococcus;s__
   1	10	24	0	k__Bacteria;p__TM6;c__;o__;f__;g__;s__
@@ -43,16 +44,16 @@ For each Bio::Community::Member $member generated from a QIIME file, $member->id
 contains the OTU ID, while $member->desc() holds the content of the consensus
 lineage field.
 
-QIIME also provides OTU tables summarized at the phylum level, with relative
-abundance instead of counts:
+B<Note>: QIIME also provides OTU tables summarized at the different taxonomic levels,
+with relative abundance instead of counts:
 
   Taxon	soil	marine	freshwater
   k__Bacteria;p__Acidobacteria	0.0	0.1016949153	0.4210526316
   k__Bacteria;p__Cyanobacteria	0.2307692308	0.8169491525	0.5789473684
   k__Bacteria;p__TM6	0.7692307692	0.0813559322	0.0
 
-B<Note>: These tables have to be read and written using th
- Bio::Community::IO::Driver::generic module, B<not> with Bio::Community::IO::Driver::qiime.
+These tables have to be read and written using the Bio::Community::IO::Driver::generic
+module, B<not> with Bio::Community::IO::Driver::qiime.
 
 =head1 CONSTRUCTOR
 
@@ -117,7 +118,7 @@ our $default_missing_string =  0;      # empty members get a '0'
 
 
 around BUILDARGS => func ($orig, $class, %args) {
-   $args{-start_line} = 2; 
+   $args{-start_line} = 2;
    return $class->$orig(%args);
 };
 
@@ -266,7 +267,16 @@ method _next_community_finish () {
 method _next_metacommunity_init () {
    # Initialize the read process by generating all community members.
    $self->_generate_members();
-   my $name = ''; # no provision for metacommunity name in this format
+   my $name = $self->_get_metacommunity_name;
+   return $name;
+}
+
+
+method _get_metacommunity_name () {
+   my $name = $self->_get_start_content;
+   chomp $name;
+   $name =~ s/^#\s*//;
+   $name =~ s/^QIIME.*$//;
    return $name;
 }
 
@@ -306,8 +316,13 @@ method _write_community_init (Bio::Community $community) {
 }
 
 
-method _write_headers () {
-   $self->_print("# QIIME v1.3.0 OTU table\n");
+method _write_headers ($name) {
+   # First line header / metacommunity name
+   my $header = '# ';
+   $header   .= (defined $name) ? $name : 'QIIME v1.3.0 OTU table';
+   $header   .= "\n";
+   $self->_print($header);
+   # First row header
    $self->_set_value(1, 1, '#OTU ID');
 }
 
@@ -318,8 +333,12 @@ method _write_community_finish (Bio::Community $community) {
 
 
 method _write_metacommunity_init (Bio::Community::Meta $meta?) {
-   # Write first column header
-   $self->_write_headers;
+   # Write some generic header information
+   my $name;
+   if (defined $meta) {
+      $name = $meta->name;
+   }
+   $self->_write_headers($name);
    return 1;
 }
 

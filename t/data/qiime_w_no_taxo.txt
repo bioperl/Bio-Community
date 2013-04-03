@@ -1,4 +1,4 @@
-# QIIME v1.3.0 OTU table
+# Temporal study
 #OTU ID	20100302	20100304	20100823
 0	40	0	76
 1	0	142	2

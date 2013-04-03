@@ -8,8 +8,8 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $community3, $member,
-   $count, $taxonomy);
+my ($in, $out, $output_file, $meta, $community, $community2, $community3,
+   $member, $count, $taxonomy);
 my (@communities, @methods);
 
 
@@ -19,6 +19,45 @@ ok $in = Bio::Community::IO->new(
    -file   => test_input_file('qiime_w_no_taxo.txt'),
 ), 'Format detection';
 is $in->format, 'qiime';
+
+
+# Read QIIME metacommunity with name
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('qiime_w_no_taxo.txt'),
+   -format => 'qiime',
+), 'Read QIIME metacommunity with name';
+
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, 'Temporal study'; ####
+is $meta->get_members_count, 344;
+is $meta->get_communities_count, 3;
+is $meta->get_richness, 3;
+$in->close;
+
+
+# Write QIIME metacommunity with name
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'qiime',
+), 'Write QIIME metacommunity with a name';
+
+ok $out->write_metacommunity($meta);
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+);
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, 'Temporal study'; ####
+is $meta->get_members_count, 344;
+is $meta->get_communities_count, 3;
+is $meta->get_richness, 3;
+$in->close;
 
 
 # Read QIIME file without taxonomy
