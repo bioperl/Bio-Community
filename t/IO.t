@@ -7,7 +7,7 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $meta, $output_file);
+my ($in, $out, $output_file, $community, $meta);
 my @methods;
 
  
@@ -45,9 +45,10 @@ $in->close;
 
 ok $in = Bio::Community::IO->new(
    -file   => test_input_file('generic_table.txt'),
-);
+), 'Read and write a metacommunity';
 
 ok $meta = $in->next_metacommunity;
+is $in->next_metacommunity, undef;
 isa_ok $meta, 'Bio::Community::Meta';
 is $meta->name, '';
 is $meta->get_members_count, 1721.9;
@@ -60,8 +61,8 @@ ok $out = Bio::Community::IO->new(
    -file   => '>'.$output_file,
    -format => 'generic',
 );
-
 ok $out->write_metacommunity($meta);
+throws_ok { $out->write_metacommunity($meta) } qr/EXCEPTION/, 'Exception';
 $out->close;
 
 ok $in = Bio::Community::IO->new(
@@ -73,6 +74,29 @@ is $meta->get_members_count, 1721.9;
 is $meta->get_communities_count, 2;
 is $meta->get_richness, 3;
 $in->close;
+
+
+# Read / write communities
+
+ok $in = Bio::Community::IO->new(
+   -file     => test_input_file('gaas_compo.txt'),
+   -format   => 'gaas',
+), 'Read and write a community';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file     => $output_file,
+   -format   => 'gaas',
+);
+ok $out->write_community($community);
+$community->name('2nd community');
+throws_ok {$out->write_community($community)} qr/EXCEPTION/, 'Exception';
+$out->close;
+
+
 
 
 # -weight_files is tested in t/IO/weights.t

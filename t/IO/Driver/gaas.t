@@ -21,6 +21,17 @@ ok $in = Bio::Community::IO->new(
 is $in->format, 'gaas';
 
 
+### Read GAAS metacommunity
+
+##ok $in = Bio::Community::IO->new(
+##   -file   => '<'.$output_file,
+##   -format => 'gaas',
+##), 'Read GAAS metacommunity';
+##ok $meta = $in->next_metacommunity;
+
+##$in->close;
+
+
 # Read GAAS format
 
 ok $taxonomy = Bio::DB::Taxonomy->new(

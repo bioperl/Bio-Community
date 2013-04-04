@@ -380,17 +380,20 @@ method _next_community_finish () {
 =cut
 
 method next_metacommunity () {
-   my $meta = Bio::Community::Meta->new();
-   my $name = $self->_next_metacommunity_init;
-   if (defined $name) {
-      $meta->name($name);
+   my $meta;
+   if (not defined $self->_meta) {
+      $meta = Bio::Community::Meta->new();
+      my $name = $self->_next_metacommunity_init;
+      if (defined $name) {
+         $meta->name($name);
+      }
+      $self->_meta($meta);
+      while (my $community = $self->next_community) {
+         $self->_meta->add_communities([$community]);
+      }
+      # _next_metacommunity_finish will happen before close()
    }
-   $self->_meta($meta);
-   while (my $community = $self->next_community) {
-      $self->_meta->add_communities([$community]);
-   }
-   # _next_metacommunity_finish will happen before close()
-   return $self->_meta;
+   return $meta;
 }
 
 
@@ -433,16 +436,17 @@ method write_member (Bio::Community::Member $member, Count $count) {
 =cut
 
 method write_community (Bio::Community $community) {
-   # Skip empty community if desired
-
    if (not defined $self->_meta) {
       $self->_write_metacommunity_init( );
       $self->_meta(Bio::Community::Meta->new);
    }
 
-   if ( ($community->get_richness > 0) || (not $self->skip_empty_communities) ) {
-
+   # Write community but skip it if empty if desired
+   if ( ($community->get_richness > 0) || (not $self->skip_empty_communities) ) {   
       $self->_write_community_init($community);
+      if (not defined $self->_meta->get_community_by_name($community->name)) {
+         $self->_meta->add_communities([$community]);
+      }
       my $sort_members = $self->sort_members;
       if ($sort_members == 1) {
          my $rank = $community->get_richness;
@@ -466,6 +470,11 @@ method write_community (Bio::Community $community) {
       }
       $self->_write_community_finish($community);
    }
+
+   if ( ($self->_meta->get_communities_count > 1) && (not $self->multiple_communities) ) {
+      $self->throw('Format '.$self->format.' only supports writing one community per file');
+   }
+
    return 1;
 }
 
@@ -492,12 +501,16 @@ method _write_community_finish (Bio::Community $community) {
 =cut
 
 method write_metacommunity (Bio::Community::Meta $meta) {
-   $self->_meta($meta);
-   $self->_write_metacommunity_init($meta);
-   while (my $community = $meta->next_community) {
-      $self->write_community($community);
+   if (not defined $self->_meta) {
+      $self->_meta($meta);
+      $self->_write_metacommunity_init($meta);
+      while (my $community = $meta->next_community) {
+         $self->write_community($community);
+      }
+      # _write_metacommunity_finish will happen before close()
+   } else {
+      $self->throw('Can write only one metacommunity');
    }
-   # _write_metacommunity_finish will happen before close()
    return 1;
 }
 

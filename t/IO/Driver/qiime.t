@@ -30,7 +30,7 @@ ok $in = Bio::Community::IO->new(
 
 ok $meta = $in->next_metacommunity;
 isa_ok $meta, 'Bio::Community::Meta';
-is $meta->name, 'Temporal study'; ####
+is $meta->name, 'Temporal study';
 is $meta->get_members_count, 344;
 is $meta->get_communities_count, 3;
 is $meta->get_richness, 3;
@@ -53,7 +53,7 @@ ok $in = Bio::Community::IO->new(
 );
 ok $meta = $in->next_metacommunity;
 isa_ok $meta, 'Bio::Community::Meta';
-is $meta->name, 'Temporal study'; ####
+is $meta->name, 'Temporal study';
 is $meta->get_members_count, 344;
 is $meta->get_communities_count, 3;
 is $meta->get_richness, 3;
