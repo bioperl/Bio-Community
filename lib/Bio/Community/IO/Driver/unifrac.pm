@@ -352,12 +352,12 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
-method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
    return 1;
 }
 
 
-method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    if ( ($self->_get_max_col == 3) && $self->_qualitative_unifrac ) {
       # Delete last column (the counts)
       $self->_delete_col(3);

@@ -570,7 +570,7 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
-method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
    # Set default matrix type to sparse
    if (not $self->_has_matrix_type) {
       $self->set_matrix_type('sparse');
@@ -585,7 +585,7 @@ method _write_metacommunity_init (Bio::Community::Meta $meta?) {
 }
 
 
-method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    # Write JSON to file
    my $rows = $self->_get_line;
    my $cols = $self->_get_col;

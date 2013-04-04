@@ -437,8 +437,9 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
 method write_community (Bio::Community $community) {
    if (not defined $self->_meta) {
-      $self->_write_metacommunity_init( );
-      $self->_meta(Bio::Community::Meta->new);
+      my $meta = Bio::Community::Meta->new;
+      $self->_write_metacommunity_init($meta);
+      $self->_meta($meta);
    }
 
    # Write community but skip it if empty if desired
@@ -515,13 +516,13 @@ method write_metacommunity (Bio::Community::Meta $meta) {
 }
 
 
-method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
    # Driver-side method to initialize writing a metacommunity
    $self->throw_not_implemented;
 }
 
 
-method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    # Driver-side method to finalize writing a metacommunity
    $self->throw_not_implemented;
 }

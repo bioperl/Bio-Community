@@ -332,7 +332,7 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
-method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
    # Write some generic header information
    my $name;
    if (defined $meta) {
@@ -343,7 +343,7 @@ method _write_metacommunity_init (Bio::Community::Meta $meta?) {
 }
 
 
-method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    # Add taxonomy (desc) if available, but only when fh opened for reading
    my $col = $self->_col + 1;
    my $descs = $self->_line2desc;

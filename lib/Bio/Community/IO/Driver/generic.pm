@@ -235,13 +235,13 @@ method _write_community_finish (Bio::Community $community) {
 }
 
 
-method _write_metacommunity_init (Bio::Community::Meta $meta?) {
+method _write_metacommunity_init (Bio::Community::Meta $meta) {
    $self->_write_headers; # write first column header
    return 1;
 }
 
 
-method _write_metacommunity_finish (Bio::Community::Meta $meta?) {
+method _write_metacommunity_finish (Bio::Community::Meta $meta) {
    return 1;
 }
 
