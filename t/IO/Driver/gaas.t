@@ -9,7 +9,8 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $member, $count, $taxonomy);
+my ($in, $out, $output_file, $meta, $community, $community2, $member, $count,
+   $taxonomy);
 my (@communities, @methods);
 
 
@@ -21,15 +22,42 @@ ok $in = Bio::Community::IO->new(
 is $in->format, 'gaas';
 
 
-### Read GAAS metacommunity
+# Read GAAS metacommunity
 
-##ok $in = Bio::Community::IO->new(
-##   -file   => '<'.$output_file,
-##   -format => 'gaas',
-##), 'Read GAAS metacommunity';
-##ok $meta = $in->next_metacommunity;
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('gaas_compo.txt'),
+   -format => 'gaas',
+), 'Read GAAS metacommunity';
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, '';
+delta_ok $meta->get_members_count, 1.0; # 100%
+is $meta->get_communities_count, 1;
+is $meta->get_richness, 3;
+$in->close;
 
-##$in->close;
+
+# Write BIOM metacommunity with name
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'gaas',
+), 'Write GAAS metacommunity with a name';
+ok $out->write_metacommunity($meta);
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+   -format => 'gaas',
+);
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, '';
+delta_ok $meta->get_members_count, 1.0;
+is $meta->get_communities_count, 1;
+is $meta->get_richness, 3;
+$in->close;
 
 
 # Read GAAS format

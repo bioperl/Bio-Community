@@ -9,8 +9,8 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $community3, $member,
-   $count, $taxonomy);
+my ($in, $out, $output_file, $meta, $community, $community2, $community3,
+   $member, $count, $taxonomy);
 my (@communities, @methods, @members);
 
 
@@ -20,6 +20,44 @@ ok $in = Bio::Community::IO->new(
    -file   => test_input_file('unifrac_quantitative.txt'),
 ), 'Format detection';
 is $in->format, 'unifrac';
+
+
+# Read generic metacommunity
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('unifrac_quantitative.txt'),
+   -format => 'unifrac',
+), 'Read Unifrac metacommunity';
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, '';
+is $meta->get_members_count, 36;
+is $meta->get_communities_count, 3;
+is $meta->get_richness, 6;
+$in->close;
+
+
+# Write generic metacommunity with name
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'unifrac',
+), 'Write Unifrac metacommunity with a name';
+ok $out->write_metacommunity($meta);
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+   -format => 'unifrac',
+);
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, '';
+is $meta->get_members_count, 36;
+is $meta->get_communities_count, 3;
+is $meta->get_richness, 6;
+$in->close;
 
 
 # Read Unifrac quantitative format

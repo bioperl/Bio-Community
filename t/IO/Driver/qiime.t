@@ -50,6 +50,7 @@ $out->close;
 
 ok $in = Bio::Community::IO->new(
    -file   => $output_file,
+   -format => 'qiime',
 );
 ok $meta = $in->next_metacommunity;
 isa_ok $meta, 'Bio::Community::Meta';

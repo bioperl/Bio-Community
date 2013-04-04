@@ -22,12 +22,12 @@ ok $in = Bio::Community::IO->new(
 is $in->format, 'biom';
 
 
-# Read biom metacommunity with name
+# Read BIOM metacommunity with name
 
 ok $in = Bio::Community::IO->new(
    -file   => test_input_file('biom_rich_sparse.txt'),
    -format => 'biom',
-), 'Read biom metacommunity with a name';
+), 'Read BIOM metacommunity with a name';
 
 ok $meta = $in->next_metacommunity;
 isa_ok $meta, 'Bio::Community::Meta';
@@ -38,19 +38,20 @@ is $meta->get_richness, 5;
 $in->close;
 
 
-# Write biom metacommunity with name
+# Write BIOM metacommunity with name
 
 $output_file = test_output_file();
 ok $out = Bio::Community::IO->new(
    -file   => '>'.$output_file,
    -format => 'biom',
-), 'Write biom metacommunity with a name';
+), 'Write BIOM metacommunity with a name';
 
 ok $out->write_metacommunity($meta);
 $out->close;
 
 ok $in = Bio::Community::IO->new(
    -file   => $output_file,
+   -format => 'biom',
 );
 ok $meta = $in->next_metacommunity;
 isa_ok $meta, 'Bio::Community::Meta';

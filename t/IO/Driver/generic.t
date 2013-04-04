@@ -9,8 +9,8 @@ use_ok($_) for qw(
 );
 
 
-my ($in, $out, $output_file, $community, $community2, $community3, $member,
-   $count, $taxonomy);
+my ($in, $out, $output_file, $meta, $community, $community2, $community3,
+   $member, $count, $taxonomy);
 my (@communities, @methods);
 
 
@@ -20,6 +20,44 @@ ok $in = Bio::Community::IO->new(
    -file   => test_input_file('generic_table.txt'),
 ), 'Format detection';
 is $in->format, 'generic';
+
+
+# Read generic metacommunity
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('generic_table.txt'),
+   -format => 'generic',
+), 'Read generic metacommunity';
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, '';
+delta_ok $meta->get_members_count, 1721.9;
+is $meta->get_communities_count, 2;
+is $meta->get_richness, 3;
+$in->close;
+
+
+# Write generic metacommunity with name
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'generic',
+), 'Write generic metacommunity with a name';
+ok $out->write_metacommunity($meta);
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+   -format => 'generic',
+);
+ok $meta = $in->next_metacommunity;
+isa_ok $meta, 'Bio::Community::Meta';
+is $meta->name, '';
+delta_ok $meta->get_members_count, 1721.9;
+is $meta->get_communities_count, 2;
+is $meta->get_richness, 3;
+$in->close;
 
 
 # Read generic format
