@@ -389,11 +389,13 @@ method _generate_members () {
             $taxo_desc = get_lineage_string($metadata->{'taxonomy'}, 1);
          }
          $member->desc( $taxo_desc );
+         $self->_attach_taxon($member, $taxo_desc, 1);
       }
       #if (exists $members{$id}) {
       #   $self->warn("Member with ID $id is present multiple times... ".
       #      "Continuing despite the perils!");
       #}
+      $self->_attach_weights($member);
       $members{$id} = $member;
    }
 

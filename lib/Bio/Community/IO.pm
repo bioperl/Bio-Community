@@ -1020,8 +1020,9 @@ method _is_taxonomy_empty ($taxonomy) {
  Function: Once a member has been created, a driver should call this method
            to attach the proper taxon object to the member. If no member is
            provided, this method will not complain and will do nothing.
- Args    : a Bio::Community::Member or nothing
-           the taxonomic string
+ Args    : * a Bio::Community::Member or nothing
+           * the taxonomic string
+           * whether the taxonomic string is a taxon name (1) or taxon ID (0)
  Returns : 1 for success
 
 =cut
