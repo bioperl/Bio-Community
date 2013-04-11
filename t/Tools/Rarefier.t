@@ -22,7 +22,7 @@ my $epsilon2 = 1.5;
 my $epsilon3 = 0.4;
 
 
-# Community with 1500 counts
+# Community with 1500.8 counts
 
 $community1 = Bio::Community->new( -name => 'community1' );
 $member1 = Bio::Community::Member->new( -id => 1 );
@@ -30,7 +30,7 @@ $member2 = Bio::Community::Member->new( -id => 2 );
 $member3 = Bio::Community::Member->new( -id => 3 );
 $member4 = Bio::Community::Member->new( -id => 4 );
 $member5 = Bio::Community::Member->new( -id => 5 );
-$community1->add_member( $member1, 301);
+$community1->add_member( $member1, 301.8);
 $community1->add_member( $member2, 300);
 $community1->add_member( $member3, 300);
 $community1->add_member( $member4, 300);

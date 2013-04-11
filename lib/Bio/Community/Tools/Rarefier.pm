@@ -300,8 +300,8 @@ method _count_normalize () {
    my $min = min( map {$_->get_members_count} @$communities );
    my $sample_size = $self->sample_size;
    if (not defined $sample_size) { 
-      # Set sample size to smallest community size
-      $sample_size = $min;
+      # Set sample size to smallest community size. Convert to integer if needed.
+      $sample_size = int $min;
       $self->sample_size($sample_size); 
    } else {
       if ($sample_size > $min) {
