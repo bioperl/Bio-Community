@@ -59,7 +59,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bc_bootstrap'
+   output_prefix.default: 'bc_remove_unexpected_members'
 
 =item -rn <ref_name> | -ref_name <ref_name>
 
