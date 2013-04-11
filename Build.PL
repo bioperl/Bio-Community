@@ -50,6 +50,7 @@ my $build = Module::Build->new(
                              'scripts/bc_get_info',
                              'scripts/bc_manage_samples',
                              'scripts/bc_measure_distance',
+                             'scripts/bc_perc_to_count',
                              'scripts/bc_summarize',
                             ],
     recursive_test_files => 1,
