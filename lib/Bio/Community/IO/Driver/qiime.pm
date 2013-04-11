@@ -319,7 +319,7 @@ method _write_community_init (Bio::Community $community) {
 method _write_headers ($name) {
    # First line header / metacommunity name
    my $header = '# ';
-   $header   .= (defined $name) ? $name : 'QIIME v1.3.0 OTU table';
+   $header   .= (not $name eq '') ? $name : 'QIIME v1.3.0 OTU table';
    $header   .= "\n";
    $self->_print($header);
    # First row header
