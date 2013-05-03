@@ -147,12 +147,12 @@ func perc_to_count ($input_files, $count_file, $output_prefix) {
 func multiply ($meta, $counts) {
    while (my $community = $meta->next_community) {
       my $tot_count = $counts->{$community->name};
-      print "Community ".$community->name.": total count of ".$tot_count."\n";
       if (not defined $tot_count) {
          warn "Warn: No total count was provided for community ".$community->name.". ".
             "Leaving this community alone...\n";
          next;
       }
+      print "Community ".$community->name.": total count of ".$tot_count."\n";
       for my $member (@{$community->get_all_members}) {
          my $old_count = $community->get_count($member);
          my $new_count = $old_count/100 * $tot_count;
