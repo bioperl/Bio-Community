@@ -229,7 +229,7 @@ has verbose => (
  Function: Calculate an average metacommunity.
  Usage   : my $meta = $normalizer->get_avg_meta;
  Args    : none
- Returns : arrayref of Bio::Community objects
+ Returns : Bio::Community::Meta object
 
 =cut
 
@@ -256,7 +256,7 @@ before get_avg_meta => sub {
  Function: Calculate a representative metacommunity.
  Usage   : my $meta = $normalizer->get_repr_meta;
  Args    : none
- Returns : arrayref of Bio::Community objects
+ Returns : Bio::Community::Meta object
 
 =cut
 

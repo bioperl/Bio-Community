@@ -31,7 +31,7 @@ bc_rarefy - Rarefy communities
 =head1 DESCRIPTION
 
 This script reads a file containing biological communities and performs
-rarefy, i.e. repeatedly takes a random subset of the community members,
+rarefaction, i.e. repeatedly takes a random subset of the community members,
 in order to normalize communities by member count. Rarefaction is useful to
 simulate an identical sampling effort for all communities. The output is a file
 containing rarefied, representative communities (integers). See
