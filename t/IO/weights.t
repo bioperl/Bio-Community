@@ -45,6 +45,8 @@ is $community2->name, 'soda lake';
 
 is $in->next_community, undef;
 
+is_deeply $in->weight_names(), ['16S copy number', ''];
+
 $in->close;
 
 ok $member = $community->get_member_by_rank(1);
@@ -290,6 +292,8 @@ is $community3->get_richness, 3;
 is $community3->name, '20100823';
 
 is $in->next_community, undef;
+
+is_deeply $in->weight_names(), ['factor'];
 
 $in->close;
 

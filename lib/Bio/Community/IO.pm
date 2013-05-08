@@ -671,9 +671,11 @@ has 'multiple_communities' => (
  Function: When reading a community, specify files (or filehandles opened in
            read mode) containing weights to assign to the community members.
            Each file can contain a different type of weight to add. The file
-           should contain two tab-delimited columns: the first one should
-           contain the ID, description or string lineage of the member and the
-           second one the weight to assign to this member.
+           should contain at least two tab-delimited columns: the first one
+           should contain the ID, description or string lineage of the member
+           and the second one the weight to assign to this member. Other columns
+           are ignored. A header line starting with '#' and containing the name
+           of the weight can be included.
  Args    : arrayref of file names (or filehandles)
  Returns : arrayref of filehandles
 
@@ -710,6 +712,25 @@ has '_file_average_weights' => (
 );
 
 
+=head2 weight_names
+
+ Usage   : $in->weight_names();
+ Function: After weight files have been read, you can get the name of the
+           weights using this method. You can also set them manually.
+ Args    : arrayref of weight names
+ Returns : arrayref of weight names
+
+=cut
+
+has 'weight_names' => ( # hashref of Bio::Community::Members, keyed by member ID
+   is => 'rw',
+   isa => 'ArrayRef[Str]',
+   required => 0,
+   lazy => 1,
+   default => sub { [] },
+);
+
+
 # The member queue contains members that will need to be given proper weights
 # and to be added to the community
 
@@ -730,25 +751,37 @@ has '_count_queue' => ( # hashref of member counts, keyed by member ID
 
 method _read_weights ($args) {
    my $all_weights = [];
+   my $all_names = [];
    my $file_average_weights = [];
    for my $fh (@{$self->weight_files}) {
       my $average = 0;
       my $num = 0;
       my $file_weights = {};
+      my $weight_name = '';
       while (my $line = <$fh>) {
-         next if $line =~ m/^#/;
+         if ($line =~ m/^#/) {
+            if ($. == 1) {
+               # process header
+               chomp $line;
+               $weight_name = (split "\t", $line)[1];
+               $weight_name =~ s/^weight$//i;
+            }
+            next;
+         }
          next if $line =~ m/^\s*$/;
          chomp $line;
-         my ($id, $weight) = (split '\t', $line)[0..1];
+         my ($id, $weight) = (split "\t", $line)[0..1];
          $file_weights->{$id} = $weight;
          $average += $weight;
          $num++;
       }
       close $fh;
       push @$all_weights, $file_weights;
+      push @$all_names, $weight_name;
       $average /= $num if $num > 0;
       push @$file_average_weights, $average;
    }
+   $self->weight_names($all_names);
    $self->_weights( $all_weights );
    $self->_file_average_weights( $file_average_weights );
    return 1;
