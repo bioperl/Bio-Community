@@ -1,0 +1,185 @@
+#! /usr/bin/env perl
+
+# BioPerl script bc_use_cluster_repr
+#
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
+#
+# Copyright Florent Angly <florent.angly@gmail.com>
+#
+# You may distribute this module under the same terms as perl itself
+
+
+use strict;
+use warnings;
+use Method::Signatures;
+use Bio::Community::IO;
+use Bio::Community::Meta;
+use Bio::Community::Tools::RepresentativeIdConverter;
+use Getopt::Euclid qw(:minimal_keys);
+
+
+=head1 NAME
+
+bc_use_cluster_repr - Replace member ID by that of their OTU cluster representative
+
+=head1 SYNOPSIS
+
+  bc_use_cluster_repr -input_files   my_communities.generic   \
+                     -output_prefix my_converted_communities \
+                     -cluster_file  gg_99_otu_map.txt
+
+=head1 DESCRIPTION
+
+This script reads a file containing biological communities and a file of OTU
+clusters and replace the ID of the members in the communities by the ID of the
+representative sequence in the corresponding OTU cluster.
+
+=head1 REQUIRED ARGUMENTS
+
+=over
+
+=item -if <input_files>... | -input_files <input_files>...
+
+Input file containing the communities to rarefy. When providing communities
+in a format that supports only one community per file (e.g. gaas), you can
+provide multiple input files.
+
+=for Euclid:
+   input_files.type: readable
+
+=item -cf <cluster_file> | -cluster_file <cluster_file>
+
+The tab-delimited file that defines the OTU clusters. The columns are: OTU ID,
+ID of the representative sequence, IDs of the other sequences in the OTU. For
+example:
+
+ 0	367523
+ 1	187144
+ 2	544886	544649
+ 3	310669
+ 4	355095	310677	347705	563209 
+
+=for Euclid:
+   cluster_file.type: readable
+
+=head1 OPTIONAL ARGUMENTS
+
+=over
+
+=item -op <output_prefix> | -output_prefix <output_prefix>
+
+Path and prefix for the output files. Default: output_prefix.default
+
+=for Euclid:
+   output_prefix.type: string
+   output_prefix.default: 'bc_use_otu_id'
+
+=back
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this
+and other Bioperl modules. Send your comments and suggestions preferably
+to one of the Bioperl mailing lists.
+
+Your participation is much appreciated.
+
+  bioperl-l@bioperl.org                  - General discussion
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+
+=head2 Support 
+
+Please direct usage questions or support issues to the mailing list:
+
+I<bioperl-l@bioperl.org>
+
+rather than to the module maintainer directly. Many experienced and 
+reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem 
+with code and data examples if at all possible.
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
+
+  http://bugzilla.open-bio.org/
+
+=head1 AUTHOR - Florent Angly
+
+Email florent.angly@gmail.com
+
+=cut
+
+
+use_cluster_repr( $ARGV{'input_files'}, $ARGV{'cluster_file'}, $ARGV{'output_prefix'} );
+exit;
+
+
+func use_cluster_repr ($input_files, $cluster_file, $output_prefix) {
+
+   # Read input communities
+   my $meta = Bio::Community::Meta->new();
+   my $communities = [];
+   my $format;
+   for my $input_file (@$input_files) {
+      my $in = Bio::Community::IO->new( -file => $input_file );
+      $format = $in->format;
+      while (my $community = $in->next_community) {
+         $meta->add_communities([$community]);
+      }
+      $in->close;
+   }
+ 
+   # Convert IDs
+   my $converter = Bio::Community::Tools::RepresentativeIdConverter->new(
+      -metacommunity => $meta,
+      -cluster_file  => $cluster_file,
+   );
+   my $out_meta = $converter->get_converted_meta;
+
+   # Write metacommunity
+   write_communities($out_meta, $output_prefix, $format, '');
+
+   return 1;
+}
+
+
+func write_communities ($meta, $output_prefix, $output_format, $type='') {
+   $type ||= '';
+   my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
+   my $num = 0;
+   my $out;
+   my $output_file = '';
+   while (my $community = $meta->next_community) {
+      if (not defined $out) {
+         if ($multiple_communities) {
+            $output_file = $output_prefix;
+         } else {
+            $num++;
+            $output_file = $output_prefix.'_'.$num;
+         }
+         if ($type) {
+            $output_file .= '_'.$type;
+         }
+         $output_file .= '.'.$output_format;
+         $out = Bio::Community::IO->new(
+            -format => $output_format,
+            -file   => '>'.$output_file,
+         );
+      }
+      print "Writing community '".$community->name."' to file '$output_file'\n";
+      $out->write_community($community);
+      if (not $multiple_communities) {
+         $out->close;
+         $out = undef;
+      }
+   }
+   if (defined $out) {
+      $out->close;
+   }
+   return 1;
+}
