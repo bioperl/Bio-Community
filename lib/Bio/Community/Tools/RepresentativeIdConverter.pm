@@ -174,12 +174,10 @@ method get_converted_meta () {
 
          if (not defined $repr_id) {
             $self->warn("Could not find representative sequence for member ID $id. Keeping original ID.\n");
+            $repr_id = $id;
          }
 
-         my $member2;
-         if (defined $repr_id) {
-            $member2 = $community2->get_member_by_id($repr_id);
-         }
+         my $member2 = $community2->get_member_by_id($repr_id);
          if (not defined $member2) {
             # Member is new. Create it.
             $member2 = $member->clone;
