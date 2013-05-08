@@ -124,10 +124,11 @@ subtype 'AlphaType'
 
 
 # Members identification method
-my @IdentifyMembersByType = qw(id desc);
+my @IdentifyMembersByType = qw(id desc id+desc);
 subtype 'IdentifyMembersByType'
    => as enum( \@IdentifyMembersByType )
    => message { _gen_err_msg(\@IdentifyMembersByType, $_) };
+
 
 # Duplicates identification method
 my @IdentifyDupsByType = qw(desc taxon);
@@ -144,6 +145,7 @@ subtype 'WeightAssignStr'
 subtype 'WeightAssignType'
    => as 'WeightAssignStr | Num'
    => message { _gen_err_msg( ['a number', @WeightAssignStr], $_) };
+
 
 # Biom matrix type
 my @BiomMatrixType = qw(sparse dense);

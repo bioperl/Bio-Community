@@ -793,7 +793,8 @@ method _read_weights ($args) {
  Usage   : $in->weight_identifier('id');
  Function: Get or set whether to lookup and assign weights to community members
            based on the member description or their ID.
- Args    : 'desc' (default) or 'id'
+ Args    : 'desc' (default), or 'id', 'id+desc' (i.e. try id first and fall back
+           to desc if this fails)
  Returns : 'desc' or 'id'
 
 =cut
@@ -877,6 +878,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
       for my $i (0 .. scalar @{$self->_weights} - 1) {
          my $weight;
          my $weight_type = $self->_weights->[$i];
+
          if ($assign_method eq 'ancestor') {
             my $taxon = $member->taxon;
             if (defined $taxon) {
@@ -892,7 +894,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
                   }
                   if (defined $weight) {
                      # Weight found. Get ready to exit loop.
-                     my $weight_name = $weight_names->[$i] || 'weight number '.($i+1); ###
+                     my $weight_name = $weight_names->[$i] || 'weight number '.($i+1);
                      $self->debug("Member '".get_lineage_string(get_taxon_lineage($taxon)).
                         "' (ID ".$member->id.") got $weight_name from ".$lineage_arr->[-1]->node_name.
                         ": $weight\n");
@@ -914,7 +916,16 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
             if ( $lookup && exists($weight_type->{$lookup}) ) {
                # This member has a weight
                $weight = $weight_type->{$lookup};
-            } else {
+            }
+            if ( ($self->weight_identifier eq 'id+desc') && (not defined $weight) ) {
+               # Lookup by ID failed. Attempt lookup by desc.
+               $lookup = $member->desc;
+               if ( $lookup && exists($weight_type->{$lookup}) ) {
+                  # This member has a weight
+                  $weight = $weight_type->{$lookup};
+               }
+            }
+            if (not defined $weight) {
                # This member has no weight, provide an alternative weight
                if ($assign_method eq 'file_average') {
                   # Use the average weight in the weight file

@@ -32,6 +32,7 @@ is $in->missing_string, 0;
 isa_ok $in->weight_files->[0], 'GLOB';  # filehandle
 isa_ok $in->weight_files->[1], 'GLOB';
 is $in->weight_assign, 1;
+is $in->weight_identifier, 'desc';
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
@@ -94,6 +95,7 @@ is $in->missing_string, 0;
 isa_ok $in->weight_files->[0], 'GLOB';
 isa_ok $in->weight_files->[1], 'GLOB';
 is $in->weight_assign, 'file_average';
+is $in->weight_identifier, 'desc';
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
@@ -154,6 +156,7 @@ is $in->missing_string, 0;
 isa_ok $in->weight_files->[0], 'GLOB';
 isa_ok $in->weight_files->[1], 'GLOB';
 is $in->weight_assign, 'file_average';
+is $in->weight_identifier, 'id';
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
@@ -215,6 +218,7 @@ is $in->missing_string, 0;
 isa_ok $in->weight_files->[0], 'GLOB';
 isa_ok $in->weight_files->[1], 'GLOB';
 is $in->weight_assign, 'community_average';
+is $in->weight_identifier, 'desc';
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
@@ -275,6 +279,7 @@ ok $in = Bio::Community::IO->new(
 ), 'Read qiime format with ancestor-based weights';
 isa_ok $in->weight_files->[0], 'GLOB';
 is $in->weight_assign, 'ancestor';
+is $in->weight_identifier, 'desc';
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
@@ -294,6 +299,68 @@ is $community3->name, '20100823';
 is $in->next_community, undef;
 
 is_deeply $in->weight_names(), ['factor'];
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'No blast hit';
+is $community->get_count($member), 41;
+is_deeply $member->weights, [100];
+delta_ok $community->get_rel_ab($member), 50.6172840;
+ok $member = $community->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
+is $community->get_count($member), 40;
+is_deeply $member->weights, [100];
+delta_ok $community->get_rel_ab($member), 49.3827160;
+is $community->get_member_by_rank(3), undef;
+
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__';
+is $community2->get_count($member), 142;
+is_deeply $member->weights, [300];
+delta_ok $community2->get_rel_ab($member), 100;
+is $community2->get_member_by_rank(2), undef;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
+is $community3->get_count($member), 76;
+is_deeply $member->weights, [100];
+delta_ok $community3->get_rel_ab($member), 63.9022637;
+ok $member = $community3->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'No blast hit';
+is $community3->get_count($member), 43;
+is_deeply $member->weights, [101.739130434783];
+delta_ok $community3->get_rel_ab($member), 35.5371901;
+ok $member = $community3->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__Marine group II;g__;s__';
+is $community3->get_count($member), 2;
+is_deeply $member->weights, [300];
+delta_ok $community3->get_rel_ab($member), 0.5605462;
+is $community3->get_member_by_rank(4), undef;
+
+
+# Read qiime format with id+desc
+
+ok $in = Bio::Community::IO->new(
+   -file              => test_input_file('qiime_w_greengenes_taxo.txt'),
+   -format            => 'qiime',
+   -taxonomy          => Bio::DB::Taxonomy->new( -source => 'list' ), # on-the-fly taxonomy
+   -weight_files      => [ test_input_file('weights_merged.txt') ],
+   -weight_assign     => 'community_average',
+   -weight_identifier => 'id+desc',
+), 'Read qiime format with id+desc weights';
+
+is $in->weight_identifier, 'id+desc';
+
+ok $community  = $in->next_community;
+ok $community2 = $in->next_community;
+ok $community3 = $in->next_community;
 
 $in->close;
 
