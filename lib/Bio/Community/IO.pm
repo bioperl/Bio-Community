@@ -873,6 +873,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
 
       my $weights;
       my $assign_method = $self->weight_assign;
+      my $weight_names = $self->weight_names;
       for my $i (0 .. scalar @{$self->_weights} - 1) {
          my $weight;
          my $weight_type = $self->_weights->[$i];
@@ -891,8 +892,9 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
                   }
                   if (defined $weight) {
                      # Weight found. Get ready to exit loop.
+                     my $weight_name = $weight_names->[$i] || 'weight number '.($i+1); ###
                      $self->debug("Member '".get_lineage_string(get_taxon_lineage($taxon)).
-                        "' (ID ".$member->id.") got weight number ".($i+1)." from ".$lineage_arr->[-1]->node_name.
+                        "' (ID ".$member->id.") got $weight_name from ".$lineage_arr->[-1]->node_name.
                         ": $weight\n");
                      @$lineage_arr = ();
                   }
@@ -957,6 +959,7 @@ method _process_member_queue ($community) {
    }
 
    # Assign average weight to members that need it
+   my $weight_names = $self->weight_names;
    while ( my ($id, $count) = each %$counts) {
       # Clone member
       my $trait_num = (keys %{$members->{$id}})[0];
@@ -964,10 +967,11 @@ method _process_member_queue ($community) {
       my $member_weights = $member->weights;
       # Update member weights
       for my $i (0 .. scalar @{$self->_weights} - 1) {
+         my $weight_name = $weight_names->[$i] || 'weight number '.($i+1);
          if ( $member_weights->[$i] == 0 ) {
             $member_weights->[$i] = $community_average_weights->[$i];
             $self->debug("Member '".$member->desc."' (ID ".$member->id.") got ".
-               "average weight number ".($i+1)." from community '".$community->name."': ".
+               "average $weight_name from community '".$community->name."': ".
                $community_average_weights->[$i]."\n");
          }
       }
