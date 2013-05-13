@@ -124,7 +124,7 @@ subtype 'AlphaType'
 
 
 # Members identification method
-my @IdentifyMembersByType = qw(id desc id+desc);
+my @IdentifyMembersByType = qw(id desc);
 subtype 'IdentifyMembersByType'
    => as enum( \@IdentifyMembersByType )
    => message { _gen_err_msg(\@IdentifyMembersByType, $_) };

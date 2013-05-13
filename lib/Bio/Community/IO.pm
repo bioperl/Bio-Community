@@ -793,8 +793,7 @@ method _read_weights ($args) {
  Usage   : $in->weight_identifier('id');
  Function: Get or set whether to lookup and assign weights to community members
            based on the member description or their ID.
- Args    : 'desc' (default), or 'id', 'id+desc' (i.e. try id first and fall back
-           to desc if this fails)
+ Args    : 'desc' (default), or 'id'
  Returns : 'desc' or 'id'
 
 =cut
@@ -916,16 +915,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
             if ( $lookup && exists($weight_type->{$lookup}) ) {
                # This member has a weight
                $weight = $weight_type->{$lookup};
-            }
-            if ( ($self->weight_identifier eq 'id+desc') && (not defined $weight) ) {
-               # Lookup by ID failed. Attempt lookup by desc.
-               $lookup = $member->desc;
-               if ( $lookup && exists($weight_type->{$lookup}) ) {
-                  # This member has a weight
-                  $weight = $weight_type->{$lookup};
-               }
-            }
-            if (not defined $weight) {
+            } else {
                # This member has no weight, provide an alternative weight
                if ($assign_method eq 'file_average') {
                   # Use the average weight in the weight file
