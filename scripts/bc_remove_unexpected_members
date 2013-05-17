@@ -69,6 +69,28 @@ Name of the reference community. Default: ref_name.default
    ref_name.type: string
    ref_name.default: 'reference'
 
+=item -nt <name_type> | -name_type <name_type>
+
+Specify if <ref_name> represents a 'prefix', 'suffix', or the 'full' name of the
+reference community. Using prefix or suffix allows to have multiple communities
+with their respective reference community in the same input file. For example,
+using a suffic of '_theo', community 'sample1' is expected to have a reference
+community named 'sample1_theo'. Default: name_type.default
+
+=for Euclid:
+   name_type.type: /prefix|suffix|full/
+   name_type.default: 'full'
+
+=item -bs <base_sep> | -base_sep <base_sep>
+
+For the purpose of determining the name of the reference community, strip
+characters before or after the specified separator. For example, when using the
+prefix 'ref' and the separator '_', community 'sample1_rep1' and 'sample1_rep2'
+are expected to have a reference community named 'sample1_ref'.
+
+=for Euclid:
+   base_sep.type: string, length(base_sep) == 1
+
 =back
 
 =head1 FEEDBACK
@@ -109,11 +131,13 @@ Email florent.angly@gmail.com
 
 =cut
 
-remove_unexpected_members($ARGV{'input_files'}, $ARGV{'output_prefix'}, $ARGV{'ref_name'});
+remove_unexpected_members($ARGV{'input_files'}, $ARGV{'output_prefix'},
+   $ARGV{'ref_name'}, $ARGV{'name_type'}, $ARGV{'base_sep'});
+
 exit;
 
 
-func remove_unexpected_members ($input_files, $output_prefix, $ref_name) {
+func remove_unexpected_members ($input_files, $output_prefix, $ref_name, $name_type, $base_sep) {
    # Read input communities
    my $meta = Bio::Community::Meta->new();
    my $format;
@@ -127,25 +151,58 @@ func remove_unexpected_members ($input_files, $output_prefix, $ref_name) {
       $in->close;
    }
 
-   # Find reference community and reads its members 
-   my $ref_comm = $meta->get_community_by_name($ref_name);
-   if (not defined $ref_comm) {
-      die("Error: No community called '$ref_name' found in input file");
-   }
-
-   # For non-reference communities, remove members not present in reference community
+   # Loop through all communities
    while (my $comm = $meta->next_community) {
-      next if $comm->name eq $ref_name;
+
+      # Determine name of reference community
+      my $name = $comm->name;
+      my $full_ref_name;
+      if ($name_type eq 'full') {
+         next if $name eq $ref_name;
+         $full_ref_name = $ref_name;
+      } elsif ($name_type eq 'prefix') {
+         my $esc_ref_name = quotemeta($ref_name);
+         next if $name =~ m/^$esc_ref_name/;
+         my $clean_name = $name;
+         if (defined $base_sep) {
+            my @arr = split($base_sep, $name);
+            @arr = @arr[1 .. scalar @arr - 1];
+            $clean_name = join $base_sep, @arr;
+         }
+         $full_ref_name = $ref_name.($base_sep||'').$clean_name;
+      } elsif ($name_type eq 'suffix') {
+         my $esc_ref_name = quotemeta($ref_name);
+         next if $name =~ m/$esc_ref_name$/;
+         my $clean_name = $name;
+         if (defined $base_sep) {
+            my @arr = split($base_sep, $name);
+            @arr = @arr[0 .. scalar @arr - 2];
+            $clean_name = join $base_sep, @arr;
+         }
+         $full_ref_name = $clean_name.($base_sep||'').$ref_name;
+      } else {
+         die "Error: '$name_type' is not a valid value for <name_type>\n";
+      }
+      print "Processing community $name (reference community $full_ref_name)\n";
+
+      # Retrieve reference community
+      my $ref_comm = $meta->get_community_by_name($full_ref_name);
+      if (not defined $ref_comm) {
+         die "Error: Expected a community called '$full_ref_name' in input but ".
+            "could not find it.";
+      }
+
+      # Process non-reference community
       while (my $member = $comm->next_member) {
          if (not defined $ref_comm->get_member_by_id($member->id)) {
             $comm->remove_member($member);
          }
       }
+
    }
 
    # Write resulting communities
    write_communities($meta, $output_prefix, $format, '');
-
 
    return 1;
 }
