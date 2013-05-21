@@ -195,7 +195,7 @@ method _generate_members () {
       if (defined $last_col_header) {
          if ($last_col_header eq '') {
             $self->throw("Parsing error. It looks like the last column of the ".
-               "QIIME might be empty\n");
+               "QIIME OTU table might be empty.\n");
          } elsif ($last_col_header =~ m/consensus\s*lineage/i) {
             $taxo_col = $self->_get_max_col;
             $self->_skip_last_col(1);
