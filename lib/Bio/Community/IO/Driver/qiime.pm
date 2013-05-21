@@ -190,11 +190,16 @@ method _generate_members () {
    # Does the last column contain the taxonomy?
    my $first_col_header = $self->_get_value(1, 1);
    my $taxo_col;
-   if ($first_col_header =~ m/OTU ID/i) {
+   if ($first_col_header =~ m/otu\s*id/i) {
       my $last_col_header = $self->_get_value(1, $self->_get_max_col);
-      if ( (defined $last_col_header) && ($last_col_header =~ m/consensus\s*lineage/i) ) {
-         $taxo_col = $self->_get_max_col;
-         $self->_skip_last_col(1);
+      if (defined $last_col_header) {
+         if ($last_col_header eq '') {
+            $self->throw("Parsing error. It looks like the last column of the ".
+               "QIIME might be empty\n");
+         } elsif ($last_col_header =~ m/consensus\s*lineage/i) {
+            $taxo_col = $self->_get_max_col;
+            $self->_skip_last_col(1);
+         }
       }
    } else {
       $self->warn("Could not recognize the headers of the QIIME OTU table, but ".
