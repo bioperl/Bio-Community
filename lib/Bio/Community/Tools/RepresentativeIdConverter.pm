@@ -198,8 +198,12 @@ method get_converted_meta () {
    my $meta = $self->metacommunity;
    my $meta2 = Bio::Community::Meta->new;
 
+   my $file = $self->cluster_file || $self->taxassign_file;
+   if (not defined $file) {
+      $self->throw("No cluster file or taxonomic assignment file was provided");
+   }
    my $id2repr = $self->_read_repr_file(
-      $self->cluster_file || $self->taxassign_file,
+      $file,
       defined $self->cluster_file ? 'cluster' : 'taxo',
    );
 
@@ -244,7 +248,7 @@ method _read_repr_file ( $file, $type ) {
    my $col_off;
    my %id2repr;
    my $num_seqs;
-   open my $in, '<', $file or $self->throw("Could not read file $file\n$!");
+   open my $in, '<', $file or $self->throw("Could not read file '$file'\n$!");
    while (my $line = <$in>) {
       chomp $line;
       next if $line =~ m/^\s*$/;

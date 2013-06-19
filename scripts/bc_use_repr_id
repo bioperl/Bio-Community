@@ -149,12 +149,6 @@ exit;
 
 
 func use_cluster_repr ($input_files, $cluster_file, $taxassign_file, $output_prefix) {
-
-   ###if ( (not defined $cluster_file) and (not defined $taxassign_file) ) {
-   ###   $self->throw('Need to specify one of <cluster_file> or <taxassign_file>');
-   ###}
-   ####my $in_file = $cluster_file || $taxassign_file;
-
    # Read input communities
    my $meta = Bio::Community::Meta->new();
    my $communities = [];
