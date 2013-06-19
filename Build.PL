@@ -53,7 +53,7 @@ my $build = Module::Build->new(
                              'scripts/bc_rarefy',
                              'scripts/bc_remove_unexpected_members',
                              'scripts/bc_summarize',
-                             'scripts/bc_use_cluster_repr',
+                             'scripts/bc_use_repr_id',
                             ],
     recursive_test_files => 1,
     dynamic_config       => 1,
