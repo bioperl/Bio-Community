@@ -71,6 +71,7 @@ is $in->sort_members, 0;
 is $in->abundance_type, 'count';
 is $in->missing_string, 0;
 is $in->multiple_communities, 1;
+is $in->explicit_ids, 0;
 
 @methods = qw(
   _next_metacommunity_init _next_community_init next_member _next_community_finish _next_metacommunity_finish

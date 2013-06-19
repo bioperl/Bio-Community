@@ -79,6 +79,7 @@ our $multiple_communities   =  0;      # the format supports one community per f
 our $default_sort_members   =  0;      # members not sorted by abundance
 our $default_abundance      = 'count'; # report raw counts
 our $default_missing_string = '-';     # empty members represented as '-'
+our $explicit_ids           =  0;      # IDs are not explicitly recorded
 
 
 has 'dummy' => (

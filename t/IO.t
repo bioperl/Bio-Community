@@ -29,7 +29,7 @@ is $in->sort_members, 0;
                write_community _write_community_init _write_community_finish
                next_metacommunity _next_metacommunity_init _next_metacommunity_finish
                write_metacommunity _write_metacommunity_init _write_metacommunity_finish
-               sort_members abundance_type missing_string multiple_communities
+               sort_members abundance_type missing_string multiple_communities explicit_ids
                weight_files weight_assign taxonomy );
 
 for my $method (@methods) {

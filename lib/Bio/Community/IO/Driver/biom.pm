@@ -165,6 +165,7 @@ with 'Bio::Community::Role::IO';
 
 
 our $multiple_communities   =  1;      # format supports several communities per file
+our $explicit_ids           =  1;      # IDs are explicitly recorded
 our $default_sort_members   =  0;      # unsorted
 our $default_abundance_type = 'count'; # absolute count (positive integer)
 our $default_missing_string =  0;      # empty members get a '0'

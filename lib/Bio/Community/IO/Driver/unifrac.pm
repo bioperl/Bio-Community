@@ -116,6 +116,7 @@ with 'Bio::Community::Role::IO',
 
 
 our $multiple_communities   =  1;      # format supports several communities per file
+our $explicit_ids           =  0;      # IDs are not explicitly recorded
 #### sorting only effective for first community???
 our $default_sort_members   =  0;      # unsorted
 our $default_abundance_type = 'count'; # absolute count (positive integer)

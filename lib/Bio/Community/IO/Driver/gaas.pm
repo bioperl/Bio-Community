@@ -92,6 +92,7 @@ with 'Bio::Community::Role::IO';
 
 
 our $multiple_communities    =  0;         # the format supports one community per file
+our $explicit_ids            =  1;         # IDs are explicitly recorded
 our $default_sort_members    =  -1;        # sorted by decreasing abundance
 our $default_abundance_type  = 'fraction'; # fractional number between 0 and 1
 our $default_missing_string  =  0;         # empty members get a '0'

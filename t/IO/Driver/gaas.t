@@ -80,6 +80,7 @@ is $in->sort_members, -1;
 is $in->abundance_type, 'fraction';
 is $in->missing_string, 0;
 is $in->multiple_communities, 0;
+is $in->explicit_ids, 1;
 ###is $in->taxonomy, $taxonomy;
 
 @methods = qw(

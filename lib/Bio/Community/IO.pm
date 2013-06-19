@@ -650,7 +650,7 @@ has 'missing_string' => (
 
  Usage   : $in->multiple_communities();
  Function: Return whether or not the file format can represent multiple
-           communities in a single file           
+           communities in a single file.
  Args    : 0 or 1
  Returns : 0 or 1
 
@@ -662,6 +662,24 @@ has 'multiple_communities' => (
    required => 0,
    lazy => 1,
    default => sub { return eval('$'.ref(shift).'::multiple_communities') || 0 },
+);
+
+
+=head2 explicit_ids
+
+ Usage   : $in->explicit_ids();
+ Function: Return whether or not the file format explicitly records member IDs.
+ Args    : 0 or 1
+ Returns : 0 or 1
+
+=cut
+
+has 'explicit_ids' => (
+   is => 'ro',
+   isa => 'Bool',
+   required => 0,
+   lazy => 1,
+   default => sub { return eval('$'.ref(shift).'::explicit_ids') || 0 },
 );
 
 
