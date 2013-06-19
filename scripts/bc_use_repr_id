@@ -175,7 +175,7 @@ func use_cluster_repr ($input_files, $cluster_file, $taxassign_file, $output_pre
    if (defined $cluster_file) {
       $converter->cluster_file($cluster_file);
    }
-   if (defined $taxassigne_file) {
+   if (defined $taxassign_file) {
       $converter->taxassign_file($taxassign_file);
    }
    my $out_meta = $converter->get_converted_meta;
