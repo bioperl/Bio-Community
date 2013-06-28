@@ -39,10 +39,10 @@ communities and some of them have spurious members.
 
 =item -if <input_files>... | -input_files <input_files>...
 
-File containing the input communities: a reference community + communities for
-which to remove members not occuring in the reference community. When providing
-communities in a format that supports only one community per file (e.g. gaas),
-you can provide multiple input files.
+This script reads a community file that contains reference communities. For
+every non-reference community in the file, every member that is not also present
+in the corresponding reference community is removed. This is useful if you have
+sequenced mock communities and some of them have spurious members.
 
 =for Euclid:
    input_files.type: readable
@@ -150,61 +150,66 @@ func remove_unexpected_members ($input_files, $output_prefix, $ref_name, $name_t
       }
       $in->close;
    }
-
    # Loop through all communities
    while (my $comm = $meta->next_community) {
-
-      # Determine name of reference community
-      my $name = $comm->name;
-      my $full_ref_name;
-      if ($name_type eq 'full') {
-         next if $name eq $ref_name;
-         $full_ref_name = $ref_name;
-      } elsif ($name_type eq 'prefix') {
-         my $esc_ref_name = quotemeta($ref_name);
-         next if $name =~ m/^$esc_ref_name/;
-         my $clean_name = $name;
-         if (defined $base_sep) {
-            my @arr = split($base_sep, $name);
-            @arr = @arr[1 .. scalar @arr - 1];
-            $clean_name = join $base_sep, @arr;
-         }
-         $full_ref_name = $ref_name.($base_sep||'').$clean_name;
-      } elsif ($name_type eq 'suffix') {
-         my $esc_ref_name = quotemeta($ref_name);
-         next if $name =~ m/$esc_ref_name$/;
-         my $clean_name = $name;
-         if (defined $base_sep) {
-            my @arr = split($base_sep, $name);
-            @arr = @arr[0 .. scalar @arr - 2];
-            $clean_name = join $base_sep, @arr;
-         }
-         $full_ref_name = $clean_name.($base_sep||'').$ref_name;
-      } else {
-         die "Error: '$name_type' is not a valid value for <name_type>\n";
-      }
-      print "Processing community $name (reference community $full_ref_name)\n";
-
-      # Retrieve reference community
-      my $ref_comm = $meta->get_community_by_name($full_ref_name);
-      if (not defined $ref_comm) {
-         die "Error: Expected a community called '$full_ref_name' in input but ".
-            "could not find it.";
-      }
-
+      # Get reference community
+      my $ref_comm = get_ref_comm($comm, $meta, $ref_name, $name_type, $base_sep) || next;
+      print "Processing community ".$comm->name." (reference community ".$ref_comm->name.")\n";
       # Process non-reference community
       while (my $member = $comm->next_member) {
          if (not defined $ref_comm->get_member_by_id($member->id)) {
             $comm->remove_member($member);
          }
       }
-
    }
-
    # Write resulting communities
    write_communities($meta, $output_prefix, $format, '');
-
    return 1;
+}
+
+
+func get_ref_comm ($comm, $meta, $ref_name, $name_type, $base_sep) {
+   # Get corresponding reference community, or undef if it itself is a reference.
+   # Determine name of reference community
+   my $name = $comm->name;
+   my $full_ref_name;
+   my $isa_ref = 0;
+   if ($name_type eq 'full') {
+      $isa_ref = 1 if $name eq $ref_name;
+      $full_ref_name = $ref_name;
+   } elsif ($name_type eq 'prefix') {
+      my $esc_ref_name = quotemeta($ref_name);
+      $isa_ref = 1 if $name =~ m/^$esc_ref_name/;
+      my $clean_name = $name;
+      if (defined $base_sep) {
+         my @arr = split($base_sep, $name);
+         @arr = @arr[1 .. scalar @arr - 1];
+         $clean_name = join $base_sep, @arr;
+      }
+      $full_ref_name = $ref_name.($base_sep||'').$clean_name;
+   } elsif ($name_type eq 'suffix') {
+      my $esc_ref_name = quotemeta($ref_name);
+      $isa_ref = 1 if $name =~ m/$esc_ref_name$/;
+      my $clean_name = $name;
+      if (defined $base_sep) {
+         my @arr = split($base_sep, $name);
+         @arr = @arr[0 .. scalar @arr - 2];
+         $clean_name = join $base_sep, @arr;
+      }
+      $full_ref_name = $clean_name.($base_sep||'').$ref_name;
+   } else {
+      die "Error: '$name_type' is not a valid value for <name_type>\n";
+   }
+   # Retrieve reference community
+   my $ref_comm;
+   if (not $isa_ref) {
+      $ref_comm = $meta->get_community_by_name($full_ref_name);
+      if (not defined $ref_comm) {
+         die "Error: Expected a community called '$full_ref_name' in input but ".
+            "could not find it.";
+      }
+   }
+   return $ref_comm;
 }
 
 
