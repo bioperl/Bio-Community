@@ -46,6 +46,7 @@ my $build = Module::Build->new(
     script_files         => [
                              'scripts/bc_clean_shrapnel',
                              'scripts/bc_convert_files',
+                             'scripts/bc_correct_misassignments',
                              'scripts/bc_get_info',
                              'scripts/bc_manage_samples',
                              'scripts/bc_measure_distance',
