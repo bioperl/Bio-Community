@@ -287,7 +287,7 @@ before get_repr_meta => sub {
 
 
 method _count_normalize () {
-   # Normalize communties by total count
+   # Normalize communities by total count
 
    # Sanity check
    my $meta = $self->metacommunity;
@@ -332,7 +332,7 @@ method _count_normalize () {
    my $max_threshold = 0;
    for my $community ( @$communities ) {
       my ($average, $repetitions, $beta_val);
-      if ($community->get_members_count == $sample_size) {         
+      if ($community->get_members_count == $sample_size) {
          ($average, $repetitions, $beta_val) = ($community->clone, undef, undef);
       } else {
          ($average, $repetitions, $beta_val) = $self->_bootstrap($community);
