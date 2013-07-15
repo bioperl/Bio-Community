@@ -16,16 +16,16 @@ Bio::Community::Tools::Rarefier - Normalize communities by count
   use Bio::Community::Tools::Rarefier;
 
   # Normalize communities in a metacommunity by repeatedly taking 1,000 random members
-  my $normalizer = Bio::Community::Tools::Rarefier->new(
+  my $rarefier = Bio::Community::Tools::Rarefier->new(
      -metacommunity => $meta,
      -sample_size   => 1000,
      -threshold     => 0.001, # When to stop iterating. Can specify repetions instead
   );
 
-  my $average_community = $normalizer->get_avg_meta->[0];
+  my $average_community = $rarefier->get_avg_meta->[0];
 
   # Round counts and remove members with abundance between 0 and 0.5
-  my $representative_community = $normalizer->get_repr_meta->[0];
+  my $representative_community = $rarefier->get_repr_meta->[0];
 
 =head1 DESCRIPTION
 
@@ -87,7 +87,7 @@ methods. Internal methods are usually preceded with a _
 =head2 new
 
  Function: Create a new Bio::Community::Tool::Rarefier object
- Usage   : my $normalizer = Bio::Community::Tool::Rarefier->new( );
+ Usage   : my $rarefier = Bio::Community::Tool::Rarefier->new( );
  Args    : -metacommunity: see metacommunity()
            -repetitions  : see repetitions()
            -sample_size  : see sample_size()
@@ -115,7 +115,7 @@ extends 'Bio::Root::Root';
 =head2 metacommunity
 
  Function: Get or set the metacommunity to normalize.
- Usage   : my $meta = $normalizer->metacommunity;
+ Usage   : my $meta = $rarefier->metacommunity;
  Args    : A Bio::Community::Meta object
  Returns : A Bio::Community::Meta object
 
@@ -137,7 +137,7 @@ has metacommunity => (
            at each iteration. It has to be smaller than the total count of the
            smallest community or an error will be generated. If the sample size
            is omitted, it defaults to the get_members_count() of the smallest community.
- Usage   : my $sample_size = $normalizer->sample_size;
+ Usage   : my $sample_size = $rarefier->sample_size;
  Args    : positive integer for the sample size
  Returns : positive integer for the sample size
 
@@ -164,7 +164,7 @@ has sample_size => (
            the repetitions() method instead of the threshold() method, the
            beta diversity between the last two average communities repetitions
            can be accessed using the threshold() method.
- Usage   : my $threshold = $normalizer->threshold;
+ Usage   : my $threshold = $rarefier->threshold;
  Args    : positive integer for the number of repetitions
  Returns : positive integer for the (minimum) number of repetitions
 
@@ -188,7 +188,7 @@ has threshold => (
            repetitions. After communities have been normalized by count using
            threshold() method, the number of repetitions actually done can be
            accessed using this method.
- Usage   : my $repetitions = $normalizer->repetitions;
+ Usage   : my $repetitions = $rarefier->repetitions;
  Args    : positive integer for the number of repetitions
  Returns : positive integer for the (minimum) number of repetitions
 
@@ -208,7 +208,7 @@ has repetitions => (
 
  Function: Get or set verbose mode. In verbose mode, the current number of
            iterations (and beta diversity if a threshold is used) is displayed.
- Usage   : $normalizer->verbose(1);
+ Usage   : $rarefier->verbose(1);
  Args    : 0 or 1
  Returns : 0 or 1
 
@@ -227,7 +227,7 @@ has verbose => (
 =head2 get_avg_meta
 
  Function: Calculate an average metacommunity.
- Usage   : my $meta = $normalizer->get_avg_meta;
+ Usage   : my $meta = $rarefier->get_avg_meta;
  Args    : none
  Returns : Bio::Community::Meta object
 
@@ -254,7 +254,7 @@ before get_avg_meta => sub {
 =head2 get_repr_meta
 
  Function: Calculate a representative metacommunity.
- Usage   : my $meta = $normalizer->get_repr_meta;
+ Usage   : my $meta = $rarefier->get_repr_meta;
  Args    : none
  Returns : Bio::Community::Meta object
 
