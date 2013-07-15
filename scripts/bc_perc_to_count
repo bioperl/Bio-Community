@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use Scalar::Util;
 use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Meta;
@@ -172,6 +173,9 @@ func read_count_file ($file) {
       next if $line =~ m/^\s*$/;
       chomp $line;
       my ($name, $count) = split "\t", $line;
+      if (not Scalar::Util::looks_like_number($count)) {
+         die "Error: Total abundance for community '$name', '$count', does not look numeric\n";
+      }
       $counts{$name} = $count;
    }
    close $in;
