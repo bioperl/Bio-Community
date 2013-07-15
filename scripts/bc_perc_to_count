@@ -15,6 +15,7 @@ use Scalar::Util;
 use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Meta;
+use Bio::Community::Tools::Transformer;
 use Getopt::Euclid qw(:minimal_keys);
 
 
@@ -30,9 +31,9 @@ bc_perc_to_count - Transform relative abundances into counts
 
 =head1 DESCRIPTION
 
-This script reads files containing biological communities and a file of counts
+This script reads files containing biological communities and a file of abundance
 for these communities. The relative abundance of each member is multiplied by
-the total count for its community.
+the total abundance  for its community.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -136,32 +137,17 @@ func perc_to_count ($input_files, $count_file, $output_prefix) {
       $in->close;
    }
 
-   my $counts = read_count_file($count_file);
+   my $abundance = read_count_file($count_file);
 
-   $meta = multiply($meta, $counts);
+   my $transformer = Bio::Community::Tools::Transformer->new(
+      -metacommunity   => $meta,
+      -type            => 'total',
+      -total_abundance => $abundance,
+   );
+   $meta = $transformer->get_transformed_meta;
 
    write_communities($meta, $output_prefix, $format, '');
    return 1;
-}
-
-
-func multiply ($meta, $counts) {
-   while (my $community = $meta->next_community) {
-      my $tot_count = $counts->{$community->name};
-      if (not defined $tot_count) {
-         warn "Warn: No total count was provided for community ".$community->name.". ".
-            "Leaving this community alone...\n";
-         next;
-      }
-      print "Community ".$community->name.": total count of ".$tot_count."\n";
-      for my $member (@{$community->get_all_members}) {
-         my $old_count = $community->get_count($member);
-         my $new_count = $old_count/100 * $tot_count;
-         my $add = $new_count - $old_count;
-         $community->add_member($member, $add);
-      }
-   }
-   return $meta;
 }
 
 
