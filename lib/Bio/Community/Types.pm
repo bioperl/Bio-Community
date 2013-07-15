@@ -109,19 +109,24 @@ subtype 'AbundanceRank'
 
 
 # Type of distance
-my @DistanceType  = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger
+my @DistanceType = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger
                        bray-curtis shared permuted maxiphi unifrac);
 subtype 'DistanceType'
    => as enum( \@DistanceType )
    => message { _gen_err_msg(\@DistanceType, $_) };
 
 
-# Type of distance
-my @AlphaType  = qw(richness richness); # duplication intended to avoid error (min 2 values needed for enum)
+# Type of alpha diversity
+my @AlphaType = qw(richness richness); # duplication intended to avoid error (min 2 values needed for enum)
 subtype 'AlphaType'
    => as enum( \@AlphaType )
    => message { _gen_err_msg(\@AlphaType, $_) };
 
+# Type of transformation
+my @TransformationType = qw(identity binary hellinger total);
+subtype 'TransformationType'
+   => as enum( \@TransformationType )
+   => message { _gen_err_msg(\@TransformationType, $_) };
 
 # Members identification method
 my @IdentifyMembersByType = qw(id desc);
