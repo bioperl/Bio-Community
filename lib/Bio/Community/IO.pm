@@ -43,7 +43,7 @@ A Bio::Community::IO object implement methods to read and write communities in
 formats used by popular programs such as BIOM, GAAS, QIIME, Unifrac, or as
 generic tab-separated tables. The format should be automatically detected though
 it can be manually specified. This module can also convert community member
-abundance between counts, fraction and relative abundance.
+abundance between counts, absolute abundance, relative abundance and fractions.
 
 When reading communities, the next_member() method is called by next_community(),
 which itself is called by next_metacommunity(). Similarly, when writing,
@@ -550,6 +550,8 @@ method _process_member ($member, $community) {
    my $ab_type = $self->abundance_type;
    if ($ab_type eq 'count') {
       $ab_value = $community->get_count($member);
+   } elsif ($ab_type eq 'absolute') {
+      $ab_value = $community->get_abs_ab($member);
    } elsif ($ab_type eq 'percentage') {
       $ab_value = $community->get_rel_ab($member);
    } elsif ($ab_type eq 'fraction') {
@@ -606,12 +608,15 @@ has 'sort_members' => (
 =head2 abundance_type
 
  Usage   : $in->abundance_type();
- Function: When writing a community to a file, report the abundance as one of
-           three possible representations: a raw count, a percentage (0-100%) or
-           a fractional number (0-1). The default is specific to each driver
-           used.
- Args    : count, percentage or fraction
- Returns : count, percentage or fraction
+ Function: When writing a community to a file, report member abundance in one
+           of four possible representations:
+            * count     : observed count
+            * absolute  : absolute abundance
+            * percentage: relative abundance, in percent (0-100%)
+            * fraction  : relative abundance, as a fractional number (0-1)
+           The default is specific to each driver
+ Args    : count, absolute, percentage or fraction
+ Returns : count, absolute, percentage or fraction
 
 =cut
 

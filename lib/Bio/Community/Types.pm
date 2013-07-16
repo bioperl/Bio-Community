@@ -97,7 +97,7 @@ subtype 'NumericSort'
 
 
 # Abundance representation
-my @AbundanceRepr = qw(count percentage fraction);
+my @AbundanceRepr = qw(count absolute percentage fraction);
 subtype 'AbundanceRepr'
    => as enum( \@AbundanceRepr )
    => message { _gen_err_msg(\@AbundanceRepr, $_) };
