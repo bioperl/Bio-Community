@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bc_perc_to_count
+# BioPerl script bc_relative_to_absolute
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -21,19 +21,20 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_perc_to_count - Transform relative abundances into counts
+bc_relative_to_absolute - Convert relative abundances into absolute
 
 =head1 SYNOPSIS
 
-  bc_perc_to_count -input_files   my_communities.generic \
-                   -count_file    my_counts.tsv          \
-                   -output_prefix my_results
+  bc_relative_to_absolute -input_files     my_communities.generic \
+                          -abundance_file  my_counts.tsv          \
+                          -output_prefix   my_results
 
 =head1 DESCRIPTION
 
-This script reads files containing biological communities and a file of abundance
-for these communities. The relative abundance of each member is multiplied by
-the total abundance  for its community.
+This script reads files containing biological communities and a file of
+abundance for these communities. The relative abundance of each member is
+multiplied by the total abundance for its community to obtain the absolute
+abundance of this member.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -48,13 +49,13 @@ unifrac. See L<Bio::Community::IO> for more information on these format.
 =for Euclid:
    input_files.type: readable
 
-=item -cf <count_file> | -count_file <count_file>
+=item -af <abundance_file> | -abundance_file <abundance_file>
 
-File containing the total count for each community. Each line in the file should
-be tab-separated and have two columns: community name, total count.
+File containing the total abundance for each community. Each line in the file should
+be tab-separated and have two columns: community name, total abundance.
 
 =for Euclid:
-   count_file.type: readable
+   abundance_file.type: readable
 
 =back
 
@@ -69,7 +70,7 @@ the requested output format can only hold a single community. Default: output_pr
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bc_perc_to_count'
+   output_prefix.default: 'bc_relative_to_absolute'
 
 =back
 
@@ -112,12 +113,14 @@ Email florent.angly@gmail.com
 =cut
 
 
-perc_to_count( $ARGV{'input_files'}, $ARGV{'count_file'}, $ARGV{'output_prefix'} );
+relative_to_absolute(
+   $ARGV{'input_files'}, $ARGV{'abundance_file'}, $ARGV{'output_prefix'}
+);
 
 exit;
 
 
-func perc_to_count ($input_files, $count_file, $output_prefix) {
+func relative_to_absolute ($input_files, $abundance_file, $output_prefix) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new();
@@ -137,35 +140,41 @@ func perc_to_count ($input_files, $count_file, $output_prefix) {
       $in->close;
    }
 
-   my $abundance = read_count_file($count_file);
+   # Read total abundances
+   my $abundances = read_abundance_file($abundance_file);
 
-   my $transformer = Bio::Community::Tools::Transformer->new(
-      -metacommunity   => $meta,
-      -type            => 'total',
-      -total_abundance => $abundance,
-   );
-   $meta = $transformer->get_transformed_meta;
+   # Add total abundances to communities
+   while (my $community = $meta->next_community) {
+      my $name = $community->name;
+      my $abundance = $abundances->{$name};
+      if (not defined $abundance) {
+         die "Error: No total abundance specified for community '$name'\n";
+      }
+      $community->set_members_abundance($abundance);
+   }
 
    write_communities($meta, $output_prefix, $format, '');
+
    return 1;
 }
 
 
-func read_count_file ($file) {
-   my %counts;
+func read_abundance_file ($file) {
+   my %abundances;
    open my $in, '<', $file or die "Error: Could not read file $file\n$!\n";
    while (my $line = <$in>) {
       next if $line =~ m/^#/;
       next if $line =~ m/^\s*$/;
       chomp $line;
-      my ($name, $count) = split "\t", $line;
-      if (not Scalar::Util::looks_like_number($count)) {
-         die "Error: Total abundance for community '$name', '$count', does not look numeric\n";
+      my ($name, $abundance) = split "\t", $line;
+      if (not Scalar::Util::looks_like_number($abundance)) {
+         die "Error: Total abundance for community '$name', '$abundance', does ".
+             "not look numeric\n";
       }
-      $counts{$name} = $count;
+      $abundances{$name} = $abundance;
    }
    close $in;
-   return \%counts;
+   return \%abundances;
 }
 
 
@@ -188,8 +197,9 @@ func write_communities ($meta, $output_prefix, $output_format, $type='') {
          }
          $output_file .= '.'.$output_format;
          $out = Bio::Community::IO->new(
-            -format => $output_format,
-            -file   => '>'.$output_file,
+            -format         => $output_format,
+            -file           => '>'.$output_file,
+            -abundance_type => 'absolute',
          );
       }
       print "Writing community '".$community->name."' to file '$output_file'\n";
