@@ -15,7 +15,6 @@ use Scalar::Util;
 use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Meta;
-use Bio::Community::Tools::Transformer;
 use Getopt::Euclid qw(:minimal_keys);
 
 
