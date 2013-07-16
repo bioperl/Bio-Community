@@ -144,55 +144,6 @@ delta_ok $transformed->get_count($member6), 0;
 #delta_ok $transformed->get_count($member6), 50.139804546886701;
 
 
-# Transformation to total abundance
-
-my $total_abundance = {
-   'community1' => 666,
-   'community2' => 1e7,
-};
-
-ok $transformer = Bio::Community::Tools::Transformer->new(
-   -metacommunity   => $meta,
-   -type            => 'total',
-   -total_abundance => $total_abundance,
-), 'Total abundance';
-
-is $transformer->get_transformed_meta->get_communities_count, 2;
-is $transformer->type, 'total';
-
-$transformed = $transformer->get_transformed_meta->get_community_by_name('community1');
-isa_ok $transformed, 'Bio::Community';
-is $transformed->name, 'community1';
-delta_ok $transformed->get_members_count, 666.0;
-delta_ok $transformed->get_count($member1),  44.4;
-delta_ok $transformed->get_count($member2),  88.8;
-delta_ok $transformed->get_count($member3), 133.2;
-delta_ok $transformed->get_count($member4), 177.6;
-delta_ok $transformed->get_count($member5), 222.0;
-delta_ok $transformed->get_count($member6),   0.0;
-
-$transformed = $transformer->get_transformed_meta->get_community_by_name('community2');
-isa_ok $transformed, 'Bio::Community';
-is $transformed->name, 'community2';
-delta_ok $transformed->get_members_count, 1e7;
-delta_ok $transformed->get_count($member1), 3.60608773500448e+06;
-delta_ok $transformed->get_count($member2), 0;
-delta_ok $transformed->get_count($member3), 1.89256938227395e+06;
-delta_ok $transformed->get_count($member4), 0;
-delta_ok $transformed->get_count($member5), 0;
-delta_ok $transformed->get_count($member6), 4.50134288272158e+06;
-
-
-delete $total_abundance->{'community1'};
-ok $transformer = Bio::Community::Tools::Transformer->new(
-   -metacommunity   => $meta,
-   -type            => 'total',
-   -total_abundance => $total_abundance,
-);
-
-throws_ok { $transformer->get_transformed_meta } qr/EXCEPTION/;
-
-
 done_testing();
 
 exit;

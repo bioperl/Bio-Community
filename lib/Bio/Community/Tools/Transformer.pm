@@ -27,7 +27,7 @@ Bio::Community::Tools::Transformer - Arbitrary transformation of member counts
 
 This module takes a metacommunity and transform the count of the community
 members it contains. Several transformation methods are available: identity,
-binary, hellinger, total.
+binary, or hellinger.
 
 =head1 FEEDBACK
 
@@ -116,15 +116,13 @@ has metacommunity => (
 
 =head2 type
 
- Function: Get or set the type of transformation.
+ Function: Get or set the type of transformation:
+            * identity  : keep the counts as-is
+            * binary    : 1 for presence, 0 for absence
+            * hellinger : Hellinger transformation (square root)
  Usage   : my $type = $transformer->type;
- Args    : String:
-              * identity  : keep the counts as-is
-              * binary    : 1 for presence, 0 for absence
-              * hellinger : Hellinger transformation (square root)
-              * total     : scale the counts of each community to the given
-                            total. See total_file().
- Returns : identity, binary, hellinger, or total
+ Args    : identity, binary, or hellinger
+ Returns : identity, binary, or hellinger
 
 =cut
 
@@ -135,25 +133,6 @@ has type => (
    default => 'identity',
    lazy => 1,
    init_arg => '-type',
-);
-
-
-=head2 total_abundance
-
- Function: Get or set the total counts
- Usage   : my $file = $transformer->total_abundance;
- Args    : Hashref giving the the total abundance (values) for each community (keys).
- Returns : Total counts hashref
-
-=cut
-
-has total_abundance => (
-   is => 'rw',
-   isa => 'Maybe[HashRef]',
-   required => 0,
-   default => undef,
-   lazy => 1,
-   init_arg => '-total_abundance',
 );
 
 
@@ -194,31 +173,12 @@ method _transform () {
    # Register transformation functions
    my $sub;
    my $type = $self->type;
-   my $want_totals;
    if ($type eq 'identity') {
-      $sub = sub {
-         return shift();
-      };
+      $sub = sub { return shift };
    } elsif ($type eq 'binary') {
-      $sub = sub {
-         return shift() > 0 ? 1 : 0;
-      };
+      $sub = sub { return shift > 0 ? 1 : 0 };
    } elsif ($type eq 'hellinger') {
-      $sub = sub {
-         return sqrt(shift());
-      };
-   } elsif ($type eq 'total') {
-      $want_totals = $self->total_abundance;
-      while (my $community = $meta->next_community) {
-         my $name = $community->name;
-         if (not exists $want_totals->{$name}) {
-            $self->throw("No total abundance given for community '$name'");
-         }
-      }
-      $sub = sub {
-         my ($count, $scaling) = @_;
-         return $count * $scaling;
-      };
+      $sub = sub { return sqrt shift };
    } else {
       $self->throw("Unsupported transformation type '$type'");
    }
@@ -231,16 +191,9 @@ method _transform () {
          -name        => $name,
          -use_weights => $community->use_weights,
       );
-      my $scaling;
-      if ($type eq 'total') {
-         my $count = $community->get_members_count;
-         if ($count) {
-            $scaling = $want_totals->{$name} / $count;
-         }
-      }
       while ( my $member = $community->next_member('_transform') ) {
          my $count = $community->get_count($member);
-         my $transf_count = $sub->($count, $scaling);
+         my $transf_count = $sub->($count);
          $transformed->add_member($member, $transf_count);
       }
       $transformed_meta->add_communities([$transformed]);
