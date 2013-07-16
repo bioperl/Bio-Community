@@ -10,18 +10,21 @@ use_ok($_) for qw(
 
 my ($community, $community2, $community3, $member1, $member2, $member3, $member4,
    $member5, $iters);
-my (%ids, %rel_abs, %members);
+my (%ids, %rel_abs, %abs_abs, %members);
 my  @members;
 
 
-# Add 3 members to a community
+# Bare object
 
 ok $community = Bio::Community->new( -name => 'simple', -use_weights => 0 );
 
 isa_ok $community, 'Bio::Root::RootI';
 isa_ok $community, 'Bio::Community';
 
-$community = Bio::Community->new( -use_weights => 0 );
+
+# Add 3 members to a community
+
+ok $community = Bio::Community->new( -use_weights => 0 ), 'Add members';
 is $community->get_members_count, 0;
 
 $member1 = Bio::Community::Member->new( -id => 1, -weights => [3] );
@@ -36,14 +39,14 @@ $member3 = Bio::Community::Member->new( -id => 3, -weights => [2,7] );
 ok $community->add_member( $member3, 4 );
 is $community->get_members_count, 28;
 
-isa_ok $community->get_member_by_id(2), 'Bio::Community::Member';
-is $community->get_member_by_id(2)->id, 2;
-
 is $community->get_count($member2), 23;
 is $community->get_count($member3), 4;
 is $community->get_count($member1), 1;
 
-is $community->get_rank($member2), 1;
+
+# Ranks
+
+is $community->get_rank($member2), 1, 'Ranks';
 is $community->get_rank($member3), 2;
 is $community->get_rank($member1), 3;
 
@@ -51,6 +54,12 @@ is $community->get_member_by_rank(1)->id, 2;
 is $community->get_member_by_rank(2)->id, 3;
 is $community->get_member_by_rank(3)->id, 1;
 is $community->get_member_by_rank(4), undef;
+
+
+# Retrieve members
+
+is $community->get_member_by_id(2)->id, 2, 'Get members';
+isa_ok $community->get_member_by_id(2), 'Bio::Community::Member';
 
 while (my $member = $community->next_member) {
    isa_ok $member, 'Bio::Community::Member';
@@ -71,11 +80,13 @@ is_deeply [sort keys %ids], [1, 2, 3];
 
 # Remove a member from the community
 
-is $community->remove_member( $member2, 5 ), 5;
+is $community->remove_member( $member2, 5 ), 5, 'Remove members';
 is $community->get_members_count, 23;
+is $community->get_members_abundance, 23;
 
 is $community->remove_member( $member2 ), 18; # remove all of it
 is $community->get_members_count, 5;
+is $community->get_members_abundance, 5;
 
 is $community->remove_member( $member2 ), 0; # remove already removed member
 
@@ -118,18 +129,32 @@ is_deeply \%rel_abs, { 1 => 20, 3 => 80 };
 ok $community->use_weights(1);
 is $community->use_weights, 1;
 
+is $community->get_member_by_rank(1)->id, 1;
+is $community->get_member_by_rank(2)->id, 3;
+
+
+# Relative abundance
+
 for my $member (@{$community->get_all_members}) {
    $rel_abs{$member->id} = $community->get_rel_ab($member);
 }
 is_deeply \%rel_abs, { 1 => 53.846153846154, 3 => 46.1538461538463 };
 
-is $community->get_member_by_rank(1)->id, 1;
-is $community->get_member_by_rank(2)->id, 3;
+
+# Absolute abundance
+
+ok $community->set_members_abundance(+1.634e5), 'Absolute abundance';
+is $community->get_members_abundance, 1.634e5;
+
+for my $member (@{$community->get_all_members}) {
+   $abs_abs{$member->id} = $community->get_abs_ab($member);
+}
+is_deeply \%abs_abs, { 1 => 87984.6153846157, 3 => 75415.3846153849 };
 
 
 # Named iterators
 
-ok $community = Bio::Community->new();
+ok $community = Bio::Community->new(), 'Iterator';
 ok $community->add_member($member1);
 ok $community->add_member($member2);
 ok $community->add_member($member3);

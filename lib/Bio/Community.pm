@@ -125,7 +125,7 @@ has name => (
 
  Function: Set whether or not relative abundance should be normalized by taking
            into accout the weights of the different members (e.g. genome length,
-           gene copy number). Refer to the Bio::Community::Member->weights()
+           gene copy number). Refer to the C<Bio::Community::Member->weights()>
            method for more details. The default is to use the weights that have
            given to community members.
  Usage   : $community->use_weights(1);
@@ -180,8 +180,8 @@ method _calc_average_weights () {
 
 =head2 get_members_count
 
- Function: Get the total number of members in the community
- Usage   : $community->get_members_count();
+ Function: Get the total count of members sampled from the community.
+ Usage   : my $total_count = $community->get_members_count();
  Args    : none
  Returns : integer
 
@@ -196,6 +196,39 @@ has _total_count => (
    reader => 'get_members_count',
    writer => '_set_members_count',
 );
+
+
+=head2 get_members_abundance, set_members_abundance
+
+ Function: Get or set the total abundance of members in the community. Setting
+           this option implies that you know the total abundance of the members
+           in the community, even though you have not have sampled them all. If
+           this value has not been set explicitly, this method returns
+           C<get_members_count> by default.
+ Usage   : $community->set_members_abundance( 1.63e6 );
+           # or
+           my $total_abundance = $community->get_members_abundance();
+ Args    : number
+ Returns : number
+
+=cut
+
+has _total_abundance => (
+   is => 'rw',
+   #isa => 'PositiveNum', # too costly for an internal method
+   lazy => 1,
+   default => 0,
+   init_arg => undef,
+   reader => '_get_members_abundance',
+   writer => 'set_members_abundance',
+   predicate => '_has_members_abundance',
+);
+
+method get_members_abundance ( ) {
+   return $self->_has_members_abundance ?
+          $self->_get_members_abundance :
+          $self->get_members_count      ;
+}
 
 
 has _weighted_count => (
@@ -471,11 +504,8 @@ method get_member_by_rank (AbundanceRank $rank) {
 
 ####
 # TODO: get_member_by_rel_ab
-####
-
-
-####
-# TODO: get_member_by_count
+#       get_member_by_abs_ab
+#       get_member_by_count
 ####
 
 
@@ -551,6 +581,21 @@ method get_rel_ab (Bio::Community::Member $member) {
      $rel_ab = $self->get_count($member) * 100 / ($weight * $weighted_count);
   }
   return $rel_ab;
+}
+
+
+=head2 get_abs_ab
+
+ Function: Determine the absolute abundance of a member in the community, i.e.,
+           its C<get_rel_ab()> multiplied by its C<get_members_abundance()>.
+ Usage   : my $abs_ab = $community->get_abs_ab($member);
+ Args    : a Bio::Community::Member object
+ Returns : a number for the absolute abundance of this member
+
+=cut
+
+method get_abs_ab (Bio::Community::Member $member) {
+  return $self->get_rel_ab($member) / 100 * $self->get_members_abundance;
 }
 
 
