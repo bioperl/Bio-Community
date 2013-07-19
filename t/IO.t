@@ -88,7 +88,7 @@ isa_ok $community, 'Bio::Community';
 
 $output_file = test_output_file();
 ok $out = Bio::Community::IO->new(
-   -file     => $output_file,
+   -file     => '>'.$output_file,
    -format   => 'gaas',
 );
 ok $out->write_community($community);
