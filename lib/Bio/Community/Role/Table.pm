@@ -568,10 +568,11 @@ method _delete_col ($col) {  # this function is called a lot, keep it lean
 =head2 _write_table
 
  Usage   : $out->_write_table;
- Function: Write the content of the cells in the table to a file.
-           If you want header lines before the table, it is your responsability
-           to write them to file using the _print() method of Bio::Root::IO
-           prior to calling _write_table().
+ Function: Write the content of the cells in the table to a file. It is
+           generally called automatically when closing the object. However, if
+           you want header lines before or after the table, you can write them
+           to file using the _print() method of Bio::Root::IO prior and after
+           calling _write_table().
  Args    : None
  Returns : 1 on success
 

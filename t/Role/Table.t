@@ -40,7 +40,7 @@ is $in->_get_value(1, 4), undef;
 is $in->_get_value(6, 1), undef;
 is $in->_get_value(1, 10), undef;
 
-$in->close;
+ok $in->close;
 
 
 # Read linux tab-delimited file with extra line
@@ -56,7 +56,7 @@ is $in->_get_max_col, 3;
 is $in->_get_max_line, 4;
 is $in->_get_start_content, "--- content below ---\n";
 
-$in->close;
+ok $in->close;
 
 
 # Read win32 tab-delimited file
@@ -84,7 +84,7 @@ is $in->_get_value(4, 3),  123;
 is $in->_get_value(5, 1), undef;
 is $in->_get_value(1, 4), undef;
 
-$in->close;
+ok $in->close;
 
 
 # Write and read tab-delimited file
@@ -124,7 +124,7 @@ is $out->_get_max_col, 4;
 ok $out->_delete_col(4);
 is $out->_get_max_col, 3;
 
-$out->close;
+ok $out->close;
 
 ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read tab-delimited table';
 is $in->delim, "\t";
@@ -153,7 +153,7 @@ is $in->_get_value(1, 10), undef;
 #is $in->_get_value(6, 0), undef; 
 #is $in->_get_value(0, 10), undef;
 
-$in->close;
+ok $in->close;
 unlink $file;
 
 
@@ -177,7 +177,7 @@ ok $out->_set_value(4, 3,  123);
 ok $out->_set_value(2, 1, 'Streptococcus');
 ok $out->_set_value(2, 3,  334);
 
-$out->close;
+ok $out->close;
 
 ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read tab-delimited table again';
 is $in->delim, "\t";
@@ -202,7 +202,7 @@ is $in->_get_value(1, 4), undef;
 is $in->_get_value(6, 1), undef;
 is $in->_get_value(1, 10), undef;
 
-$in->close;
+ok $in->close;
 unlink $file;
 
 
@@ -222,7 +222,7 @@ ok $out->_set_value(3, 2,  '"0"');
 ok $out->_set_value(3, 3,  1023.9);
 ok $out->_insert_line(4, ['Lumpy_skin_disease_virus', '', 123]);
 
-$out->close;
+ok $out->close;
 
 ok $in = t::Role::TestTable->new(
    -file  => $file,
@@ -248,7 +248,7 @@ is $in->_get_value(4, 3),  123;
 is $in->_get_value(5, 1), undef;
 is $in->_get_value(1, 4), undef;
 
-$in->close;
+ok $in->close;
 unlink $file;
 
 
@@ -273,7 +273,7 @@ ok $out->_set_value(4, 1, 'Lumpy_skin_disease_virus');
 #ok $out->_set_value(4, 2, '');
 ok $out->_set_value(4, 3,  123);
 
-$out->close;
+ok $out->close;
 
 ok $in = t::Role::TestTable->new(
    -file  => $file,
@@ -297,7 +297,7 @@ is $in->_get_value(4, 3),  123;
 is $in->_get_value(5, 1), undef;
 is $in->_get_value(1, 4), undef;
 
-$in->close;
+ok $in->close;
 unlink $file;
 
 
@@ -310,7 +310,7 @@ ok $out->_set_value(1, 1, 'Species');
 ok $out->_set_value(1, 2, 'gut');
 ok $out->_set_value(1, 3, 'soda lake');
 
-$out->close;
+ok $out->close;
 
 ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read single-line table';
 is $in->delim, "\t";
@@ -324,7 +324,7 @@ is $in->_get_value(1, 2), 'gut';
 is $in->_get_value(1, 4), undef;
 is $in->_get_value(2, 1), undef;
 
-$in->close;
+ok $in->close;
 unlink $file;
 
 
@@ -337,7 +337,7 @@ ok $out->_set_value(3, 1, 'Goatpox virus');
 ok $out->_set_value(2, 1, 'Streptococcus');
 ok $out->_set_value(4, 1, 'Lumpy skin disease virus');
 
-$out->close;
+ok $out->close;
 
 ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read single-column table';
 ok $in->_read_table;
@@ -353,7 +353,7 @@ is $in->_get_value(4, 1), 'Lumpy skin disease virus';
 is $in->_get_value(5, 1), undef;
 is $in->_get_value(1, 2), undef;
 
-$in->close;
+ok $in->close;
 unlink $file;
 
 
@@ -363,7 +363,7 @@ ok $out = t::Role::TestTable->new(
    -file       => '>'.$file,
 ), 'Write table that does not span the entire file';
 
-ok $out->_print("<table>\n");
+$out->_print("<table>\n"); ### should return true
 ok $out->_set_value(1, 1, 'Streptococcus');
 ok $out->_set_value(1, 2,  241);
 ok $out->_set_value(1, 3,  334);
@@ -371,9 +371,8 @@ ok $out->_set_value(2, 1, 'Goatpox virus');
 ok $out->_set_value(2, 2,  '"0"');
 ok $out->_set_value(2, 3,  1023.9);
 ok $out->_write_table;
-ok $out->_print("</table>\n");
-
-$out->close;
+$out->_print("</table>\n"); ### should return true
+ok $out->close;
 
 ok $in = t::Role::TestTable->new(
    -file       => $file,
@@ -394,7 +393,7 @@ is $in->_get_value(2, 3),  1023.9;
 is $in->_get_value(3, 1), undef;
 is $in->_get_value(1, 4), undef;
 
-$in->close;
+ok $in->close;
 unlink $file;
 
 done_testing();

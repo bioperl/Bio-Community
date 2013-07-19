@@ -537,7 +537,7 @@ before 'close' => sub {
       $self->_write_metacommunity_finish($self->_meta);
       # For objects consuming Bio::Community::Role::Table, write the table now
       if (does_role($self, 'Bio::Community::Role::Table')) {
-         $self->_write_table;
+         $self->_write_table unless $self->_was_written;
       }
    }
    return 1;
