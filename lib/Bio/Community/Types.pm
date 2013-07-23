@@ -123,7 +123,7 @@ subtype 'AlphaType'
    => message { _gen_err_msg(\@AlphaType, $_) };
 
 # Type of transformation
-my @TransformationType = qw(identity binary hellinger total);
+my @TransformationType = qw(identity binary relative hellinger chord);
 subtype 'TransformationType'
    => as enum( \@TransformationType )
    => message { _gen_err_msg(\@TransformationType, $_) };

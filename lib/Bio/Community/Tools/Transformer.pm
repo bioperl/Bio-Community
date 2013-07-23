@@ -116,13 +116,17 @@ has metacommunity => (
 
 =head2 type
 
- Function: Get or set the type of transformation:
-            * identity  : keep the counts as-is
-            * binary    : 1 for presence, 0 for absence
-            * hellinger : Hellinger transformation (square root)
+ Function: Get or set the type of transformation that is to be applied to member
+           counts (not relative abundance):
+            * identity  : Keep the counts as-is
+            * binary    : Assign 1 if member is present, 0 if absent
+            * relative  : Set count of member equal to its relative abundance (%)
+            * chisquare : Chi-square transformation
+            * chord     : Chord transformation
+            * hellinger : Hellinger transformation
  Usage   : my $type = $transformer->type;
- Args    : identity, binary, or hellinger
- Returns : identity, binary, or hellinger
+ Args    : identity, binary, relative, chisquare, chord, or hellinger
+ Returns : identity, binary, relative, chisquare, chord, or hellinger
 
 =cut
 
@@ -171,19 +175,57 @@ method _transform () {
    }
 
    # Register transformation functions
-   my $sub;
+   my ($sub, $pre_sub);
    my $type = $self->type;
    if ($type eq 'identity') {
-      $sub = sub { return shift };
-   } elsif ($type eq 'binary') {
-      $sub = sub { return shift > 0 ? 1 : 0 };
-   } elsif ($type eq 'hellinger') {
-      $sub = sub { return sqrt shift };
-   } else {
+      $pre_sub = undef;
+      $sub     = sub {
+                    # Keep same count
+                    my ($com, $mem) = @_;
+                    return $com->get_count($mem);
+                 };
+   }
+   elsif ($type eq 'binary') {
+      $pre_sub = undef;
+      $sub     = sub {
+                    # 1 for presence, 0 otherwise
+                    my ($com, $mem) = @_;
+                    return $com->get_count($mem) > 0 ? 1 : 0;
+                 };
+   }
+   elsif ($type eq 'relative') {
+      $pre_sub = undef;
+      $sub     = sub {
+                    # Use relative abundance
+                    my ($com, $mem) = @_;
+                    return $com->get_rel_ab($mem);
+                 };
+   }
+   elsif ($type eq 'chord') {
+      $pre_sub = sub {
+                    # Add the squares of count
+                    my ($com, $mem, $sum) = @_;
+                    return $sum + $com->get_count($mem)**2;
+                 }; 
+      $sub     = sub {
+                    # Count divided by sum of squares
+                    my ($com, $mem, $sum) = @_;
+                    return $com->get_count($mem) / $sum;
+                 };
+   }
+   elsif ($type eq 'hellinger') {
+      $pre_sub = undef;
+      $sub     = sub {
+                    # Square root of count
+                    my ($com, $mem) = @_;
+                    return sqrt $com->get_count($mem);
+                 };
+   }
+   else {
       $self->throw("Unsupported transformation type '$type'");
    }
 
-   # Transform now
+   # Create new transformed metacommunity
    my $transformed_meta = Bio::Community::Meta->new( -name => $meta->name );
    while (my $community = $meta->next_community) {
       my $name = $community->name;
@@ -191,9 +233,18 @@ method _transform () {
          -name        => $name,
          -use_weights => $community->use_weights,
       );
+
+      # Pre-processing (if needed)
+      my $pre = 0;
+      if (defined $pre_sub) {
+         while ( my $member = $community->next_member('_transform') ) {
+            $pre = $pre_sub->($community, $member, $pre);
+         }
+      }
+
+      # Transform counts
       while ( my $member = $community->next_member('_transform') ) {
-         my $count = $community->get_count($member);
-         my $transf_count = $sub->($count);
+         my $transf_count = $sub->($community, $member, $pre);
          $transformed->add_member($member, $transf_count);
       }
       $transformed_meta->add_communities([$transformed]);
