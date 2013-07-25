@@ -252,7 +252,6 @@ func new ($class, @args) {
        unless $real_class->does('Bio::Community::Role::IO');
 
    $params = $real_class->BUILDARGS(%$params);
-
    my $self = Class::MOP::Class->initialize($real_class)->new_object($params);
 
    return $self;
@@ -780,12 +779,12 @@ method _read_weights ($args) {
       my $average = 0;
       my $num = 0;
       my $file_weights = {};
-      my $weight_name = '';
+      my $weight_name;
       while (my $line = <$fh>) {
          if ($line =~ m/^#/) {
             chomp $line;
-            my ($col1, $col2) = (split "\t", $line, 2);
-            if (defined $col1 && defined $col2) {
+            my ($col1, $col2) = (split "\t", $line)[0..1];
+            if ( (defined $col1) && (defined $col2) && (not defined $weight_name) ) {
                # Process header
                $weight_name = $col2;
                $weight_name =~ s/^weight$//i;
@@ -794,11 +793,12 @@ method _read_weights ($args) {
          }
          next if $line =~ m/^\s*$/;
          chomp $line;
-         my ($id, $weight) = (split "\t", $line, 2);
+         my ($id, $weight) = (split "\t", $line)[0..1];
          $file_weights->{$id} = $weight;
          $average += $weight;
          $num++;
       }
+      $weight_name = '' if not defined $weight_name;
       close $fh;
       push @$all_weights, $file_weights;
       push @$all_names, $weight_name;
