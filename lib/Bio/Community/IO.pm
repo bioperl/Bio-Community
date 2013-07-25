@@ -697,8 +697,8 @@ has 'explicit_ids' => (
            should contain at least two tab-delimited columns: the first one
            should contain the ID, description or string lineage of the member
            and the second one the weight to assign to this member. Other columns
-           are ignored. A header line starting with '#' and containing the name
-           of the weight can be included.
+           are ignored. A tab-delimited header line starting with '#' and
+           containing the name of the weight can be included.
  Args    : arrayref of file names (or filehandles)
  Returns : arrayref of filehandles
 
@@ -783,17 +783,18 @@ method _read_weights ($args) {
       my $weight_name = '';
       while (my $line = <$fh>) {
          if ($line =~ m/^#/) {
-            if ($. == 1) {
-               # process header
-               chomp $line;
-               $weight_name = (split "\t", $line)[1];
+            chomp $line;
+            my ($col1, $col2) = (split "\t", $line, 2);
+            if (defined $col1 && defined $col2) {
+               # Process header
+               $weight_name = $col2;
                $weight_name =~ s/^weight$//i;
             }
             next;
          }
          next if $line =~ m/^\s*$/;
          chomp $line;
-         my ($id, $weight) = (split "\t", $line)[0..1];
+         my ($id, $weight) = (split "\t", $line, 2);
          $file_weights->{$id} = $weight;
          $average += $weight;
          $num++;

@@ -1,3 +1,6 @@
+# DISCLAIMER HERE...
+# DISCLAIMER THERE...
+
 #desc	16S copy number
 Streptococcus	1
 Goatpox virus	3
