@@ -936,7 +936,7 @@ method _attach_weights (Maybe[Bio::Community::Member] $member) {
 
             # Methods based on member description (or ID)
             my $lookup = $self->weight_identifier eq 'desc' ? $member->desc : $member->id;
-            if ( $lookup && exists($weight_type->{$lookup}) ) {
+            if ( defined($lookup) && exists($weight_type->{$lookup}) ) {
                # This member has a weight
                $weight = $weight_type->{$lookup};
             } else {
