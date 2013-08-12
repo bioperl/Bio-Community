@@ -12,11 +12,11 @@ my ($in, $out);
 my $file = test_output_file();
 
 
-# Read linux tab-delimited file
+# Read tab-delimited file 
 
 ok $in = t::Role::TestTable->new(
    -file => test_input_file('table.txt'),
-), 'Read linux table';
+), 'Read table';
 isa_ok $in, 't::Role::TestTable';
 is $in->delim, "\t";
 is $in->_get_max_col, 3;
@@ -43,27 +43,11 @@ is $in->_get_value(1, 10), undef;
 ok $in->close;
 
 
-# Read linux tab-delimited file with extra line
+# Read another tab-delimited file
 
 ok $in = t::Role::TestTable->new(
-   -file => test_input_file('table_extra_line.txt'),
-   -start_line => 2,
-), 'Read linux table with extra line';
-
-isa_ok $in, 't::Role::TestTable';
-is $in->delim, "\t";
-is $in->_get_max_col, 3;
-is $in->_get_max_line, 4;
-is $in->_get_start_content, "--- content below ---\n";
-
-ok $in->close;
-
-
-# Read win32 tab-delimited file
-
-ok $in = t::Role::TestTable->new(
-   -file => test_input_file('table_win32.txt'),
-), 'Read win32 table';
+   -file => test_input_file('table_2.txt'),
+), 'Read another table';
 is $in->delim, "\t";
 is $in->_get_max_col, 3;
 is $in->_get_max_line, 4;
@@ -76,9 +60,53 @@ is $in->_get_value(2, 2),  241;
 is $in->_get_value(2, 3),  334;
 is $in->_get_value(3, 1), 'Goatpox virus';
 is $in->_get_value(3, 2),  0;
-is $in->_get_value(3, 3),  1023;
+is $in->_get_value(3, 3),  1023.9;
 is $in->_get_value(4, 1), 'Lumpy skin disease virus';
 is $in->_get_value(4, 2),  39;
+is $in->_get_value(4, 3),  123;
+
+is $in->_get_value(5, 1), undef;
+is $in->_get_value(1, 4), undef;
+
+ok $in->close;
+
+
+# Read tab-delimited file with extra line (with Linux EOL)
+
+ok $in = t::Role::TestTable->new(
+   -file => test_input_file('table_extra_line.txt'),
+   -start_line => 2,
+), 'Read table with extra line';
+
+isa_ok $in, 't::Role::TestTable';
+is $in->delim, "\t";
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
+is $in->_get_start_content, "--- content below ---\n";
+
+ok $in->close;
+
+
+# Read tab-delimited file (with Windows EOL)
+
+ok $in = t::Role::TestTable->new(
+   -file => test_input_file('table_win.txt'),
+), 'Read Win table';
+is $in->delim, "\t";
+is $in->_get_max_col, 3;
+is $in->_get_max_line, 4;
+
+is $in->_get_value(1, 1), 'Species';
+is $in->_get_value(1, 2), 'gut';
+is $in->_get_value(1, 3), 'soda lake';
+is $in->_get_value(2, 1), 'Streptococcus';
+is $in->_get_value(2, 2),  241;
+is $in->_get_value(2, 3),  334;
+is $in->_get_value(3, 1), 'Goatpox virus';
+is $in->_get_value(3, 2),  '"0"';
+is $in->_get_value(3, 3),  1023.9;
+is $in->_get_value(4, 1), 'Lumpy skin disease virus';
+is $in->_get_value(4, 2),  '';
 is $in->_get_value(4, 3),  123;
 
 is $in->_get_value(5, 1), undef;
