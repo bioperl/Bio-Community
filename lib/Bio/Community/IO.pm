@@ -242,7 +242,7 @@ func new ($class, @args) {
       $format = $guesser->guess;
    }
    if (not defined $format) {
-      $real_class->throw("Error: Could not automatically detect input format.");
+      $real_class->throw("Could not automatically detect input format.");
    }
 
    # Use the real driver class here
@@ -466,7 +466,7 @@ method write_community (Bio::Community $community) {
             $self->_process_member($member, $community);
          }
       } else {
-         $self->throw("Error: $sort_members is not a valid sort value.\n");
+         $self->throw("$sort_members is not a valid sort value.\n");
       }
       $self->_write_community_finish($community);
    }
@@ -556,7 +556,7 @@ method _process_member ($member, $community) {
    } elsif ($ab_type eq 'fraction') {
       $ab_value = $community->get_rel_ab($member) / 100;
    } else {
-      $self->throw("Error: $ab_value is not a valid abundance type.\n");
+      $self->throw("$ab_value is not a valid abundance type.\n");
    }
    $self->write_member($member, $ab_value);
    return 1;
