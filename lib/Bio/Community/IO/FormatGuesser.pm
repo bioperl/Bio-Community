@@ -218,19 +218,14 @@ method guess () {
    my $format;
 
    # Prepare input
-   my $fh;
-   my $original_pos;
-   my @lines;
+   my ($in, $original_pos);
    if ($self->_has_text) {
-      # Break the text into separate lines.
-      @lines = split /\n/, $self->text;
+      $in = Bio::Root::IO->new(-string => $self->text);
    } elsif ($self->_has_file) {
-      # If given a filename, open the file.
-      my $file = $self->file;
-      open $fh, '<', $file or $self->throw("Could not read file '$file': $!");
+      $in = Bio::Root::IO->new(-file => $self->file);
    } elsif ($self->_has_fh) {
-      $fh = $self->fh;
-      $original_pos = tell($fh);
+      $original_pos = tell($self->fh);
+      $in = Bio::Root::IO->new(-fh => $self->fh, -noclose => 1);
    } else {
       $self->throw('Need to provide -file, -fh or -text');
    }
@@ -238,18 +233,11 @@ method guess () {
    # Read lines and try to attribute format
    my %test_formats = %formats;
    my %ok_formats;
-   my $line_num  = 0;
-   while (1) {
+   my $line_num = 0;
+   while ( defined(my $line = $in->_readline) ) {
 
-      # Read next line. Exit if no lines left
+      # Read next line (and convert line endings). Exit if no lines left.
       $line_num++;
-      my $line;
-      if ($fh) {
-         $line = <$fh>;
-      } else {
-         $line = shift @lines;
-      }
-      last if not defined $line;
       chomp $line;
 
       # Skip white and empty lines.
@@ -302,16 +290,12 @@ method guess () {
    }
 
    # Cleanup
-   if (not $self->_has_text) {
-      if ($self->_has_file) {
-         # Close the file that we opened
-         close $fh;
-      } elsif ($self->_has_fh) {
-         # Reset cursor to original location
-         seek($fh, $original_pos, 0)
-            or $self->throw("Could not reset the cursor to its original position: $!");
-      }
+   if ($in->noclose) {
+      # Reset filehandle cursor to original location
+      seek($self->fh, $original_pos, 0)
+         or $self->throw("Could not reset the cursor to its original position: $!");
    }
+   $in->close;
 
    return $format;
 }

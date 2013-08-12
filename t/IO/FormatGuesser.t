@@ -72,29 +72,39 @@ is $guesser->file, $file;
 is $guesser->guess, 'biom';
 
 $file = test_input_file('biom_rich_sparse.txt');
-ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'biom files';
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'biom';
 
 $file = test_input_file('biom_float.txt');
-ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'biom files';
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'biom';
 
 $file = test_input_file('biom_dups.txt');
-ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'biom files';
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'biom';
 
 $file = test_input_file('biom_invalid.txt');
-ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'biom files';
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'biom';
 
 # Test generic input file
 
+$file = test_input_file('generic_table_win.txt');
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'generic files (Windows)';
+is $guesser->file, $file;
+is $guesser->guess, 'generic';
+
+$file = test_input_file('generic_table_mac.txt');
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'generic files (Mac)';
+is $guesser->file, $file;
+is $guesser->guess, 'generic';
+
 $file = test_input_file('generic_table.txt');
-ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'generic files';
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'generic files (Linux)';
 is $guesser->file, $file;
 is $guesser->guess, 'generic';
 
