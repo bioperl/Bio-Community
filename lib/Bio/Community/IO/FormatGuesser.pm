@@ -219,15 +219,18 @@ method guess () {
 
    # Prepare input
    my ($in, $original_pos);
-   if ($self->_has_text) {
-      $in = Bio::Root::IO->new(-string => $self->text);
-   } elsif ($self->_has_file) {
-      $in = Bio::Root::IO->new(-file => $self->file);
-   } elsif ($self->_has_fh) {
-      $original_pos = tell($self->fh);
-      $in = Bio::Root::IO->new(-fh => $self->fh, -noclose => 1);
-   } else {
-      $self->throw('Need to provide -file, -fh or -text');
+   {
+      local $Bio::Root::IO::HAS_EOL = 1;
+      if ($self->_has_text) {
+         $in = Bio::Root::IO->new(-string => $self->text);
+      } elsif ($self->_has_file) {
+         $in = Bio::Root::IO->new(-file => $self->file);
+      } elsif ($self->_has_fh) {
+         $original_pos = tell($self->fh);
+         $in = Bio::Root::IO->new(-fh => $self->fh, -noclose => 1);
+      } else {
+         $self->throw('Need to provide -file, -fh or -text');
+      }
    }
 
    # Read lines and try to attribute format
