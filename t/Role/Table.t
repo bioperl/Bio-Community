@@ -19,7 +19,7 @@ ok $in = t::Role::TestTable->new(
 ), 'Read table';
 isa_ok $in, 't::Role::TestTable';
 is $in->delim, "\t";
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
@@ -35,9 +35,9 @@ is $in->_get_value(4, 1), 'Lumpy skin disease virus';
 is $in->_get_value(4, 2), '';
 is $in->_get_value(4, 3),  123;
 
-is $in->_get_value(5, 1), undef;
-is $in->_get_value(1, 4), undef;
-is $in->_get_value(6, 1), undef;
+is $in->_get_value(5,  1), undef;
+is $in->_get_value(1,  4), undef;
+is $in->_get_value(6,  1), undef;
 is $in->_get_value(1, 10), undef;
 
 ok $in->close;
@@ -49,7 +49,7 @@ ok $in = t::Role::TestTable->new(
    -file => test_input_file('table_2.txt'),
 ), 'Read another table';
 is $in->delim, "\t";
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
@@ -80,7 +80,7 @@ ok $in = t::Role::TestTable->new(
 
 isa_ok $in, 't::Role::TestTable';
 is $in->delim, "\t";
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 4;
 is $in->_get_start_content, "--- content below ---\n";
 
@@ -93,7 +93,7 @@ ok $in = t::Role::TestTable->new(
    -file => test_input_file('table_win.txt'),
 ), 'Read Win table';
 is $in->delim, "\t";
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
@@ -115,11 +115,45 @@ is $in->_get_value(1, 4), undef;
 ok $in->close;
 
 
+TODO: {
+   # Read tab-delimited file (with Mac EOL)
+   local $TODO = 'Mac-formatted files not supported yet';
+   # I see no obvious way to support them using Bioperl. If I make
+   # B::C::Role::Table use $Bio::Root::IO::HAS_EOL, then there is no way to
+   # determine the number of EOL characters on each line, which is a problem
+
+   ok $in = t::Role::TestTable->new(
+      -file => test_input_file('table_mac.txt'),
+   ), 'Read Mac table';
+   is $in->delim, "\t";
+   is $in->_get_max_col , 3;
+   is $in->_get_max_line, 4;
+
+   is $in->_get_value(1, 1), 'Species';
+   is $in->_get_value(1, 2), 'gut';
+   is $in->_get_value(1, 3), 'soda lake';
+   is $in->_get_value(2, 1), 'Streptococcus';
+   is $in->_get_value(2, 2),  241;
+   is $in->_get_value(2, 3),  334;
+   is $in->_get_value(3, 1), 'Goatpox virus';
+   is $in->_get_value(3, 2),  '"0"';
+   is $in->_get_value(3, 3),  1023.9;
+   is $in->_get_value(4, 1), 'Lumpy skin disease virus';
+   is $in->_get_value(4, 2),  '';
+   is $in->_get_value(4, 3),  123;
+
+   is $in->_get_value(5, 1), undef;
+   is $in->_get_value(1, 4), undef;
+
+   ok $in->close;
+}
+
+
 # Write and read tab-delimited file
 
 ok $out = t::Role::TestTable->new( -file => '>'.$file ), 'Write tab-delimited table';
 is $out->delim, "\t";
-is $out->_get_max_col, 0;
+is $out->_get_max_col , 0;
 is $out->_get_max_line, 0;
 
 # Add a first column... and delete it
@@ -156,7 +190,7 @@ ok $out->close;
 
 ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read tab-delimited table';
 is $in->delim, "\t";
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
@@ -189,7 +223,7 @@ unlink $file;
 
 ok $out = t::Role::TestTable->new( -file => '>'.$file ), 'Write tab-delimited table again';
 is $out->delim, "\t";
-is $out->_get_max_col, 0;
+is $out->_get_max_col , 0;
 is $out->_get_max_line, 0;
 
 ok $out->_set_value(2, 2,  241);
@@ -209,7 +243,7 @@ ok $out->close;
 
 ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read tab-delimited table again';
 is $in->delim, "\t";
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
@@ -257,7 +291,7 @@ ok $in = t::Role::TestTable->new(
    -delim => '  ',
 ), 'Re-read double-space delimited table';
 is $in->delim, '  ';
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
@@ -306,7 +340,7 @@ ok $out->close;
 ok $in = t::Role::TestTable->new(
    -file  => $file,
 ), 'Re-read file with specified missing abundance string';
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
@@ -342,7 +376,7 @@ ok $out->close;
 
 ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read single-line table';
 is $in->delim, "\t";
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 1;
 
 is $in->_get_value(1, 3), 'soda lake';
@@ -370,7 +404,7 @@ ok $out->close;
 ok $in = t::Role::TestTable->new( -file => $file ), 'Re-read single-column table';
 ok $in->_read_table;
 is $in->delim, "\t";
-is $in->_get_max_col, 1;
+is $in->_get_max_col , 1;
 is $in->_get_max_line, 4;
 
 is $in->_get_value(1, 1), 'Species';
@@ -408,7 +442,7 @@ ok $in = t::Role::TestTable->new(
    -end_line   => 3,
 ), 'Re-read table that does not span the entire file';
 is $in->delim, "\t";
-is $in->_get_max_col, 3;
+is $in->_get_max_col , 3;
 is $in->_get_max_line, 2;
 
 is $in->_get_value(1, 1), 'Streptococcus';
