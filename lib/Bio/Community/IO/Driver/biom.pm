@@ -387,7 +387,7 @@ method _generate_members () {
          if (ref($metadata->{'taxonomy'}) eq 'SCALAR') {
             $taxo_desc = $metadata->{'taxonomy'};
          } elsif (ref($metadata->{'taxonomy'}) eq 'ARRAY') {
-            $taxo_desc = get_lineage_string($metadata->{'taxonomy'}, 1);
+            $taxo_desc = get_lineage_string($metadata->{'taxonomy'}, ' ');
          }
          $member->desc( $taxo_desc );
          $self->_attach_taxon($member, $taxo_desc, 1);

@@ -90,26 +90,34 @@ use base 'Bio::Root::Root';
 
 
 my $sep = ';'; # separator
-my $sep_re = qr/$sep\s*/;
+my $wsp = '';  # white space
 my $clean_front_re = qr/^(?:Root)$/i;
 my $clean_rear_re  = qr/^(?:\S__||Other|No blast hit|unidentified|uncultured|environmental)$/i;
 
 
 =head2 split_lineage_string
 
- Function: Split a lineage string, e.g. 'Bacteria;Proteobacteria' into an
-           arrayref of its individual components using the ';' separator, e.g.
-           'Bacteria' and 'Betaproteobact'. Also, clean the arrayref using
-           clean_lineage_arr(). The reciprocal operation is get_lineage_string().
+ Function: Split a lineage string, clean it and autodetect whitespaces.
+           Use the ';' separator is used to split lineages like 'Bacteria;
+           Proteobacteria' into an arrayref of its individual components, e.g.
+           ['Bacteria','Proteobact']. The number and type of spaces after the
+           separator is saved for future use in get_lineage_string(), the
+           reciprocal function. Also, optionally clean the arrayref using
+           clean_lineage_arr().
  Usage   : my $taxa_names = split_lineage($lineage_string);
- Args    : a lineage string
-           whether to clean taxonomy or not (default is to clean)
+ Args    : * a lineage string
+           * whether to clean taxonomy or not (default is to clean)
  Returns : an arrayref of taxon names
 
 =cut
 
 func split_lineage_string ($lineage_str, $clean=1) {
-   my $names = [ split $sep_re, $lineage_str ];
+   if ( $lineage_str =~ m/$sep(\s*)/ ) {
+      if (defined $1) {
+         $wsp = $1;
+      }
+   }
+   my $names = [ split qr/$sep\s*/, $lineage_str ];
    if ($clean) {
       $names = clean_lineage_arr($names);
    }
@@ -176,7 +184,7 @@ func get_taxon_lineage ($taxon) {
 }
 
 
-### Renane this join_lineage_arr (and have alias for backward compat)
+### Rename this join_lineage_arr (and have alias for backward compatibility)
 
 =head2 get_lineage_string
 
@@ -186,15 +194,17 @@ func get_taxon_lineage ($taxon) {
  Usage   : my $lineage = get_lineage_string(['Bacteria', 'Proteobacteria']);
              or
            my $lineage = get_lineage_string([$taxon1, $taxon2]);
- Args    : Arrayref of taxon names or objects
-           1 to include a whitespace between each entry (in addition to the separator)
+ Args    : * Arrayref of taxon names or objects
+           * Optional: whitespace string to include after separator (omit to autodetect)
  Returns : A lineage string
 
 =cut
 
 func get_lineage_string ($lineage_arr, $space?) {
+   # Use specified or detected whitespaces
+   $space = defined $space ? $space : $wsp;
+   # Get lineage array and construct lineage string
    my @names = map { ref $_ ? $_->node_name : $_ } @$lineage_arr;
-   $space = (defined($space) && $space) ? ' ' : '';
    return join( $sep.$space, @names );
 }
 

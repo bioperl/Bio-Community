@@ -154,8 +154,8 @@ has merge_dups => (
 
 =head2 identify_dups_by
 
- Function: Define what constitute duplicates, members have the exact same desc()
-           or same taxon().
+ Function: Define what constitute duplicates, i.e. members that have the same
+           desc() or the same taxon().
  Usage   : $summarizer->identify_dups_by('taxon');
  Args    : 'desc' or 'taxon'. Default: 'desc'
  Returns : 'desc' or 'taxon'
