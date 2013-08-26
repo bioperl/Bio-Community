@@ -747,40 +747,40 @@ delta_ok $summary->get_count($member), 9;
 delta_ok $summary->get_rel_ab($member), 9;
 
 $member = $summary->get_member_by_rank(5);
-is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
-is $member->taxon->node_name, 'Chytridiomycota';
-delta_ok $summary->get_count($member), 7;
-delta_ok $summary->get_rel_ab($member), 7;
-
-$member = $summary->get_member_by_rank(6);
 is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingobium;Sphingomonas';
 is $member->taxon->node_name, 'Sphingomonas';
 delta_ok $summary->get_count($member), 7;
 delta_ok $summary->get_rel_ab($member), 7;
 
-$member = $summary->get_member_by_rank(7);
-is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas';
-is $member->taxon->node_name, 'Sphingomonas';
-delta_ok $summary->get_count($member), 6;
-delta_ok $summary->get_rel_ab($member), 6;
+$member = $summary->get_member_by_rank(6);
+is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
+is $member->taxon->node_name, 'Chytridiomycota';
+delta_ok $summary->get_count($member), 6.99;
+delta_ok $summary->get_rel_ab($member), 6.99;
 
-$member = $summary->get_member_by_rank(8);
+$member = $summary->get_member_by_rank(7);
 is $member->desc, 'Archaea;Crenarchaeota;Miscellaneous';
 is $member->taxon->node_name, 'Miscellaneous';
+delta_ok $summary->get_count($member), 6.01;
+delta_ok $summary->get_rel_ab($member), 6.01;
+
+$member = $summary->get_member_by_rank(8);
+is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas';
+is $member->taxon->node_name, 'Sphingomonas';
 delta_ok $summary->get_count($member), 6;
 delta_ok $summary->get_rel_ab($member), 6;
 
 $member = $summary->get_member_by_rank(9);
 is $member->desc, 'Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter';
 is $member->taxon->node_name, 'Flexibacter';
-delta_ok $summary->get_count($member), 1;
-delta_ok $summary->get_rel_ab($member), 1;
+delta_ok $summary->get_count($member), 1.5;
+delta_ok $summary->get_rel_ab($member), 1.5;
 
 $member = $summary->get_member_by_rank(10);
 is $member->desc, 'Bacteria;WCHB1-60';
 is $member->taxon->node_name, 'WCHB1-60';
-delta_ok $summary->get_count($member), 1;
-delta_ok $summary->get_rel_ab($member), 1;
+delta_ok $summary->get_count($member), 0.5;
+delta_ok $summary->get_rel_ab($member), 0.5;
 
 is $summary->get_member_by_rank(11), undef;
 
@@ -794,7 +794,7 @@ ok $summarizer = Bio::Community::Tools::Summarizer->new(
    -merge_dups       => 1,
    -identify_dups_by => 'taxon',
    -by_tax_level     => 5,
-   -by_rel_ab        => ['<=', 6],
+   -by_rel_ab        => ['<=', 6.01],
 ), 'Multiple summary operations';
 
 ok $summary_meta = $summarizer->get_summary;
@@ -828,16 +828,16 @@ delta_ok $summary->get_count($member), 9;
 delta_ok $summary->get_rel_ab($member), 9;
 
 $member = $summary->get_member_by_rank(5);
-is $member->desc, 'Other <= 6 %';
+is $member->desc, 'Other <= 6.01 %';
 is $member->taxon, undef;
-delta_ok $summary->get_count($member), 8;
-delta_ok $summary->get_rel_ab($member), 8;
+delta_ok $summary->get_count($member), 8.01;
+delta_ok $summary->get_rel_ab($member), 8.01;
 
 $member = $summary->get_member_by_rank(6);
 is $member->desc, 'Eukaryota;Fungi;Chytridiomycota';
 is $member->taxon->node_name, 'Chytridiomycota';
-delta_ok $summary->get_count($member), 7;
-delta_ok $summary->get_rel_ab($member), 7;
+delta_ok $summary->get_count($member), 6.99;
+delta_ok $summary->get_rel_ab($member), 6.99;
 
 is $summary->get_member_by_rank(7), undef;
 
@@ -880,27 +880,27 @@ delta_ok $summary->get_count($member), 7;
 
 $member = $summary->get_member_by_rank(6);
 is $member->desc, 'Eukaryota;Fungi;Chytridiomycota;environmental';
-delta_ok $summary->get_count($member), 7;
+delta_ok $summary->get_count($member), 6.99;
 
 $member = $summary->get_member_by_rank(7);
 is $member->desc, 'Archaea;Crenarchaeota;Miscellaneous';
-delta_ok $summary->get_count($member), 6;
+delta_ok $summary->get_count($member), 6.01;
 
 $member = $summary->get_member_by_rank(8);
 is $member->desc, 'Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas;uncultured';
 delta_ok $summary->get_count($member), 5;
 
 $member = $summary->get_member_by_rank(9);
-is $member->desc, 'Bacteria;WCHB1-60;unidentified';
-delta_ok $summary->get_count($member), 1;
+is $member->desc, 'Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter';
+delta_ok $summary->get_count($member), 1.5;
 
 $member = $summary->get_member_by_rank(10);
-is $member->desc, 'Bacteria;Bacteroidetes;Sphingobacteria;Sphingobacteriales;Chitinophagaceae;Sediminibacterium;Flexibacter';
+is $member->desc, 'Bacteria; Proteobacteria; Alphaproteobacteria; Sphingomonadales; Sphingomonadaceae; Sphingomonas';
 delta_ok $summary->get_count($member), 1;
 
 $member = $summary->get_member_by_rank(11);
-is $member->desc, 'Bacteria; Proteobacteria; Alphaproteobacteria; Sphingomonadales; Sphingomonadaceae; Sphingomonas';
-delta_ok $summary->get_count($member), 1;
+is $member->desc, 'Bacteria;WCHB1-60;unidentified';
+delta_ok $summary->get_count($member), 0.5;
 
 is $summary->get_member_by_rank(12), undef;
 
