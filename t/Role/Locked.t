@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-
 use Bio::Root::Test;
 
 use_ok($_) for qw(
