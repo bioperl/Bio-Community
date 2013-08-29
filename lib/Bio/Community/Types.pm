@@ -117,7 +117,9 @@ subtype 'DistanceType'
 
 
 # Type of alpha diversity
-my @AlphaType = qw(richness richness); # duplication intended to avoid error (min 2 values needed for enum)
+my @AlphaType = qw(observed menhinick margalef chao1
+                   shannon_e simpson_e
+                   shannon simpson simpson_r);
 subtype 'AlphaType'
    => as enum( \@AlphaType )
    => message { _gen_err_msg(\@AlphaType, $_) };

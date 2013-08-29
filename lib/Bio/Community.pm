@@ -33,8 +33,8 @@ Bio::Community - A biological community
 
 The Bio::Community module represent communities of biological organisms. It is
 composed of Bio::Community::Member objects at a specified abundance. Each member
-can represent a species (e.g. an elephant, a bacterium) or a proxy for a species,
-such as a DNA sequence.
+can represent a species (e.g. an elephant, a bacterium), taxon, OTU, or any
+proxy for a species.
 
 =head1 FEEDBACK
 
