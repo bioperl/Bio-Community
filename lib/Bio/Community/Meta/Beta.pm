@@ -145,9 +145,9 @@ has metacommunity => (
                 and 1
             * bray-curtis: the Bray-Curtis dissimilarity index, between 0 and 1
             * shared: percentage of species shared (between 0 and 100), relative
-                to the least rich community). Note: this is the opposite
+                to the least rich community. Note: this is the opposite
                 of a beta-diversity measure: the higher the percent of 
-                species shared, the smaller the smaller the beta-diversity.
+                species shared, the smaller the beta-diversity.
             * permuted: a beta-diversity measure between 0 and 100, representing
                 the percentage of the dominant species in the first community
                 with a permuted abundance rank in the second community. As a
