@@ -116,10 +116,9 @@ has community => (
  Usage   : my $type = $alpha->type;
  Args    : String for the desired type of alpha diversity ('observed' by default).
 
-           Richness: Let C<S> be number of observed members C<i> (species, taxa,
-           OTUs) in the community and C<n> be the total counts (observations).
+           Richness (or estimated number of species):
             * observed :  C<S>
-            * menhinick:  C<S/sqrt(n)>
+            * menhinick:  C<S/sqrt(n)>, where C<n> is the total counts (observations).
             * margalef : C<(S-1)/ln(n)>
             * chao1    : Bias-corrected chao1 richness, C<S+n1*(n1-1)/(2*(n2+1))>
                          where C<n1> and C<n2> are the number of singletons and
@@ -130,31 +129,38 @@ has community => (
                          counts, not relative abundance.
 
            Evenness (or equitability):
-            * buzas    : Buzas & Gibson's evenness, C<e^H/S>. Ranges from 0 to 1.
-            * shannon_e: Shannon's evenness, or the Shannon-Wiener index divided
-                         by the maximum diversity possible in the community.
-                         Ranges from 0 to 1.
-            * simpson_e: Simpson's evenness, or the Simpson's Index of Diversity
-                         divided by the maximum diversity possible in the
-                         community. Ranges from 0 to 1.
-            * hill     : C<N_inf>, the inverse of the Berger-Parker dominance.
-                         Ranges from 1 to infinity.
+            * buzas      : Buzas & Gibson's evenness, C<e^H/S>. Ranges from 0 to 1.
+            * shannon_e  : Shannon's evenness (a.k.a. Pielou), or the Shannon-
+                           Wiener index divided by the maximum diversity
+                           possible in the community. Ranges from 0 to 1.
+            * simpson_e  : Simpson's evenness, or the Simpson's Index of Diversity
+                           divided by the maximum diversity possible in the
+                           community. Ranges from 0 to 1.
+            * brillouin_e: Brillouin's evenness, or the Brillouin's index divided
+                           by the maximum diversity possible in the community.
+                           Ranges from 0 to 1.
+            * hill_e     : Hill's C<E_2,1> evenness, i.e. Simpson's Reciprocal
+                           index divided by C<e^H>.
+            * mcintosh_e : McIntosh's evenness.
 
-           Indices accounting explicitly for both richness and evenness:
+           Indices (accounting for species abundance):
             * shannon  : Shannon-Wiener index C<H>. Emphasizes richness. Ranges
                          from 0 to infinity.
             * simpson  : Simpson's Index of Diversity C<1-D>, where C<D> is
                          Simpson's dominance index. C<1-D> is the probability
                          that two individuals taken randomly are not from the
                          same species. Emphasizes evenness. Ranges from 0 to 1.
-            * simpson_r: Simpson's reciprocal Index C<1/D>. Ranges from 1 to
+            * simpson_r: Simpson's Reciprocal Index C<1/D>. Ranges from 1 to
                          infinity.
-            * brillouin: Brillouin's index of diversity, appropriate for small,
-                         completely censused communities. Ranges from XXX to XXX.
-                         Based on counts, not relative abundance.
+            * brillouin: Brillouin's index, appropriate for small, completely
+                         censused communities. Based on counts, not relative
+                         abundance.
+            * hill     : Hill's C<N_inf> index, the inverse of the Berger-Parker
+                         dominance. Ranges from 1 to infinity.
+            * mcintosh : McIntosh's index. Based on counts, not relative abundance.
 
-           Dominance metrics: Note that they are B<not> diversity measurements
-           because the higher their value, the lower the diversity.
+           Dominance (B<not> diversity metrics since the higher their value, the
+           lower the diversity):
             * simpson_d: Simpson's Dominance Index C<D>. Ranges from 0 to 1.
             * berger   : Berger-Parker dominance, i.e. the proportion of the most
                          abundant species. Ranges from 0 to 1.
@@ -176,21 +182,15 @@ has type => (
 #####
 ## TODO:
 
-## Hill is a evenness, richness or composite index??
-
 ## Index:
 ##   Fisher index: a diversity index, defined implicitly by the formula
 ##      S=a*ln(1+n/a) where S is number of taxa, n is number of individuals and a
 ##      is the value of Fisher's alpha.
 ##      See http://www.thefreelibrary.com/A+table+of+values+for+Fisher%27s+%5Balpha%5D+log+series+diversity+index.-a0128667026
 
-## Richness:
-##   Chao2?
-
 ## Evenness:
-##   Brillouin evenness
-##   McIntosh
 #    Heip
+#    Camargo: http://www.pisces-conservation.com/sdrhelp/index.html?camargo.htm
 
 ## QIIME supports these alpha diversity indices:
 ##   $ alpha_diversity.py -s
@@ -198,12 +198,10 @@ has type => (
 ##      Implemented (or not needed) in B:C:
 ##        observed_species, shannon, simpson_e, simpson, reciprocal_simpson,
 ##        margalef,  menhinick, equitability, chao1, ACE, dominance, singles,
-##        doubles, chao1_confidence, berger_parker_d
+##        doubles, chao1_confidence, berger_parker_d, brillouin_d, mcintosh_d
+##        mcintosh_e, PD_whole_tree
 ##      Not yet implemented:
-##        mcintosh_e, heip_e
-##        brillouin_d, mcintosh_d
 ##        fisher_alpha, kempton_taylor_q, michaelis_menten_fit, osd, robbins, strong,
-##        PD_whole_tree
 
 #####
 
@@ -316,9 +314,43 @@ method _simpson_e () {
 }
 
 
-method _hill () {
-   # Calculate Hill's N_inf diversity
-   return 1 / $self->_berger;
+method _hill_e () {
+   # Calculate Hill's E_2,1 evenness
+   # http://www.wcsmalaysia.org/analysis/diversityIndexMenagerie.htm#Hill
+   return $self->_simpson_r / exp($self->_shannon);
+}
+
+
+method _brillouin_e () {
+   # Calculate Brillouin's evenness
+   # http://www.wcsmalaysia.org/analysis/diversityIndexMenagerie.htm#Brillouin
+   my $community = $self->community;
+   my $N = $community->get_members_count;
+   my $S = $community->get_richness;
+   my $n = int( $N / $S );
+   my $r = $N - $S * $n;
+   my $tmp1 =           Math::BigFloat->new($N  )->bfac->blog;
+   my $tmp2 =     $r  * Math::BigFloat->new($n+1)->bfac->blog;
+   my $tmp3 = ($S-$r) * Math::BigFloat->new($n  )->bfac->blog;
+   my $bmax  = ($tmp1 - $tmp2 - $tmp3) / $N;
+   return $self->_brillouin / $bmax;
+}
+
+
+method _mcintosh_e () {
+   # Calculate McIntosh's evenness
+   my $d = 0;
+   my $U = 0;
+   my $community = $self->community;
+   while (my $member = $community->next_member) {
+      my $c = $community->get_count($member);
+      $U += $c**2;
+   }
+   $U = sqrt($U);
+   my $N = $community->get_members_count;
+   my $S = $community->get_richness;
+   $d = $U / sqrt( ($N-$S+1)**2 + $S - 1 );
+   return $d;
 }
 
 
@@ -361,6 +393,30 @@ method _brillouin () {
    my $N = $community->get_members_count;
    my $tmp = Math::BigFloat->new($N)->bfac->blog;
    $d = ( $tmp - $sum ) / $N;
+   return $d;
+}
+
+
+method _hill () {
+   # Calculate Hill's N_inf index of diversity
+   # http://www.wcsmalaysia.org/analysis/diversityIndexMenagerie.htm#Hill
+   return 1 / $self->_berger;
+}
+
+
+method _mcintosh () {
+   # Calculate McIntosh's index of diversity
+   # http://www.pisces-conservation.com/sdrhelp/index.html?mcintoshd.htm
+   my $d = 0;
+   my $U = 0;
+   my $community = $self->community;
+   while (my $member = $community->next_member) {
+      my $c = $community->get_count($member);
+      $U += $c**2;
+   }
+   $U = sqrt($U);
+   my $N = $community->get_members_count;
+   $d = ($N - $U) / ($N - sqrt($N));
    return $d;
 }
 

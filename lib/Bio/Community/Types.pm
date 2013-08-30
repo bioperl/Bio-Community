@@ -118,8 +118,8 @@ subtype 'DistanceType'
 
 # Type of alpha diversity
 my @AlphaType = qw(observed menhinick margalef chao1 ace
-                   buzas shannon_e simpson_e hill
-                   shannon simpson simpson_r brillouin
+                   shannon_e brillouin_e hill_e mcintosh_e simpson_e  buzas
+                   shannon   brillouin   hill   mcintosh   simpson    simpson_r
                    simpson_d berger);
 subtype 'AlphaType'
    => as enum( \@AlphaType )

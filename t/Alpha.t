@@ -47,10 +47,12 @@ delta_ok Bio::Community::Alpha->new(-community=>$c2, -type=>'ace'      )->get_al
 
 # Test evenness
 
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'buzas'    )->get_alpha, 0.916486424665735, 'Evenness';
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'shannon_e')->get_alpha, 0.920619835714305;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_e')->get_alpha, 0.916666666666667;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'hill'     )->get_alpha, 2.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'buzas'      )->get_alpha, 0.916486424665735, 'Evenness';
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'shannon_e'  )->get_alpha, 0.920619835714305;
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_e'  )->get_alpha, 0.916666666666667;
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'brillouin_e')->get_alpha, 0.909892831516493;
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'hill_e'     )->get_alpha, 0.935248830832905;
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'mcintosh_e' )->get_alpha, 0.881917103688197;
 
 
 # Test composite metrics
@@ -59,6 +61,8 @@ delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'shannon'  )->get_al
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson'  )->get_alpha, 0.611111111111111;
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_r')->get_alpha, 2.57142857142857;
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'brillouin')->get_alpha, 0.682390760370350;
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'hill'     )->get_alpha, 2.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'mcintosh' )->get_alpha, 0.636061424871458;
 
 
 # Test dominance
