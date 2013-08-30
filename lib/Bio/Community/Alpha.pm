@@ -16,7 +16,7 @@ Bio::Community::Alpha - Calculate the alpha diversity of a community
   use Bio::Community::Alpha;
   
   my $alpha = Bio::Community::Alpha->new( -community => $community,
-                                          -type      => 'richness'  );
+                                          -type      => 'observed'  );
   my $richness = $alpha->get_alpha;
 
 =head1 DESCRIPTION
@@ -87,6 +87,7 @@ use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use List::Util qw(max);
+use Math::BigFloat try => 'GMP';
 
 extends 'Bio::Root::Root';
 
@@ -124,10 +125,9 @@ has community => (
                          where C<n1> and C<n2> are the number of singletons and
                          doubletons, respectively. Particularly useful for data
                          skewed toward the low-abundance species, e.g. microbial.
-                         Note this metric uses counts instead of relative
-                         abundance.
-            * ace      : Abundance-based Coverage Estimator (ACE). Note this
-                         metric uses counts instead of relative abundance.
+                         Based on counts, not relative abundance.
+            * ace      : Abundance-based Coverage Estimator (ACE). Based on
+                         counts, not relative abundance.
 
            Evenness (or equitability):
             * buzas    : Buzas & Gibson's evenness, C<e^H/S>. Ranges from 0 to 1.
@@ -149,6 +149,9 @@ has community => (
                          same species. Emphasizes evenness. Ranges from 0 to 1.
             * simpson_r: Simpson's reciprocal Index C<1/D>. Ranges from 1 to
                          infinity.
+            * brillouin: Brillouin's index of diversity, appropriate for small,
+                         completely censused communities. Ranges from XXX to XXX.
+                         Based on counts, not relative abundance.
 
            Dominance metrics: Note that they are B<not> diversity measurements
            because the higher their value, the lower the diversity.
@@ -176,7 +179,6 @@ has type => (
 ## Hill is a evenness, richness or composite index??
 
 ## Index:
-##   Brillouin
 ##   Fisher index: a diversity index, defined implicitly by the formula
 ##      S=a*ln(1+n/a) where S is number of taxa, n is number of individuals and a
 ##      is the value of Fisher's alpha.
@@ -189,12 +191,6 @@ has type => (
 ##   Brillouin evenness
 ##   McIntosh
 #    Heip
-
-## Phylogenetic
-##   PD: Faith's phylogenetic diversity
-##   Mean pairwise distance (MPD) and mean nearest taxon distance (MNTD) (Webb et al. 2002)
-##   Net-relatedness index (NRI) and nearest taxon index (NTI)
-##   See http://nunn.rc.fas.harvard.edu/groups/pica/wiki/cb0ce/111_Phylogenetic_community_ecology.html
 
 ## QIIME supports these alpha diversity indices:
 ##   $ alpha_diversity.py -s
@@ -347,6 +343,25 @@ method _simpson () {
 method _simpson_r () {
    # Calculate Simpson's Reciprocal Index (1/D)
    return 1 / $self->_simpson_d;
+}
+
+
+method _brillouin () {
+   # Calculate Brillouin's index of diversity
+   # http://www.wcsmalaysia.org/analysis/diversityIndexMenagerie.htm#Brillouin
+   # Use the Math::BigFloat module because i) it has a function to calculate
+   # factorial, and ii) it can use Math::BigInt::GMP C-bindings to be faster
+   my $d = 0;
+   my $sum = 0;
+   my $community = $self->community;
+   while (my $member = $community->next_member) {
+      my $c = $community->get_count($member);
+      $sum += Math::BigFloat->new($c)->bfac->blog;
+   }
+   my $N = $community->get_members_count;
+   my $tmp = Math::BigFloat->new($N)->bfac->blog;
+   $d = ( $tmp - $sum ) / $N;
+   return $d;
 }
 
 

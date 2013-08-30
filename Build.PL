@@ -41,8 +41,8 @@ my $build = Module::Build->new(
                              'Tie::IxHash'                  =>  0, # metacommunity
                             },
     recommends           => {
-                              # Clone objects using Bio::Root::clone(). Uses a pure-Perl way if needed. Broken in 0.97?!
-                             'Clone::Fast'                  => 0,
+                             'Clone::Fast'                  =>  0, # C bindings for Bio::Root::clone(). Broken in 0.97?!
+                             'Math::BigInt::GMP'            =>  0, # C bindings for arithmetic
                             },
     script_files         => [
                              'scripts/bc_clean_shrapnel',
