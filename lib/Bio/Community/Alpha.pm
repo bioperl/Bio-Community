@@ -129,10 +129,12 @@ has community => (
                          counts, not relative abundance.
 
            Evenness (or equitability):
-            * buzas      : Buzas & Gibson's evenness, C<e^H/S>. Ranges from 0 to 1.
-            * shannon_e  : Shannon's evenness (a.k.a. Pielou), or the Shannon-
-                           Wiener index divided by the maximum diversity
-                           possible in the community. Ranges from 0 to 1.
+            * buzas      : Buzas & Gibson's (or Sheldon's) evenness, C<e^H/S>.
+                           Ranges from 0 to 1.
+            * heip       : Heip's evenness, C<(e^H-1)/(S-1)>. Ranges from 0 to 1.
+            * shannon_e  : Shannon's evenness, or the Shannon-Wiener index
+                           divided by the maximum diversity possible in the
+                           community. Ranges from 0 to 1.
             * simpson_e  : Simpson's evenness, or the Simpson's Index of Diversity
                            divided by the maximum diversity possible in the
                            community. Ranges from 0 to 1.
@@ -142,6 +144,7 @@ has community => (
             * hill_e     : Hill's C<E_2,1> evenness, i.e. Simpson's Reciprocal
                            index divided by C<e^H>.
             * mcintosh_e : McIntosh's evenness.
+            * camargo    : Camargo's eveness. Ranges from 0 to 1.
 
            Indices (accounting for species abundance):
             * shannon  : Shannon-Wiener index C<H>. Emphasizes richness. Ranges
@@ -188,10 +191,6 @@ has type => (
 ##      is the value of Fisher's alpha.
 ##      See http://www.thefreelibrary.com/A+table+of+values+for+Fisher%27s+%5Balpha%5D+log+series+diversity+index.-a0128667026
 
-## Evenness:
-#    Heip
-#    Camargo: http://www.pisces-conservation.com/sdrhelp/index.html?camargo.htm
-
 ## QIIME supports these alpha diversity indices:
 ##   $ alpha_diversity.py -s
 ##   Known metrics are:
@@ -201,7 +200,7 @@ has type => (
 ##        doubles, chao1_confidence, berger_parker_d, brillouin_d, mcintosh_d
 ##        mcintosh_e, PD_whole_tree
 ##      Not yet implemented:
-##        fisher_alpha, kempton_taylor_q, michaelis_menten_fit, osd, robbins, strong,
+##        fisher_alpha, kempton_taylor_q, michaelis_menten_fit, osd, robbins, strong
 
 #####
 
@@ -298,7 +297,15 @@ method _ace () {
 
 method _buzas () {
    # Calculate Buzas and Gibson's evenness
+   # http://folk.uio.no/ohammer/past/diversity.html
    return exp($self->_shannon) / $self->community->get_richness;
+}
+
+
+method _heip () {
+   # Calculate Heip's evenness
+   # http://www.pisces-conservation.com/sdrhelp/index.html?heip.htm
+   return (exp($self->_shannon) - 1) / ($self->community->get_richness - 1);
 }
 
 
@@ -350,6 +357,23 @@ method _mcintosh_e () {
    my $N = $community->get_members_count;
    my $S = $community->get_richness;
    $d = $U / sqrt( ($N-$S+1)**2 + $S - 1 );
+   return $d;
+}
+
+
+method _camargo () {
+   # Calculate Camargo's evenness
+   # http://www.pisces-conservation.com/sdrhelp/index.html?camargo.htm
+   my $d = 0;
+   my $community = $self->community;
+   my $S = $community->get_richness;
+   my @p = map { $community->get_rel_ab($_) / 100 } @{$community->get_all_members};
+   for my $i (1 .. $S) {
+      for my $j ($i+1 .. $S) {
+         $d += abs($p[$i-1] - $p[$j-1]) / $S;
+      }
+   }
+   $d = 1 - $d;
    return $d;
 }
 

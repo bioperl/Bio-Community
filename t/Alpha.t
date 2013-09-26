@@ -48,11 +48,13 @@ delta_ok Bio::Community::Alpha->new(-community=>$c2, -type=>'ace'      )->get_al
 # Test evenness
 
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'buzas'      )->get_alpha, 0.916486424665735, 'Evenness';
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'heip'       )->get_alpha, 0.874729636998600;
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'shannon_e'  )->get_alpha, 0.920619835714305;
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_e'  )->get_alpha, 0.916666666666667;
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'brillouin_e')->get_alpha, 0.909892831516493;
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'hill_e'     )->get_alpha, 0.935248830832905;
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'mcintosh_e' )->get_alpha, 0.881917103688197;
+delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'camargo'    )->get_alpha, 0.777777777777778;
 
 
 # Test composite metrics
@@ -71,7 +73,6 @@ delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_d')->get_al
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'berger'   )->get_alpha, 0.5;
 
 
-
 ### Tests with max or min evenness / richness.
 
 ### Compare results to estimateS or vegan or QIIME alpha_diversity.py
@@ -79,6 +80,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'berger'   )->get_al
 ### Should have an error when calculating ACE or chao1 with non-integers
 
 ### Test Brillouin's factorial with 100,000 individuals (should still be quite fast)
+
+### What if communities have a richness of zero?
+
+### What happens for evenness when communities has richness < 2. What does the evenness of a single species mean??
 
 done_testing();
 
