@@ -54,59 +54,60 @@ is $member->id,'bc10'; # Automatic ID should be above all we have seen
 warning_like {$member = Bio::Community::Member->new( -id => 'bc10' )} qr/ID might not be unique/i;
 is $member->id,'bc10'; # Warn when assigning ID below what we have
 
+is my $id = $member->_generate_id, 'bc11';
+ok $member->id( $id );
+
+#### Test description
+
+###ok $member = Bio::Community::Member->new( -desc => 'H. sapiens' ), 'Description';
+###is $member->desc(), 'H. sapiens';
+
+###ok $member->desc('mouse');
+###is $member->desc(), 'mouse';
+
+###ok $member = Bio::Community::Member->new( );
+###is $member->desc, '';
 
 
-# Test description
+#### Test taxon
 
-ok $member = Bio::Community::Member->new( -desc => 'H. sapiens' ), 'Description';
-is $member->desc(), 'H. sapiens';
+###$taxon = Bio::Taxon->new( -name => 'some_taxon' );
+###ok $member = Bio::Community::Member->new( -taxon => $taxon ), 'Taxon';
+###is $member->taxon(), $taxon;
 
-ok $member->desc('mouse');
-is $member->desc(), 'mouse';
+###$taxon = Bio::Taxon->new( -name => 'some_other_taxon' );
+###ok $member->taxon($taxon);
+###is $member->taxon(), $taxon;
 
-ok $member = Bio::Community::Member->new( );
-is $member->desc, '';
-
-
-# Test taxon
-
-$taxon = Bio::Taxon->new( -name => 'some_taxon' );
-ok $member = Bio::Community::Member->new( -taxon => $taxon ), 'Taxon';
-is $member->taxon(), $taxon;
-
-$taxon = Bio::Taxon->new( -name => 'some_other_taxon' );
-ok $member->taxon($taxon);
-is $member->taxon(), $taxon;
-
-ok $member = Bio::Community::Member->new( );
-is $member->taxon, undef;
+###ok $member = Bio::Community::Member->new( );
+###is $member->taxon, undef;
 
 
-# Test sequences
+#### Test sequences
 
-$sequence1 = Bio::PrimarySeq->new( -seq => 'AACGT' );
-$sequence2 = Bio::PrimarySeq->new( -seq => 'AACGAAAAA' );
-ok $member = Bio::Community::Member->new( -seqs => [ $sequence1, $sequence2 ] ), 'Sequences';
-is_deeply $member->seqs(), [$sequence1, $sequence2];
+###$sequence1 = Bio::PrimarySeq->new( -seq => 'AACGT' );
+###$sequence2 = Bio::PrimarySeq->new( -seq => 'AACGAAAAA' );
+###ok $member = Bio::Community::Member->new( -seqs => [ $sequence1, $sequence2 ] ), 'Sequences';
+###is_deeply $member->seqs(), [$sequence1, $sequence2];
 
-$sequence1 = Bio::PrimarySeq->new( -seq => 'AACGAAAAA' );
-ok $member->seqs([$sequence1]);
-is_deeply $member->seqs(), [$sequence1];
+###$sequence1 = Bio::PrimarySeq->new( -seq => 'AACGAAAAA' );
+###ok $member->seqs([$sequence1]);
+###is_deeply $member->seqs(), [$sequence1];
 
-ok $member = Bio::Community::Member->new( );
-is_deeply $member->seqs, [];
+###ok $member = Bio::Community::Member->new( );
+###is_deeply $member->seqs, [];
 
 
-# Test weights
+#### Test weights
 
-ok $member = Bio::Community::Member->new( -weights => [ 0.1, 3 ] ), 'Weights';
-is_deeply $member->weights(), [ 0.1, 3 ];
+###ok $member = Bio::Community::Member->new( -weights => [ 0.1, 3 ] ), 'Weights';
+###is_deeply $member->weights(), [ 0.1, 3 ];
 
-ok $member->weights([4124]);
-is_deeply $member->weights(), [4124];
+###ok $member->weights([4124]);
+###is_deeply $member->weights(), [4124];
 
-ok $member = Bio::Community::Member->new( );
-is_deeply $member->weights, [ 1 ];
+###ok $member = Bio::Community::Member->new( );
+###is_deeply $member->weights, [ 1 ];
 
 
 done_testing();
