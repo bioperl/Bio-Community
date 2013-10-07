@@ -23,7 +23,6 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
   BioPerl version > 1.6.910
-  Bio-Root 1.7
   Math::Random::MT
   Method::Signatures
   Moose
