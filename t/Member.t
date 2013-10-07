@@ -20,8 +20,6 @@ ok $member = Bio::Community::Member->new( );
 isa_ok $member, 'Bio::Root::RootI';
 isa_ok $member, 'Bio::Community::Member';
 
-can_ok $member, '_generate_id';
-
 
 # Test ID
 
@@ -54,8 +52,12 @@ is $member->id,'bc10'; # Automatic ID should be above all we have seen
 warning_like {$member = Bio::Community::Member->new( -id => 'bc10' )} qr/ID might not be unique/i;
 is $member->id,'bc10'; # Warn when assigning ID below what we have
 
-is my $id = $member->_generate_id, 'bc11';
-ok $member->id( $id );
+
+# _auto_id
+
+can_ok $member, '_auto_id';
+ok $member->_auto_id;
+is $member->id, 'bc11';
 
 
 # Test description

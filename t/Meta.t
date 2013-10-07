@@ -139,7 +139,7 @@ $community2 = Bio::Community::IO->new(
    -file => test_input_file('to_merge_2.qiime'),
 )->next_community;
 
-ok $meta = Bio::Community::Meta->new( -identify_members_by => 'desc' );
+ok $meta = Bio::Community::Meta->new( -identify_members_by => 'desc' ), 'Merging';
 is $meta->identify_members_by, 'desc';
 
 ok $meta->add_communities([$community1, $community2]);

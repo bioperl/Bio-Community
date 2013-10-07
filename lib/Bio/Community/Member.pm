@@ -151,39 +151,36 @@ has id => (
    init_arg => '-id',
    lazy => 0,
    predicate => '_has_id',
-   trigger => \&_register_id, # only when setting the ID
+   trigger => \&_auto_id, # only when setting the ID
 );
 
 
-method _register_id ($id, $old_id?) {
-   if ( not((caller(0))[0] eq __PACKAGE__) && ($id =~ $id_re) ) {
-      # Check validity of 'bcXX' IDs not requested by Bio::Community::Member
-      my $num = $1;
-      if ($num > $max_num) {
-         $max_num = $num;
-      } else {
-         $self->warn("Request to assign ID $id to member but we are at ID ".
-            PREFIX."$max_num already. ID might not be unique!");
+method BUILD ($args) {
+   ## Ensure that a default ID is assigned if needed after object construction
+   $self->_auto_id( $self->id );
+}
+
+
+method _auto_id ($id?, $old_id?) {
+   # Validate given ID or assign a new ID automatically
+   if (not defined $id) {
+      # Assign a new ID
+      #$self->id( PREFIX.$max_num++ ); # it adds a call to _register_id and warns
+      $self->{id} = PREFIX.++$max_num
+   } else {
+      # Validate ID
+      if ( not((caller(0))[0] eq __PACKAGE__) && ($id =~ $id_re) ) {
+         # Check validity of 'bcXX' IDs not requested by Bio::Community::Member
+         my $num = $1;
+         if ($num > $max_num) {
+            $max_num = $num;
+         } else {
+            $self->warn("Request to assign ID $id to member but we are at ID ".
+               PREFIX."$max_num already. ID might not be unique!");
+         }
       }
    }
    return 1;
-}
-
-
-method BUILD ($args) {
-   # Ensure that a default ID is assigned if needed after object construction
-   if (not $self->_has_id) {
-      # Generate a new ID
-      #$self->id( PREFIX.$max_num++ ); # it adds a call to _register_id and warns
-      $self->{id} = $self->_generate_id();
-   } else {
-      $self->_register_id($self->id);
-   }
-}
-
-
-method _generate_id {
-   return PREFIX.++$max_num;
 }
 
 

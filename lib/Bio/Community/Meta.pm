@@ -187,7 +187,6 @@ has _communities => (
 method add_communities ( ArrayRef[Bio::Community] $communities ) {
    my $comm_hash = $self->_communities;
    for my $community (@$communities) {
-
       # Identify members by description and fix IDs
       if ($self->identify_members_by eq 'desc') {
          my $members_lookup = $self->_members_lookup;
@@ -195,17 +194,14 @@ method add_communities ( ArrayRef[Bio::Community] $communities ) {
             my $count = $community->remove_member($member);
             my $desc = $member->desc;
             my $same_member = $members_lookup->{$desc};
-            my $id;
             if (defined $same_member) {
-               # Use same ID and same Member object
-               $id = $same_member->id;
+               # A members with same description exists. Use same Member object
                $member = $same_member;
             } else {
-               # Use new ID
-               $id = $member->_generate_id();
+               # This is a new member. Use a new ID.
+               $member->_auto_id();
                $members_lookup->{$desc} = $member;
             }
-            $member->id( $id );
             $community->add_member($member, $count);
          }
       }
