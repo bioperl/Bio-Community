@@ -20,20 +20,40 @@ ok $member = Bio::Community::Member->new( );
 isa_ok $member, 'Bio::Root::RootI';
 isa_ok $member, 'Bio::Community::Member';
 
+can_ok $member, '_generate_id';
+
 
 # Test ID
 
-ok $member = Bio::Community::Member->new( -id => 0 ), 'ID';
+is $member->id, 'bc1', 'ID';
+
+ok $member = Bio::Community::Member->new( -id => 0 );
 is $member->id, 0;
 
 ok $member = Bio::Community::Member->new( -id => 'asdf' );
 is $member->id, 'asdf';
+
+ok $member->id('qwer');
+is $member->id, 'qwer';
 
 ok $member = Bio::Community::Member->new( );
 is $member->id, 'bc2';
 
 ok $member = Bio::Community::Member->new( );
 is $member->id,'bc3';
+
+
+# Restricted IDs
+
+ok $member = Bio::Community::Member->new( -id => 'bc9' ), 'Restricted IDs';
+is $member->id,'bc9';
+
+ok $member = Bio::Community::Member->new( );
+is $member->id,'bc10'; # Automatic ID should be above all we have seen
+
+warning_like {$member = Bio::Community::Member->new( -id => 'bc10' )} qr/ID might not be unique/i;
+is $member->id,'bc10'; # Warn when assigning ID below what we have
+
 
 
 # Test description

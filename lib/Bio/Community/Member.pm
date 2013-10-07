@@ -122,9 +122,12 @@ with 'Bio::Community::Role::Described' , # -desc
      'Bio::Community::Role::Weighted'  ; # -weights
 
 
-my $last_num = 0;
-my $prefix = 'bc';
+use constant PREFIX => 'bc';
+my $max_num = 1;
 # First ID is 'bc1'
+
+my $id_re = '^'.PREFIX.'(\d+)$';
+$id_re = qr/$id_re/;
 
 
 =head2 id
@@ -148,29 +151,39 @@ has id => (
    init_arg => '-id',
    lazy => 0,
    predicate => '_has_id',
-   #trigger => \&_register_id,
+   trigger => \&_register_id, # only when setting the ID
 );
 
 
-# Don't register IDs anymore since we use a prefix that users should not use.
-#my %ids = ();
-#func _register_id ($self, $id, $old_id?) {
-#   # Register ID after it has been assigned
-#   $ids{$self->{id}} = undef;
-#};
+method _register_id ($id, $old_id?) {
+   if ( not((caller(0))[0] eq __PACKAGE__) && ($id =~ $id_re) ) {
+      # Check validity of 'bcXX' IDs not requested by Bio::Community::Member
+      my $num = $1;
+      if ($num >= $max_num) {
+         $max_num = $num + 1;
+      } else {
+         $self->warn("Requested to assign ID $id to member but we are at ID ".
+            PREFIX."$max_num already. ID might not be unique!");
+      }
+   }
+   return 1;
+}
 
 
 method BUILD ($args) {
    # Ensure that a default ID is assigned if needed after object construction
    if (not $self->_has_id) {
-      $self->id( _generate_id() );
+      # Generate a new ID
+      #$self->id( PREFIX.$max_num++ ); # it adds a call to _register_id and warns
+      $self->{id} = _generate_id();
+   } else {
+      $self->_register_id($self->id);
    }
 }
 
 
-func _generate_id () {
-   $last_num++;
-   return $prefix.$last_num;
+method _generate_id {
+   return PREFIX.$max_num++;
 }
 
 

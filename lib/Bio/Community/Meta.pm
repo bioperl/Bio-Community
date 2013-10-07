@@ -202,7 +202,7 @@ method add_communities ( ArrayRef[Bio::Community] $communities ) {
                $member = $same_member;
             } else {
                # Use new ID
-               $id = Bio::Community::Member::_generate_id();
+               $id = $member->_generate_id();
                $members_lookup->{$desc} = $member;
             }
             $member->id( $id );
