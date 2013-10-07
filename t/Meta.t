@@ -74,7 +74,7 @@ is_deeply [sort(map {$_->name} @{$meta->get_all_communities})], ['GOM'];
 
 is $meta->get_communities_count, 1;
 
-is_deeply [sort(map {ref $_}   @{$meta->get_all_members})], ['Bio::Community::Member', 'Bio::Community::Member'];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_members})], [('Bio::Community::Member')x2];
 is_deeply [sort(map {$_->id}   @{$meta->get_all_members})], [1, 2];
 
 is $meta->get_richness, 2;
@@ -91,12 +91,12 @@ is $meta->next_community->name, 'BBC';
 is $meta->next_community->name, 'SAR';
 is $meta->next_community, undef;
 
-is_deeply [sort(map {ref $_}   @{$meta->get_all_communities})], ['Bio::Community', 'Bio::Community', 'Bio::Community'];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_communities})], [('Bio::Community')x3];
 is_deeply [sort(map {$_->name} @{$meta->get_all_communities})], ['BBC', 'GOM', 'SAR'];
 
 is $meta->get_communities_count, 3;
 
-is_deeply [sort(map {ref $_}  @{$meta->get_all_members})], ['Bio::Community::Member', 'Bio::Community::Member', 'Bio::Community::Member'];
+is_deeply [sort(map {ref $_}  @{$meta->get_all_members})], [('Bio::Community::Member')x3];
 is_deeply [sort(map {$_->id}  @{$meta->get_all_members})], [1, 2, 3];
 
 is $meta->get_richness, 3;
@@ -112,7 +112,7 @@ is $meta->next_community->name, 'GOM';
 is $meta->next_community->name, 'SAR';
 is $meta->next_community, undef;
 
-is_deeply [sort(map {ref $_}   @{$meta->get_all_communities})], ['Bio::Community', 'Bio::Community'];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_communities})], [('Bio::Community')x2];
 is_deeply [sort(map {$_->name} @{$meta->get_all_communities})], ['GOM', 'SAR'];
 
 is $meta->get_community_by_name('SAR')->name, 'SAR';
@@ -121,7 +121,7 @@ is $meta->get_community_by_name('GOM')->name, 'GOM';
 
 is $meta->get_communities_count, 2;
 
-is_deeply [sort(map {ref $_}  @{$meta->get_all_members})], ['Bio::Community::Member', 'Bio::Community::Member'];
+is_deeply [sort(map {ref $_}  @{$meta->get_all_members})], [('Bio::Community::Member')x2];
 is_deeply [sort(map {$_->id}  @{$meta->get_all_members})], [1, 2];
 
 is $meta->get_richness, 2;
