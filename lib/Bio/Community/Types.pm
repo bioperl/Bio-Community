@@ -118,7 +118,7 @@ subtype 'DistanceType'
 
 # Type of alpha diversity
 my @AlphaType = qw(
-   observed menhinick margalef chao1 ace
+   observed  menhinick   chao1  margalef   ace
    shannon_e brillouin_e hill_e mcintosh_e simpson_e buzas heip camargo
    shannon   brillouin   hill   mcintosh   simpson   simpson_r
    simpson_d berger

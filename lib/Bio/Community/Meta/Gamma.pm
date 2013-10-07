@@ -125,7 +125,7 @@ has type => (
    isa => 'AlphaType', # support same metrics as Bio::Community::Alpha
    required => 0,
    lazy => 1,
-   default => 'richness',
+   default => 'observed',
    init_arg => '-type',
 );
 
@@ -152,8 +152,8 @@ method get_gamma () {
 };
 
 
-method _richness () {
-   # Calculate the richness
+method _observed () {
+   # Calculate the observed richness
    return $self->metacommunity->get_richness;
 }
 
