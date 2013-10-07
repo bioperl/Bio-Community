@@ -26,13 +26,13 @@ is $meta->name, '';
 is $meta->identify_members_by, 'id';
 is $meta->next_community, undef;
 
-is_deeply [map {ref $_}   @{$meta->get_all_communities}], [];
-is_deeply [map {$_->name} @{$meta->get_all_communities}], [];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_communities})], [];
+is_deeply [sort(map {$_->name} @{$meta->get_all_communities})], [];
 
 is $meta->get_communities_count, 0;
 
-is_deeply [map {ref $_}   @{$meta->get_all_members}], [];
-is_deeply [map {$_->id}   @{$meta->get_all_members}], [];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_members})], [];
+is_deeply [sort(map {$_->id}   @{$meta->get_all_members})], [];
 
 is $meta->get_richness, 0;
 
@@ -69,13 +69,13 @@ is $meta->name, 'marine regions';
 is $meta->next_community->name, 'GOM';
 is $meta->next_community, undef;
 
-is_deeply [map {ref $_}   @{$meta->get_all_communities}], ['Bio::Community'];
-is_deeply [map {$_->name} @{$meta->get_all_communities}], ['GOM'];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_communities})], ['Bio::Community'];
+is_deeply [sort(map {$_->name} @{$meta->get_all_communities})], ['GOM'];
 
 is $meta->get_communities_count, 1;
 
-is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member'];
-is_deeply [map {$_->id}   @{$meta->get_all_members}], [1, 2];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_members})], ['Bio::Community::Member', 'Bio::Community::Member'];
+is_deeply [sort(map {$_->id}   @{$meta->get_all_members})], [1, 2];
 
 is $meta->get_richness, 2;
 
@@ -91,13 +91,13 @@ is $meta->next_community->name, 'BBC';
 is $meta->next_community->name, 'SAR';
 is $meta->next_community, undef;
 
-is_deeply [map {ref $_}   @{$meta->get_all_communities}], ['Bio::Community', 'Bio::Community', 'Bio::Community'];
-is_deeply [map {$_->name} @{$meta->get_all_communities}], ['GOM', 'BBC', 'SAR'];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_communities})], ['Bio::Community', 'Bio::Community', 'Bio::Community'];
+is_deeply [sort(map {$_->name} @{$meta->get_all_communities})], ['BBC', 'GOM', 'SAR'];
 
 is $meta->get_communities_count, 3;
 
-is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member', 'Bio::Community::Member'];
-is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2, 3];
+is_deeply [sort(map {ref $_}  @{$meta->get_all_members})], ['Bio::Community::Member', 'Bio::Community::Member', 'Bio::Community::Member'];
+is_deeply [sort(map {$_->id}  @{$meta->get_all_members})], [1, 2, 3];
 
 is $meta->get_richness, 3;
 
@@ -112,8 +112,8 @@ is $meta->next_community->name, 'GOM';
 is $meta->next_community->name, 'SAR';
 is $meta->next_community, undef;
 
-is_deeply [map {ref $_}   @{$meta->get_all_communities}], ['Bio::Community', 'Bio::Community'];
-is_deeply [map {$_->name} @{$meta->get_all_communities}], ['GOM', 'SAR'];
+is_deeply [sort(map {ref $_}   @{$meta->get_all_communities})], ['Bio::Community', 'Bio::Community'];
+is_deeply [sort(map {$_->name} @{$meta->get_all_communities})], ['GOM', 'SAR'];
 
 is $meta->get_community_by_name('SAR')->name, 'SAR';
 is $meta->get_community_by_name('BBC'), undef;
@@ -121,8 +121,8 @@ is $meta->get_community_by_name('GOM')->name, 'GOM';
 
 is $meta->get_communities_count, 2;
 
-is_deeply [map {ref $_}   @{$meta->get_all_members}], ['Bio::Community::Member', 'Bio::Community::Member'];
-is_deeply [sort {$a <=> $b} (map {$_->id} @{$meta->get_all_members})], [1, 2];
+is_deeply [sort(map {ref $_}  @{$meta->get_all_members})], ['Bio::Community::Member', 'Bio::Community::Member'];
+is_deeply [sort(map {$_->id}  @{$meta->get_all_members})], [1, 2];
 
 is $meta->get_richness, 2;
 
