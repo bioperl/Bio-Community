@@ -24,8 +24,8 @@ my $build = Module::Build->new(
                             },
     requires             => {
                              'perl'                         => '5.10.0',
-                             #'Bio::Root::Version'           => '1.7', # unreleased. Bio::Root::IO bundled here
-                             'Bio::DB::Taxonomy'            => '1.006901',
+                             #'Bio::Root::IO'               => '1.7', # unreleased. Bio::Root::IO bundled here
+                             'Bio::Root::Version'           => '1.006901',
                              'DateTime'                     =>  0,
                              'Getopt::Euclid'               => '0.4.3',
                              'JSON::XS'                     =>  0, # biom format
