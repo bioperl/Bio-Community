@@ -123,7 +123,7 @@ with 'Bio::Community::Role::Described' , # -desc
 
 
 use constant PREFIX => 'bc';
-my $max_num = 1;
+my $max_num = 0;
 # First ID is 'bc1'
 
 my $id_re = '^'.PREFIX.'(\d+)$';
@@ -159,10 +159,10 @@ method _register_id ($id, $old_id?) {
    if ( not((caller(0))[0] eq __PACKAGE__) && ($id =~ $id_re) ) {
       # Check validity of 'bcXX' IDs not requested by Bio::Community::Member
       my $num = $1;
-      if ($num >= $max_num) {
-         $max_num = $num + 1;
+      if ($num > $max_num) {
+         $max_num = $num;
       } else {
-         $self->warn("Requested to assign ID $id to member but we are at ID ".
+         $self->warn("Request to assign ID $id to member but we are at ID ".
             PREFIX."$max_num already. ID might not be unique!");
       }
    }
@@ -175,7 +175,7 @@ method BUILD ($args) {
    if (not $self->_has_id) {
       # Generate a new ID
       #$self->id( PREFIX.$max_num++ ); # it adds a call to _register_id and warns
-      $self->{id} = _generate_id();
+      $self->{id} = $self->_generate_id();
    } else {
       $self->_register_id($self->id);
    }
@@ -183,7 +183,7 @@ method BUILD ($args) {
 
 
 method _generate_id {
-   return PREFIX.$max_num++;
+   return PREFIX.++$max_num;
 }
 
 
