@@ -37,6 +37,7 @@ my $build = Module::Build->new(
                              'MooseX::NonMoose'             =>  0,
                              'MooseX::StrictConstructor'    =>  0,
                              'Parallel::Iterator'           =>  0, # community member iteration
+                             'PerlIO::eol'                  =>  0,
                              'Scalar::Util'                 =>  0,
                              'Tie::IxHash'                  =>  0, # metacommunity
                             },

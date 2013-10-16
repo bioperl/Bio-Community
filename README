@@ -20,9 +20,15 @@ To install this module type the following:
 
 DEPENDENCIES
 
-This module requires these other modules and libraries:
+This module requires perl 5.10 or above. Additionally, these perl modules are
+required:
 
   BioPerl version > 1.6.910
+  Bio-Root 1.7 (bundled here)
+  DateTime
+  Getopt::Euclid
+  JSON::XS
+  Hash::Util
   Math::Random::MT
   Method::Signatures
   Moose
@@ -30,12 +36,14 @@ This module requires these other modules and libraries:
   MooseX::NonMoose
   MooseX::StrictConstructor
   Parallel::Iterator
+  PerlIO:eol
+  Scalar::Util
   Tie::IxHash
   Test::Number::Delta
 
-These other modules are strongly recommended:
- 
-  Clone
+These other modules are recommended:
+  Clone::Fast
+  Math::BigInt::GMP
 
 
 COPYRIGHT AND LICENCE
