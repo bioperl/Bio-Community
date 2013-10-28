@@ -1,27 +1,19 @@
 Bio-Community version 0.01
 ==========================
 
-THIS MODULE IS IN EARLY DEVELOPMENT STAGE! WHILE IT CURRENTLY PROVIDES USEFUL
-OPERATIONS, THE INTERFACE MAY UNDERGO CHANGES TO IMPROVE THE MODULES.
 
-Bio::Community is a set of BioPerl modules to represent and manipulate communities
-of biological organisms.
+ABOUT BIO-COMMUNITY
 
-
-INSTALLATION
-
-To install this module type the following:
-
-   perl Build.PL
-   ./Build
-   ./Build test
-   ./Build install
+The Bio-Community distribution contains a set of generic, open, object-oriented,
+cross-platform Perl modules to represent and manipulate communities of
+biological organisms. Bio-Community is part of the BioPerl project
+(http://bioperl.org/).
 
 
-DEPENDENCIES
+INSTALLATION & DEPENDENCIES
 
-This module requires perl 5.10 or above. Additionally, these perl modules are
-required:
+The Bio-Community modules require Perl 5.10 or above. Additionally, these Perl
+modules are required and will be installed during the installation procedure:
 
   BioPerl version > 1.6.910
   Bio-Root 1.7 (bundled here)
@@ -41,14 +33,61 @@ required:
   Tie::IxHash
   Test::Number::Delta
 
-These other modules are recommended:
-  Clone::Fast
+This other module is recommended:
   Math::BigInt::GMP
 
+To install the Bio::Community modules, type the following:
+   perl Build.PL
+   ./Build installdeps   (as administrator)
+   ./Build
+   ./Build test
+   ./Build install       (as administrator)
 
-COPYRIGHT AND LICENCE
 
-Copyright (C) 2011-2012 by Florent Angly <florent.angly@gmail.com>
+MODULE OVERVIEW
+
+The ./lib/ folder contains the Bio-Community modules, which provide various
+objects and operations:
+
+ * The main objects are the community, member and metacommunity, provided by
+   Bio::Community, Bio::Community::Member and Bio::Community::Meta, respectively
+
+ * Reading and writing files in various formats, e.g. QIIME, biom, is possible
+   through Bio::Community::IO
+
+ * Alpha, beta and gamma diversity metrics are implemented in the modules
+   Bio::Community::Alpha, Bio::Community::Meta::Beta and Bio::Community::Meta::Gamma
+
+ * Bio::Community::Tools::* are modules providing various operations like random
+   sampling, rarefaction or taxonomic summaries.
+
+The ./scripts/ folder contains scripts. All these scripts use the Bio::Community
+modules and are useful for reading or writing files, rarefying, 
+They are good examples of how Bio::Community moudles can be used as building
+blocks for more complex programs.
+
+The ./t/ folder contains unit tests to ensure the proper functioning of the
+Bio-Community mocules. The ./t/data/ further contains data files used for the
+tests and is thus a good source of example data.
+
+
+SUPPORT AND BUGS
+
+User feedback is an integral part of the evolution of this and other Bioperl
+modules. Please direct usage questions or support issues to the mailing list, 
+bioperl-l@bioperl.org, rather than to the module maintainer directly. Many
+experienced and reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem with code and
+data examples if at all possible.
+
+If you have found a bug, please report it on the BioPerl bug tracking system
+to help us keep track the bugs and their resolution:
+https://redmine.open-bio.org/projects/bioperl/
+
+
+COPYRIGHT
+
+Copyright 2011,2012,2013 by the BioPerl Team <bioperl-l@bioperl.org>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,

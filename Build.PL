@@ -8,15 +8,15 @@ my $build = Module::Build->new(
     dist_name            => 'Bio-Community',
     module_name          => 'Bio::Community', # look here for version number
     dist_author          => 'BioPerl Team <bioperl-l@bioperl.org>',
-    dist_abstract        => 'Bio::Community - Represent and manipulate communities of biological organisms',
+    dist_abstract        => 'Modules to represent and manipulate communities of biological organisms',
     license              => 'perl',
     recursive_test_files => 1,
     create_license       => 1,
     meta_merge           => {
                              'resources' => {
                                              'repository' => 'git://github.com/bioperl/Bio-Community.git',
-                                             #'homepage'   => 'http://...',
-                                             #'bugtracker' => 'http://...',
+                                             'homepage'   => 'http://www.bioperl.org',
+                                             'bugtracker' => 'https://redmine.open-bio.org/projects/bioperl/',
                                             },
                             },
     build_requires       => {
@@ -42,7 +42,7 @@ my $build = Module::Build->new(
                              'Tie::IxHash'                  =>  0, # metacommunity
                             },
     recommends           => {
-                             'Clone::Fast'                  =>  0, # C bindings for Bio::Root::clone(). Broken in 0.97?!
+                             #'Clone::Fast'                  =>  0, # C bindings for Bio::Root::clone(). Broken in 0.97?!
                              'Math::BigInt::GMP'            =>  0, # C bindings for arithmetic
                             },
     script_files         => [

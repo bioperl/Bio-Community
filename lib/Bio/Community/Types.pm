@@ -9,43 +9,36 @@
 
 =head1 NAME
 
-Bio::Community::Types - Definition of useful data types for use in Moose modules
+Bio::Community::Types - Data types
 
-=head1 FEEDBACK
+=head1 DESCRIPTION
 
-=head2 Mailing Lists
+This module defineds of useful data types for use in modules that use Moose.
 
-User feedback is an integral part of the evolution of this
-and other Bioperl modules. Send your comments and suggestions preferably
-to one of the Bioperl mailing lists.
+=head1 AUTHOR
 
-Your participation is much appreciated.
+Florent Angly L<florent.angly@gmail.com>
 
-  bioperl-l@bioperl.org                  - General discussion
-  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+=head1 SUPPORT AND BUGS
 
-=head2 Support 
+User feedback is an integral part of the evolution of this and other Bioperl
+modules. Please direct usage questions or support issues to the mailing list, 
+L<bioperl-l@bioperl.org>, rather than to the module maintainer directly. Many
+experienced and reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem with code and
+data examples if at all possible.
 
-Please direct usage questions or support issues to the mailing list:
+If you have found a bug, please report it on the BioPerl bug tracking system
+to help us keep track the bugs and their resolution:
+L<https://redmine.open-bio.org/projects/bioperl/>
 
-I<bioperl-l@bioperl.org>
+=head1 COPYRIGHT
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
-with code and data examples if at all possible.
+Copyright 2011,2012,2013 by the BioPerl Team L<bioperl-l@bioperl.org>
 
-=head2 Reporting Bugs
-
-Report bugs to the Bioperl bug tracking system to help us keep track
-the bugs and their resolution.  Bug reports can be submitted via the
-web:
-
-  http://bugzilla.open-bio.org/
-
-=head1 AUTHOR - Florent Angly
-
-Email florent.angly@gmail.com
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.1 or,
+at your option, any later version of Perl 5 you may have available.
 
 =cut
 

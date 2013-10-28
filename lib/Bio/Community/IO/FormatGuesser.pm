@@ -40,7 +40,7 @@ The following formats are currently supported:
 
 =item *
 
-generic (tab-delimited tables, QIIME summarized OTU tables, ...)
+generic (tab-delimited matrix, site-by-species table, QIIME summarized OTU tables, ...)
 
 =item *
 
@@ -63,46 +63,33 @@ biom
 See the documentation for the corresponding IO drivers to read and write these
 formats in the Bio::Community::IO::* namespace.
 
-=head1 OBJECT METHODS
+=head1 AUTHOR
 
-=head1 FEEDBACK
-
-=head2 Mailing Lists
-
-User feedback is an integral part of the evolution of this
-and other Bioperl modules. Send your comments and suggestions preferably
-to one of the Bioperl mailing lists.
-
-Your participation is much appreciated.
-
-  bioperl-l@bioperl.org                  - General discussion
-  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
-
-=head2 Support 
-
-Please direct usage questions or support issues to the mailing list:
-
-I<bioperl-l@bioperl.org>
-
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
-with code and data examples if at all possible.
-
-=head2 Reporting Bugs
-
-Report bugs to the Bioperl bug tracking system to help us keep track
-the bugs and their resolution.  Bug reports can be submitted via the
-web:
-
-  http://bugzilla.open-bio.org/
-
-=head1 AUTHOR - Florent Angly
-
-Email florent.angly@gmail.com
+Florent Angly L<florent.angly@gmail.com>
 
 This module was inspired and based on the Bio::IO::GuessSeqFormat module written
 by Andreas Kähäri <andreas.kahari@ebi.ac.uk> and contributors. Thanks to them!
+
+=head1 SUPPORT AND BUGS
+
+User feedback is an integral part of the evolution of this and other Bioperl
+modules. Please direct usage questions or support issues to the mailing list, 
+L<bioperl-l@bioperl.org>, rather than to the module maintainer directly. Many
+experienced and reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem with code and
+data examples if at all possible.
+
+If you have found a bug, please report it on the BioPerl bug tracking system
+to help us keep track the bugs and their resolution:
+L<https://redmine.open-bio.org/projects/bioperl/>
+
+=head1 COPYRIGHT
+
+Copyright 2011,2012,2013 by the BioPerl Team L<bioperl-l@bioperl.org>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.1 or,
+at your option, any later version of Perl 5 you may have available.
 
 =head1 APPENDIX
 
