@@ -187,13 +187,14 @@ has '_qualitative_unifrac' => (
 method _generate_community_names () {
    # Read all possible community names from the second column
    my %names;
+   my @names;
    my $col = 2;
    for my $line (1 .. $self->_get_max_line) {
       my $name = $self->_get_value($line, $col);
       next if exists $names{$name};
       $names{$name} = undef;
+      push @names, $name;
    }
-   my @names = keys %names;
    $self->_community_names(\@names);
    return 1;
 }

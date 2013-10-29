@@ -22,7 +22,7 @@ ok $in = Bio::Community::IO->new(
 is $in->format, 'unifrac';
 
 
-# Read generic metacommunity
+# Read UniFrac metacommunity
 
 ok $in = Bio::Community::IO->new(
    -file   => test_input_file('unifrac_quantitative.txt'),
@@ -37,7 +37,7 @@ is $meta->get_richness, 6;
 $in->close;
 
 
-# Write generic metacommunity with name
+# Write UniFrac metacommunity with name
 
 $output_file = test_output_file();
 ok $out = Bio::Community::IO->new(
@@ -83,18 +83,18 @@ for my $method (@methods) {
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
-is $community->get_richness, 3;
-is $community->name, 'Sample.2';
+is $community->get_richness, 4;
+is $community->name, 'Sample.1';
 
 ok $community2 = $in->next_community;
 isa_ok $community2, 'Bio::Community';
-is $community2->get_richness, 2;
-is $community2->name, 'Sample 3';
+is $community2->get_richness, 3;
+is $community2->name, 'Sample.2';
 
 ok $community3 = $in->next_community;
 isa_ok $community3, 'Bio::Community';
-is $community3->get_richness, 4;
-is $community3->name, 'Sample.1';
+is $community3->get_richness, 2;
+is $community3->name, 'Sample 3';
 
 is $in->next_community, undef;
 
@@ -102,45 +102,45 @@ $in->close;
 
 ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.4';
-delta_ok $community->get_count($member), 8;
+is $member->desc, 'Sequence.2';
+delta_ok $community->get_count($member), 15;
 ok $member = $community->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.1';
-delta_ok $community->get_count($member), 2;
+is $member->desc, 'Sequence.5';
+delta_ok $community->get_count($member), 4;
 ok $member = $community->get_member_by_rank(3);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.6';
+is $member->desc, 'Sequence 3';
+delta_ok $community->get_count($member), 2;
+ok $member = $community->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.1';
 delta_ok $community->get_count($member), 1;
-is $community->get_member_by_rank(4), undef;
+is $community->get_member_by_rank(5), undef;
 
 ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.6';
-delta_ok $community2->get_count($member), 2;
+is $member->desc, 'Sequence.4';
+delta_ok $community2->get_count($member), 8;
 ok $member = $community2->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.1';
+delta_ok $community2->get_count($member), 2;
+ok $member = $community2->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.6';
 delta_ok $community2->get_count($member), 1;
-is $community2->get_member_by_rank(3), undef;
+is $community2->get_member_by_rank(4), undef;
 
 ok $member = $community3->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.2';
-delta_ok $community3->get_count($member), 15;
-ok $member = $community3->get_member_by_rank(2);
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.5';
-delta_ok $community3->get_count($member), 4;
-ok $member = $community3->get_member_by_rank(3);
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence 3';
+is $member->desc, 'Sequence.6';
 delta_ok $community3->get_count($member), 2;
-ok $member = $community3->get_member_by_rank(4);
+ok $member = $community3->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.1';
 delta_ok $community3->get_count($member), 1;
-is $community3->get_member_by_rank(5), undef;
+is $community3->get_member_by_rank(3), undef;
 
 
 # Write Unifrac quantitative format
@@ -162,52 +162,52 @@ ok $in = Bio::Community::IO->new(
 ), 'Re-read Unifrac quantitative format';
 
 ok $community = $in->next_community;
-is $community->name, 'Sample.2';
+is $community->name, 'Sample.1';
 ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.4';
-delta_ok $community->get_count($member), 8;
+is $member->desc, 'Sequence.2';
+delta_ok $community->get_count($member), 15;
 ok $member = $community->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.1';
-delta_ok $community->get_count($member), 2;
+is $member->desc, 'Sequence.5';
+delta_ok $community->get_count($member), 4;
 ok $member = $community->get_member_by_rank(3);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.6';
+is $member->desc, 'Sequence.3'; # space replaced by underscore
+delta_ok $community->get_count($member), 2;
+ok $member = $community->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.1';
 delta_ok $community->get_count($member), 1;
-is $community->get_member_by_rank(4), undef;
+is $community->get_member_by_rank(5), undef;
 
 ok $community2 = $in->next_community;
-is $community2->name, 'Sample.3'; # space replaced by dot
+is $community2->name, 'Sample.2';
 ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.6';
-delta_ok $community2->get_count($member), 2;
+is $member->desc, 'Sequence.4';
+delta_ok $community2->get_count($member), 8;
 ok $member = $community2->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.1';
+delta_ok $community2->get_count($member), 2;
+ok $member = $community2->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.6';
 delta_ok $community2->get_count($member), 1;
-is $community2->get_member_by_rank(3), undef;
+is $community2->get_member_by_rank(4), undef;
 
 ok $community3 = $in->next_community;
-is $community3->name, 'Sample.1';
+is $community3->name, 'Sample.3'; # space replaced by dot
 ok $member = $community3->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.2';
-delta_ok $community3->get_count($member), 15;
-ok $member = $community3->get_member_by_rank(2);
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.5';
-delta_ok $community3->get_count($member), 4;
-ok $member = $community3->get_member_by_rank(3);
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.3'; # space replaced by underscore
+is $member->desc, 'Sequence.6';
 delta_ok $community3->get_count($member), 2;
-ok $member = $community3->get_member_by_rank(4);
+ok $member = $community3->get_member_by_rank(2);
 isa_ok $member, 'Bio::Community::Member';
 is $member->desc, 'Sequence.1';
 delta_ok $community3->get_count($member), 1;
-is $community3->get_member_by_rank(5), undef;
+is $community3->get_member_by_rank(3), undef;
 
 $in->close;
 
@@ -221,34 +221,34 @@ ok $in = Bio::Community::IO->new(
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
-is $community->get_richness, 3;
-is $community->name, 'Sample.2';
+is $community->get_richness, 4;
+is $community->name, 'Sample.1';
 
 ok $community2 = $in->next_community;
 isa_ok $community2, 'Bio::Community';
-is $community2->get_richness, 1;
-is $community2->name, 'Sample.3';
+is $community2->get_richness, 3;
+is $community2->name, 'Sample.2';
 
 ok $community3 = $in->next_community;
 isa_ok $community3, 'Bio::Community';
-is $community3->get_richness, 4;
-is $community3->name, 'Sample.1';
+is $community3->get_richness, 1;
+is $community3->name, 'Sample.3';
 
 is $in->next_community, undef;
 
 $in->close;
 
 @members = @{$community->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.4', 'Sequence.6'];
-is_deeply [map {$community->get_count($_)} @members], [1, 1, 1];
+is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
+is_deeply [map {$community->get_count($_)} @members], [1,1,1,1];
 
 @members = @{$community2->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.6'];
-is_deeply [map {$community2->get_count($_)} @members], [1];
+is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.4', 'Sequence.6'];
+is_deeply [map {$community2->get_count($_)} @members], [1, 1, 1];
 
 @members = @{$community3->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
-is_deeply [map {$community3->get_count($_)} @members], [1,1,1,1];
+is_deeply [sort map {$_->desc} @members], ['Sequence.6'];
+is_deeply [map {$community3->get_count($_)} @members], [1];
 
 
 # Write Unifrac qualitative format
@@ -270,18 +270,18 @@ ok $in = Bio::Community::IO->new(
 
 ok $community = $in->next_community;
 @members = @{$community->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.4', 'Sequence.6'];
-is_deeply [map {$community->get_count($_)} @members], [1, 1, 1];
+is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
+is_deeply [map {$community->get_count($_)} @members], [1,1,1,1];
 
 ok $community2 = $in->next_community;
 @members = @{$community2->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.6'];
-is_deeply [map {$community2->get_count($_)} @members], [1];
+is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.4', 'Sequence.6'];
+is_deeply [map {$community2->get_count($_)} @members], [1, 1, 1];
 
 ok $community3 = $in->next_community;
 @members = @{$community3->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
-is_deeply [map {$community3->get_count($_)} @members], [1,1,1,1];
+is_deeply [sort map {$_->desc} @members], ['Sequence.6'];
+is_deeply [map {$community3->get_count($_)} @members], [1];
 
 is $in->next_community, undef;
 
@@ -297,28 +297,40 @@ ok $in = Bio::Community::IO->new(
 
 ok $community = $in->next_community;
 isa_ok $community, 'Bio::Community';
-is $community->get_richness, 1;
-is $community->name, 'Sample.2';
+is $community->get_richness, 4;
+is $community->name, 'Sample.1';
 
 ok $community2 = $in->next_community;
 isa_ok $community2, 'Bio::Community';
 is $community2->get_richness, 1;
-is $community2->name, 'Sample.3';
+is $community2->name, 'Sample.2';
 
 ok $community3 = $in->next_community;
 isa_ok $community3, 'Bio::Community';
-is $community3->get_richness, 4;
-is $community3->name, 'Sample.1';
+is $community3->get_richness, 1;
+is $community3->name, 'Sample.3';
 
 is $in->next_community, undef;
 
 $in->close;
 
+ok $member = $community->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.1';
+delta_ok $community->get_count($member), 1;
 ok $member = $community->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.6';
-delta_ok $community->get_count($member), 1;
-is $community->get_member_by_rank(2), undef;
+is $member->desc, 'Sequence.2';
+delta_ok $community->get_count($member), 15;
+ok $member = $community->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.3';
+delta_ok $community->get_count($member), 2;
+ok $member = $community->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.5';
+delta_ok $community->get_count($member), 4;
+is $community->get_member_by_rank(5), undef;
 
 ok $member = $community2->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
@@ -326,23 +338,11 @@ is $member->desc, 'Sequence.6';
 delta_ok $community2->get_count($member), 1;
 is $community2->get_member_by_rank(2), undef;
 
-ok $member = $community3->get_member_by_rank(4);
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.1';
-delta_ok $community3->get_count($member), 1;
 ok $member = $community3->get_member_by_rank(1);
 isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.2';
-delta_ok $community3->get_count($member), 15;
-ok $member = $community3->get_member_by_rank(3);
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.3';
-delta_ok $community3->get_count($member), 2;
-ok $member = $community3->get_member_by_rank(2);
-isa_ok $member, 'Bio::Community::Member';
-is $member->desc, 'Sequence.5';
-delta_ok $community3->get_count($member), 4;
-is $community3->get_member_by_rank(5), undef;
+is $member->desc, 'Sequence.6';
+delta_ok $community3->get_count($member), 1;
+is $community3->get_member_by_rank(2), undef;
 
 
 done_testing();
