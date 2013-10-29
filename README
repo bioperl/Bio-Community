@@ -1,8 +1,8 @@
-Bio-Community version 0.01
+Bio-Community
 ==========================
 
 
-ABOUT BIO-COMMUNITY
+ABOUT
 
 The Bio-Community distribution contains a set of generic, open, object-oriented,
 cross-platform Perl modules to represent and manipulate communities of
@@ -44,7 +44,7 @@ To install the Bio::Community modules, type the following:
    ./Build install       (as administrator)
 
 
-MODULE OVERVIEW
+OVERVIEW
 
 The ./lib/ folder contains the Bio-Community modules, which provide various
 objects and operations:
