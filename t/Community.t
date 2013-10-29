@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Bio::Root::Test;
+use Test::Number::Delta;
 
 use Bio::Community::Member;
 
@@ -138,7 +139,8 @@ is $community->get_member_by_rank(2)->id, 3;
 for my $member (@{$community->get_all_members}) {
    $rel_abs{$member->id} = $community->get_rel_ab($member);
 }
-is_deeply \%rel_abs, { 1 => 53.846153846154, 3 => 46.1538461538463 };
+delta_ok $rel_abs{1}, 53.846153846154;
+delta_ok $rel_abs{3}, 46.1538461538463;
 
 
 # Absolute abundance
@@ -149,7 +151,8 @@ is $community->get_members_abundance, 1.634e5;
 for my $member (@{$community->get_all_members}) {
    $abs_abs{$member->id} = $community->get_abs_ab($member);
 }
-is_deeply \%abs_abs, { 1 => 87984.6153846157, 3 => 75415.3846153849 };
+delta_ok $abs_abs{1}, 87984.6153846157;
+delta_ok $abs_abs{3}, 75415.3846153849;
 
 
 # Named iterators
