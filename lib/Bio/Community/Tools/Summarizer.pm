@@ -455,41 +455,31 @@ method _calc_weights ($count, $weighted_count) {
    return [ $weight ];
 }
 
-
 method _add_groups ($taxa_objs, $taxa_counts, $summary, $use_desc = 0) {
    # Add groups to the summary metacommunity provided
    while (my ($lineage_str, $taxon) = each %$taxa_objs) {
-      my $group_id;
+      # Make a group template
+      my $group_template = Bio::Community::Member->new( );
+      if ($use_desc) {
+         $group_template->desc($taxon);
+         #### TODO: Need to make taxonomy. Ideally instead of re-making it, it should not be lost.
+         #use Bio::Community::TaxonomyUtils qw(split_lineage_string);
+         #my @names = @{split_lineage_string($lineage_str)};
+         #my $taxonomy = $tax_obj->db_handle;
+         #my $tax_obj = $self->taxonomy->get_taxon( -names => \@names );
+         #$group_template->taxon($tax_obj);
+      } else {
+         $group_template->desc($lineage_str);
+         if ($taxon) {
+            $group_template->taxon($taxon);
+         }
+      }
+      # Make a group based on the template and add it to each community
       my $i = 0;
       while (my $summary = $summary->next_community) {
          my $count_info = $taxa_counts->{$lineage_str}->{$i} || next;
          my ($count, $wcount) = @{$count_info};
-         my $group;
-         if (not $group_id) {
-            # Give an ID to this group
-            $group = Bio::Community::Member->new( );
-            $group_id = $group->id;
-         } else {
-            # Re-use same ID
-            $group = Bio::Community::Member->new( -id => $group_id ); #### It is problematic to re-use same ID!!!
-         }
-         if ($use_desc) {
-            $group->desc($taxon);
-
-            #### Need to make taxonomy. Ideally instead of re-making it, it should not be lost.
-            ##use Bio::Community::TaxonomyUtils qw(split_lineage_string);
-            ##my @names = @{split_lineage_string($lineage_str)};
-            ##my $taxonomy = $tax_obj->db_handle;
-            ##my $tax_obj = $self->taxonomy->get_taxon( -names => \@names );
-            ##$group->taxon($tax_obj);
-            ####
-
-         } else {
-            $group->desc($lineage_str);
-            if ($taxon) {
-               $group->taxon($taxon);
-            }
-         }
+         my $group = $group_template->clone;
          $group->weights( $self->_calc_weights($count, $wcount) );
          $summary->add_member($group, $count) if $count > 0;
          $i++;
