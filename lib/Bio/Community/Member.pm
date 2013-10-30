@@ -53,6 +53,7 @@ In the above example, $obj1, $obj2 and $obj3 represent the same member, while
 $obj4 represents a different member, and $obj5 yet another member.
 
 =back
+
 =head1 AUTHOR
 
 Florent Angly L<florent.angly@gmail.com>
@@ -124,9 +125,9 @@ $id_re = qr/$id_re/;
  Usage   : Get or set the ID for the member. If an ID is not provided, a unique
            ID prefixed with 'bc' is generated, e.g. 'bc1', 'bc2', etc. This
            makes it easy to distinguish IDs assigned by Bio::Community::Member
-           from IDs obtained from other sources, e.g. read from a QIIME file.
-           Use of the 'bc' prefix is restricted to the Bio::Community::Member
-           module; refrain from using it yourself.
+           from IDs obtained from other sources, e.g. Greengenes taxa ID or
+           QIIME aritrary OTU ID. Use of the 'bc' prefix is restricted to the
+           L<Bio::Community::Member> module; please refrain from using it yourself.
  Args    : A string
  Returns : A string
 
@@ -144,7 +145,7 @@ has id => (
 
 
 method BUILD ($args) {
-   ## Ensure that a default ID is assigned if needed after object construction
+   # Ensure that a default ID is assigned if needed after object construction
    $self->_auto_id( $self->id );
 }
 
@@ -176,7 +177,7 @@ method _auto_id ($id?, $old_id?) {
 
  Usage   : my $description = $member->desc();
  Function: Get or set a description for this object.
-           See Bio::Community::Role::Described.
+           See L<Bio::Community::Role::Described>.
  Args    : A string
  Returns : A string
 
@@ -184,7 +185,7 @@ method _auto_id ($id?, $old_id?) {
 
  Usage   : my $taxon = $member->taxon();
  Function: Get or set a taxon (or species) for this object.
-           See Bio::Community::Role::Classified.
+           See L<Bio::Community::Role::Classified>.
  Args    : A Bio::Taxon object
  Returns : A Bio::Taxon object
 
@@ -192,7 +193,7 @@ method _auto_id ($id?, $old_id?) {
 
  Usage   : my $seqs = $member->seqs();
  Function: Get or set some sequences for this object.
-           See Bio::Community::Role::Sequenced.
+           See L<Bio::Community::Role::Sequenced>.
  Args    : An arrayref of Bio::SeqI objects
  Returns : An arrayref of Bio::SeqI objects
 
@@ -206,8 +207,8 @@ method _auto_id ($id?, $old_id?) {
            abundance of the genomes because larger genomes contribute
            disproportionalely more reads than small genomes. In such a case, you
            could set the weight to the length of the genome. See
-           Bio::Community::Role::Weighted. Also see get_count() and get_rel_ab()
-           in Bio::Community.
+           L<Bio::Community::Role::Weighted>. Also see get_count() and get_rel_ab()
+           in L<Bio::Community>.
  Args    : An arrayref of positive integers
  Returns : An arrayref of positive integers
 
