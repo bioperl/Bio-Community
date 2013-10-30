@@ -418,27 +418,26 @@ method _group_by_relative_abundance ( $meta, $params ) {
       }
       for my $rel_ab (@$rel_abs) {
          if ( not &$cmp($rel_ab, $thresh) ) {
-            # Do not put this guy in a group
-            $member_to_group--;
+            $member_to_group--; # This member needs no grouping
             last;
          }
       }
 
-      my $i = -1;
+      my $i = 0;
       while (my $community = $meta->next_community) {
-         $i++;
          my $rel_ab = $rel_abs->[$i];
          my $count  = $community->get_count($member);
-         if ($member_to_group) {
-            # Will group member
-            my $wcount = $count / Bio::Community::_prod($member->weights);
-            $taxa_counts->{$desc}->{$i}->[0] += $count;
-            $taxa_counts->{$desc}->{$i}->[1] += $wcount;
-         } else {
-            # Add member as-is, ungrouped
-            my $summary = $summary->get_community_by_name($community->name);
-            $summary->add_member($member, $count) if $count > 0;
+         if ($count > 0) {
+            if ($member_to_group) {
+               # Will group member
+               $taxa_counts->{$desc}->{$i}->[0] += $count; # count
+               $taxa_counts->{$desc}->{$i}->[1] += $count / Bio::Community::_prod($member->weights); # weighted count
+            } else {
+               # Add member as-is, ungrouped
+               $summary->get_community_by_name($community->name)->add_member($member, $count);
+            }
          }
+         $i++;
       }
 
    }
@@ -458,20 +457,21 @@ method _calc_weights ($count, $weighted_count) {
 
 
 method _add_groups ($taxa_objs, $taxa_counts, $summary, $use_desc = 0) {
-   # Add taxonomic groups to the summary metacommunity provided
+   # Add groups to the summary metacommunity provided
    while (my ($lineage_str, $taxon) = each %$taxa_objs) {
       my $group_id;
-      my $i = -1;
+      my $i = 0;
       while (my $summary = $summary->next_community) {
-         $i++;
          my $count_info = $taxa_counts->{$lineage_str}->{$i} || next;
          my ($count, $wcount) = @{$count_info};
          my $group;
-         if ($group_id) {
-            $group = Bio::Community::Member->new( -id => $group_id );
-         } else {
+         if (not $group_id) {
+            # Give an ID to this group
             $group = Bio::Community::Member->new( );
             $group_id = $group->id;
+         } else {
+            # Re-use same ID
+            $group = Bio::Community::Member->new( -id => $group_id ); #### It is problematic to re-use same ID!!!
          }
          if ($use_desc) {
             $group->desc($taxon);
@@ -492,6 +492,7 @@ method _add_groups ($taxa_objs, $taxa_counts, $summary, $use_desc = 0) {
          }
          $group->weights( $self->_calc_weights($count, $wcount) );
          $summary->add_member($group, $count) if $count > 0;
+         $i++;
       }
    }
    return 1;
