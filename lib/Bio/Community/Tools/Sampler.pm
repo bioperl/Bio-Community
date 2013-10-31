@@ -78,9 +78,9 @@ use Method::Signatures;
 use namespace::autoclean;
 use List::Util qw( first );
 use Bio::Community;
-use Math::Random::MT qw(srand rand);
 
 extends 'Bio::Root::Root';
+with 'Bio::Community::Role::PRNG';
 
 
 method BUILD ($args) {
