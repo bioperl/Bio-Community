@@ -63,8 +63,9 @@ objects and operations:
 
 The ./scripts/ folder contains scripts. All these scripts use the Bio::Community
 modules and are useful for reading or writing files, rarefying, 
-They are good examples of how Bio::Community moudles can be used as building
-blocks for more complex programs.
+They are good examples of how Bio::Community modules can be used as building
+blocks for more complex programs. For convenience, all scripts are prefixed with
+'bc_'.
 
 The ./t/ folder contains unit tests to ensure the proper functioning of the
 Bio-Community mocules. The ./t/data/ further contains data files used for the
