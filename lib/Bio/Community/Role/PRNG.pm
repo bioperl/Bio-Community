@@ -68,6 +68,7 @@ package Bio::Community::Role::PRNG;
 use Moose::Role;
 use namespace::autoclean;
 use Method::Signatures;
+use Bio::Community::Types;
 use Math::Random::MT;
 
 

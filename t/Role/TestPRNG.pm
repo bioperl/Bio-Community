@@ -3,7 +3,6 @@ package t::Role::PRNG;
 use Moose;
 use Method::Signatures;
 
-extends 'Bio::Community::Member';
 with 'Bio::Community::Role::PRNG';
 
 
