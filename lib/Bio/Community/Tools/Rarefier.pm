@@ -90,13 +90,13 @@ package Bio::Community::Tools::Rarefier;
 use Moose;
 use MooseX::NonMoose;
 use MooseX::StrictConstructor;
-use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Meta;
 use Bio::Community::Tools::Sampler;
 use Bio::Community::Meta::Beta;
 use POSIX;
 use List::Util qw(min);
+use Method::Signatures;
 
 extends 'Bio::Root::Root';
 
