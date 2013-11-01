@@ -18,15 +18,17 @@ Bio::Community::Role::PRNG - Role for objects that use a pseudo-random number ge
   use Moose;
   with 'Bio::Community::Role::PRNG';
 
-  # Use the seed() method as needed
+  # Use set_seed(), get_seed() and rand() as needed
   # ...
 
   1;
 
 =head1 DESCRIPTION
 
-This role provides the capability to add a taxonomic classification (Bio::Taxon
-object) to objects of the class that consumes this role.
+This role provides the capability to generate random numbers using a specified
+or automatically determined seed. This module uses the superior Mersenne-Twister
+algorithm provided by the L<Math::Random::MT> module to draw uniformly
+distributed random numbers.
 
 =head1 AUTHOR
 
@@ -60,30 +62,69 @@ methods. Internal methods are usually preceded with a _
 
 =cut
 
+
 package Bio::Community::Role::PRNG;
 
 use Moose::Role;
 use namespace::autoclean;
-use Math::Random::MT qw(srand rand);
+use Method::Signatures;
+use Math::Random::MT;
 
 
-##=head2 get_seed, set_seed
+has _prng  => (
+   is => 'rw',
+   #isa => 'Math::Random::MT',
+   required => 0,
+   default => undef,
+   default => sub { Math::Random::MT->new( shift->seed ) },
+   init_arg => undef,
+   lazy => 1,
+   predicate => '_has_prng',
+);
 
-## Usage   : $sampler->set_seed();
-## Function: Get or set the seed to use when generating pseudo-random numbers.
-## Args    : Integer
-## Returns : Integer
 
-##=cut
+has seed => (
+   is => 'rw',
+   isa => 'Maybe[PositiveInt]',
+   required => 0,
+   default => undef,
+   init_arg => '-seed',
+   lazy => 1,
+);
 
-##has seed => (
-##   is => 'rw',
-##   isa => 'Maybe[Bio::Taxon]',
-##   required => 0,
-##   default => undef,
-##   init_arg => '-seed',
-##   lazy => 1,
-##);
+
+=head2 get_seed, set_seed
+
+ Usage   : $prng->set_seed(1234513451);
+ Function: Get or set the seed used to generate the random numbers.
+ Args    : Positive integer
+ Returns : Positive integer
+
+=cut
+
+method get_seed {
+   $self->_prng->get_seed;
+}
+
+
+method set_seed ($int) {
+   $self->_prng->set_seed($int);
+}
+
+
+=head2 rand
+
+ Usage   : my $num = $prng->rand($max);
+ Function: Generate a number uniformly distributed in [0, $max)
+ Args    : Number
+ Returns : Number
+
+=cut
+
+method rand ($num?) {
+   $self->_prng->rand($num);
+}
+
 
 
 1;
