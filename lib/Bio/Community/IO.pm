@@ -189,6 +189,7 @@ use Moose;
 use Moose::Util qw/does_role/;
 use MooseX::NonMoose;
 use namespace::autoclean;
+use Module::Runtime;
 use Method::Signatures;
 use Bio::Community;
 use Bio::Community::Meta;
@@ -235,7 +236,7 @@ func new ($class, @args) {
 
    # Use the real driver class here
    $real_class = __PACKAGE__.'::Driver::'.$format;
-   Class::MOP::load_class($real_class);
+   Module::Runtime::use_module($real_class);
    $class->throw("Module $real_class does not implement a community IO stream")
        unless $real_class->does('Bio::Community::Role::IO');
 

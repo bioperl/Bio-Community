@@ -30,17 +30,18 @@ my $build = Module::Build->new(
                              'JSON::XS'                     =>  0, # biom format
                              'Hash::Util'                   =>  0,
                              'Math::Random::MT'             =>  0, # PRNG role
+                             'Module::Runtime'              =>  0, # load IO drivers
                              'Method::Signatures'           =>  0,
                              'Moose'                        =>  0,
-                             'MooseX::NonMoose'             =>  0, # 0.24 works well with Moose 2.1005 but not with 2.1103-TRIAL
+                             'MooseX::NonMoose'             =>  0,
                              'MooseX::StrictConstructor'    =>  0,
                              'Parallel::Iterator'           =>  0, # community member iteration
-                             'PerlIO::eol'                  =>  0, # portable line ending in Bio::Root::IO
+                             'PerlIO::eol'                  =>  0, # IO portable line endings
                              'Scalar::Util'                 =>  0,
                              'Tie::IxHash'                  =>  0, # metacommunity
                             },
     recommends           => {
-                             #'Clone::Fast'                  =>  0, # C bindings for Bio::Root::clone(). Broken in 0.97?!
+                             #'Clone::Fast'                 =>  0, # C bindings for Bio::Root::clone(). Broken in 0.97?!
                              'Math::BigInt::GMP'            =>  0, # C bindings for arithmetic
                             },
     script_files         => [
