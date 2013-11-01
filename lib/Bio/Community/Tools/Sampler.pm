@@ -77,19 +77,10 @@ use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
-use List::Util qw( first );
 use Bio::Community;
 
 extends 'Bio::Root::Root';
 with 'Bio::Community::Role::PRNG';
-
-
-method BUILD ($args) {
-   # Prepare the CDF that we will be sampling from after new()
-   my ($cdf, $members) = $self->_calc_cdf();
-   $self->_cdf( $cdf );
-   $self->_members( $members );
-}
 
 
 =head2 community
@@ -114,7 +105,7 @@ has _cdf => (
    is => 'rw',
    isa => 'ArrayRef', # ArrayRef[PositiveNum]
    lazy => 1,
-   default => sub{ [] },
+   default => sub { shift->_init_cdf( ) },
    init_arg => undef,
 );
 
@@ -194,9 +185,10 @@ method get_rand_community ( StrictlyPositiveInt $total_count = 1 ) {
 }
 
 
-method _calc_cdf () {
+method _init_cdf () {
    # Sort the members of the community by decreasing rank and calculate the
-   # cumulative density function of their relative abundance
+   # cumulative density function of their relative abundance. Store the
+   # resulting CDF and members;
    my $community = $self->community;
 
    my @cdf;
@@ -212,7 +204,9 @@ method _calc_cdf () {
       $cdf[$i] += $cdf[$i-1];
    }
 
-   return \@cdf, \@members;
+   $self->_cdf( \@cdf );
+   $self->_members( \@members );
+   return \@cdf;
 }
 
 
