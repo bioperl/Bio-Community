@@ -76,14 +76,16 @@ has _prng  => (
    #isa => 'Math::Random::MT',
    required => 0,
    default => undef,
-   default => sub { Math::Random::MT->new( shift->seed ) },
+   default => sub { Math::Random::MT->new( shift->_seed ) },
    init_arg => undef,
    lazy => 1,
    predicate => '_has_prng',
 );
 
 
-has seed => (
+# The -seed constructor
+
+has _seed => (
    is => 'rw',
    isa => 'Maybe[PositiveInt]',
    required => 0,
