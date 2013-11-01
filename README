@@ -15,8 +15,7 @@ INSTALLATION & DEPENDENCIES
 The Bio-Community modules require Perl 5.10 or above. Additionally, these Perl
 modules are required and will be installed during the installation procedure:
 
-  BioPerl version > 1.6.910
-  Bio-Root 1.7 (bundled here)
+  BioPerl version >= 1.6.923
   DateTime
   Getopt::Euclid
   JSON::XS
