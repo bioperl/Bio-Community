@@ -64,6 +64,7 @@ methods. Internal methods are usually preceded with a _
  Function: Create a new Bio::Community::Tool::Sampler object
  Usage   : my $sampler = Bio::Community::Tool::Sampler->new( );
  Args    : -community: See community().
+           -seed     : See set_seed().
  Returns : a new Bio::Community::Tools::Sampler object
 
 =cut
@@ -127,6 +128,16 @@ has _members => (
 );
 
 
+=head2 get_seed, set_seed
+
+ Usage   : $sampler->set_seed(1234513451);
+ Function: Get or set the seed used to pick the random members.
+ Args    : Positive integer
+ Returns : Positive integer
+
+=cut
+
+
 =head2 get_rand_member
 
  Function: Get a random member from a community (sample with replacement).
@@ -138,7 +149,7 @@ has _members => (
 
 method get_rand_member () {
    # Pick a random member based on the community's cdf
-   my $rand_pick = rand();
+   my $rand_pick = $self->rand();
    my $cdf = $self->_cdf;
    my $index = 0;
    while (1) {

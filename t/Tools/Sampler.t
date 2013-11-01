@@ -25,16 +25,26 @@ $community->add_member( $member1, 1);
 $community->add_member( $member2, 1);
 $community->add_member( $member3, 1);
 
-ok $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
+ok $sampler = Bio::Community::Tools::Sampler->new(
+   -community => $community,
+   -seed      => 12537409,
+);
 isa_ok $sampler, 'Bio::Community::Tools::Sampler';
 
-$count = 100;
+%descs = ();
+$count = 999;
 for (1 .. $count) {
    ok $rand_member = $sampler->get_rand_member;
    isa_ok $rand_member, 'Bio::Community::Member';
-   $descs{$rand_member->desc} = undef;
+   $descs{$rand_member->desc}++;
 }
-is_deeply \%descs, { 'A' => undef, 'B' => undef, 'C' => undef };
+
+cmp_ok( $descs{'A'}, '>=', 300 ); # should be 333
+cmp_ok( $descs{'A'}, '<=', 366 );
+cmp_ok( $descs{'B'}, '>=', 300 ); # should be 333
+cmp_ok( $descs{'B'}, '<=', 366 );
+cmp_ok( $descs{'C'}, '>=', 300 ); # should be 333
+cmp_ok( $descs{'C'}, '<=', 366 );
 
 
 # Uneven community
@@ -44,14 +54,19 @@ $community->add_member( $member1, 100);
 $community->add_member( $member2, 10);
 $community->add_member( $member3, 1);
 
-ok $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
+ok $sampler = Bio::Community::Tools::Sampler->new(
+   -community => $community,
+   -seed      => 72904653,
+);
 
+%descs = ();
 $count = 1000;
 for (1 .. $count) {
    ok $rand_member = $sampler->get_rand_member;
    isa_ok $rand_member, 'Bio::Community::Member';
    $descs{$rand_member->desc}++;
 }
+
 cmp_ok( $descs{'A'}, '>=',  500 ); # should be 1000
 cmp_ok( $descs{'A'}, '<=', 1500 );
 cmp_ok( $descs{'B'}, '>=',   50 ); # should be  100
