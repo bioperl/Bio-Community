@@ -86,7 +86,7 @@ use namespace::autoclean;
 use Bio::Community::Member;
 use Parallel::Iterator qw( iterate );
 
-our $VERSION = '0.001000'; # 0.1.0
+our $VERSION = '0.001001'; # 0.1.1
 
 extends 'Bio::Root::Root';
 
