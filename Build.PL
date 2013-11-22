@@ -24,7 +24,7 @@ my $build = Module::Build->new(
                             },
     requires             => {
                              'perl'                         => '5.10.0',
-                             'Bio::Root::Version'           => '1.006923',
+                             'Bio::Root::Version'           => '1.006922',
                              'DateTime'                     =>  0,
                              'Getopt::Euclid'               => '0.4.3',
                              'JSON::XS'                     =>  0, # biom format
