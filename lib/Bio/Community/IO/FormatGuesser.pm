@@ -207,7 +207,7 @@ method guess () {
    # Prepare input
    my ($in, $original_pos);
    {
-      local $Bio::Root::IO::HAS_EOL = 1;
+      ####local $Bio::Root::IO::HAS_EOL = 1; # Need Bioperl-dev (>1.6.922) for this to work
       if ($self->_has_text) {
          $in = Bio::Root::IO->new(-string => $self->text);
       } elsif ($self->_has_file) {
