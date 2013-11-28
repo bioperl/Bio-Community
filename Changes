@@ -1,5 +1,8 @@
 Revision history for Perl extension Bio::Community.
 
+0.1.2 2013-11-28
+  - Fixed code that does not work with released BioPerl version
+
 0.1.1 2013-11-22
   - Use a released version of BioPerl
 
