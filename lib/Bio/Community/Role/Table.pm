@@ -317,6 +317,19 @@ method _read_table () {
    my $file_offset = 0;
    my $num_eol_chars;
 
+   # In Windows, text files have '\r\n' as line separator, but when reading in
+   # text mode Perl will only show the '\n'. This means that for a line "ABC\r\n",
+   # "length $_" will report 4 although the line is 5 bytes in length.
+   # We assume that all lines have the same line separator and only read current line.
+   my $fh         = $self->_fh;
+   my $init_pos   = tell($fh);
+   my $init_line  = $.;
+   my $curr_line  = <$fh>;
+   my $pos_diff   = tell($fh) - $init_pos;
+   my $correction = $pos_diff - length $curr_line;
+   $fh->input_line_number($init_line); # Rewind line number $.
+   seek $fh, $init_pos, 0;             # Rewind position to proceed to read the file
+
    while (my $line = $self->_readline(-raw => 1)) { # _readline is from Bio::Root::IO
 
       next if $line =~ m/^\s*$/;
@@ -324,10 +337,10 @@ method _read_table () {
       if (not defined $num_eol_chars) {
          # Count line length
          $line =~ m/([\r\n]?\n)$/; # last line may not match
-         $num_eol_chars = length($1||'');
+         $num_eol_chars = length($1||'') + $correction;
       }
 
-      my $line_length = length $line;
+      my $line_length = length($line) + $correction;
 
       # Do not index the line if it is before or after the table
       if ($. < $start_line) {
@@ -351,7 +364,7 @@ method _read_table () {
          my $match = index($line, $delim, $line_offset);
          if ($match == -1) {
             # Reached end of line. Register it and move on to next line.
-            $match = length( $line ) - $num_eol_chars;
+            $match = length( $line ) + $correction - $num_eol_chars;
             push @matches, $match + $file_offset;
             $file_offset += $line_length;
             last;
