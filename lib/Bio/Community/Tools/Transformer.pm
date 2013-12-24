@@ -48,7 +48,7 @@ L<https://redmine.open-bio.org/projects/bioperl/>
 
 =head1 COPYRIGHT
 
-Copyright 2011,2012,2013 by Florent Angly <florent.angly.com>
+Copyright 2011,2012,2013 by Florent Angly <florent.angly@gmail.com>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
