@@ -80,6 +80,7 @@ methods. Internal methods are usually preceded with a _
  Args    : -metacommunity: see metacommunity()
            -repetitions  : see repetitions()
            -sample_size  : see sample_size()
+           -seed         : see set_seed().
  Returns : a new Bio::Community::Tools::Rarefier object
 
 =cut
@@ -99,6 +100,7 @@ use List::Util qw(min);
 use Method::Signatures;
 
 extends 'Bio::Root::Root';
+with 'Bio::Community::Role::PRNG';
 
 
 =head2 metacommunity
@@ -191,6 +193,16 @@ has repetitions => (
    lazy => 1,
    init_arg => '-repetitions',
 );
+
+
+=head2 get_seed, set_seed
+
+ Usage   : $sampler->set_seed(1234513451);
+ Function: Get or set the seed used to pick the random members.
+ Args    : Positive integer
+ Returns : Positive integer
+
+=cut
 
 
 =head2 verbose
@@ -361,7 +373,10 @@ method _bootstrap (Bio::Community $community) {
    # Set 'use_weights' to sample from counts (similar to unweighted relative abundances)
    my $use_weights = $community->use_weights;
    $community->use_weights(0);
-   my $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
+   my $sampler = Bio::Community::Tools::Sampler->new(
+      -community => $community,
+      -seed      => $self->get_seed,
+   );
 
    my $overall = Bio::Community->new(
       -name        => 'overall',

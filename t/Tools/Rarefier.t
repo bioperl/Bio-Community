@@ -101,6 +101,7 @@ ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -repetitions   => 10,
    -sample_size   => 1000,
    -verbose       => 1,
+   -seed          => 12537409,
 );
 
 is $rarefier->get_avg_meta->get_communities_count, 2;
@@ -155,6 +156,7 @@ ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -threshold     => 1E-3,
    -sample_size   => 1000,
+   -seed          => 12537409,
 );
 is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_repr_meta->get_communities_count, 2;
@@ -206,6 +208,7 @@ ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -threshold     => 1E-3,
    -repetitions   => 10,
+   -seed          => 12537409,
 );
 is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_avg_meta->get_communities_count, 2;
@@ -258,6 +261,7 @@ ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -repetitions   => 50,
    -sample_size   => 4,
+   -seed          => 12537409,
 );
 is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_avg_meta->get_communities_count, 2;
@@ -314,6 +318,7 @@ ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -repetitions   => 50,
    -sample_size   => 4,
+   -seed          => 12537409,
 );
 is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_avg_meta->get_communities_count, 2;
@@ -615,6 +620,7 @@ ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
    -repetitions   => 10,
    -sample_size   => 1000,
+   -seed          => 12537409,
 );
 
 is $rarefier->get_avg_meta->get_communities_count, 2;
