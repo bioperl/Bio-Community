@@ -324,7 +324,7 @@ method _read_table () {
    my $fh         = $self->_fh;
    my $init_pos   = tell($fh);
    my $init_line  = $.;
-   my $curr_line  = <$fh>;
+   my $curr_line  = <$fh> || '';
    my $pos_diff   = tell($fh) - $init_pos;
    my $correction = $pos_diff - length $curr_line;
    $fh->input_line_number($init_line); # Rewind line number $.
