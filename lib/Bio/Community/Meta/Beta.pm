@@ -133,6 +133,11 @@ has metacommunity => (
             * hellinger: like the euclidean distance, but constrained between 0
                 and 1
             * bray-curtis: the Bray-Curtis dissimilarity index, between 0 and 1
+            * jaccard: the Jaccard similarity index (between 0 and 1), i.e. the
+                fraction of species shared, relative to the richness of the
+                metacommunity. Note: this is the opposite of a beta-diversity
+                measure: the higher the fraction of species shared, the smaller
+                the beta-diversity.
             * shared: percentage of species shared (between 0 and 100), relative
                 to the least rich community. Note: this is the opposite
                 of a beta-diversity measure: the higher the percent of 
@@ -198,6 +203,8 @@ method _get_pairwise_beta ($meta) {
       $val = $self->_hellinger($meta);
    } elsif ($type eq 'bray-curtis') {
       $val = $self->_braycurtis($meta);
+   } elsif ($type eq 'jaccard') {
+      $val = $self->_jaccard($meta);
    } elsif ($type eq 'shared') {
       $val = $self->_shared($meta);
    } elsif ($type eq 'permuted') {
@@ -314,6 +321,25 @@ method _braycurtis ($meta) {
       $sumdiff += min($abundance1, $abundance2);
    }
    return 1 - $sumdiff;
+}
+
+
+method _jaccard ($meta) {
+   # Calculate the Jaccard _similarity_ index J (fraction of spp shared):
+   #    J = #spp in common / total #spp
+   my ($community1, $community2) = @{$meta->get_all_communities};
+   my ($num_shared, $num_total) = (0, 0);
+   for my $member (@{$meta->get_all_members}) {
+      my $ab1 = $community1->get_rel_ab($member);
+      my $ab2 = $community2->get_rel_ab($member);
+      if ( ($ab1 > 0) || ($ab2 > 0) ) {
+         $num_total++;
+         if ( ($ab1 > 0) && ($ab2 > 0) ) {
+            $num_shared++;
+         }
+      }
+   }
+   return ($num_total > 0) ? ($num_shared / $num_total) : 0;
 }
 
 
@@ -448,7 +474,6 @@ method _unifrac ($meta, $tree) {
 # TODO:
 # Many more beta diversity indices to calculate:
 #    Unifrac
-#    Jaccard
 #    ...
 #######
 

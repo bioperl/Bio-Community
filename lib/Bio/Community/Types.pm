@@ -9,11 +9,11 @@
 
 =head1 NAME
 
-Bio::Community::Types - Data types
+Bio::Community::Types - Data type definitions
 
 =head1 DESCRIPTION
 
-This module defineds of useful data types for use in modules that use Moose.
+This module defines useful data types for use in Moose-based modules.
 
 =head1 AUTHOR
 
@@ -103,7 +103,7 @@ subtype 'AbundanceRank'
 
 # Type of distance
 my @DistanceType = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger
-                       bray-curtis shared permuted maxiphi unifrac);
+                       bray-curtis jaccard shared permuted maxiphi unifrac);
 subtype 'DistanceType'
    => as enum( \@DistanceType )
    => message { _gen_err_msg(\@DistanceType, $_) };
