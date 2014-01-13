@@ -133,11 +133,9 @@ has metacommunity => (
             * hellinger: like the euclidean distance, but constrained between 0
                 and 1
             * bray-curtis: the Bray-Curtis dissimilarity index, between 0 and 1
-            * jaccard: the Jaccard similarity index (between 0 and 1), i.e. the
-                fraction of species shared, relative to the richness of the
-                metacommunity. Note: this is the opposite of a beta-diversity
-                measure: the higher the fraction of species shared, the smaller
-                the beta-diversity.
+            * jaccard: the Jaccard distance (between 0 and 1), i.e. the
+                fraction of non-shared species, relative to the richness of the
+                metacommunity.
             * shared: percentage of species shared (between 0 and 100), relative
                 to the least rich community. Note: this is the opposite
                 of a beta-diversity measure: the higher the percent of 
@@ -325,8 +323,8 @@ method _braycurtis ($meta) {
 
 
 method _jaccard ($meta) {
-   # Calculate the Jaccard _similarity_ index J (fraction of spp shared):
-   #    J = #spp in common / total #spp
+   # Calculate the Jaccard distance dJ (1 - fraction of spp shared):
+   #    J = 1 - (#spp in common / total #spp)
    my ($community1, $community2) = @{$meta->get_all_communities};
    my ($num_shared, $num_total) = (0, 0);
    for my $member (@{$meta->get_all_members}) {
@@ -339,7 +337,7 @@ method _jaccard ($meta) {
          }
       }
    }
-   return ($num_total > 0) ? ($num_shared / $num_total) : 0;
+   return ($num_total > 0) ? (1 - $num_shared / $num_total) : 1;
 }
 
 
