@@ -21,8 +21,8 @@ $| = 1;
 
 =head1 NAME
 
-bc_correct_mis_assignments - Try to fix incorrect taxonomic assignments, based
-on a reference community
+bc_correct_mis_assignments - Try fixing incorrect taxonomic assignments, using
+a reference community
 
 =head1 SYNOPSIS
 
@@ -271,7 +271,7 @@ func calc_tax_distances( $missings, $candidates ) {
 
    # Get the names of species that have an ancestor
    my $names = { map { $taxonomy->get_taxon($_)->scientific_name => undef}
-                     ( keys $taxonomy->{ancestors}                       ) };
+                     ( keys %{$taxonomy->{ancestors}}                    ) };
 
    my $tree = $taxonomy->get_tree(keys %$names);
 
