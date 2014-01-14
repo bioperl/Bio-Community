@@ -9,7 +9,7 @@
 
 =head1 NAME
 
-Bio::Community::Meta::Beta - Beta-diversity or distance separating communities
+Bio::Community::Meta::Beta - Beta diversity or distance separating communities
 
 =head1 SYNOPSIS
 
@@ -44,7 +44,7 @@ Since the relative abundance of community members is not always proportional to
 member counts (see weights() in Bio::Community::Member and use_weights() in
 Bio::Community), the beta diversity measured here are always based on relative
 abundance (as a fractional number between 0 and 1, not as a percentage), even
-for beta-diversity metrics that are usually based on number of observations
+for beta diversity metrics that are usually based on number of observations
 (counts).
 
 =head1 AUTHOR
@@ -124,7 +124,7 @@ has metacommunity => (
 
 =head2 type
 
- Function: Get or set the beta-diversity metric to calculate.
+ Function: Get or set the beta diversity metric to calculate.
  Usage   : my $type = $beta->type;
  Args    : String for the desired type of beta diversity
             * 1-norm: the 1-norm distance
@@ -141,14 +141,14 @@ has metacommunity => (
                 in the metacommunity.
             * shared: percentage of species shared (between 0 and 100), relative
                 to the least rich community. Note: this is the opposite
-                of a beta-diversity measure: the higher the percent of 
-                species shared, the smaller the beta-diversity.
-            * permuted: a beta-diversity measure between 0 and 100, representing
+                of a beta diversity measure since the higher the percent of
+                species shared, the smaller the beta diversity.
+            * permuted: a beta diversity measure between 0 and 100, representing
                 the percentage of the dominant species in the first community
                 with a permuted abundance rank in the second community. As a
                 special case, when no species are shared (and the percentage
                 permuted is meaningless), undef is returned.
-            * maxiphi: a beta-diversity measure between 0 and 1, based on the 
+            * maxiphi: a beta diversity measure between 0 and 1, based on the 
                 percentage of species shared and the percentage of top species
                 permuted (that have had a change in abundance rank).
 
@@ -168,7 +168,7 @@ has type => (
 
 =head2 get_beta
 
- Function: Calculate the beta-diversity between two communities. The input
+ Function: Calculate the beta diversity between two communities. The input
            metacommunity should contain exactly two communities. The distance is
            calculated based on the relative abundance (in %) of the members (not
            their counts).
