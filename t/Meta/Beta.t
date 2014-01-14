@@ -28,6 +28,7 @@ ok $beta = Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'e
 isa_ok $beta, 'Bio::Community::Meta::Beta';
 
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => '2-norm'        )->get_beta, 0, 'Identical communities';
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'euclidean'     )->get_beta, 0; # synonym for euclidean
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => '1-norm'        )->get_beta, 0;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'infinity-norm' )->get_beta, 0;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0;

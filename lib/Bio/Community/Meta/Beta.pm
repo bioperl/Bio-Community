@@ -192,36 +192,10 @@ method _get_pairwise_beta ($meta) {
       $self->throw("Cannot calculate pairwise beta diversity because the ".
          "metacommunity contains $num_comm communities. Expected exactly two.");
    }
-   my $type = $self->type;
-   my $val;
-   if ($type eq '1-norm') {
-      $val = $self->_pnorm($meta, 1);
-   } elsif ( ($type eq '2-norm') || ($type eq 'euclidean') ) {
-      $val = $self->_pnorm($meta, 2);
-   } elsif ($type eq 'infinity-norm') {
-      $val = $self->_infnorm($meta);
-   } elsif ($type eq 'hellinger') {
-      $val = $self->_hellinger($meta);
-   } elsif ($type eq 'bray-curtis') {
-      $val = $self->_braycurtis($meta);
-   } elsif ($type eq 'jaccard') {
-      $val = $self->_jaccard($meta);
-   } elsif ($type eq 'sorensen') {
-      $val = $self->_sorensen($meta);
-   } elsif ($type eq 'shared') {
-      $val = $self->_shared($meta);
-   } elsif ($type eq 'permuted') {
-      $val = $self->_permuted($meta);
-   } elsif ($type eq 'maxiphi') {
-      $val = $self->_maxiphi($meta);
-   } elsif ($type eq 'unifrac') {
-      my $tree;
-      $val = $self->_unifrac($meta);
-   } else {
-      $self->throw("Invalid beta diversity type '$type'.");
-   }
-   return $val;
-}
+   my $metric = '_'.$self->type;
+   $metric =~ s/-/_/g;
+   return $self->$metric($meta);
+};
 
 
 =head2 get_all_beta
@@ -269,7 +243,7 @@ method get_all_beta () {
 }
 
 
-method _pnorm ($meta, $power) {
+method _p_norm ($meta, $power) {
    # Calculate the p-norm. If power is 1, this is the 1-norm. If power is 2,
    # this is the 2-norm (a.k.a. euclidean distance).
    my ($community1, $community2) = @{$meta->get_all_communities};
@@ -284,7 +258,23 @@ method _pnorm ($meta, $power) {
 }
 
 
-method _infnorm ($meta) {
+method _1_norm ($meta) {
+   # Calculate the 1-norm
+   return $self->_p_norm($meta, 1);
+}
+
+
+method _2_norm ($meta) {
+   # Calculate the 2-norm
+   return $self->_p_norm($meta, 2);
+}
+
+
+# The euclidean distance is the same as the 2-norm
+*_euclidean = \&_2_norm;
+
+
+method _infinity_norm ($meta) {
    # Calculate the infinity-norm.
    my ($community1, $community2) = @{$meta->get_all_communities};
    my $val = 0;
@@ -302,11 +292,11 @@ method _infnorm ($meta) {
 
 method _hellinger ($meta) {
    # Calculate the Hellinger distance.
-   return $self->_pnorm($meta, 2) / sqrt(2);
+   return $self->_p_norm($meta, 2) / sqrt(2);
 }
 
 
-method _braycurtis ($meta) {
+method _bray_curtis ($meta) {
    # Calculate the Bray-Curtis dissimilarity index BC:
    #    BC = 1 - sum( min(r_i, r_j) )
    # where r_i and r_j are the relative abundance (fractional) for species in
