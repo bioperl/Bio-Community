@@ -37,8 +37,8 @@ The more different communities are, the larger their beta diversity. Often,
 beta diversity metrics are actually a distance measurement.
 
 Several types of beta diversity metrics are available: 1-norm, 2-norm (euclidean),
-and infinity-norm. They consider the communities as a n-dimensional space, where
-n is the total number of unique members across the communities.
+and infinity-norm, Hellinger distance, Bray-Curtis dissimilarity, Jaccard
+distance, Sørensen dissimilarity and MaxiPhi index.
 
 Since the relative abundance of community members is not always proportional to
 member counts (see weights() in Bio::Community::Member and use_weights() in
@@ -128,14 +128,17 @@ has metacommunity => (
  Usage   : my $type = $beta->type;
  Args    : String for the desired type of beta diversity
             * 1-norm: the 1-norm distance
-            * 2-norm (or euclidean): the euclidean distance
+            * 2-norm (euclidean): the euclidean distance
             * infinity-norm: the infinity-norm distance
             * hellinger: like the euclidean distance, but constrained between 0
                 and 1
             * bray-curtis: the Bray-Curtis dissimilarity index, between 0 and 1
             * jaccard: the Jaccard distance (between 0 and 1), i.e. the
-                fraction of non-shared species, relative to the richness of the
-                metacommunity.
+                fraction of non-shared species relative to the overall richness
+                of the metacommunity.
+            * sorensen: the Sørensen dissimilarity (between 0 and 1), i.e. the
+                fraction of non-shared species relative to the average richness
+                in the metacommunity.
             * shared: percentage of species shared (between 0 and 100), relative
                 to the least rich community. Note: this is the opposite
                 of a beta-diversity measure: the higher the percent of 
@@ -147,7 +150,7 @@ has metacommunity => (
                 permuted is meaningless), undef is returned.
             * maxiphi: a beta-diversity measure between 0 and 1, based on the 
                 percentage of species shared and the percentage of top species
-                permuted (that have had a change in abundance rank)
+                permuted (that have had a change in abundance rank).
 
  Returns : String for the desired type of beta diversity
 
@@ -203,6 +206,8 @@ method _get_pairwise_beta ($meta) {
       $val = $self->_braycurtis($meta);
    } elsif ($type eq 'jaccard') {
       $val = $self->_jaccard($meta);
+   } elsif ($type eq 'sorensen') {
+      $val = $self->_sorensen($meta);
    } elsif ($type eq 'shared') {
       $val = $self->_shared($meta);
    } elsif ($type eq 'permuted') {
@@ -323,8 +328,8 @@ method _braycurtis ($meta) {
 
 
 method _jaccard ($meta) {
-   # Calculate the Jaccard distance dJ (1 - fraction of spp shared):
-   #    J = 1 - (#spp in common / total #spp)
+   # Calculate the Jaccard distance dJ:
+   #    dJ = 1 - (#spp in common / total richness)
    my ($community1, $community2) = @{$meta->get_all_communities};
    my ($num_shared, $num_total) = (0, 0);
    for my $member (@{$meta->get_all_members}) {
@@ -338,6 +343,23 @@ method _jaccard ($meta) {
       }
    }
    return ($num_total > 0) ? (1 - $num_shared / $num_total) : 1;
+}
+
+
+method _sorensen ($meta) {
+   # Calculate the Sørensen dissimilarity dS:
+   #    dS = 1 - (#spp in common / average richness)
+   #       = 1 - 2* #spp in common / (richness A + richness B)
+   my ($community1, $community2) = @{$meta->get_all_communities};
+   my $num_shared = 0;
+   for my $member (@{$meta->get_all_members}) {
+      if ( ($community1->get_rel_ab($member) > 0) &&
+           ($community2->get_rel_ab($member) > 0) ) {
+         $num_shared++;
+      }
+   }
+   my $richness_sum = $community1->get_richness + $community2->get_richness;
+   return ($richness_sum > 0) ? 1 - (2 * $num_shared / $richness_sum) : 1;
 }
 
 

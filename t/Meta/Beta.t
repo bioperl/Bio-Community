@@ -33,6 +33,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 0;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 0;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 0;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 100;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, 0;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 0;
@@ -58,6 +59,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0.3138566;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 0.3523077;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 0.0000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 0.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 100.00000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, 0.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 0.0000000;
@@ -83,6 +85,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0.3266667;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 0.3656410;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 0.0000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 0.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 100.00000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, 100.00000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 0.5000000;
@@ -108,6 +111,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0.3219226;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 0.3589744;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 0.0000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 0.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 100.00000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, 100.00000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 0.5000000;
@@ -133,6 +137,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0.3187207;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 0.3589744;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 0.0000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 0.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 100.00000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, 66.666667;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 0.3333333;
@@ -158,6 +163,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0.3516165;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 0.4292308;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 0.5000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 0.3333333;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 66.666666;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, 0.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 0.3333333;
@@ -184,6 +190,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0.3943471;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 0.5092308;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 0.6000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 0.4285714;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 66.666666;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, 0.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 0.3333333;
@@ -215,6 +222,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0.5256415;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 0.7475860;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 0.5000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 0.3333333;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 80.000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, 80.000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 0.5200000;
@@ -240,6 +248,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 0.6602589;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 1.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 1.0000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 1.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 0.0000000;
 is       Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, undef;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 1.0000000;
@@ -261,6 +270,7 @@ delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'inf
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'hellinger'     )->get_beta, 1.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'bray-curtis'   )->get_beta, 1.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'jaccard'       )->get_beta, 1.0000000;
+delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'sorensen'      )->get_beta, 1.0000000;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'shared'        )->get_beta, 0.0000000;
 is       Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'permuted'      )->get_beta, undef;
 delta_ok Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'maxiphi'       )->get_beta, 1.0000000;
