@@ -126,13 +126,9 @@ has metacommunity => (
 
  Function: Get or set the beta diversity metric to calculate.
  Usage   : my $type = $beta->type;
- Args    : String for the desired type of beta diversity
-            * 1-norm: the 1-norm distance
-            * 2-norm (euclidean): the euclidean distance
-            * infinity-norm: the infinity-norm distance
-            * hellinger: like the euclidean distance, but constrained between 0
-                and 1
-            * bray-curtis: the Bray-Curtis dissimilarity index, between 0 and 1
+ Args    : String for the desired type of beta diversity.
+
+           Qualitative (presence/absence):
             * jaccard: the Jaccard distance (between 0 and 1), i.e. the
                 fraction of non-shared species relative to the overall richness
                 of the metacommunity.
@@ -143,6 +139,17 @@ has metacommunity => (
                 to the least rich community. Note: this is the opposite
                 of a beta diversity measure since the higher the percent of
                 species shared, the smaller the beta diversity.
+
+           Quantitative:
+            * 1-norm: the 1-norm, i.e. the sum of difference in abundance for
+                 all species.
+            * 2-norm (euclidean): the 2-norm, or euclidean distance.
+            * infinity-norm: the infinity-norm, i.e. the maximum difference in
+                 abundance over all species.
+            * hellinger: like the euclidean distance, but constrained between 0
+                and 1.
+            * bray-curtis: the Bray-Curtis dissimilarity (or Sørensen quantitative
+                index), which varies between 0 and 1.
             * permuted: a beta diversity measure between 0 and 100, representing
                 the percentage of the dominant species in the first community
                 with a permuted abundance rank in the second community. As a
