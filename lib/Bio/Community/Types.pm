@@ -103,7 +103,8 @@ subtype 'AbundanceRank'
 
 # Type of distance
 my @DistanceType = qw(1-norm 2-norm euclidean p-norm infinity-norm hellinger
-                      bray-curtis jaccard sorensen shared permuted maxiphi unifrac);
+                      bray-curtis morisita-horn jaccard sorensen
+                      shared permuted maxiphi unifrac);
 subtype 'DistanceType'
    => as enum( \@DistanceType )
    => message { _gen_err_msg(\@DistanceType, $_) };

@@ -132,9 +132,9 @@ has metacommunity => (
             * jaccard: the Jaccard distance (between 0 and 1), i.e. the
                 fraction of non-shared species relative to the overall richness
                 of the metacommunity.
-            * sorensen: the Sørensen dissimilarity (between 0 and 1), i.e. the
-                fraction of non-shared species relative to the average richness
-                in the metacommunity.
+            * sorensen: the Sørensen dissimilarity, or Whittaker's species
+                turnover (between 0 and 1), i.e. the fraction of non-shared
+                species relative to the average richness in the metacommunity.
             * shared: percentage of species shared (between 0 and 100), relative
                 to the least rich community. Note: this is the opposite
                 of a beta diversity measure since the higher the percent of
@@ -148,8 +148,10 @@ has metacommunity => (
                  abundance over all species.
             * hellinger: like the euclidean distance, but constrained between 0
                 and 1.
-            * bray-curtis: the Bray-Curtis dissimilarity (or Sørensen quantitative
-                index), which varies between 0 and 1.
+            * bray-curtis: the Bray-Curtis dissimilarity (or Sørensen
+                quantitative index), which varies between 0 and 1.
+            * morisita-horn: the Morisita Horn dissimilarity, which varies
+                between 0 and 1;
             * permuted: a beta diversity measure between 0 and 100, representing
                 the percentage of the dominant species in the first community
                 with a permuted abundance rank in the second community. As a
@@ -321,6 +323,33 @@ method _bray_curtis ($meta) {
       $sumdiff += min($abundance1, $abundance2);
    }
    return 1 - $sumdiff;
+}
+
+
+method _morisita_horn ($meta) {
+   # Calculate the Morisita-Horn dissimilarity MH:
+   #    MH = 1- Cmh
+   # where:
+   #    CmH = 1 - 2 sum(ani * bni) / [(da + db)(aN)(bN)]
+   #    aN = total # of indiv in site A
+   #    ani = # of individuals in ith species in site A
+   #    da = sum(ani^2) / aN^2
+   my ($community1, $community2) = @{$meta->get_all_communities};
+   my ($aN, $bN) = (1, 1);
+   my ($sumprod, $da, $db) = (0, 0);
+   for my $member (@{$meta->get_all_members}) {
+      my $ani = $community1->get_rel_ab($member) / 100;
+      my $bni = $community2->get_rel_ab($member) / 100;
+      $sumprod += $ani * $bni;
+      $da += $ani**2;
+      $db += $bni**2;
+   }
+   #$da /= $aN;
+   #$db /= $bN;
+   print "sumprod: $sumprod\n";
+   print "da     : $da\n";
+   print "db     : $db\n";
+   return 1 - 2 * $sumprod / (($da + $db) * $aN * $bN);
 }
 
 
