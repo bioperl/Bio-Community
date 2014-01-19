@@ -141,8 +141,8 @@ has metacommunity => (
                 species shared, the smaller the beta diversity.
 
            Quantitative:
-            * 1-norm: the 1-norm, i.e. the sum of difference in abundance for
-                 all species.
+            * 1-norm: the 1-norm, or Manhattan distance, i.e. the sum of
+                 difference in abundance for all species.
             * 2-norm (euclidean): the 2-norm, or euclidean distance.
             * infinity-norm: the infinity-norm, i.e. the maximum difference in
                  abundance over all species.
@@ -150,8 +150,9 @@ has metacommunity => (
                 and 1.
             * bray-curtis: the Bray-Curtis dissimilarity (or Sørensen
                 quantitative index), which varies between 0 and 1.
-            * morisita-horn: the Morisita Horn dissimilarity, which varies
-                between 0 and 1;
+            * morisita-horn: the Morisita-Horn dissimilarity, which varies
+                between 0 and 1. Affected strongly by the abundance of the most
+                abundant species, but not by sample size or richness.
             * permuted: a beta diversity measure between 0 and 100, representing
                 the percentage of the dominant species in the first community
                 with a permuted abundance rank in the second community. As a
