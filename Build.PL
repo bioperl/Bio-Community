@@ -22,6 +22,7 @@ my $build = Module::Build->new(
     build_requires       => {
                              'Test::Number::Delta'          =>  0,
                              'Test::Pod::Coverage'          =>  1.00,
+                             'Pod::Coverage::Moose'         =>  0,
                             },
     requires             => {
                              'perl'                         => '5.10.0',
