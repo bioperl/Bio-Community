@@ -12,7 +12,7 @@ biological organisms. Bio-Community is part of the BioPerl project
 
 INSTALLATION & DEPENDENCIES
 
-The Bio-Community modules require Perl 5.10 or above. Additionally, these Perl
+Bio-Community module requires Perl 5.10 or above. Additionally, these Perl
 modules are required and will be installed during the installation procedure:
 
   BioPerl version >= 1.6.923
@@ -36,7 +36,10 @@ modules are required and will be installed during the installation procedure:
 This other module is recommended:
   Math::BigInt::GMP
 
-To install the Bio::Community modules, type the following:
+The easiest way to install Bio-Community is using the CPAN way. See the detailed
+instructions at http://www.cpan.org/modules/INSTALL.html
+
+To install the Bio-Community modules by hand, type the following in a terminal:
    perl Build.PL
    ./Build installdeps   (as administrator)
    ./Build
@@ -72,18 +75,23 @@ Bio-Community mocules. The ./t/data/ further contains data files used for the
 tests and is thus a good source of example data.
 
 
-SUPPORT AND BUGS
+BUGS, SUPPORT AND CONTRIBUTIONS
 
-User feedback is an integral part of the evolution of this and other Bioperl
-modules. Please direct usage questions or support issues to the mailing list, 
-bioperl-l@bioperl.org, rather than to the module maintainer directly. Many
-experienced and reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem with code and
-data examples if at all possible.
+User feedback is an integral part of the evolution of these BioPerl modules.
+Please direct usage questions or support issues to the mailing list, rather
+than to the module maintainer directly:
+   bioperl-l@bioperl.org
+Many experienced and reponsive experts will be able look at the problem and
+quickly address it. Please include a thorough description of the problem with
+code and data examples if at all possible.
 
 If you have found a bug, please report it on the BioPerl bug tracking system
 to help us keep track the bugs and their resolution:
-https://redmine.open-bio.org/projects/bioperl/
+   https://redmine.open-bio.org/projects/bioperl/
+
+The development code for Bio-Community is hosted on GitHub. To fork it and
+start hacking, simply run:
+   git clone https://github.com/bioperl/Bio-Community.git
 
 
 COPYRIGHT
