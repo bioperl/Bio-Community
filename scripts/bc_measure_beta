@@ -34,8 +34,8 @@ This script reads files containing biological communities and calculate how
 dissimilar they are (beta diversity). The output is a tab-delimited file
 containing the beta diversity between all pairs of communities. The columns of
 this file contain the name of the first community, of the second community, and
-their beta diversity, respectively. Note that beta diversity metrics are based
-on relative abundances. Hence, any weights you provide will affect the results.
+their beta diversity, respectively. Note that some beta diversity metrics are
+based on relative abundances, and may thus be affected by the weights you provide.
 
 =head1 REQUIRED ARGUMENTS
 
