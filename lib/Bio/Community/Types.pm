@@ -2,7 +2,7 @@
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
-# Copyright Florent Angly <florent.angly@gmail.com>
+# Copyright 2011-2014 Florent Angly <florent.angly@gmail.com>
 #
 # You may distribute this module under the same terms as perl itself
 
@@ -34,7 +34,7 @@ L<https://redmine.open-bio.org/projects/bioperl/>
 
 =head1 COPYRIGHT
 
-Copyright 2011,2012,2013 by Florent Angly <florent.angly@gmail.com>
+Copyright 2011-2014 by Florent Angly <florent.angly@gmail.com>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
