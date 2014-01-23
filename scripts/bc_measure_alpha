@@ -179,7 +179,7 @@ func calc_alpha ($input_files, $alpha_types, $weight_files, $weight_assign,
    my $out_file = $output_prefix.'.txt';
    print "Writing alpha diversity to file '$out_file'\n";
    open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
-   print $out join("\t", "# community", @$alpha_types)."\n";
+   print $out join("\t", '# community', @$alpha_types)."\n";
    while (my $community = $meta->next_community) {
       my $alpha = Bio::Community::Alpha->new(
          -community => $community,
