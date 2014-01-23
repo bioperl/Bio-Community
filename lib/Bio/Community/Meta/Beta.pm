@@ -345,9 +345,6 @@ method _morisita_horn ($meta) {
    }
    #$da /= $aN;
    #$db /= $bN;
-   print "sumprod: $sumprod\n";
-   print "da     : $da\n";
-   print "db     : $db\n";
    return 1 - 2 * $sumprod / (($da + $db) * $aN * $bN);
 }
 
