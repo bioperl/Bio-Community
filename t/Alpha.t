@@ -32,6 +32,12 @@ $c2->add_member( Bio::Community::Member->new(-id=>4), 1  );
 $alpha = Bio::Community::Alpha->new( -community=>$c1 );
 isa_ok $alpha, 'Bio::Community::Alpha';
 
+is $alpha->type('observed'), 'observed';
+delta_ok $alpha->get_alpha, 3.0;
+
+is $alpha->type('menhinick'), 'menhinick';
+is $alpha->get_alpha, 1.22474487139159;
+
 
 # Test richness
 

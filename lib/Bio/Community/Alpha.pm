@@ -163,7 +163,7 @@ has community => (
 =cut
 
 has type => (
-   is => 'ro',
+   is => 'rw',
    isa => 'AlphaType',
    required => 0,
    lazy => 1,
