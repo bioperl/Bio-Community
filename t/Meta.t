@@ -10,8 +10,8 @@ use_ok($_) for qw(
     Bio::Community::Meta
 );
 
-my ($meta, $community1, $community2, $community3, $member1, $member2, $member3,
-   $member);
+my ($meta, $community1, $community2, $community3, $community_all,
+    $member, $member1, $member2, $member3                        );
 
 my %ids;
 
@@ -102,6 +102,23 @@ is_deeply [sort(map {$_->id}  @{$meta->get_all_members})], [1, 2, 3];
 is $meta->get_richness, 3;
 
 is $meta->get_members_count, 155;
+
+
+# Generate a metacommunity
+
+ok $community_all = $meta->get_metacommunity, 'Metacommunity';
+isa_ok $community_all, 'Bio::Community';
+
+ok $member = $community_all->get_member_by_rank(1);
+is $member->id, 3;
+is $community_all->get_count($member), 100;
+ok $member = $community_all->get_member_by_rank(2);
+is $member->id, 1;
+is $community_all->get_count($member), 35;
+ok $member = $community_all->get_member_by_rank(3);
+is $member->id, 2;
+is $community_all->get_count($member), 20;
+is $community_all->get_member_by_rank(4), undef;
 
 
 # Remove communities
