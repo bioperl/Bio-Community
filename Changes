@@ -2,6 +2,9 @@ Revision history for Perl extension Bio::Community.
 
 x.x.x xxxx-xx-xx
   - New script to calculate alpha diversity, bc_measure_alpha
+  - Changes to script bc_measure_distance:
+    * Renamed to bc_measure_beta
+    * Can now be passed a list of metrics to compute
 
 0.1.3 2014-01-23
   - Added new Beta diversity measures: Sorensen, Jaccard and Morisita-Horn

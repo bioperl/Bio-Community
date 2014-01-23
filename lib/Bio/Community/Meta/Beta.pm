@@ -165,7 +165,7 @@ has metacommunity => (
 =cut
 
 has type => (
-   is => 'ro',
+   is => 'rw',
    isa => 'DistanceType',
    required => 0,
    lazy => 1,
