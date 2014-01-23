@@ -76,6 +76,7 @@ use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
+use Bio::Community::Alpha;
 
 extends 'Bio::Root::Root';
 
@@ -102,28 +103,20 @@ has metacommunity => (
 
  Function: Get or set the type of gamma diversity metric to measure.
  Usage   : my $type = $gamma->type;
- Args    : String for the desired type of gamma diversity:
-            * richness: the number of species in the metacommunity
-           This defaults to richness
+ Args    : String for the desired type of gamma diversity. The same metrics are
+           available as in L<Bio::Community::Alpha>. Default is 'observed'.
  Returns : String for the desired type of gamma diversity
 
 =cut
 
 has type => (
-   is => 'ro',
-   isa => 'AlphaType', # support same metrics as Bio::Community::Alpha
+   is => 'rw',
+   isa => 'AlphaType', # supports the same metrics as Bio::Community::Alpha
    required => 0,
    lazy => 1,
    default => 'observed',
    init_arg => '-type',
 );
-
-
-#####
-# TODO
-#   build a "gamma community" and feed it to Bio::Community::Alpha so that we can
-#   use all the same alpha diversity metrics
-#####
 
 
 =head2 get_gamma
@@ -136,15 +129,12 @@ has type => (
 =cut
 
 method get_gamma () {
-   my $metric = '_'.$self->type;
-   return $self->$metric();
+   my $alpha = Bio::Community::Alpha->new(
+      -community => $self->metacommunity->get_metacommunity,
+      -type      => $self->type,
+   );
+   return $alpha->get_alpha;
 };
-
-
-method _observed () {
-   # Calculate the observed richness
-   return $self->metacommunity->get_richness;
-}
 
 
 __PACKAGE__->meta->make_immutable;
