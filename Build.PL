@@ -53,7 +53,7 @@ my $build = Module::Build->new(
                              'scripts/bc_correct_misassignments',
                              'scripts/bc_get_info',
                              'scripts/bc_manage_samples',
-                             'scripts/bc_measure_distance',
+                             'scripts/bc_measure_beta',
                              'scripts/bc_rarefy',
                              'scripts/bc_relative_to_absolute',
                              'scripts/bc_remove_unexpected_members',

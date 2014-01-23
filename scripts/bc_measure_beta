@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bc_measure_distance
+# BioPerl script bc_measure_beta
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -20,13 +20,13 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_measure_distance - Measure beta-diversity between communities
+bc_measure_beta - Measure beta-diversity between communities
 
 =head1 SYNOPSIS
 
-  bc_measure_distance -input_files   communities.generic      \
-                      -dist_type     'hellinger'              \
-                      -output_prefix community_distance
+  bc_measure_beta -input_files   communities.generic      \
+                  -beta_type     'hellinger'              \
+                  -output_prefix community_beta
 
 =head1 DESCRIPTION
 
@@ -34,9 +34,8 @@ This script reads files containing biological communities and calculate how
 dissimilar they are (beta diversity). The output is a tab-delimited file
 containing the beta diversity between all pairs of communities. The columns of
 this file contain the name of the first community, of the second community, and
-their beta diversity, respectively. See L<Bio::Community::Meta::Beta> for more
-details. Note that beta diversity metrics are based on relative abundances.
-Hence, any weight you provide will affect the results.
+their beta diversity, respectively. Note that beta diversity metrics are based
+on relative abundances. Hence, any weights you provide will affect the results.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -88,16 +87,18 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bc_distance'
+   output_prefix.default: 'bc_beta'
 
-=item -dt <dist_type> | -dist_type <dist_type>
+=item -bt <beta_type> | -beta_type <beta_type>
 
-The type of distance or beta-diversity metric to calculate: 1-norm, euclidean
-(2-norm), hellinger, infinity-norm, bray-curtis... Default: dist_type.default
+The type of beta-diversity metric to calculate: jaccard, sorensen, shared,
+1-norm, 2-norm (euclidean), infinity-norm, hellinger, bray-curtis, morisita-horn,
+permuted, or maxiphi. See L<Bio::Community::Meta::Beta> for details about these
+metrics. Default: beta_type.default
 
 =for Euclid:
-   dist_type.type: string
-   dist_type.default: 'euclidean'
+   beta_type.type: string
+   beta_type.default: 'euclidean'
 
 =item -pf <pair_files>... | -pair_files <pair_files>...
 
@@ -150,16 +151,16 @@ Email florent.angly@gmail.com
 =cut
 
 
-calc_dist( $ARGV{'input_files'}  , $ARGV{'weight_files'}, $ARGV{'weight_assign'},
-           $ARGV{'output_prefix'}, $ARGV{'dist_type'}   , $ARGV{'pair_files'}    );
+calc_beta( $ARGV{'input_files'}  , $ARGV{'weight_files'}, $ARGV{'weight_assign'},
+           $ARGV{'output_prefix'}, $ARGV{'beta_type'}   , $ARGV{'pair_files'}    );
 exit;
 
 
 # TODO: implement option for matrix output
 
 
-func calc_dist ($input_files, $weight_files, $weight_assign, $output_prefix,
-   $dist_type, $pair_files) {
+func calc_beta ($input_files, $weight_files, $weight_assign, $output_prefix,
+   $beta_type, $pair_files) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new;
@@ -180,16 +181,16 @@ func calc_dist ($input_files, $weight_files, $weight_assign, $output_prefix,
 
    # Calculate beta diversity
    if ($pair_files) {
-      _process_specific_pairs($meta, $dist_type, $output_prefix, $pair_files);
+      _process_specific_pairs($meta, $beta_type, $output_prefix, $pair_files);
    } else {
-      _process_all_pairs($meta, $dist_type, $output_prefix);
+      _process_all_pairs($meta, $beta_type, $output_prefix);
    }
 
    return 1;
 }
 
 
-func _process_specific_pairs ($meta, $dist_type, $output_prefix, $pair_files) {
+func _process_specific_pairs ($meta, $beta_type, $output_prefix, $pair_files) {
    my $i = 0;
    for my $pair_file (@$pair_files) {
       $i++;
@@ -207,7 +208,7 @@ func _process_specific_pairs ($meta, $dist_type, $output_prefix, $pair_files) {
             die "Error: Community $name2 was not found in the provided community file";
          my $beta_val = Bio::Community::Meta::Beta->new(
             -metacommunity => Bio::Community::Meta->new(-communities => [$community1, $community2]),
-            -type          => $dist_type,
+            -type          => $beta_type,
          )->get_beta;
          print $out $community1->name."\t".$community2->name."\t".$beta_val."\n";
       }
@@ -217,7 +218,7 @@ func _process_specific_pairs ($meta, $dist_type, $output_prefix, $pair_files) {
 }
 
 
-func _process_all_pairs ($meta, $dist_type, $output_prefix) {
+func _process_all_pairs ($meta, $beta_type, $output_prefix) {
    # Calculate beta diversity for all pairs of communities
    my $out_file = $output_prefix.'.txt';
    print "Writing beta diversity to file $out_file\n";
@@ -230,7 +231,7 @@ func _process_all_pairs ($meta, $dist_type, $output_prefix) {
          my $community2 = $communities->[$j];
          my $beta_val = Bio::Community::Meta::Beta->new(
             -metacommunity => Bio::Community::Meta->new(-communities => [$community1, $community2]),
-            -type          => $dist_type,
+            -type          => $beta_type,
          )->get_beta;
          print $out $community1->name."\t".$community2->name."\t".$beta_val."\n";
       }

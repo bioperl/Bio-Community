@@ -33,12 +33,10 @@ Bio::Community::Meta::Beta - Beta diversity or distance separating communities
 =head1 DESCRIPTION
 
 Calculate how dissimilar communities are by calculating their beta diversity.
-The more different communities are, the larger their beta diversity. Often,
-beta diversity metrics are actually a distance measurement.
-
-Several types of beta diversity metrics are available: 1-norm, 2-norm (euclidean),
-and infinity-norm, Hellinger distance, Bray-Curtis dissimilarity, Jaccard
-distance, Sørensen dissimilarity and MaxiPhi index.
+The more different communities are, the larger their beta diversity. Some
+beta diversity metrics are a distance measure (in the mathematical sense).
+Qualitative (presence/absence) and qualitative measures of beta diversity are
+available: see type().
 
 Since the relative abundance of community members is not always proportional to
 member counts (see weights() in Bio::Community::Member and use_weights() in
