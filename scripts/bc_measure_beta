@@ -20,7 +20,7 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_measure_beta - Measure beta-diversity between communities
+bc_measure_beta - Measure beta diversity between communities
 
 =head1 SYNOPSIS
 
@@ -91,7 +91,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =item -bt <beta_type> | -beta_type <beta_type>
 
-The type of beta-diversity metric to calculate: jaccard, sorensen, shared,
+The type of beta diversity metric to calculate: jaccard, sorensen, shared,
 1-norm, 2-norm (euclidean), infinity-norm, hellinger, bray-curtis, morisita-horn,
 permuted, or maxiphi. See L<Bio::Community::Meta::Beta> for details about these
 metrics. Default: beta_type.default
@@ -103,7 +103,7 @@ metrics. Default: beta_type.default
 =item -pf <pair_files>... | -pair_files <pair_files>...
 
 Input file specifying the pairs of communities for which to calculate the
-beta-diversity. Each line of a file of pairs should have the name of two
+beta diversity. Each line of a file of pairs should have the name of two
 communities, separated by a tab. For each file of pairs, there will be a
 corresponding output file.
 
