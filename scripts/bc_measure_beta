@@ -30,7 +30,7 @@ bc_measure_beta - Measure beta diversity between communities
 
 =head1 DESCRIPTION
 
-This script reads files containing biological communities and calculate how
+This script reads files containing biological communities and calculates how
 dissimilar they are (beta diversity). The output is a tab-delimited file
 containing the beta diversity between all pairs of communities. The columns of
 this file contain the name of the first community, of the second community, and
