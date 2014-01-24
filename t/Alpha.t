@@ -10,7 +10,7 @@ use_ok($_) for qw(
 );
 
 
-my ($alpha, $c1, $c2);
+my ($alpha, $c1, $c2, $c3);
 
 
 # Communities for which to measure alpha diversity
@@ -25,6 +25,8 @@ $c2->add_member( Bio::Community::Member->new(-id=>1), 1  );
 $c2->add_member( Bio::Community::Member->new(-id=>2), 2  );
 $c2->add_member( Bio::Community::Member->new(-id=>3), 11 );
 $c2->add_member( Bio::Community::Member->new(-id=>4), 1  );
+
+$c3 = Bio::Community->new;
 
 
 # Basic object
@@ -80,6 +82,34 @@ delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'mcintosh' )->get_al
 
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_d')->get_alpha, 0.388888888888889, 'Dominance';
 delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'berger'   )->get_alpha, 0.5;
+
+
+# Test empty community
+
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'observed' )->get_alpha, 0.0, 'Empty community';
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'menhinick')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'margalef' )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'chao1'    )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'ace'      )->get_alpha, 0.0;
+
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'buzas'      )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'heip'       )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'shannon_e'  )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'simpson_e'  )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'brillouin_e')->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'hill_e'     )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'mcintosh_e' )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'camargo'    )->get_alpha, undef;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'shannon'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'simpson'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'simpson_r')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'brillouin')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'hill'     )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'mcintosh' )->get_alpha, 0.0;
+
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'simpson_d')->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c3, -type=>'berger'   )->get_alpha, undef;
 
 
 ### Tests with max or min evenness / richness.
