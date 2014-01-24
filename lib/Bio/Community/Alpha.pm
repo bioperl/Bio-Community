@@ -219,14 +219,14 @@ method _chao1 () {
    my $d = 0;
    my ($n1, $n2) = (0, 0); # singletons and doubletons
    my $community = $self->community;
-   while (my $member = $community->next_member) {
+   while (my $member = $community->next_member('_alpha_chao1')) {
       my $c = $community->get_count($member);
       if ($c == 1) {
          $n1++;
       } elsif ($c == 2) {
          $n2++;
       } elsif ( $c != int($c) ) {
-         $self->throw("Got count $c but can only compute Chao1 on integer numbers");
+         $self->throw("Got count $c but can only compute chao1 on integer numbers");
       }
    }
    return $community->get_richness + ($n1*($n1-1)) / (2*($n2+1));
@@ -242,14 +242,14 @@ method _ace () {
       my $thresh = 10;
       my ($s_rare, $s_abund) = (0, 0); # number of rare, and abundant (>10) species
       my @F = (0) x $thresh; # number of singletons, doubletons, tripletons, ... 10-tons
-      while (my $member = $community->next_member) {
+      while (my $member = $community->next_member('_alpha_ace')) {
          my $c = $community->get_count($member);
          if ($c > $thresh) {
             $s_abund++;
          } else {
             $s_rare++;
             if ( $c != int($c) ) {
-               $self->throw("Got count $c but can only compute ACE on integer numbers");
+               $self->throw("Got count $c but can only compute ace on integer numbers");
             } else {
                $F[$c-1]++;
             }
@@ -370,7 +370,7 @@ method _mcintosh_e () {
    my $S = $community->get_richness;
    if ($S > 0) {
       my $U = 0;
-      while (my $member = $community->next_member) {
+      while (my $member = $community->next_member('_alpha_mcintosh_e')) {
          my $c = $community->get_count($member);
          $U += $c**2;
       }
@@ -406,7 +406,7 @@ method _shannon () {
    # Calculate the Shannon-Wiener index
    my $d = 0;
    my $community = $self->community;
-   while (my $member = $community->next_member) {
+   while (my $member = $community->next_member('_alpha_shannon')) {
       my $p = $community->get_rel_ab($member) / 100;
       $d += $p * log($p);
    }
@@ -445,7 +445,7 @@ method _brillouin () {
          $self->throw("Need module Math::GSL::SF to calculate brillouin_e\n$@");
       }
       my $sum = 0;
-      while (my $member = $community->next_member) {
+      while (my $member = $community->next_member('_alpha_brillouin')) {
          my $c = $community->get_count($member);
          $sum += Math::GSL::SF::gsl_sf_lngamma($c);
       }
@@ -473,7 +473,7 @@ method _mcintosh () {
    my $N = $community->get_members_count;
    if ($N > 1) {
       my $U = 0;
-      while (my $member = $community->next_member) {
+      while (my $member = $community->next_member('_alpha_mcintosh')) {
          my $c = $community->get_count($member);
          $U += $c**2;
       }
@@ -489,7 +489,7 @@ method _simpson_d () {
    my $d = undef;
    my $community = $self->community;
    if ($community->get_richness > 0) {
-      while (my $member = $community->next_member) {
+      while (my $member = $community->next_member('_alpha_simpson_d')) {
          my $p = $community->get_rel_ab($member) / 100;
          $d += $p**2;
       }

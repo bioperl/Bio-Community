@@ -266,8 +266,8 @@ $c->add_member( Bio::Community::Member->new(-id=>4), 1.4  );
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 4.0, 'Decimals';
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 1.0127394;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 1.0919928;
-#throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'chao1' )->get_alpha} qr/EXCEPTION.*integer/;
-#throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'ace'   )->get_alpha} qr/EXCEPTION.*integer/;
+throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'chao1' )->get_alpha} qr/EXCEPTION.*integer/msi;
+throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'ace'   )->get_alpha} qr/EXCEPTION.*integer/msi;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.5477421;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.3969895;
