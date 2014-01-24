@@ -184,7 +184,7 @@ func calc_alpha ($input_files, $alpha_types, $weight_files, $weight_assign,
       my $alpha = Bio::Community::Alpha->new(
          -community => $community,
       );
-      my @alpha_vals = map {$alpha->type($_); $alpha->get_alpha} @$alpha_types;
+      my @alpha_vals = map {$alpha->type($_); $alpha->get_alpha || '-'} @$alpha_types;
       print $out join("\t", $community->name, @alpha_vals)."\n";
    }
 

@@ -10,28 +10,17 @@ use_ok($_) for qw(
 );
 
 
-my ($alpha, $c1, $c2, $c3);
-
-
-# Communities for which to measure alpha diversity
-
-$c1 = Bio::Community->new;
-$c1->add_member( Bio::Community::Member->new(-id=>1), 1 );
-$c1->add_member( Bio::Community::Member->new(-id=>2), 2 );
-$c1->add_member( Bio::Community::Member->new(-id=>3), 3 );
-
-$c2 = Bio::Community->new;
-$c2->add_member( Bio::Community::Member->new(-id=>1), 1  );
-$c2->add_member( Bio::Community::Member->new(-id=>2), 2  );
-$c2->add_member( Bio::Community::Member->new(-id=>3), 11 );
-$c2->add_member( Bio::Community::Member->new(-id=>4), 1  );
-
-$c3 = Bio::Community->new;
+my ($alpha, $c);
 
 
 # Basic object
 
-$alpha = Bio::Community::Alpha->new( -community=>$c1 );
+$c = Bio::Community->new;
+$c->add_member( Bio::Community::Member->new(-id=>1), 1 );
+$c->add_member( Bio::Community::Member->new(-id=>2), 2 );
+$c->add_member( Bio::Community::Member->new(-id=>3), 3 );
+
+$alpha = Bio::Community::Alpha->new( -community=>$c );
 isa_ok $alpha, 'Bio::Community::Alpha';
 
 
@@ -44,85 +33,262 @@ is $alpha->type('menhinick'), 'menhinick';
 delta_ok $alpha->get_alpha, 1.22474487139159;
 
 
-# Test richness
-
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'observed' )->get_alpha, 3.0, 'Richness';
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'menhinick')->get_alpha, 1.22474487139159;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'margalef' )->get_alpha, 1.11622125310249;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'chao1'    )->get_alpha, 3.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'ace'      )->get_alpha, 3.6;
-
-delta_ok Bio::Community::Alpha->new(-community=>$c2, -type=>'chao1'    )->get_alpha, 4.5;
-delta_ok Bio::Community::Alpha->new(-community=>$c2, -type=>'ace'      )->get_alpha, 7.0;
-
-
-# Test evenness
-
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'buzas'      )->get_alpha, 0.916486424665735, 'Evenness';
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'heip'       )->get_alpha, 0.874729636998600;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'shannon_e'  )->get_alpha, 0.920619835714305;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_e'  )->get_alpha, 0.916666666666667;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'brillouin_e')->get_alpha, 0.909892831516493;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'hill_e'     )->get_alpha, 0.935248830832905;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'mcintosh_e' )->get_alpha, 0.881917103688197;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'camargo'    )->get_alpha, 0.777777777777778;
-
-
-# Test composite metrics
-
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'shannon'  )->get_alpha, 1.01140426470735, 'Composite';
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson'  )->get_alpha, 0.611111111111111;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_r')->get_alpha, 2.57142857142857;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'brillouin')->get_alpha, 0.682390760370350;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'hill'     )->get_alpha, 2.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'mcintosh' )->get_alpha, 0.636061424871458;
-
-
-# Test dominance
-
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'simpson_d')->get_alpha, 0.388888888888889, 'Dominance';
-delta_ok Bio::Community::Alpha->new(-community=>$c1, -type=>'berger'   )->get_alpha, 0.5;
-
-
 # Test empty community
 
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'observed' )->get_alpha, 0.0, 'Empty community';
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'menhinick')->get_alpha, 0.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'margalef' )->get_alpha, 0.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'chao1'    )->get_alpha, 0.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'ace'      )->get_alpha, 0.0;
+$c = Bio::Community->new;
 
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'buzas'      )->get_alpha, undef;
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'heip'       )->get_alpha, undef;
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'shannon_e'  )->get_alpha, undef;
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'simpson_e'  )->get_alpha, undef;
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'brillouin_e')->get_alpha, undef;
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'hill_e'     )->get_alpha, undef;
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'mcintosh_e' )->get_alpha, undef;
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'camargo'    )->get_alpha, undef;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 0.0, 'Empty community';
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 0.0;
 
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'shannon'  )->get_alpha, 0.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'simpson'  )->get_alpha, 0.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'simpson_r')->get_alpha, 0.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'brillouin')->get_alpha, 0.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'hill'     )->get_alpha, 0.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c3, -type=>'mcintosh' )->get_alpha, 0.0;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, undef;
 
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'simpson_d')->get_alpha, undef;
-is Bio::Community::Alpha->new(-community=>$c3, -type=>'berger'   )->get_alpha, undef;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.0;
+
+is Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alpha, undef;
+is Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, undef;
 
 
-### Tests with max or min evenness / richness.
+# Test community with a single individual
 
-### Compare results to estimateS or vegan or QIIME alpha_diversity.py
+$c = Bio::Community->new;
+$c->add_member( Bio::Community::Member->new(-id=>1), 1);
 
-### Should have an error when calculating ACE or chao1 with non-integers
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 1.0, 'Single-individual community';
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, undef;
 
-### Test Brillouin's factorial with 100,000 individuals (should still be quite fast)
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 1.0;
 
-### What if communities have a richness of zero?
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.0;
 
-### What happens for evenness when communities has richness < 2. What does the evenness of a single species mean??
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 1.0;
+
+
+# Test community with a few individuals
+
+$c = Bio::Community->new;
+$c->add_member( Bio::Community::Member->new(-id=>1), 3);
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 1.0, 'Few-individual community';
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 0.5773503;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 1.0;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 1.0;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.0;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 1.0;
+
+
+# Test community with a single species
+
+$c = Bio::Community->new;
+$c->add_member( Bio::Community::Member->new(-id=>1), 35 );
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 1.0, 'Single-species community';
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 0.1690309;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 0.0;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 1.0;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.0;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 1.0;
+
+
+# Test community with 2 species
+
+$c = Bio::Community->new;
+$c->add_member( Bio::Community::Member->new(-id=>1), 4 );
+$c->add_member( Bio::Community::Member->new(-id=>2), 25 );
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 2.0, '2-species community';
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 0.3713907;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.2969742;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 2.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 2.0;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.7468004;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.4936008;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.5787946;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.4756243;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.5546117;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 0.8784224;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 0.9036374;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 0.6379310;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.4011899;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.2378121;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.3120125;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.3474269;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.1600000;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.1559199;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alpha, 0.7621879;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 0.8620690;
+
+
+# Test community with 3 species
+
+$c = Bio::Community->new;
+$c->add_member( Bio::Community::Member->new(-id=>1), 1 );
+$c->add_member( Bio::Community::Member->new(-id=>2), 2 );
+$c->add_member( Bio::Community::Member->new(-id=>3), 3 );
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 3.0, '3-species community';
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 1.22474487139159;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 1.11622125310249;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 3.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 3.6;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.916486424665735;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.874729636998600;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.920619835714305;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.916666666666667;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.909892831516493;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 0.935248830832905;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 0.881917103688197;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 0.777777777777778;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 1.01140426470735;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.611111111111111;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 2.57142857142857;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.682390760370350;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 2.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.636061424871458;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alpha, 0.388888888888889;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 0.5;
+
+
+# Test community with 4 species
+
+$c = Bio::Community->new;
+$c->add_member( Bio::Community::Member->new(-id=>1), 1  );
+$c->add_member( Bio::Community::Member->new(-id=>2), 2  );
+$c->add_member( Bio::Community::Member->new(-id=>3), 11 );
+$c->add_member( Bio::Community::Member->new(-id=>4), 1  );
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 4.0, '4-species community';
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 1.0327956;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 1.1078081;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 4.5;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 7.0;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.5891230;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.4521640;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.6183204;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.5807407;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.5855072;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 0.7518182;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 0.9294867;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 0.4833333;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.8571740;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.4355556;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.7716535;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.6469211;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.3636364;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.3352716;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alpha, 0.5644444;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 0.7333333;
+
+
+# Test community with decimals
+
+$c = Bio::Community->new;
+$c->add_member( Bio::Community::Member->new(-id=>1), 0.3  );
+$c->add_member( Bio::Community::Member->new(-id=>2), 2.2  );
+$c->add_member( Bio::Community::Member->new(-id=>3), 11.7 );
+$c->add_member( Bio::Community::Member->new(-id=>4), 1.4  );
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alpha, 4.0, 'Decimals';
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 1.0127394;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 1.0919928;
+#throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'chao1' )->get_alpha} qr/EXCEPTION.*integer/;
+#throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'ace'   )->get_alpha} qr/EXCEPTION.*integer/;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.5477421;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.3969895;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.5657844;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.5455840;
+####delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.5855072;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 0.7725286;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 0.9427872;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 0.4391026;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'     )->get_alpha, 0.7843437;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'     )->get_alpha, 0.4091880;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r'   )->get_alpha, 1.6925859;
+####delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.6469211;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'        )->get_alpha, 1.3333333;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh'    )->get_alpha, 0.3097916;
+
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alpha, 0.5908120;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 0.7500000;
+
+
 
 done_testing();
 

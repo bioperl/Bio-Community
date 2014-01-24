@@ -170,29 +170,6 @@ has type => (
 );
 
 
-#####
-## TODO:
-
-## Index:
-##   Fisher index: a diversity index, defined implicitly by the formula
-##      S=a*ln(1+n/a) where S is number of taxa, n is number of individuals and a
-##      is the value of Fisher's alpha.
-##      See http://www.thefreelibrary.com/A+table+of+values+for+Fisher%27s+%5Balpha%5D+log+series+diversity+index.-a0128667026
-
-## QIIME supports these alpha diversity indices:
-##   $ alpha_diversity.py -s
-##   Known metrics are:
-##      Implemented (or not needed) in B:C:
-##        observed_species, shannon, simpson_e, simpson, reciprocal_simpson,
-##        margalef,  menhinick, equitability, chao1, ACE, dominance, singles,
-##        doubles, chao1_confidence, berger_parker_d, brillouin_d, mcintosh_d
-##        mcintosh_e, PD_whole_tree
-##      Not yet implemented:
-##        fisher_alpha, kempton_taylor_q, michaelis_menten_fit, osd, robbins, strong
-
-#####
-
-
 =head2 get_alpha
 
  Function: Calculate the alpha diversity of a community.
@@ -230,7 +207,7 @@ method _margalef () {
    # Calculate the Margalef richness
    my $community = $self->community;
    my $counts = $community->get_members_count;
-   return $counts > 0 ?
+   return $counts > 1 ?
           ($community->get_richness - 1) / log($counts) :
           0;
 }
@@ -250,7 +227,7 @@ method _chao1 () {
       } elsif ($c == 2) {
          $n2++;
       } elsif ( $c != int($c) ) {
-         $self->throw("Got count $c but can only compute chao1 on integer numbers");
+         $self->throw("Got count $c but can only compute Chao1 on integer numbers");
       }
    }
    return $community->get_richness + ($n1*($n1-1)) / (2*($n2+1));
@@ -273,7 +250,7 @@ method _ace () {
          } else {
             $s_rare++;
             if ( $c != int($c) ) {
-               $self->throw("Got count $c but can only compute chao1 on integer numbers");
+               $self->throw("Got count $c but can only compute ACE on integer numbers");
             } else {
                $F[$c-1]++;
             }
@@ -286,10 +263,16 @@ method _ace () {
          $add *= $i-1;
          $tmp_sum += $add;
       }
-      my $C = 1 - $F[0]/$n_rare;
-      my $gamma = ($s_rare * $tmp_sum) / ($C * $n_rare * ($n_rare-1)) - 1;
-      $gamma = max($gamma, 0);
-      $d = $s_abund + $s_rare/$C + $F[0]*$gamma/$C;
+
+      if ($n_rare == $F[0]) {
+         # ACE is not defined when all rare species are singletons
+         $d = undef;
+      } else {
+         my $C = 1 - $F[0]/$n_rare;
+         my $gamma = ($s_rare * $tmp_sum) / ($C * $n_rare * ($n_rare-1)) - 1;
+         $gamma = max($gamma, 0);
+         $d = $s_abund + $s_rare/$C + $F[0]*$gamma/$C;
+      }
    }
    return $d;
 }
@@ -317,19 +300,30 @@ method _heip () {
 
 method _shannon_e () {
    # Calculate Shannon's evenness
-   my $richness = $self->community->get_richness;
-   return $richness > 0 ?
-          $self->_shannon / log($self->community->get_richness) :
-          undef;
+   my $e = undef;
+   my $community = $self->community;
+   my $richness = $community->get_richness;
+   if ($richness > 0) { 
+      $e = 0;
+      if ($richness > 1) {
+         $e = $self->_shannon / log($richness);
+      }
+   }
+   return $e;
 }
 
 
 method _simpson_e () {
    # Calculate Simpson's evenness
+   my $e = undef;
    my $richness = $self->community->get_richness;
-   return $richness > 0 ?
-          $self->_simpson / (1 - 1/$richness) :
-          undef;
+   if ($richness > 0) {
+      $e = 0;
+      if ($richness > 1) {
+         $e = $self->_simpson / (1 - 1/$richness);
+      }
+   }
+   return $e;
 }
 
 
@@ -349,14 +343,17 @@ method _brillouin_e () {
    my $community = $self->community;
    my $S = $community->get_richness;
    if ($S > 0) {
-      my $N = $community->get_members_count;
-      my $n = int( $N / $S );
-      my $r = $N - $S * $n;
-      my $tmp1 =           Math::BigFloat->new($N  )->bfac->blog;
-      my $tmp2 =     $r  * Math::BigFloat->new($n+1)->bfac->blog;
-      my $tmp3 = ($S-$r) * Math::BigFloat->new($n  )->bfac->blog;
-      my $bmax  = ($tmp1 - $tmp2 - $tmp3) / $N;
-      $b = $self->_brillouin / $bmax;
+      $b = 0;
+      if ($S > 1) {
+         my $N = $community->get_members_count;
+         my $n = int( $N / $S );
+         my $r = $N - $S * $n;
+         my $tmp1 =           Math::BigFloat->new($N  )->bfac->blog;
+         my $tmp2 =     $r  * Math::BigFloat->new($n+1)->bfac->blog;
+         my $tmp3 = ($S-$r) * Math::BigFloat->new($n  )->bfac->blog;
+         my $bmax  = ($tmp1 - $tmp2 - $tmp3) / $N;
+         $b = $self->_brillouin / $bmax;
+      }
    }
    return $b;
 }
@@ -468,7 +465,7 @@ method _mcintosh () {
    my $d = 0;
    my $community = $self->community;
    my $N = $community->get_members_count;
-   if ($N > 0) {
+   if ($N > 1) {
       my $U = 0;
       while (my $member = $community->next_member) {
          my $c = $community->get_count($member);
