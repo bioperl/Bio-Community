@@ -34,7 +34,7 @@ modules are required and will be installed during the installation procedure:
   Test::Number::Delta
 
 This other module is recommended:
-  Math::BigInt::GMP
+  Math::GSL::SF
 
 The easiest way to install Bio-Community is using the CPAN way. See the detailed
 instructions at http://www.cpan.org/modules/INSTALL.html

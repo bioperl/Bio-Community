@@ -74,7 +74,6 @@ use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use List::Util qw(max);
-use Math::BigFloat try => 'GMP';
 
 extends 'Bio::Root::Root';
 
@@ -339,18 +338,23 @@ method _hill_e () {
 method _brillouin_e () {
    # Calculate Brillouin's evenness
    # http://www.wcsmalaysia.org/analysis/diversityIndexMenagerie.htm#Brillouin
+   # We replaced the factorial function by its generalization, the gamma
+   # function, to be able to handle decimal numbers.
    my $b = undef;
    my $community = $self->community;
    my $S = $community->get_richness;
    if ($S > 0) {
       $b = 0;
       if ($S > 1) {
+         if (not eval { require Math::GSL::SF }) {
+            $self->throw("Need module Math::GSL::SF to calculate brillouin_e\n$@");
+         }
          my $N = $community->get_members_count;
          my $n = int( $N / $S );
          my $r = $N - $S * $n;
-         my $tmp1 =           Math::BigFloat->new($N  )->bfac->blog;
-         my $tmp2 =     $r  * Math::BigFloat->new($n+1)->bfac->blog;
-         my $tmp3 = ($S-$r) * Math::BigFloat->new($n  )->bfac->blog;
+         my $tmp1 =           Math::GSL::SF::gsl_sf_lngamma($N  );
+         my $tmp2 =     $r  * Math::GSL::SF::gsl_sf_lngamma($n+1);
+         my $tmp3 = ($S-$r) * Math::GSL::SF::gsl_sf_lngamma($n  );
          my $bmax  = ($tmp1 - $tmp2 - $tmp3) / $N;
          $b = $self->_brillouin / $bmax;
       }
@@ -437,13 +441,15 @@ method _brillouin () {
    my $community = $self->community;
    my $N = $community->get_members_count;
    if ($N > 0) {
+      if (not eval { require Math::GSL::SF }) {
+         $self->throw("Need module Math::GSL::SF to calculate brillouin_e\n$@");
+      }
       my $sum = 0;
       while (my $member = $community->next_member) {
          my $c = $community->get_count($member);
-         $sum += Math::BigFloat->new($c)->bfac->blog;
+         $sum += Math::GSL::SF::gsl_sf_lngamma($c);
       }
-      my $tmp = Math::BigFloat->new($N)->bfac->blog;
-      $d = ( $tmp - $sum ) / $N;
+      $d = ( Math::GSL::SF::gsl_sf_lngamma($N) - $sum ) / $N;
    }
    return $d;
 }

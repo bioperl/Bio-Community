@@ -45,7 +45,7 @@ my $build = Module::Build->new(
                             },
     recommends           => {
                              #'Clone::Fast'                 =>  0, # C bindings for Bio::Root::clone(). Broken in 0.97?!
-                             'Math::BigInt::GMP'            =>  0, # C bindings for arithmetic
+                             'Math::GSL::SF'                =>  0, # C bindings for arithmetic
                             },
     script_files         => [
                              'scripts/bc_clean_shrapnel',
