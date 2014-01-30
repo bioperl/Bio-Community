@@ -12,8 +12,8 @@ biological organisms. Bio-Community is part of the BioPerl project
 
 INSTALLATION & DEPENDENCIES
 
-Bio-Community module requires Perl 5.10 or above. Additionally, these Perl
-modules are required and will be installed during the installation procedure:
+Bio-Community requires Perl 5.10 or above. Additionally, these Perl modules are
+required and will be installed during the installation procedure:
 
   BioPerl version >= 1.6.923
   DateTime
