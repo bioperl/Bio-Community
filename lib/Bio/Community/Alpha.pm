@@ -262,7 +262,6 @@ method _ace () {
          $add *= $i-1;
          $tmp_sum += $add;
       }
-
       if ($n_rare == $F[0]) {
          # ACE is not defined when all rare species are singletons
          $d = undef;

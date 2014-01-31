@@ -81,7 +81,7 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alp
 is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, undef;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
 SKIP: {
@@ -106,7 +106,7 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 1.0;
 
 
-# Test community with a few individuals
+# Test community with a few individuals from the same species
 
 $c = Bio::Community->new;
 $c->add_member( Bio::Community::Member->new(-id=>1), 3);
@@ -118,7 +118,7 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 1.0;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
 SKIP: {
@@ -143,7 +143,7 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_d')->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'berger'   )->get_alpha, 1.0;
 
 
-# Test community with a single species
+# Test community with a many individuals from the same species
 
 $c = Bio::Community->new;
 $c->add_member( Bio::Community::Member->new(-id=>1), 35 );
@@ -152,10 +152,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 0.1690309;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 0.0;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, undef;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
-delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
 SKIP: {
