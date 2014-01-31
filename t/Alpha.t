@@ -47,7 +47,10 @@ is Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 
 is Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
 is Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, undef;
 is Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, undef;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 is Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, undef;
+}
 is Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, undef;
 is Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, undef;
 is Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, undef;
@@ -55,7 +58,10 @@ is Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 0.0;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.0;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.0;
 
@@ -78,7 +84,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.0;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 1.0;
@@ -86,7 +95,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.0;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.0;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.0;
 
@@ -109,7 +121,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.0;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 1.0;
@@ -117,7 +132,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.0;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.0;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.0;
 
@@ -140,7 +158,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.0;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.0;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 1.0;
@@ -148,7 +169,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.0;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.0;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.0;
 
@@ -172,7 +196,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.4936008;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.5787946;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.4756243;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.5615533;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 0.8784224;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 0.9036374;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 0.6379310;
@@ -180,7 +207,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.4011899;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.2378121;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.3120125;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.3901122;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.1600000;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.1559199;
 
@@ -205,7 +235,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.874729636998600;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.920619835714305;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.916666666666667;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.8552170;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 0.935248830832905;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 0.881917103688197;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 0.777777777777778;
@@ -213,7 +246,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 1.01140426470735;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.611111111111111;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 2.57142857142857;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.682390760370350;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 2.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.636061424871458;
 
@@ -239,7 +275,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.4521640;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.6183204;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.5807407;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.5274756;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 0.7518182;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 0.9294867;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 0.4833333;
@@ -247,7 +286,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.8571740;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.4355556;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.7716535;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.6724539;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.3636364;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.3352716;
 
@@ -273,7 +315,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.3969895;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon_e'  )->get_alpha, 0.5657844;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_e'  )->get_alpha, 0.5455840;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin_e')->get_alpha, 0.4462784;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill_e'     )->get_alpha, 0.7725286;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh_e' )->get_alpha, 0.9427872;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_alpha, 0.4391026;
@@ -281,7 +326,10 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'camargo'    )->get_a
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'shannon'  )->get_alpha, 0.7843437;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson'  )->get_alpha, 0.4091880;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'simpson_r')->get_alpha, 1.6925859;
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::SF');
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'brillouin')->get_alpha, 0.5744541;
+}
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'hill'     )->get_alpha, 1.3333333;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'mcintosh' )->get_alpha, 0.3097916;
 
