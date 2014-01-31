@@ -36,10 +36,10 @@ delta_ok $gamma->get_gamma, 0.0722965031388601;
 
 # Just test a few metrics check that we can use the same metrics as in Bio::Community::Alpha
 
-is Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'observed'  )->get_gamma, 3;
-is Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'menhinick' )->get_gamma, 0.0722965031388601;
-is Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'heip'      )->get_gamma, 0.686161833891381;
-is Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'shannon'   )->get_gamma, 0.863869925360591;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'observed'  )->get_gamma, 3.0;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'menhinick' )->get_gamma, 0.0722965031388601;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'heip'      )->get_gamma, 0.686161833891381;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'shannon'   )->get_gamma, 0.863869925360591;
 
 
 done_testing();
