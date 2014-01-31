@@ -28,7 +28,7 @@ bc_manage_samples - Include, delete, merge, sort or rename samples
   bc_manage_samples -input_files   communities.generic              \
                     -exclude_names soil1                            \
                     -merge_names   freshwater2 freshwater5          \
-                    -merge_names   marine.*                         \
+                    -merge_names   marine*                          \
                     -output_prefix processed_communities
 
 =head1 DESCRIPTION
@@ -86,10 +86,9 @@ If names of communities are specified, only these communities will be included
 in the output file, in the requested order. This is also useful to arrange the
 communities in a specific order.
 
-Community names can be specified using Perl regular expressions. The regular
-expressions are anchored, which means that 'marine.*2013' will match all names
-starting with 'marine' and finishing with '2013', while '.*gut.*' will match all
-names containing 'gut'.
+Community names can be specified using wildcards, which means that 'marine*2013'
+will match all names starting with 'marine' and finishing with '2013', while
+'*gut*' will match all names containing 'gut'.
 
 =for Euclid:
    include_names.type: string
@@ -97,7 +96,7 @@ names containing 'gut'.
 =item -en <exclude_names>... | -exclude_names <exclude_names>...
 
 If names of communities are specified, these communities will be excluded from
-the output file. As with <include_names>, regular expressions can be used.
+the output file. As with <include_names>, wildcards are supported.
 
 =for Euclid:
    exclude_names.type: string
@@ -106,8 +105,7 @@ the output file. As with <include_names>, regular expressions can be used.
 
 Specify the name of the communities to merge. Use this option multiple time if
 you need to merge multiple sets of communities. The count of the members of
-these communities are added. As with <include_names>, regular expressions can be
-used.
+these communities are added. As with <include_names>, wildcards are supported.
 
 =for Euclid:
    repeatable
@@ -226,7 +224,6 @@ func manage ($input_files, $output_prefix, $name_prefix, $name_suffix,
    }
 
    if ($include_regexps) {
-
       # Re-order communities
       my %missings = map {$_ => undef} @$include_names;
       my @names = @included_names;
@@ -246,15 +243,12 @@ func manage ($input_files, $output_prefix, $name_prefix, $name_suffix,
          }
       }
       $meta = $ordered_meta;
-
       # Warn if there are samples that were requested but not seen
       my @missing = keys %missings;
       if (scalar @missing > 0) {
-         die "Error: Did not find the following requested communities: ".join(', ',@missing)."\n";
+         die "Error: No communities seem to match: ".join(' ',map{"'".$_."'"}@missing)."\n";
       }
-
    }
-
 
    # Merge communities
    if (defined $merge_regexps) {
@@ -323,9 +317,14 @@ func manage ($input_files, $output_prefix, $name_prefix, $name_suffix,
 
 
 func regexify ($strings) {
-   # Given strings, return the corresponding anchored regular expressions
-   my $regexps = [ map { qr/^$_$/ } @$strings ];
-   return $regexps;
+   # Given strings with wildcards, return the corresponding anchored regexps
+   # Example: 'marine.site1*2013' becomes '^marine\.site1.*2013$'
+   return [ map {
+      my $re = $_;
+      $re = quotemeta($re);
+      $re =~ s/\\\*/.*/g;
+      $re = qr/^$re$/;
+   } @$strings ];
 }
 
 
