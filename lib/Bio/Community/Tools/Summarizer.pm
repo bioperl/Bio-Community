@@ -93,6 +93,9 @@ use Bio::Community::Meta;
 use Bio::Community::TaxonomyUtils
    qw(get_taxon_lineage get_lineage_string clean_lineage_arr);
 
+use POSIX; # defines DBL_EPSILON to something like 2.22044604925031e-16
+use constant EPSILON => 10 * DBL_EPSILON;
+
 
 extends 'Bio::Root::Root';
 
@@ -392,11 +395,11 @@ method _group_by_relative_abundance ( $meta, $params ) {
    if      ($operator eq '<' ) {
       $cmp =  sub { $_[0] < $_[1] };
    } elsif ($operator eq '<=' ) {
-      $cmp =  sub { $_[0] <= $_[1] };
+      $cmp =  sub { $_[0] - $_[1] < EPSILON };
    } elsif ($operator eq '>=' ) {
-      $cmp =  sub { $_[0] >= $_[1] };
+      $cmp =  sub { $_[1] - $_[0] < EPSILON };
    } elsif ($operator eq '>' ) {
-      $cmp =  sub { $_[0] > $_[1] };
+      $cmp =  sub { $_[1] <  $_[0] };
    } else {
       $self->throw("Invalid comparison operator provided, '$operator'.");
    }
@@ -418,7 +421,7 @@ method _group_by_relative_abundance ( $meta, $params ) {
       }
       for my $rel_ab (@$rel_abs) {
          if ( not &$cmp($rel_ab, $thresh) ) {
-            $member_to_group--; # This member needs no grouping
+            $member_to_group = 0; # This member needs no grouping
             last;
          }
       }
