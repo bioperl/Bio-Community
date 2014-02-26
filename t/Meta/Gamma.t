@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Bio::Root::Test;
-
+use Test::Number::Delta;
 use Bio::Community::IO;
 
 use_ok($_) for qw(
@@ -25,11 +25,21 @@ $gamma = Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'ob
 isa_ok $gamma, 'Bio::Community::Meta::Gamma';
 
 
-# Test metrics
+# Get/set type of gamma diversity
 
-is Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'observed' )->get_gamma, 3;
+is $gamma->type('observed'), 'observed';
+delta_ok $gamma->get_gamma, 3.0;
 
-# TODO: Should have a method that tests all the methods that Bio::Community::Alpha has
+is $gamma->type('menhinick'), 'menhinick';
+delta_ok $gamma->get_gamma, 0.0722965031388601;
+
+
+# Just test a few metrics check that we can use the same metrics as in Bio::Community::Alpha
+
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'observed'  )->get_gamma, 3.0;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'menhinick' )->get_gamma, 0.0722965031388601;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'heip'      )->get_gamma, 0.686161833891381;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'shannon'   )->get_gamma, 0.863869925360591;
 
 
 done_testing();

@@ -24,6 +24,24 @@ $community2->add_member( Bio::Community::Member->new(-id => 1), 1 );
 
 $meta = Bio::Community::Meta->new( -communities => [$community1, $community2] );
 
+
+# Basic object
+
+$beta = Bio::Community::Meta::Beta->new( -metacommunity => $meta );
+isa_ok $beta, 'Bio::Community::Meta::Beta';
+
+
+# Get/set type of beta diversity
+
+is $beta->type('euclidean'), 'euclidean';
+delta_ok $beta->get_beta, 0;
+
+is $beta->type('shared'), 'shared';
+delta_ok $beta->get_beta, 100;
+
+
+# Test all metrics
+
 ok $beta = Bio::Community::Meta::Beta->new( -metacommunity => $meta, -type => 'euclidean' );
 isa_ok $beta, 'Bio::Community::Meta::Beta';
 

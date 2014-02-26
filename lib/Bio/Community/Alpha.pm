@@ -22,10 +22,8 @@ Bio::Community::Alpha - Calculate the alpha diversity of a community
 =head1 DESCRIPTION
 
 The Bio::Community::Alpha module calculates the alpha diversity within a
-community. The goal is to support many different alpha diversity metrics, but
-the only metric available at the moment is: richness.
-
-For all these metrics, a higher value means that the community is more diverse.
+community. This module supports different types of alpha diversity metrics:
+richness, evenness, dominance and indices. See type() for details.
 
 =head1 AUTHOR
 
@@ -76,7 +74,6 @@ use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use List::Util qw(max);
-use Math::BigFloat try => 'GMP';
 
 extends 'Bio::Root::Root';
 
@@ -163,7 +160,7 @@ has community => (
 =cut
 
 has type => (
-   is => 'ro',
+   is => 'rw',
    isa => 'AlphaType',
    required => 0,
    lazy => 1,
@@ -172,35 +169,14 @@ has type => (
 );
 
 
-#####
-## TODO:
-
-## Index:
-##   Fisher index: a diversity index, defined implicitly by the formula
-##      S=a*ln(1+n/a) where S is number of taxa, n is number of individuals and a
-##      is the value of Fisher's alpha.
-##      See http://www.thefreelibrary.com/A+table+of+values+for+Fisher%27s+%5Balpha%5D+log+series+diversity+index.-a0128667026
-
-## QIIME supports these alpha diversity indices:
-##   $ alpha_diversity.py -s
-##   Known metrics are:
-##      Implemented (or not needed) in B:C:
-##        observed_species, shannon, simpson_e, simpson, reciprocal_simpson,
-##        margalef,  menhinick, equitability, chao1, ACE, dominance, singles,
-##        doubles, chao1_confidence, berger_parker_d, brillouin_d, mcintosh_d
-##        mcintosh_e, PD_whole_tree
-##      Not yet implemented:
-##        fisher_alpha, kempton_taylor_q, michaelis_menten_fit, osd, robbins, strong
-
-#####
-
-
 =head2 get_alpha
 
  Function: Calculate the alpha diversity of a community.
  Usage   : my $metric = $alpha->get_alpha;
  Args    : None
- Returns : A number for the alpha diversity measurement
+ Returns : A number for the alpha diversity measurement. Undef is returned in
+           special cases, e.g. when measuring the evenness or dominance in a
+           community with no members.
 
 =cut
 
@@ -218,13 +194,21 @@ method _observed () {
 
 method _menhinick () {
    # Calculate the Menhinick richness
-   return $self->community->get_richness / sqrt($self->community->get_members_count);
+   my $community = $self->community;
+   my $counts = $community->get_members_count;
+   return $counts > 0 ?
+          $community->get_richness / sqrt($counts) :
+          0;
 }
 
 
 method _margalef () {
    # Calculate the Margalef richness
-   return ($self->community->get_richness - 1) / log($self->community->get_members_count);
+   my $community = $self->community;
+   my $counts = $community->get_members_count;
+   return $counts > 1 ?
+          ($community->get_richness - 1) / log($counts) :
+          0;
 }
 
 
@@ -235,7 +219,7 @@ method _chao1 () {
    my $d = 0;
    my ($n1, $n2) = (0, 0); # singletons and doubletons
    my $community = $self->community;
-   while (my $member = $community->next_member) {
+   while (my $member = $community->next_member('_alpha_chao1')) {
       my $c = $community->get_count($member);
       if ($c == 1) {
          $n1++;
@@ -253,34 +237,41 @@ method _ace () {
    # Calculate abundance-based coverage estimator (ACE) richness.
    # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC93182/
    my $d = 0;
-   my $thresh = 10;
-   my ($s_rare, $s_abund) = (0, 0); # number of rare, and abundant (>10) species
-   my @F = (0) x $thresh; # number of singletons, doubletons, tripletons, ... 10-tons
    my $community = $self->community;
-   while (my $member = $community->next_member) {
-      my $c = $community->get_count($member);
-      if ($c > $thresh) {
-         $s_abund++;
-      } else {
-         $s_rare++;
-         if ( $c != int($c) ) {
-            $self->throw("Got count $c but can only compute chao1 on integer numbers");
+   if ($community->get_richness > 0) {
+      my $thresh = 10;
+      my ($s_rare, $s_abund) = (0, 0); # number of rare, and abundant (>10) species
+      my @F = (0) x $thresh; # number of singletons, doubletons, tripletons, ... 10-tons
+      while (my $member = $community->next_member('_alpha_ace')) {
+         my $c = $community->get_count($member);
+         if ($c > $thresh) {
+            $s_abund++;
          } else {
-            $F[$c-1]++;
+            $s_rare++;
+            if ( $c != int($c) ) {
+               $self->throw("Got count $c but can only compute ace on integer numbers");
+            } else {
+               $F[$c-1]++;
+            }
          }
       }
+      my ($n_rare, $tmp_sum) = (0, 0);
+      for my $i (0.. $thresh) {
+         my $add = $i * $F[$i-1];
+         $n_rare  += $add;
+         $add *= $i-1;
+         $tmp_sum += $add;
+      }
+      if ($n_rare == $F[0]) {
+         # ACE is not defined when all rare species are singletons
+         $d = undef;
+      } else {
+         my $C = 1 - $F[0]/$n_rare;
+         my $gamma = ($s_rare * $tmp_sum) / ($C * $n_rare * ($n_rare-1)) - 1;
+         $gamma = max($gamma, 0);
+         $d = $s_abund + $s_rare/$C + $F[0]*$gamma/$C;
+      }
    }
-   my ($n_rare, $tmp_sum) = (0, 0);
-   for my $i (0.. $thresh) {
-      my $add = $i * $F[$i-1];
-      $n_rare  += $add;
-      $add *= $i-1;
-      $tmp_sum += $add;
-   }
-   my $C = 1 - $F[0]/$n_rare;
-   my $gamma = ($s_rare * $tmp_sum) / ($C * $n_rare * ($n_rare-1)) - 1;
-   $gamma = max($gamma, 0);
-   $d = $s_abund + $s_rare/$C + $F[0]*$gamma/$C;
    return $d;
 }
 
@@ -288,65 +279,104 @@ method _ace () {
 method _buzas () {
    # Calculate Buzas and Gibson's evenness
    # http://folk.uio.no/ohammer/past/diversity.html
-   return exp($self->_shannon) / $self->community->get_richness;
+   my $richness = $self->community->get_richness;
+   return $richness > 0 ?
+          exp($self->_shannon) / $richness :
+          undef;
 }
 
 
 method _heip () {
    # Calculate Heip's evenness
-   # http://www.pisces-conservation.com/sdrhelp/index.html?heip.htm
-   return (exp($self->_shannon) - 1) / ($self->community->get_richness - 1);
+   # http://www.pisces-conservaton.com/sdrhelp/index.html?heip.htm
+   my $richness = $self->community->get_richness;
+   return $richness > 1 ?
+          (exp($self->_shannon) - 1) / ($richness - 1) :
+          undef;
 }
 
 
 method _shannon_e () {
    # Calculate Shannon's evenness
-   return $self->_shannon / log($self->community->get_richness);
+   my $e = undef;
+   my $community = $self->community;
+   my $richness = $community->get_richness;
+   if ($richness > 0) { 
+      $e = 0;
+      if ($richness > 1) {
+         $e = $self->_shannon / log($richness);
+      }
+   }
+   return $e;
 }
 
 
 method _simpson_e () {
    # Calculate Simpson's evenness
-   return $self->_simpson / (1 - 1/$self->community->get_richness);
+   my $e = undef;
+   my $richness = $self->community->get_richness;
+   if ($richness > 0) {
+      $e = 0;
+      if ($richness > 1) {
+         $e = $self->_simpson / (1 - 1/$richness);
+      }
+   }
+   return $e;
 }
 
 
 method _hill_e () {
    # Calculate Hill's E_2,1 evenness
    # http://www.wcsmalaysia.org/analysis/diversityIndexMenagerie.htm#Hill
-   return $self->_simpson_r / exp($self->_shannon);
+   return $self->community->get_richness > 0 ?
+          $self->_simpson_r / exp($self->_shannon) :
+          undef;
 }
 
 
 method _brillouin_e () {
    # Calculate Brillouin's evenness
    # http://www.wcsmalaysia.org/analysis/diversityIndexMenagerie.htm#Brillouin
+   # We replaced the factorial function by its generalization, the gamma
+   # function, to be able to handle decimal numbers.
+   my $b = undef;
    my $community = $self->community;
-   my $N = $community->get_members_count;
    my $S = $community->get_richness;
-   my $n = int( $N / $S );
-   my $r = $N - $S * $n;
-   my $tmp1 =           Math::BigFloat->new($N  )->bfac->blog;
-   my $tmp2 =     $r  * Math::BigFloat->new($n+1)->bfac->blog;
-   my $tmp3 = ($S-$r) * Math::BigFloat->new($n  )->bfac->blog;
-   my $bmax  = ($tmp1 - $tmp2 - $tmp3) / $N;
-   return $self->_brillouin / $bmax;
+   if ($S > 0) {
+      $b = 0;
+      if ($S > 1) {
+         if (not eval { require Math::GSL::SF }) {
+            $self->throw("Need module Math::GSL::SF to calculate brillouin_e\n$@");
+         }
+         my $N = $community->get_members_count;
+         my $n = int( $N / $S );
+         my $r = $N - $S * $n;
+         my $tmp1 =           Math::GSL::SF::gsl_sf_lngamma($N  );
+         my $tmp2 =     $r  * Math::GSL::SF::gsl_sf_lngamma($n+1);
+         my $tmp3 = ($S-$r) * Math::GSL::SF::gsl_sf_lngamma($n  );
+         my $bmax  = ($tmp1 - $tmp2 - $tmp3) / $N;
+         $b = $self->_brillouin / $bmax;
+      }
+   }
+   return $b;
 }
 
 
 method _mcintosh_e () {
    # Calculate McIntosh's evenness
-   my $d = 0;
-   my $U = 0;
+   my $d = undef;
    my $community = $self->community;
-   while (my $member = $community->next_member) {
-      my $c = $community->get_count($member);
-      $U += $c**2;
-   }
-   $U = sqrt($U);
-   my $N = $community->get_members_count;
    my $S = $community->get_richness;
-   $d = $U / sqrt( ($N-$S+1)**2 + $S - 1 );
+   if ($S > 0) {
+      my $U = 0;
+      while (my $member = $community->next_member('_alpha_mcintosh_e')) {
+         my $c = $community->get_count($member);
+         $U += $c**2;
+      }
+      $U = sqrt($U);
+      my $N = $community->get_members_count;
+      $d = $U / sqrt( ($N-$S+1)**2 + $S - 1 );
+   }
    return $d;
 }
 
@@ -354,16 +384,19 @@ method _mcintosh_e () {
 method _camargo () {
    # Calculate Camargo's evenness
    # http://www.pisces-conservation.com/sdrhelp/index.html?camargo.htm
-   my $d = 0;
+   my $d = undef;
    my $community = $self->community;
    my $S = $community->get_richness;
-   my @p = map { $community->get_rel_ab($_) / 100 } @{$community->get_all_members};
-   for my $i (1 .. $S) {
-      for my $j ($i+1 .. $S) {
-         $d += abs($p[$i-1] - $p[$j-1]) / $S;
+   if ($S > 0) {
+      my @p = map { $community->get_rel_ab($_) / 100 } @{$community->get_all_members}; 
+      $d = 0;
+      for my $i (1 .. $S) {
+         for my $j ($i+1 .. $S) {
+            $d += abs($p[$i-1] - $p[$j-1]) / $S;
+         }
       }
+      $d = 1 - $d;
    }
-   $d = 1 - $d;
    return $d;
 }
 
@@ -372,7 +405,7 @@ method _shannon () {
    # Calculate the Shannon-Wiener index
    my $d = 0;
    my $community = $self->community;
-   while (my $member = $community->next_member) {
+   while (my $member = $community->next_member('_alpha_shannon')) {
       my $p = $community->get_rel_ab($member) / 100;
       $d += $p * log($p);
    }
@@ -382,13 +415,19 @@ method _shannon () {
 
 method _simpson () {
    # Calculate Simpson's Index of Diversity (1-D)
-   return 1 - $self->_simpson_d;
+   my $richness = $self->community->get_richness;
+   return $richness > 0 ?
+          1 - $self->_simpson_d :
+          0;
 }
 
 
 method _simpson_r () {
    # Calculate Simpson's Reciprocal Index (1/D)
-   return 1 / $self->_simpson_d;
+   my $richness = $self->community->get_richness;
+   return $richness > 0 ?
+          1 / $self->_simpson_d :
+          0;
 }
 
 
@@ -398,15 +437,19 @@ method _brillouin () {
    # Use the Math::BigFloat module because i) it has a function to calculate
    # factorial, and ii) it can use Math::BigInt::GMP C-bindings to be faster
    my $d = 0;
-   my $sum = 0;
    my $community = $self->community;
-   while (my $member = $community->next_member) {
-      my $c = $community->get_count($member);
-      $sum += Math::BigFloat->new($c)->bfac->blog;
-   }
    my $N = $community->get_members_count;
-   my $tmp = Math::BigFloat->new($N)->bfac->blog;
-   $d = ( $tmp - $sum ) / $N;
+   if ($N > 0) {
+      if (not eval { require Math::GSL::SF }) {
+         $self->throw("Need module Math::GSL::SF to calculate brillouin_e\n$@");
+      }
+      my $sum = 0;
+      while (my $member = $community->next_member('_alpha_brillouin')) {
+         my $c = $community->get_count($member);
+         $sum += Math::GSL::SF::gsl_sf_lngamma($c);
+      }
+      $d = ( Math::GSL::SF::gsl_sf_lngamma($N) - $sum ) / $N;
+   }
    return $d;
 }
 
@@ -414,7 +457,10 @@ method _brillouin () {
 method _hill () {
    # Calculate Hill's N_inf index of diversity
    # http://www.wcsmalaysia.org/analysis/diversityIndexMenagerie.htm#Hill
-   return 1 / $self->_berger;
+   my $richness = $self->community->get_richness;
+   return $richness > 0 ?
+          1 / $self->_berger :
+          0;
 }
 
 
@@ -422,26 +468,30 @@ method _mcintosh () {
    # Calculate McIntosh's index of diversity
    # http://www.pisces-conservation.com/sdrhelp/index.html?mcintoshd.htm
    my $d = 0;
-   my $U = 0;
    my $community = $self->community;
-   while (my $member = $community->next_member) {
-      my $c = $community->get_count($member);
-      $U += $c**2;
-   }
-   $U = sqrt($U);
    my $N = $community->get_members_count;
-   $d = ($N - $U) / ($N - sqrt($N));
+   if ($N > 1) {
+      my $U = 0;
+      while (my $member = $community->next_member('_alpha_mcintosh')) {
+         my $c = $community->get_count($member);
+         $U += $c**2;
+      }
+      $U = sqrt($U);
+      $d = ($N - $U) / ($N - sqrt($N));
+   }
    return $d;
 }
 
 
 method _simpson_d () {
    # Calculate Simpson's Dominance Index (D)
-   my $d = 0;
+   my $d = undef;
    my $community = $self->community;
-   while (my $member = $community->next_member) {
-      my $p = $community->get_rel_ab($member) / 100;
-      $d += $p**2;
+   if ($community->get_richness > 0) {
+      while (my $member = $community->next_member('_alpha_simpson_d')) {
+         my $p = $community->get_rel_ab($member) / 100;
+         $d += $p**2;
+      }
    }
    return $d;
 }
@@ -450,7 +500,10 @@ method _simpson_d () {
 method _berger () {
    # Calculate Berger-Parker's dominance
    my $community = $self->community;
-   return $community->get_rel_ab($community->get_member_by_rank(1)) / 100;
+   my $member = $community->get_member_by_rank(1);
+   return defined $member ?
+          $community->get_rel_ab($member) / 100 :
+          undef;
 }
 
 

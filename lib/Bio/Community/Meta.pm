@@ -84,6 +84,7 @@ use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use Tie::IxHash;
+use Bio::Community;
 use Bio::Community::Member;
 
 
@@ -252,8 +253,30 @@ method next_community () {
 =cut
 
 method get_all_communities () {
-   my @all_communities = values %{$self->_communities};   
+   my @all_communities = values %{$self->_communities};
    return \@all_communities;
+}
+
+
+=head2 get_metacommunity
+
+ Function: Generate a community that is the sum of all the members of the
+           communities. If sampling effort was unequal between your communities,
+           you may consider using L<Bio::Community::Tools::Rarefier>.
+ Usage   : my $metacommunity = $meta->get_metacommunity();
+ Args    : None
+ Returns : A new Bio::Community object
+
+=cut
+
+method get_metacommunity () {
+   my $metacommunity = Bio::Community->new();
+   for my $community (@{$self->get_all_communities}) {
+      while (my $member = $community->next_member('_meta_get_metacommunity_ite')) {
+         $metacommunity->add_member( $member, $community->get_count($member) );
+      }
+   }
+   return $metacommunity;
 }
 
 

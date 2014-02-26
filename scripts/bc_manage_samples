@@ -26,9 +26,9 @@ bc_manage_samples - Include, delete, merge, sort or rename samples
 =head1 SYNOPSIS
 
   bc_manage_samples -input_files   communities.generic              \
-                    -exclude_names community1                       \
-                    -merge_names   community2 community5            \
-                    -merge_names   community7 community8 community9 \
+                    -exclude_names soil1                            \
+                    -merge_names   freshwater2 freshwater5          \
+                    -merge_names   marine*                          \
                     -output_prefix processed_communities
 
 =head1 DESCRIPTION
@@ -83,7 +83,12 @@ Suffix to add to the end of all community names. Default: name_suffix.default
 =item -in <include_names>... | -include_names <include_names>...
 
 If names of communities are specified, only these communities will be included
-in the output file, in the requested order. This is useful to sort communities.
+in the output file, in the requested order. This is also useful to arrange the
+communities in a specific order.
+
+Community names can be specified using wildcards, which means that 'marine*2013'
+will match all names starting with 'marine' and finishing with '2013', while
+'*gut*' will match all names containing 'gut'.
 
 =for Euclid:
    include_names.type: string
@@ -91,7 +96,7 @@ in the output file, in the requested order. This is useful to sort communities.
 =item -en <exclude_names>... | -exclude_names <exclude_names>...
 
 If names of communities are specified, these communities will be excluded from
-the output file.
+the output file. As with <include_names>, wildcards are supported.
 
 =for Euclid:
    exclude_names.type: string
@@ -100,7 +105,7 @@ the output file.
 
 Specify the name of the communities to merge. Use this option multiple time if
 you need to merge multiple sets of communities. The count of the members of
-these communities are added.
+these communities are added. As with <include_names>, wildcards are supported.
 
 =for Euclid:
    repeatable
@@ -167,101 +172,109 @@ Email florent.angly@gmail.com
 =cut
 
 
-manip( $ARGV{'input_files'}, $ARGV{'output_prefix'}  , $ARGV{'name_prefix'},
-       $ARGV{'name_suffix'}, $ARGV{'include_names'}  , $ARGV{'exclude_names'},
-       $ARGV{'merge_names'}, $ARGV{'renaming_method'} );
+manage( $ARGV{'input_files'}, $ARGV{'output_prefix'}  , $ARGV{'name_prefix'},
+        $ARGV{'name_suffix'}, $ARGV{'include_names'}  , $ARGV{'exclude_names'},
+        $ARGV{'merge_names'}, $ARGV{'renaming_method'} );
 
 exit;
 
 
-func manip ($input_files, $output_prefix, $name_prefix, $name_suffix,
+func manage ($input_files, $output_prefix, $name_prefix, $name_suffix,
    $include_names, $exclude_names, $merge_names, $renaming_method) {
 
-   # Prepare communities to include or exclude 
-   my $nof_includes = 0;
-   my %includes;
-   if (defined $include_names) {
-      $nof_includes = scalar @$include_names;
-      %includes = map { $_ => undef } @$include_names;
-   }
-   my %excludes;
-   if (defined $exclude_names) {
-      %excludes = map { $_ => undef } @$exclude_names;
-   }
-   while ( my ($include, undef) = each %includes ) {
-      if (exists $excludes{$include}) {
-         die "Error: Cannot request to include and exclude community '$include' at the same time\n";
-      }
-   }
+   # Process regular expressions
+   my $include_regexps = regexify($include_names) if defined $include_names;
+   my $exclude_regexps = regexify($exclude_names) if defined $exclude_names;
+   my $merge_regexps = [ map { regexify($_) } @$merge_names ] if defined $merge_names;
 
    # Read input communities, exclude or include as needed
    my $meta = Bio::Community::Meta->new;
    my $format;
+   my %included_comms;
+   my @included_names;
    for my $input_file (@$input_files) {
       print "Reading file '$input_file'\n";
       my $in = Bio::Community::IO->new( -file => $input_file );
       $format = $in->format;
       while (my $community = $in->next_community) {
          my $name = $community->name;
-         if ( $nof_includes > 0 ) {
+         my $include = 0;
+         if ( $include_regexps ) {
             # Only include specifically requested communities
-            if ( exists $includes{$name} ) {
-               $meta->add_communities([$community]);
-               delete $includes{$name};
+            if ($name ~~ @{$include_regexps}) {
+               $include = 1;
             }
          } else {
-            if ( not exists $excludes{$name} ) {
-               $meta->add_communities([$community]);
+            if (not $name ~~ @{$exclude_regexps}) {
+               $include = 1;
             } # else it is specifically excluded
+         }
+         if ($include) {
+            $meta->add_communities([$community]);
+            if (exists $included_comms{$name}) {
+               die "Error: Community name $name is ambiguous because several ".
+                  "communities have this same name.\n";
+            } else {
+               $included_comms{$name} = $community;
+               push @included_names, $name;
+            }
          }
       }
       $in->close;
    }
 
-   # Warn if there are samples that were requested but not seen
-   my @missing = keys %includes;
-   if (scalar @missing > 0) {
-      die "Error: Did not find the following requested communities: ".join(', ',@missing)."\n";
-   }
-
-   # Order communities
-   if ((defined $include_names) && (scalar @$include_names > 0)) {
+   if ($include_regexps) {
+      # Re-order communities
+      my %missings = map {$_ => undef} @$include_names;
+      my @names = @included_names;
       my $ordered_meta = Bio::Community::Meta->new;
-      for my $name (@$include_names) {
-         my $community = $meta->get_community_by_name($name);
-         $ordered_meta->add_communities([$community]);
+      for my $i (0 .. scalar @$include_regexps - 1) {
+         my $regexp = $include_regexps->[$i];
+         my $regname = $include_names->[$i];
+         for (my $i = 0; $i < scalar @names; $i++) {
+            my $name = $names[$i];
+            if ($name =~ $regexp) {
+               splice @names, $i, 1;
+               $i--;
+               my $community = $meta->get_community_by_name($name);
+               $ordered_meta->add_communities([$community]);
+               delete $missings{$regname};
+            }
+         }
       }
       $meta = $ordered_meta;
+      # Warn if there are samples that were requested but not seen
+      my @missing = keys %missings;
+      if (scalar @missing > 0) {
+         die "Error: No communities seem to match: ".join(' ',map{"'".$_."'"}@missing)."\n";
+      }
    }
 
    # Merge communities
-   if (defined $merge_names) {
-      my %communities_hash;
-      while (my $community = $meta->next_community) {
-         my $name = $community->name;
-         if (exists $communities_hash{$name}) {
-            die "Error: Ambiguous community names. Several communities named ".
-               "identically, as '$name',  were given as input.\n";
-         } else {
-            $communities_hash{$name} = $community;
-         }
-      }
-      for my $merge_set (@$merge_names) {
-         my $merged_name = gen_name($merge_set, $renaming_method);
-         print "Processing $merged_name\n";
-         my $merged_community = Bio::Community->new( -name => $merged_name );
-         for my $name (@$merge_set) {
-            my $community = delete $communities_hash{$name} ||
-               die "Error: Could not find requested community, '$name' in the ".
-                  "input.\n";
-            while ( my $member = $community->next_member ) {
-               my $count = $community->get_count($member);
-               $merged_community->add_member($member, $count);
+   if (defined $merge_regexps) {
+      for my $i (0 .. scalar @$merge_regexps - 1) {
+         my $merge_set = $merge_regexps->[$i];
+         my $merge_names = $merge_names->[$i];
+         print "Processing ".join(' ', @$merge_names)."\n";
+         my $merged_community = Bio::Community->new( );
+         my @names;
+         for my $name (@included_names) {
+            if ($name ~~ @$merge_set) {
+               push @names, $name;
+               my $community = delete $included_comms{$name} ||
+                  die "Error: Could not find requested community, '$name' in the ".
+                     "input.\n";
+               while ( my $member = $community->next_member ) {
+                  my $count = $community->get_count($member);
+                  $merged_community->add_member($member, $count);
+               }
             }
          }
-         $communities_hash{$merged_name} = $merged_community;
+         my $merged_name = gen_name(\@names, $renaming_method);
+         $merged_community->name($merged_name);
+         $included_comms{$merged_name} = $merged_community;
       }
-      $meta = Bio::Community::Meta->new(-communities => [values %communities_hash]);
+      $meta = Bio::Community::Meta->new(-communities => [values %included_comms]);
    }
 
    # Write output communities
@@ -303,7 +316,20 @@ func manip ($input_files, $output_prefix, $name_prefix, $name_suffix,
 }
 
 
+func regexify ($strings) {
+   # Given strings with wildcards, return the corresponding anchored regexps
+   # Example: 'marine.site1*2013' becomes '^marine\.site1.*2013$'
+   return [ map {
+      my $re = $_;
+      $re = quotemeta($re);
+      $re =~ s/\\\*/.*/g;
+      $re = qr/^$re$/;
+   } @$strings ];
+}
+
+
 func gen_name ($names, $method) {
+   # Generate a new name for the communities to merge
    my $name;
    if (length $method == 1) {
       my $separator = $method;

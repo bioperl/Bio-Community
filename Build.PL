@@ -44,7 +44,7 @@ my $build = Module::Build->new(
                             },
     recommends           => {
                              #'Clone::Fast'                 =>  0, # C bindings for Bio::Root::clone(). Broken in 0.97?!
-                             'Math::BigInt::GMP'            =>  0, # C bindings for arithmetic
+                             'Math::GSL::SF'                =>  0, # C bindings for arithmetic
                             },
     script_files         => [
                              'scripts/bc_add_taxonomy',
@@ -53,7 +53,8 @@ my $build = Module::Build->new(
                              'scripts/bc_correct_misassignments',
                              'scripts/bc_get_info',
                              'scripts/bc_manage_samples',
-                             'scripts/bc_measure_distance',
+                             'scripts/bc_measure_alpha',
+                             'scripts/bc_measure_beta',
                              'scripts/bc_rarefy',
                              'scripts/bc_relative_to_absolute',
                              'scripts/bc_remove_unexpected_members',
