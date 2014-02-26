@@ -27,7 +27,6 @@ modules are required and will be installed during the installation procedure:
   Moose::Util::TypeConstraints
   MooseX::NonMoose
   MooseX::StrictConstructor
-  Parallel::Iterator
   PerlIO:eol
   Scalar::Util
   Tie::IxHash

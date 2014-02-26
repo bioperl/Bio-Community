@@ -84,7 +84,6 @@ use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Member;
-use Parallel::Iterator qw( iterate );
 
 our $VERSION = '0.001003'; # 0.1.3
 
@@ -404,11 +403,7 @@ method next_member ( $iter_name = 'default' ) {
    my $iter;
    if (not exists $iters->{$iter_name}) {
       # Create new iterator
-      $iter = iterate(
-         { workers => 0 },
-         sub { return $_[1]; }, # i.e. my ($id, $member) = @_; return $member;
-         $self->_members
-      );
+      $iter = $self->_create_hash_val_iter( $self->_members );
       $iters->{$iter_name} = $iter;
    } else {
       $iter = $iters->{$iter_name};
@@ -424,6 +419,35 @@ method next_member ( $iter_name = 'default' ) {
 
    $self->_members_iterator($iters);
    return $member;
+}
+
+
+method _create_hash_iter ($data) {
+   # Iteratively return hash key-value pairs
+   my %h = %$data;
+   return sub {
+      my ($key, $val) = each %h;
+      return unless $val;
+      return ($key, $val);
+   };
+}
+
+
+method _create_array_iter ($data) {
+   # Iteratively return array values
+   my @r = @$data;
+   return sub {
+      return shift @r;
+   };
+}
+
+
+method _create_hash_val_iter ($data) {
+   # Iteratively return hash values
+   my @r = values %$data;
+   return sub {
+      return shift @r;
+   };
 }
 
 

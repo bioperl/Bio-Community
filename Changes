@@ -2,6 +2,7 @@ Revision history for Perl extension Bio::Community.
 
 x.x.x
   - Script to assign taxonomy from similarity searches
+  - Bio::Community::next_member is faster and now returns identical objects
 
 0.1.3 2014-01-23
   - Added new Beta diversity measures: Sorensen, Jaccard and Morisita-Horn

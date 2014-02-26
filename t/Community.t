@@ -11,7 +11,7 @@ use_ok($_) for qw(
 
 my ($community, $community2, $community3, $member1, $member2, $member3, $member4,
    $member5, $iters);
-my (%ids, %rel_abs, %abs_abs, %members);
+my (%ids, %refs_1, %refs_2, %rel_abs, %abs_abs, %members);
 my  @members;
 
 
@@ -65,10 +65,16 @@ isa_ok $community->get_member_by_id(2), 'Bio::Community::Member';
 while (my $member = $community->next_member) {
    isa_ok $member, 'Bio::Community::Member';
    $ids{$member->id} = undef;
+   $refs_1{$member} = undef;
 }
 is_deeply [sort keys %ids], [1, 2, 3];
 
 is $community->get_richness, 3;
+
+while (my $member = $community->next_member) {
+   $refs_2{$member} = undef;
+}
+is_deeply [sort keys %refs_1], [sort keys %refs_2], 'Same objects reference';
 
 %ids = ();
 ok @members = @{$community->get_all_members};
