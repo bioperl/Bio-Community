@@ -430,7 +430,7 @@ method write_community (Bio::Community $community) {
       $self->_meta($meta);
    }
 
-   # Write community but skip it if empty if desired
+   # Write community but skip empty ones if desired
    if ( ($community->get_richness > 0) || (not $self->skip_empty_communities) ) {   
       $self->_write_community_init($community);
       if (not defined $self->_meta->get_community_by_name($community->name)) {
