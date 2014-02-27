@@ -14,7 +14,7 @@ use warnings;
 use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Meta;
-use Bio::Community::Tools::RepresentativeIdConverter;
+use Bio::Community::Tools::IdConverter;
 use Getopt::Euclid qw(:minimal_keys);
 
 
@@ -191,7 +191,7 @@ func use_cluster_repr ($input_files, $cluster_file, $blast_file, $taxassign_file
    }
 
    # Convert IDs
-   my $converter = Bio::Community::Tools::RepresentativeIdConverter->new(
+   my $converter = Bio::Community::Tools::IdConverter->new(
       -metacommunity => $meta,
    );
    if (defined $cluster_file) {

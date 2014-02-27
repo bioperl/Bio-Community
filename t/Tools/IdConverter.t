@@ -5,7 +5,7 @@ use Bio::Community::Member;
 use Bio::Community;
 
 use_ok($_) for qw(
-    Bio::Community::Tools::RepresentativeIdConverter
+    Bio::Community::Tools::IdConverter
 );
 
 
@@ -26,11 +26,11 @@ $community1->add_member( $member2, 2);
 $community1->add_member( $member3, 3);
 $meta1 = Bio::Community::Meta->new( -communities => [$community1] );
 
-ok $converter = Bio::Community::Tools::RepresentativeIdConverter->new(
+ok $converter = Bio::Community::Tools::IdConverter->new(
    -metacommunity => $meta1,
    -cluster_file  => test_input_file('gg_99_otu_map.txt'),
 ), 'Cluster ID representative';
-isa_ok $converter, 'Bio::Community::Tools::RepresentativeIdConverter';
+isa_ok $converter, 'Bio::Community::Tools::IdConverter';
 
 ok $meta2 = $converter->get_converted_meta;
 isa_ok $meta2, 'Bio::Community::Meta';
@@ -60,7 +60,7 @@ $community1->add_member( $member2, 2);
 $community1->add_member( $member3, 3);
 $meta1 = Bio::Community::Meta->new( -communities => [$community1] );
 
-ok $converter = Bio::Community::Tools::RepresentativeIdConverter->new(
+ok $converter = Bio::Community::Tools::IdConverter->new(
    -metacommunity  => $meta1,
    -taxassign_file => test_input_file('rep_set_tax_assignments.txt'),
 );
@@ -91,7 +91,7 @@ $community1->add_member( $member2, 2);
 $community1->add_member( $member3, 3);
 $meta1 = Bio::Community::Meta->new( -communities => [$community1] );
 
-ok $converter = Bio::Community::Tools::RepresentativeIdConverter->new(
+ok $converter = Bio::Community::Tools::IdConverter->new(
    -metacommunity => $meta1,
    -blast_file    => test_input_file('blast_tab_usearch.txt'),
 );

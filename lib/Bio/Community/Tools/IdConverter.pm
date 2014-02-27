@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::Tools::RepresentativeIdConverter
+# BioPerl module for Bio::Community::Tools::IdConverter
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -9,11 +9,11 @@
 
 =head1 NAME
 
-Bio::Community::Tools::RepresentativeIdConverter - Convert member ID to OTU representative ID or taxonomic ID
+Bio::Community::Tools::IdConverter - Convert member ID to OTU representative ID or taxonomic ID
 
 =head1 SYNOPSIS
 
-  use Bio::Community::Tools::RepresentativeIdConverter;
+  use Bio::Community::Tools::IdConverter;
 
   my $converter = Bio::Community::Tools::Summarizer->new(
      -metacommunity => $meta,
@@ -62,18 +62,18 @@ methods. Internal methods are usually preceded with a _
 
 =head2 new
 
- Function: Create a new Bio::Community::Tool::RepresentativeIdConverter object
- Usage   : my $converter = Bio::Community::Tool::RepresentativeIdConverter->new(
+ Function: Create a new Bio::Community::Tool::IdConverter object
+ Usage   : my $converter = Bio::Community::Tool::IdConverter->new(
               -metacommunity => $meta,
               -cluster_file  => '99_otu_map.txt',
            );
            # or
-           my $converter = Bio::Community::Tool::RepresentativeIdConverter->new(
+           my $converter = Bio::Community::Tool::IdConverter->new(
               -metacommunity => $meta,
               -blast_file    => 'blast_res.tab',
            );
            # or
-           my $converter = Bio::Community::Tool::RepresentativeIdConverter->new(
+           my $converter = Bio::Community::Tool::IdConverter->new(
               -metacommunity  => $meta,
               -taxassign_file => 'rep_set_tax_assignments.txt',
            );
@@ -82,12 +82,12 @@ methods. Internal methods are usually preceded with a _
            -blast_file     : See blast_file().
            -taxassign_file : See taxassign_file().
            Use either -cluster_file or -taxassign_file
- Returns : a Bio::Community::Tools::RepresentativeIdConverter object
+ Returns : a Bio::Community::Tools::IdConverter object
 
 =cut
 
 
-package Bio::Community::Tools::RepresentativeIdConverter;
+package Bio::Community::Tools::IdConverter;
 
 use Moose;
 use MooseX::NonMoose;
