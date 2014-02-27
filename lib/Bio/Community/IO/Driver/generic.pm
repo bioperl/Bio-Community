@@ -126,6 +126,17 @@ has '_id2line' => (
 );
 
 
+has '_write_desc' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   init_arg => undef,
+   default => undef,
+   lazy => 1,
+   predicate => '_has_write_desc',
+);
+
+
 method _generate_members () {
    # Make members from the first column
    my @members;
@@ -190,17 +201,25 @@ method _next_metacommunity_finish () {
 
 
 method write_member (Bio::Community::Member $member, Count $count) {
-    my $id   = $member->id;
-    my $line = $self->_id2line->{$id};
-    if (not defined $line) {
-        # This member has not been written previously for another community
-        $line = $self->_get_max_line + 1;
-        $self->_set_value( $line, 1, $member->desc );
-        $self->_id2line->{$id} = $line;
-    }
-    $self->_set_value($line, $self->_col, $count);
-    $self->_line( $line + 1 );
-    return 1;
+   my $id   = $member->id;
+   my $line = $self->_id2line->{$id};
+   if (not defined $line) {
+      # Determine whether to write desc or id for all members
+      if (not $self->_has_write_desc) {
+         if ( (defined $member->desc) && (not $member->desc eq '') ) {
+            $self->_write_desc(1);
+         } else {
+            $self->_write_desc(0);
+         }
+      }
+      # This member has not been written previously for another community
+      $line = $self->_get_max_line + 1;
+      $self->_set_value( $line, 1, $self->_write_desc ? $member->desc : $member->id );
+      $self->_id2line->{$id} = $line;
+   }
+   $self->_set_value($line, $self->_col, $count);
+   $self->_line( $line + 1 );
+   return 1;
 }
 
 

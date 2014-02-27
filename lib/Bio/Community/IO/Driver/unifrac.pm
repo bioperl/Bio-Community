@@ -184,6 +184,17 @@ has '_qualitative_unifrac' => (
 );
 
 
+has '_write_desc' => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0,
+   init_arg => undef,
+   default => undef,
+   lazy => 1,
+   predicate => '_has_write_desc',
+);
+
+
 method _generate_community_names () {
    # Read all possible community names from the second column
    my %names;
@@ -287,8 +298,17 @@ method _next_metacommunity_finish () {
 
 method write_member (Bio::Community::Member $member, Count $count) {
 
+   # Determine whether to write desc or id for all members
+   if (not $self->_has_write_desc) {
+      if ( (defined $member->desc) && (not $member->desc eq '') ) {
+         $self->_write_desc(1);
+      } else {
+         $self->_write_desc(0);
+      }
+   }
+
    # Replace spaces by dot in description
-   my $desc = $member->desc;
+   my $desc = $self->_write_desc ? $member->desc : $member->id;
    $desc =~ s/ /./g;
 
    my $desc2line = $self->_desc2line;
