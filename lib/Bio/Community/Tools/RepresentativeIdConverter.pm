@@ -222,7 +222,7 @@ method get_converted_meta () {
    my $meta = $self->metacommunity;
    my $meta2 = Bio::Community::Meta->new;
 
-   my $file = $self->cluster_file || $self->taxassign_file;
+   my $file = $self->cluster_file || $self->blast_file || $self->taxassign_file;
    if (not defined $file) {
       $self->throw("No cluster file or taxonomic assignment file was provided");
    }
@@ -245,7 +245,7 @@ method get_converted_meta () {
          my $repr_id = $id2repr->{$id};
 
          if (not defined $repr_id) {
-            $self->warn("Could not find representative sequence for member ID $id. Keeping original ID.\n");
+            $self->warn("Could not find representative ID for member $id. Keeping original ID.");
             $repr_id = $id;
          }
 
@@ -272,6 +272,7 @@ method _read_repr_file ( $file, $type ) {
    my $col_off;
    my %id2repr;
    my $num_seqs;
+   my $warned = 0;
    open my $in, '<', $file or $self->throw("Could not read file '$file'\n$!");
    while (my $line = <$in>) {
       chomp $line;
@@ -287,13 +288,21 @@ method _read_repr_file ( $file, $type ) {
          $repr_id = $elems[3];
          $seq_ids = [ $elems[0] ];
       } elsif ($type eq 'blast') {
+         # Default fields: qseqid sseqid pident length mismatchgapopen
+         #                 qstart qend sstart send evalue bitscore
          $repr_id = $elems[1];
          $seq_ids = [ $elems[0] ];
       } else {
          $self->throw("Internal error: Unexpected type '$type'");
       }
       for my $seq_id (@$seq_ids) {
-         if (not exists $id2repr{$seq_id}) { # only keep first match
+         if (exists $id2repr{$seq_id}) {
+            if (not $warned) {
+               $self->warn("Multiple entries found for $seq_id. Keeping only the first one.");
+               $warned = 1;
+            }
+         } else {
+            # only keep first match
             $id2repr{$seq_id} = $repr_id;
             $num_seqs++; # account for seq_id
          }
