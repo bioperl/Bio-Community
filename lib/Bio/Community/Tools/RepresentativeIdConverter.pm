@@ -23,9 +23,12 @@ Bio::Community::Tools::RepresentativeIdConverter - Convert member ID to OTU repr
 
 =head1 DESCRIPTION
 
-Given a metacommunity and an OTU cluster map file (or taxonomic assignment file),
-replace the ID of every member by that of its OTU cluster (or taxonomic)
-representative and add it in a new metacommunity.
+Given a metacommunity and an Greengenes OTU cluster file (or BLAST file, QIIME
+taxonomic assignment file), replace the ID of every member by that of its OTU
+cluster (or BLAST, or taxonomic) representative and add it in a new metacommunity.
+
+Note that this script expects high-quality results. No quality processing is done
+and only the first match assigned to a member is kept.
 
 =head1 AUTHOR
 
@@ -66,11 +69,17 @@ methods. Internal methods are usually preceded with a _
            );
            # or
            my $converter = Bio::Community::Tool::RepresentativeIdConverter->new(
+              -metacommunity => $meta,
+              -blast_file    => 'blast_res.tab',
+           );
+           # or
+           my $converter = Bio::Community::Tool::RepresentativeIdConverter->new(
               -metacommunity  => $meta,
               -taxassign_file => 'rep_set_tax_assignments.txt',
            );
  Args    : -metacommunity  : See metacommunity().
            -cluster_file   : See cluster_file().
+           -blast_file     : See blast_file().
            -taxassign_file : See taxassign_file().
            Use either -cluster_file or -taxassign_file
  Returns : a Bio::Community::Tools::RepresentativeIdConverter object
@@ -141,6 +150,32 @@ has cluster_file => (
 );
 
 
+=head2 blast_file
+
+ Function: Get / set the tab-delimited BLAST file that defines the best
+           similarity. This type of file generally has 12 columns and the first
+           two should be the member ID and the ID of sequence with the best
+           similarity. For example:
+
+           OTU_4   JN647692.1.1869 99.6    250     1       0       1       250     1       250     *       *
+           OTU_12  655879  94.4    250     14      0       1       250     1       250     *       *
+
+ Usage   : $summarizer->blast_file('blastn_res.tab');
+ Args    : BLAST file name
+ Returns : BLAST file name
+
+=cut
+
+has blast_file => (
+   is => 'rw',
+   isa => 'Maybe[Str]',
+   required => 1,
+   lazy => 1,
+   default => undef,
+   init_arg => '-blast_file',
+);
+
+
 =head2 taxassign_file
 
  Function: Get / set the tab-delimited file that defines the OTU taxonomic
@@ -193,7 +228,7 @@ method get_converted_meta () {
    }
    my $id2repr = $self->_read_repr_file(
       $file,
-      defined $self->cluster_file ? 'cluster' : 'taxo',
+      defined $self->cluster_file ? 'cluster' : ( defined $self->blast_file ? 'blast' : 'taxo' ),
    );
 
    while (my $community = $meta->next_community) {
@@ -244,19 +279,24 @@ method _read_repr_file ( $file, $type ) {
       my @elems = split "\t", $line;
       my ($repr_id, $seq_ids);
       if ($type eq 'cluster') {
-         shift @elems; # cluster ID
+         shift @elems; # remove cluster ID
          $repr_id = shift @elems;
          $seq_ids = \@elems;
          push @$seq_ids, $repr_id;
       } elsif ($type eq 'taxo') {
          $repr_id = $elems[3];
          $seq_ids = [ $elems[0] ];
+      } elsif ($type eq 'blast') {
+         $repr_id = $elems[1];
+         $seq_ids = [ $elems[0] ];
       } else {
          $self->throw("Internal error: Unexpected type '$type'");
       }
       for my $seq_id (@$seq_ids) {
-         $id2repr{$seq_id} = $repr_id;
-         $num_seqs++; # seq_id
+         if (not exists $id2repr{$seq_id}) { # only keep first match
+            $id2repr{$seq_id} = $repr_id;
+            $num_seqs++; # account for seq_id
+         }
       }
    }
    close $in;

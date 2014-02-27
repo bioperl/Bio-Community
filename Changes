@@ -5,6 +5,7 @@ x.x.x
   - Bio::Community::next_member is faster and now returns identical objects
   - In generic and unifrac drivers, write member description if available, or
     ID otherwise
+  - Support of BLAST files in Bio::Tools::RepresentativeIdConverter
 
 0.1.4 2014-02-10
   - Changes to script bc_measure_distance:

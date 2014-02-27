@@ -82,6 +82,11 @@ is_deeply \%info, { '1042485' => 5, '219826' => 1 };
 isnt $meta1, $meta2;
 
 
+#### Try BLAST representative IDs
+
+#### Keep only first match
+
+
 done_testing();
 
 exit;
