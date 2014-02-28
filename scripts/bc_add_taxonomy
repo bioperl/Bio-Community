@@ -23,9 +23,9 @@ bc_add_taxonomy - Add a taxonomic lineage to members in a community file
 
 =head1 SYNOPSIS
 
-  bc_add_taxonomy -input_files   my_communities.qiime     \
-                  -search_file   blast_results.tab        \
-                  -taxonomy_file taxonomy.tab             \
+  bc_add_taxonomy -input_files   my_communities.qiime  \
+                  -search_file   blast_results.tab     \
+                  -taxonomy_file taxonomy.tab          \
                   -output_prefix my_communities_w_taxo
 
 =head1 DESCRIPTION
@@ -74,6 +74,15 @@ i.e. tab-delimited with two columns: sequence ID and taxonomic string.
 
 =for Euclid:
    taxonomy_file.type: readable
+
+=item -pi <populate_id> | -populate_id <populate_id>
+
+In addition to assigning taxonomy to a member, also change its ID to that of
+taxonomic representative. Default: populate_id.default
+
+=for Euclid:
+   populate_id.type: integer, populate_id == 0 || populate_id == 1
+   populate_id.default: 0
 
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
@@ -127,12 +136,13 @@ Email florent.angly@gmail.com
 
 
 add_taxo( $ARGV{'input_files'}, $ARGV{'search_file'}, $ARGV{'taxonomy_file'},
-          $ARGV{'output_prefix'} );
+          $ARGV{'populate_id'}, $ARGV{'output_prefix'} );
 
 exit;
 
 
-func add_taxo ($input_files, $search_file, $taxonomy_file, $output_prefix) {
+func add_taxo ($input_files, $search_file, $taxonomy_file, $populate_id,
+   $output_prefix) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new;
@@ -149,7 +159,7 @@ func add_taxo ($input_files, $search_file, $taxonomy_file, $output_prefix) {
 
    # Add best similarity ID
    my $members = $meta->get_all_members();
-   $members = add_sim_id($members, $search_file);
+   $members = add_sim_id($members, $search_file, $populate_id);
 
    # Assign taxonomy if needed
    if (defined $taxonomy_file) {
@@ -163,10 +173,14 @@ func add_taxo ($input_files, $search_file, $taxonomy_file, $output_prefix) {
 }
 
 
-func add_sim_id ($members, $search_file) {
+func add_sim_id ($members, $search_file, $populate_id) {
    my $sims = read_lookup($search_file);
    for my $member (@$members) {
-      $member->desc( $sims->{$member->id} || 'unidentified' );
+      my $tax_id = $sims->{$member->id};
+      $member->desc( $tax_id || 'unidentified' );
+      if ($populate_id && defined $tax_id) {
+         $member->id( $tax_id );
+      }
    }
    return $members;
 }
