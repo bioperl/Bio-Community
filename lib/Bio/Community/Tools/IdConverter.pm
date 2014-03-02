@@ -9,26 +9,37 @@
 
 =head1 NAME
 
-Bio::Community::Tools::IdConverter - Convert member ID to OTU representative ID or taxonomic ID
+Bio::Community::Tools::IdConverter - Various methods to convert member ID
 
 =head1 SYNOPSIS
 
   use Bio::Community::Tools::IdConverter;
 
+  # Based on member description
   my $converter = Bio::Community::Tools::Summarizer->new(
      -metacommunity => $meta,
-     -cluster_file  => 'gg_99_otu_map.txt',
+     -member_attr   => 'desc',
   );
   my $meta_by_otu = $converter->get_converted_meta;
 
+  # Based on IDs given in a file
+  $converter = Bio::Community::Tools::Summarizer->new(
+     -metacommunity => $meta,
+     -cluster_file  => 'gg_99_otu_map.txt',
+  );
+  $meta_by_otu = $converter->get_converted_meta;
+
 =head1 DESCRIPTION
 
-Given a metacommunity and an Greengenes OTU cluster file (or BLAST file, QIIME
-taxonomic assignment file), replace the ID of every member by that of its OTU
-cluster (or BLAST, or taxonomic) representative and add it in a new metacommunity.
+Convert the ID of members given a metacommunity based on another member
+attribute, such as its description, or based on IDs provided in a file.
+This file can be a Greengenes OTU cluster file, a BLAST file, or a QIIME
+taxonomic assignment file. A new metacommunity containing members with
+converted IDs is returned.
 
-Note that this script expects high-quality results. No quality processing is done
-and only the first match assigned to a member is kept.
+Note that when given a files, this script expects high-quality results. No
+quality processing is done and only the first match assigned to a member is
+kept.
 
 =head1 AUTHOR
 
@@ -65,6 +76,11 @@ methods. Internal methods are usually preceded with a _
  Function: Create a new Bio::Community::Tool::IdConverter object
  Usage   : my $converter = Bio::Community::Tool::IdConverter->new(
               -metacommunity => $meta,
+              -member_attr   => 'desc',
+           );
+           # or
+           my $converter = Bio::Community::Tool::IdConverter->new(
+              -metacommunity => $meta,
               -cluster_file  => '99_otu_map.txt',
            );
            # or
@@ -78,10 +94,11 @@ methods. Internal methods are usually preceded with a _
               -taxassign_file => 'rep_set_tax_assignments.txt',
            );
  Args    : -metacommunity  : See metacommunity().
+           And ones of:
+           -member_attr    : See member_attr().
            -cluster_file   : See cluster_file().
            -blast_file     : See blast_file().
            -taxassign_file : See taxassign_file().
-           Use either -cluster_file or -taxassign_file
  Returns : a Bio::Community::Tools::IdConverter object
 
 =cut
@@ -120,25 +137,26 @@ has metacommunity => (
 );
 
 
-=head2 from_desc
+=head2 member_attr
 
- Function: Get / set whether member IDs should be replace by their description.
-           This feature useful when importing data from formats that do not
-           explicitly represent member ID, e.g. when converting from 'generic' to
-           'qiime'.
- Usage   : $summarizer->from_desc(1);
- Args    : 0 or 1
- Returns : 0 or 1
+ Function: Get / set whether member ID should be replaced by the value of another
+           attribute, e.g. the member's description. Replacing a member's ID
+           by its description is useful when importing data from formats that do
+           not explicitly represent member ID, e.g. from 'generic' to 'qiime'.
+ Usage   : $summarizer->member_attr('id');
+ Args    : member attribute, e.g. 'desc' (see C<Bio::Community::Member>)
+ Returns : member attribute
 
 =cut
 
-has from_desc => (
+has member_attr => (
    is => 'rw',
-   isa => 'Maybe[Bool]',
-   required => 1,
+   isa => 'Maybe[Str]',
+   required => 0,
    lazy => 1,
    default => undef,
-   init_arg => '-from_desc',
+   init_arg => '-member_attr',
+   predicate => '_has_member_attr',
 );
 
 
@@ -165,10 +183,11 @@ has from_desc => (
 has cluster_file => (
    is => 'rw',
    isa => 'Maybe[Str]',
-   required => 1,
+   required => 0,
    lazy => 1,
    default => undef,
    init_arg => '-cluster_file',
+   predicate => '_has_cluster_file',
 );
 
 
@@ -191,10 +210,11 @@ has cluster_file => (
 has blast_file => (
    is => 'rw',
    isa => 'Maybe[Str]',
-   required => 1,
+   required => 0,
    lazy => 1,
    default => undef,
    init_arg => '-blast_file',
+   predicate => '_has_blast_file',
 );
 
 
@@ -219,10 +239,11 @@ has blast_file => (
 has taxassign_file => (
    is => 'rw',
    isa => 'Maybe[Str]',
-   required => 1,
+   required => 0,
    lazy => 1,
    default => undef,
    init_arg => '-taxassign_file',
+   predicate => '_has_taxassign_file',
 );
 
 
@@ -236,21 +257,35 @@ has taxassign_file => (
 =cut
 
 method get_converted_meta () {
-   if ( (defined $self->cluster_file) + (defined $self->blast_file) + (defined $self->taxassign_file) > 1) {
-      $self->throw('Specify either a cluster_file, blast_file or taxassign_file');
+   # Sanity checks
+   if ( $self->_has_member_attr + $self->_has_cluster_file + $self->_has_blast_file
+      + $self->_has_taxassign_file > 1) {
+      $self->throw('Specify only one of -member_attr, -cluster_file, -blast_file'.
+         ' or -taxassign_file');
    }
-
-   my $meta = $self->metacommunity;
-   my $meta2 = Bio::Community::Meta->new;
 
    my $file = $self->cluster_file || $self->blast_file || $self->taxassign_file;
-   if (not defined $file) {
-      $self->throw("No cluster file, BLAST file or taxonomic assignment file was provided");
+   if ( not( $self->_has_member_attr || defined $file ) ) {
+      $self->throw("No -member_attr, -cluster file, -blast_file or -taxassign_file".
+         " was specified");
    }
-   my $id2repr = $self->_read_repr_file(
-      $file,
-      defined $self->cluster_file ? 'cluster' : ( defined $self->blast_file ? 'blast' : 'taxo' ),
-   );
+
+   # Read file containing representative IDs
+   my ($id2repr, $attr);
+   if (defined $file) {
+      $id2repr = $self->_read_repr_file(
+         $file,
+         defined $self->cluster_file ?
+            'cluster' :
+            ( $self->blast_file ? 'blast' : 'taxo' ),
+      );
+   } else {
+      $attr = $self->member_attr;
+   }
+
+   # Process IDs
+   my $meta = $self->metacommunity;
+   my $meta2 = Bio::Community::Meta->new;
 
    while (my $community = $meta->next_community) {
       my $name = $community->name;
@@ -262,11 +297,19 @@ method get_converted_meta () {
       while (my $member = $community->next_member) {
 
          my $id = $member->id;
-         my $count = $community->get_count($member);
-         my $repr_id = $id2repr->{$id};
+         my $repr_id;
+         if ($id2repr) {
+            # Use representative ID from file
+            $repr_id = $id2repr->{$id};
+         } else {
+            # Use ID from member attr
+            eval { $repr_id = $member->$attr };
+            if ($@) { $self->throw("Invalid member attribute '$attr'") }
+         }
 
          if (not defined $repr_id) {
-            $self->warn("Could not find representative ID for member $id. Keeping original ID.");
+            $self->warn("Representative ID for member '$id' was not defined. ".
+               "Keeping original ID.");
             $repr_id = $id;
          }
 
@@ -277,7 +320,7 @@ method get_converted_meta () {
             $member2->id($repr_id);
          }
 
-         $community2->add_member( $member2, $count );
+         $community2->add_member( $member2, $community->get_count($member) );
 
       }
       $meta2->add_communities([$community2]);

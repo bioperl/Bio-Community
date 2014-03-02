@@ -6,7 +6,7 @@ x.x.x
   - In generic and unifrac drivers, write member description if available, or
     ID otherwise
   - Renamed Bio::Tools::RepresentativeIdConverter to Bio::Tools::IdConverter and
-    added support for BLAST tabular files
+    added support for BLAST tabular files and conversion from member description
 
 0.1.4 2014-02-10
   - Changes to script bc_measure_distance:

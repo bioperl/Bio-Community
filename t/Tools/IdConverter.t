@@ -112,6 +112,48 @@ is_deeply \%info, { 'JN647692.1.1869' => 1, '655879' => 2, 'OTU_324' => 3 };
 isnt $meta1, $meta2;
 
 
+# Test ID conversion to member description
+
+$member1 = Bio::Community::Member->new( -desc => 'OTU_4'   );
+$member2 = Bio::Community::Member->new( -desc => 'OTU_12'  );
+$member3 = Bio::Community::Member->new( -desc => 'OTU_324' );
+
+$community1 = Bio::Community->new();
+$community1->add_member( $member1, 1);
+$community1->add_member( $member2, 2);
+$community1->add_member( $member3, 3);
+$meta1 = Bio::Community::Meta->new( -communities => [$community1] );
+
+ok $converter = Bio::Community::Tools::IdConverter->new(
+   -metacommunity => $meta1,
+   -member_attr   => 'desc',
+);
+
+ok $meta2 = $converter->get_converted_meta;
+ok $community2 = $meta2->get_all_communities->[0];
+
+%info = ();
+while (my $member = $community2->next_member) {
+   my $id = $member->id;
+   my $count = $community2->get_count($member);
+   $info{$id} = $count;
+}
+
+is_deeply \%info, { 'OTU_4' => 1, 'OTU_12' => 2, 'OTU_324' => 3 };
+
+isnt $meta1, $meta2;
+
+
+# Test conversion to invalid member attribute
+
+ok $converter = Bio::Community::Tools::IdConverter->new(
+   -metacommunity => $meta1,
+   -member_attr  => 'XXXX',
+);
+
+throws_ok { $converter->get_converted_meta } qr/Invalid member attribute/i;
+
+
 done_testing();
 
 exit;
