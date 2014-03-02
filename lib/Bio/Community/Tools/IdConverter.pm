@@ -120,6 +120,28 @@ has metacommunity => (
 );
 
 
+=head2 from_desc
+
+ Function: Get / set whether member IDs should be replace by their description.
+           This feature useful when importing data from formats that do not
+           explicitly represent member ID, e.g. when converting from 'generic' to
+           'qiime'.
+ Usage   : $summarizer->from_desc(1);
+ Args    : 0 or 1
+ Returns : 0 or 1
+
+=cut
+
+has from_desc => (
+   is => 'rw',
+   isa => 'Maybe[Bool]',
+   required => 1,
+   lazy => 1,
+   default => undef,
+   init_arg => '-from_desc',
+);
+
+
 =head2 cluster_file
 
  Function: Get / set the tab-delimited file that defines the OTU clusters. The
@@ -214,9 +236,8 @@ has taxassign_file => (
 =cut
 
 method get_converted_meta () {
-
-   if ( (defined $self->cluster_file) && (defined $self->taxassign_file) ) {
-      $self->throw('Need to specify use either a cluster_file or a taxassign_file');
+   if ( (defined $self->cluster_file) + (defined $self->blast_file) + (defined $self->taxassign_file) > 1) {
+      $self->throw('Specify either a cluster_file, blast_file or taxassign_file');
    }
 
    my $meta = $self->metacommunity;
@@ -224,7 +245,7 @@ method get_converted_meta () {
 
    my $file = $self->cluster_file || $self->blast_file || $self->taxassign_file;
    if (not defined $file) {
-      $self->throw("No cluster file or taxonomic assignment file was provided");
+      $self->throw("No cluster file, BLAST file or taxonomic assignment file was provided");
    }
    my $id2repr = $self->_read_repr_file(
       $file,
