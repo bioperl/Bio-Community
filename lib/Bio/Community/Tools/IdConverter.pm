@@ -131,8 +131,8 @@ has metacommunity => (
    is => 'rw',
    isa => 'Bio::Community::Meta',
    required => 0,
-   lazy => 1,
-   default => undef,
+   #lazy => 1,
+   #default => undef,
    init_arg => '-metacommunity',
 );
 
@@ -153,8 +153,8 @@ has member_attr => (
    is => 'rw',
    isa => 'Maybe[Str]',
    required => 0,
-   lazy => 1,
-   default => undef,
+   #lazy => 1,
+   #default => undef,
    init_arg => '-member_attr',
    predicate => '_has_member_attr',
 );
@@ -184,8 +184,8 @@ has cluster_file => (
    is => 'rw',
    isa => 'Maybe[Str]',
    required => 0,
-   lazy => 1,
-   default => undef,
+   #lazy => 1,
+   #default => undef,
    init_arg => '-cluster_file',
    predicate => '_has_cluster_file',
 );
@@ -211,8 +211,8 @@ has blast_file => (
    is => 'rw',
    isa => 'Maybe[Str]',
    required => 0,
-   lazy => 1,
-   default => undef,
+   #lazy => 1,
+   #default => undef,
    init_arg => '-blast_file',
    predicate => '_has_blast_file',
 );
@@ -240,8 +240,8 @@ has taxassign_file => (
    is => 'rw',
    isa => 'Maybe[Str]',
    required => 0,
-   lazy => 1,
-   default => undef,
+   #lazy => 1,
+   #default => undef,
    init_arg => '-taxassign_file',
    predicate => '_has_taxassign_file',
 );
@@ -275,9 +275,9 @@ method get_converted_meta () {
    if (defined $file) {
       $id2repr = $self->_read_repr_file(
          $file,
-         defined $self->cluster_file ?
+         $self->_has_cluster_file ?
             'cluster' :
-            ( $self->blast_file ? 'blast' : 'taxo' ),
+            ( $self->_has_blast_file ? 'blast' : 'taxo' ),
       );
    } else {
       $attr = $self->member_attr;
