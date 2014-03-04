@@ -1,6 +1,6 @@
 #! /usr/bin/env perl
 
-# BioPerl script bc_use_repr_id
+# BioPerl script bc_convert_ids
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -20,32 +20,38 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_use_repr_id - Replace member ID by that of their OTU cluster or taxonomic representative
+bc_convert_ids - Convert member ID from member attribute or file
 
 =head1 SYNOPSIS
 
-  bc_use_repr_id -input_files   my_communities.generic   \
+  bc_convert_ids -input_files   my_communities.generic   \
+                 -output_prefix my_converted_communities \
+                 -member_attr   desc
+
+or
+
+  bc_convert_ids -input_files   my_communities.generic   \
                  -output_prefix my_converted_communities \
                  -cluster_file  gg_99_otu_map.txt
 
 or
 
-  bc_use_repr_id -input_files   my_communities.generic   \
+  bc_convert_ids -input_files   my_communities.generic   \
                  -output_prefix my_converted_communities \
                  -blast_file    blastn_res.tab
 
 or 
 
-  bc_use_repr_id -input_files    my_communities.generic      \
+  bc_convert_ids -input_files    my_communities.generic      \
                  -output_prefix  my_converted_communities    \
                  -taxassign_file rep_set_tax_assignments.txt
 
 =head1 DESCRIPTION
 
-This script reads a file containing biological communities and a file of OTU
-clusters (or similarity search results or taxonomic assignments) and replaces
-the ID of the members in the communities by the ID of the representative
-cluster sequence (or that of the taxonomic representative).
+This script converts the ID of members given a metacommunity based on another
+member attribute, such as its description, or based on IDs provided in a file.
+This file can be a Greengenes OTU cluster file, a BLAST file, or a QIIME
+taxonomic assignment file.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -66,6 +72,17 @@ provide multiple input files.
 
 =over
 
+=item -ma <member_attr> | -member_attr <member_attr>
+
+Replace member ID should by the value of another member attribute, e.g. the
+member's description field ('desc'). Replacing a member's ID by its description
+is useful when importing data from formats that do not explicitly represent
+member ID, e.g. from 'generic' to 'qiime'.
+
+=for Euclid:
+   member_attr.type: string
+   member_attr.excludes: cluster_file, taxassign_file, blast_file
+
 =item -cf <cluster_file> | -cluster_file <cluster_file>
 
 The tab-delimited file that defines the OTU clusters. The columns are: OTU ID,
@@ -82,7 +99,7 @@ The OTU files distributed by Greengenes use this format (e.g., 99_otu_map.txt).
 
 =for Euclid:
    cluster_file.type: readable
-   cluster_file.excludes: taxassign_file, blast_file
+   cluster_file.excludes: member_attr, taxassign_file, blast_file
 
 =item -bf <blast_file> | -blast_file <blast_file>
 
@@ -98,7 +115,7 @@ first similarity assigned to a member is kept.
 
 =for Euclid:
    blast_file.type: readable
-   blast_file.excludes: cluster_file, taxassign_file
+   blast_file.excludes: member_attr, cluster_file, taxassign_file
 
 =item -tf <taxassign_file> | -taxassign_file <taxassign_file>
 
@@ -115,7 +132,7 @@ follow this format.
 
 =for Euclid:
    taxassign_file.type: readable
-   taxassign_file.excludes: cluster_file, blast_file
+   taxassign_file.excludes: member_attr, cluster_file, blast_file
 
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
@@ -123,7 +140,7 @@ Path and prefix for the output files. Default: output_prefix.default
 
 =for Euclid:
    output_prefix.type: string
-   output_prefix.default: 'bc_use_repr_id'
+   output_prefix.default: 'bc_convert_ids'
 
 =back
 
@@ -166,12 +183,16 @@ Email florent.angly@gmail.com
 =cut
 
 
-use_cluster_repr( $ARGV{'input_files'}, $ARGV{'cluster_file'}, $ARGV{'blast_file'},
-   $ARGV{'taxassign_file'}, $ARGV{'output_prefix'} );
+use_cluster_repr(
+   $ARGV{'input_files'}, $ARGV{'member_attr'}, $ARGV{'cluster_file'},
+   $ARGV{'blast_file'}, $ARGV{'taxassign_file'}, $ARGV{'output_prefix'},
+);
 exit;
 
 
-func use_cluster_repr ($input_files, $cluster_file, $blast_file, $taxassign_file, $output_prefix) {
+func use_cluster_repr ($input_files, $member_attr, $cluster_file, $blast_file,
+   $taxassign_file, $output_prefix) {
+
    # Read input communities
    my $meta = Bio::Community::Meta->new();
    my $communities = [];
@@ -194,10 +215,12 @@ func use_cluster_repr ($input_files, $cluster_file, $blast_file, $taxassign_file
    my $converter = Bio::Community::Tools::IdConverter->new(
       -metacommunity => $meta,
    );
-   if (defined $cluster_file) {
+   if (defined $member_attr) {
+      $converter->member_attr($member_attr);
+   } elsif (defined $cluster_file) {
       $converter->cluster_file($cluster_file);
    } elsif (defined $blast_file) {
-      $converter->blast_file($blast_file;
+      $converter->blast_file($blast_file);
    } elsif (defined $taxassign_file) {
       $converter->taxassign_file($taxassign_file);
    }
