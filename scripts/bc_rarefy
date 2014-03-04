@@ -85,7 +85,8 @@ the specified threshold. Default: dist_threshold.default
 =item -nr <num_repetitions> | -num_repetitions <num_repetitions>
 
 Perform the specified number of bootstrap iterations instead of a dynamic number
-of iterations based on a distance threshold.
+of iterations based on a distance threshold. As a special case, use 'inf' to
+assume an infinite number of repetitions.
 
 =for Euclid:
    num_repetitions.type: +integer

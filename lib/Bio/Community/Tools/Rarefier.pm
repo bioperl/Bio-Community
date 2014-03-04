@@ -19,13 +19,29 @@ Bio::Community::Tools::Rarefier - Normalize communities by count
   my $rarefier = Bio::Community::Tools::Rarefier->new(
      -metacommunity => $meta,
      -sample_size   => 1000,
-     -threshold     => 0.001, # When to stop iterating. Can specify repetions instead
+     -threshold     => 0.001, # stop bootstrap iterations when threshold is reached
   );
 
+  # Rarefied results, with decimal counts
   my $average_community = $rarefier->get_avg_meta->[0];
 
-  # Round counts and remove members with abundance between 0 and 0.5
+  # Round counts to integer numbers
   my $representative_community = $rarefier->get_repr_meta->[0];
+  
+
+  # Alternatively, specify a number of repetitions
+  my $rarefier = Bio::Community::Tools::Rarefier->new(
+     -metacommunity => $meta,
+     -sample_size   => 1000,
+     -repetitions   => 0.001, # stop after this number of bootstrap iterations
+  );
+
+  # ... or assume an infinite number of repetitions
+  my $rarefier = Bio::Community::Tools::Rarefier->new(
+     -metacommunity => $meta,
+     -sample_size   => 1000,
+     -repetitions   => 'inf',
+  );
 
 =head1 DESCRIPTION
 
@@ -80,7 +96,7 @@ methods. Internal methods are usually preceded with a _
  Args    : -metacommunity: see metacommunity()
            -repetitions  : see repetitions()
            -sample_size  : see sample_size()
-           -seed         : see set_seed().
+           -seed         : see set_seed()
  Returns : a new Bio::Community::Tools::Rarefier object
 
 =cut
@@ -93,7 +109,6 @@ use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use namespace::autoclean;
 use Bio::Community::Meta;
-use Bio::Community::Tools::Sampler;
 use Bio::Community::Meta::Beta;
 use POSIX;
 use List::Util qw(min);
@@ -178,16 +193,17 @@ has threshold => (
            repeating the bootstrap process, perform an arbitrary number of
            repetitions. After communities have been normalized by count using
            threshold() method, the number of repetitions actually done can be
-           accessed using this method.
+           accessed using this method. As a special case, specify 'inf' to
+           simulate as if an infinity of repetitions had been performed.
  Usage   : my $repetitions = $rarefier->repetitions;
- Args    : positive integer for the number of repetitions
+ Args    : positive integer or 'inf' number of repetitions
  Returns : positive integer for the (minimum) number of repetitions
 
 =cut
 
 has repetitions => (
    is => 'rw',
-   isa => 'Maybe[PositiveInt]',
+   isa => 'Maybe[PositiveInt | Str]',
    required => 0, 
    default => undef,
    lazy => 1,
@@ -373,21 +389,26 @@ method _bootstrap (Bio::Community $community) {
    # Set 'use_weights' to sample from counts (similar to unweighted relative abundances)
    my $use_weights = $community->use_weights;
    $community->use_weights(0);
-   my $sampler = Bio::Community::Tools::Sampler->new(
-      -community => $community,
-      -seed      => $self->get_seed,
-   );
-
-   my $overall = Bio::Community->new(
-      -name        => 'overall',
-      -use_weights => $use_weights,
-   );
 
    my $members = $community->get_all_members;
 
    my $verbose = $self->verbose;
    if ($verbose) {
       print "Community '".$community->name."'\n";
+   }
+
+   my $overall = Bio::Community->new(
+      -name        => 'overall',
+      -use_weights => $use_weights,
+   );
+
+   my $sampler;
+   if ( not( defined $repetitions && $repetitions eq 'inf' ) )  {
+      require Bio::Community::Tools::Sampler;
+      $sampler = Bio::Community::Tools::Sampler->new(
+         -community => $community,
+         -seed      => $self->get_seed,
+      );
    }
 
    my $prev_overall = Bio::Community->new( -name => 'prev' );
@@ -397,8 +418,25 @@ method _bootstrap (Bio::Community $community) {
 
       # Get a random community and add it to the overall community
       $iteration++;
-      my $random = $sampler->get_rand_community($sample_size);
-      $overall = $self->_add( $overall, $random, $members );
+      my $random;
+      if (defined $sampler) {
+         $random = $sampler->get_rand_community($sample_size);
+         $overall = $self->_add( $overall, $random, $members );
+      } else {
+         # Exit when assuming infinite number of repetitions
+         # In fact, do a single repetitions where we add the relative abundance
+         # as counts into a new community
+         require Bio::Community::Tools::Transformer;
+         $overall = Bio::Community::Tools::Transformer->new(
+            -metacommunity => Bio::Community::Meta->new(-communities =>[$community]),
+            -type          => 'relative',
+         )->get_transformed_meta->next_community;
+         if ($verbose) {
+            print "   iteration -\n";
+         }
+         $beta_val = 0;
+         last;
+      }
 
       # We could divide here, but since the beta diversity is based on the
       # relative abundance, not the counts, it would be the same. Hence, only
@@ -442,7 +480,13 @@ method _bootstrap (Bio::Community $community) {
    }
 
    $community->use_weights($use_weights);
-   my $average = $self->_divide( $overall, $iteration, $members );
+
+   my $average;
+   if (defined $sampler) {
+      $average = $self->_divide( $overall, $iteration, $members );
+   } else {
+      $average = $self->_divide( $overall, 100 / $sample_size, $members );
+   }
 
    return $overall, $iteration, $beta_val;
 }
@@ -459,7 +503,7 @@ method _add ($existing, $new, $members) { # keep it lean
 }
 
 
-method _divide (Bio::Community $community, StrictlyPositiveInt $divisor, $members) {
+method _divide (Bio::Community $community, Num $divisor, $members) {
    # Divide the counts in a community
    for my $member (@$members) {
       my $count     = $community->get_count($member);

@@ -9,6 +9,8 @@ x.x.x
     Renamed the corresponding script from bc_use_repr_id to bc_convert_ids. In
     both module and script, added support for BLAST tabular files and conversion
     from member description.
+  - Rarefaction module and script can now assume an infinite number of bootstrap
+    repetitions
 
 0.1.4 2014-02-10
   - Changes to script bc_measure_distance:

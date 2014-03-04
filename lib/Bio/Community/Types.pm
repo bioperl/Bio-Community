@@ -121,11 +121,13 @@ subtype 'AlphaType'
    => as enum( \@AlphaType )
    => message { _gen_err_msg(\@AlphaType, $_) };
 
+
 # Type of transformation
 my @TransformationType = qw(identity binary relative hellinger chord);
 subtype 'TransformationType'
    => as enum( \@TransformationType )
    => message { _gen_err_msg(\@TransformationType, $_) };
+
 
 # Members identification method
 my @IdentifyMembersByType = qw(id desc);
@@ -157,6 +159,7 @@ subtype 'BiomMatrixType'
    => as enum( \@BiomMatrixType )
    => message { _gen_err_msg(\@BiomMatrixType, $_) };
 
+
 # A readable file
 subtype 'ReadableFile'
    => as 'Str'
@@ -165,6 +168,7 @@ subtype 'ReadableFile'
 
 subtype 'ArrayRefOfReadableFiles'
    => as 'ArrayRef[ReadableFile]';
+
 
 # A readable filehandle (and coercing it from a readable file)
 subtype 'ReadableFileHandle'

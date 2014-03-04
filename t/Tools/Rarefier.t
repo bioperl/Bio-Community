@@ -94,7 +94,7 @@ ok $rarefier = Bio::Community::Tools::Rarefier->new( );
 isa_ok $rarefier, 'Bio::Community::Tools::Rarefier';
 
 
-# Normalizer with specified settings
+# Normalizer with specified repetitions
 
 ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
@@ -108,10 +108,65 @@ is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_repr_meta->get_communities_count, 2;
 
 is $rarefier->repetitions, 10;
-isnt $rarefier->threshold, 0.00001;
+isnt $rarefier->threshold, 0.001;
 cmp_ok $rarefier->threshold, '<', 1;
 is $rarefier->sample_size, 1000;
 is $rarefier->verbose, 1;
+
+$average = $rarefier->get_avg_meta->get_community_by_name('community1');
+isa_ok $average, 'Bio::Community';
+is $average->name, 'community1';
+delta_ok $average->get_members_count, 1000;
+delta_within $average->get_count($member1), 200.7, $epsilon1;
+delta_within $average->get_count($member2), 200.0, $epsilon1;
+delta_within $average->get_count($member3), 200.0, $epsilon1;
+delta_within $average->get_count($member4), 200.0, $epsilon1;
+delta_within $average->get_count($member5), 199.3, $epsilon1;
+
+$representative = $rarefier->get_repr_meta->get_community_by_name('community1');
+isa_ok $representative, 'Bio::Community';
+is $representative->name, 'community1';
+delta_ok $representative->get_members_count, 1000;
+delta_within $representative->get_count($member1), $average->get_count($member1), $epsilon2;
+delta_within $representative->get_count($member2), $average->get_count($member2), $epsilon2;
+delta_within $representative->get_count($member3), $average->get_count($member3), $epsilon2;
+delta_within $representative->get_count($member4), $average->get_count($member4), $epsilon2;
+delta_within $representative->get_count($member5), $average->get_count($member5), $epsilon2;
+
+$average = $rarefier->get_avg_meta->get_community_by_name('community2');
+isa_ok $average, 'Bio::Community';
+is $average->name, 'community2';
+delta_ok $average->get_members_count, 1000;
+delta_within $average->get_count($member1), 360.6, $epsilon1;
+delta_within $average->get_count($member3), 189.3, $epsilon1;
+delta_within $average->get_count($member6), 450.1, $epsilon1;
+
+$representative = $rarefier->get_repr_meta->get_community_by_name('community2');
+isa_ok $representative, 'Bio::Community';
+is $representative->name, 'community2';
+delta_ok $representative->get_members_count, 1000;
+delta_within $representative->get_count($member1), $representative->get_count($member1), $epsilon2;
+delta_within $representative->get_count($member3), $representative->get_count($member3), $epsilon2;
+delta_within $representative->get_count($member6), $representative->get_count($member6), $epsilon2;
+
+
+# Assume an infinity of bootstrap repetitions
+
+ok $rarefier = Bio::Community::Tools::Rarefier->new(
+   -metacommunity => $meta,
+   -repetitions   => 'inf',
+   -sample_size   => 1000,
+   -verbose       => 0,
+);
+
+
+is $rarefier->get_avg_meta->get_communities_count, 2;
+is $rarefier->get_repr_meta->get_communities_count, 2;
+
+is $rarefier->repetitions, 'inf';
+is $rarefier->threshold, 0;
+is $rarefier->sample_size, 1000;
+is $rarefier->verbose, 0;
 
 $average = $rarefier->get_avg_meta->get_community_by_name('community1');
 isa_ok $average, 'Bio::Community';
