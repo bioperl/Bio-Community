@@ -11,10 +11,10 @@
 
 use strict;
 use warnings;
-use Method::Signatures;
 use Bio::Community::IO;
 use Bio::Community::Meta;
 use Bio::Community::Tools::Rarefier;
+use Method::Signatures;
 use Getopt::Euclid qw(:minimal_keys);
 
 
@@ -89,7 +89,7 @@ of iterations based on a distance threshold. As a special case, use 'inf' to
 assume an infinite number of repetitions.
 
 =for Euclid:
-   num_repetitions.type: +integer
+   num_repetitions.type: string
 
 =item -wa <write_average> | -write_average <write_average>
 

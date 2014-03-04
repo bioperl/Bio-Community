@@ -432,7 +432,7 @@ method _bootstrap (Bio::Community $community) {
             -type          => 'relative',
          )->get_transformed_meta->next_community;
          if ($verbose) {
-            print "   iteration -\n";
+            print "   iteration inf\n";
          }
          $beta_val = 0;
          last;
