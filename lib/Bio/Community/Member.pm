@@ -118,6 +118,8 @@ my $max_num = 0;
 my $id_re = '^'.PREFIX.'(\d+)$';
 $id_re = qr/$id_re/;
 
+my $mod_re = qr/^Bio::Community/;
+
 
 =head2 id
 
@@ -154,12 +156,12 @@ method _auto_id ($id?, $old_id?) {
    # Validate given ID or assign a new ID automatically
    if (not defined $id) {
       # Assign a new ID
-      #$self->id( PREFIX.$max_num++ ); # it adds a call to _register_id and warns
+      #$self->id( PREFIX.$max_num++ ); # warns because of call to _register_id
       $self->{id} = PREFIX.++$max_num
    } else {
       # Validate ID
-      if ( not((caller(0))[0] eq __PACKAGE__) && ($id =~ $id_re) ) {
-         # Check validity of 'bcXX' IDs not requested by Bio::Community::Member
+      if ( ($id =~ $id_re) && ((caller(0))[0] !~ $mod_re) && ((caller(1))[0] !~ $mod_re) ) {
+         # Check validity of 'bcXX' IDs not requested by Bio::Community* modules
          my $num = $1;
          if ($num > $max_num) {
             $max_num = $num;

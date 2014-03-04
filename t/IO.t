@@ -97,9 +97,19 @@ throws_ok {$out->write_community($community)} qr/EXCEPTION/, 'Exception';
 $out->close;
 
 
+# Files with Bio::Community-generated IDs
+
+warning_is {
+   $in = Bio::Community::IO->new(
+      -file     => test_input_file('qiime_w_bc_ids.txt'),
+      -format   => 'qiime',
+   );
+   $in->next_community;
+} undef, 'No warnings reading Bio::Community IDs';
 
 
 # -weight_files is tested in t/IO/weights.t
+
 
 done_testing();
 
