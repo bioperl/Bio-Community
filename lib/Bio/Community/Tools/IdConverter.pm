@@ -31,7 +31,7 @@ Bio::Community::Tools::IdConverter - Various methods to convert member ID
 
 =head1 DESCRIPTION
 
-Convert the ID of members given a metacommunity based on another member
+Convert the ID of members given in a metacommunity based on another member
 attribute, such as its description, or based on IDs provided in a file.
 This file can be a Greengenes OTU cluster file, a BLAST file, or a QIIME
 taxonomic assignment file. A new metacommunity containing members with
