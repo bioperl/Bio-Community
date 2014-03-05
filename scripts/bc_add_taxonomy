@@ -19,19 +19,20 @@ use Getopt::Euclid qw(:minimal_keys);
 
 =head1 NAME
 
-bc_add_taxonomy - Add a taxonomic lineage to members in a community file
+bc_add_taxonomy - Add a taxonomic lineage to community members
 
 =head1 SYNOPSIS
 
   bc_add_taxonomy -input_files   my_communities.qiime  \
-                  -search_file   blast_results.tab     \
                   -taxonomy_file taxonomy.tab          \
                   -output_prefix my_communities_w_taxo
 
 =head1 DESCRIPTION
 
-This script takes results of similarity searches and optional taxonomy to assign
-a taxonomy to each member in the given communities.
+This script takes communities in which members have IDs reflecting their position
+in a taxonomic system and add the taxonomic lineage information to each member.
+The string 'unidentified' is given to members for which no taxonomic lineage is
+found.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -40,49 +41,29 @@ a taxonomy to each member in the given communities.
 =item -if <input_files>... | -input_files <input_files>...
 
 Input file containing the communities to manipulate. Your input file need to be
-in a format that makes provisions for taxonomic assignments in addition to
-member ID (e.g. qiime, biom). Also, when providing communities in a format that
+in a format that makes provisions for member ID and taxonomic assignments (e.g.
+qiime and biom formats). Also, when providing communities in a format that
 supports only one community per file (e.g. gaas), you can provide multiple input
-files.
+files. Note that members must have IDs that are valid IDs in the taxonomic sytem
+used, or they will be labelled as 'unidentified'.
 
 =for Euclid:
    input_files.type: readable
 
-=item -sf <search_file> | -search_file <search_file>
+=item -tf <taxonomy_file> | -taxonomy_file <taxonomy_file>
 
-File containing the results of similarity searches for taxonomic assignment
-purposes. The file should be formatted in the BLAST tabular format, i.e.
-with OTU ID in the first column and the ID of the best similarity in the second.
-The string 'unidentified' is given to members for which no similarity was found.
-Note that this scripts expects high-quality similarity results and that only the
-first similarity assigned to a member is kept.
+Taxonomy file giving the lineage information for this taxonomic system. This
+file should be in a format similar to that of Greengenes, i.e. tab-delimited
+with two columns: taxonomic ID and taxonomic lineage.
 
 =for Euclid:
-   search_file.type: readable
+   taxonomy_file.type: readable
 
 =back
 
 =head1 OPTIONAL ARGUMENTS
 
 =over
-
-=item -tf <taxonomy_file> | -taxonomy_file <taxonomy_file>
-
-Taxonomy file giving the taxonomic string for the sequences referred to in the
-<search_file>. This file should be in a format similar to that of Greengenes,
-i.e. tab-delimited with two columns: sequence ID and taxonomic string.
-
-=for Euclid:
-   taxonomy_file.type: readable
-
-=item -pi <populate_id> | -populate_id <populate_id>
-
-In addition to assigning taxonomy to a member, also change its ID to that of
-taxonomic representative. Default: populate_id.default
-
-=for Euclid:
-   populate_id.type: integer, populate_id == 0 || populate_id == 1
-   populate_id.default: 0
 
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
@@ -135,14 +116,12 @@ Email florent.angly@gmail.com
 =cut
 
 
-add_taxo( $ARGV{'input_files'}, $ARGV{'search_file'}, $ARGV{'taxonomy_file'},
-          $ARGV{'populate_id'}, $ARGV{'output_prefix'} );
+add_taxo( $ARGV{'input_files'}, $ARGV{'taxonomy_file'}, $ARGV{'output_prefix'} );
 
 exit;
 
 
-func add_taxo ($input_files, $search_file, $taxonomy_file, $populate_id,
-   $output_prefix) {
+func add_taxo ($input_files, $taxonomy_file, $output_prefix) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new;
@@ -157,14 +136,8 @@ func add_taxo ($input_files, $search_file, $taxonomy_file, $populate_id,
       $in->close;
    }
 
-   # Add best similarity ID
-   my $members = $meta->get_all_members();
-   $members = add_sim_id($members, $search_file, $populate_id);
-
-   # Assign taxonomy if needed
-   if (defined $taxonomy_file) {
-      $members = add_tax_str($members, $taxonomy_file);
-   }
+   # Assign taxonomy
+   add_tax_str($meta, $taxonomy_file);
 
    # Write processed communities
    write_communities($meta, $output_prefix, $format, '');
@@ -173,28 +146,12 @@ func add_taxo ($input_files, $search_file, $taxonomy_file, $populate_id,
 }
 
 
-func add_sim_id ($members, $search_file, $populate_id) {
-   my $sims = read_lookup($search_file);
-   for my $member (@$members) {
-      my $tax_id = $sims->{$member->id};
-      $member->desc( $tax_id || 'unidentified' );
-      if ($populate_id && defined $tax_id) {
-         $member->id( $tax_id );
-      }
-   }
-   return $members;
-}
-
-
-func add_tax_str ($members, $taxonomy_file) {
+func add_tax_str ($meta, $taxonomy_file) {
    my $taxa = read_lookup($taxonomy_file);
-   for my $member (@$members) {
-      my $taxo_str = $taxa->{$member->desc};
-      if (defined $taxo_str) {
-         $member->desc( $taxo_str );
-      }
+   for my $member (@{$meta->get_all_members}) {
+      $member->desc( $taxa->{$member->id} || 'unidentified' );
    }
-   return $members;
+   return 1;
 }
 
 
@@ -212,6 +169,7 @@ func read_lookup ($file) {
    print "Read ".scalar(keys(%$lookup))." entries from file '$file'\n";
    return $lookup;
 }
+
 
 func write_communities ($meta, $output_prefix, $output_format, $type='') {
    $type ||= '';
