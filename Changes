@@ -1,7 +1,6 @@
 Revision history for Perl extension Bio-Community.
 
-x.x.x
-  - Script to assign taxonomy from similarity searches
+0.1.5 2014-03-12
   - Bio::Community::next_member is faster and now returns identical objects
   - In generic and unifrac drivers, write member description if available, or
     ID otherwise
@@ -9,6 +8,8 @@ x.x.x
     Renamed the corresponding script from bc_use_repr_id to bc_convert_ids. In
     both module and script, added support for BLAST tabular files and conversion
     from member description.
+  - Added script bc_add_taxonomy that adds a taxonomic lineage when members have
+    a valid taxonomic ID
   - Rarefaction module and script can now assume an infinite number of bootstrap
     repetitions
 
