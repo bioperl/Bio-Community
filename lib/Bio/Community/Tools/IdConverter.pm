@@ -335,7 +335,7 @@ method _read_repr_file ( $file, $type ) {
    # assignment file.
    my $col_off;
    my %id2repr;
-   my $num_seqs;
+   my $num_seqs = 0;
    my $warned = 0;
    open my $in, '<', $file or $self->throw("Could not read file '$file'\n$!");
    while (my $line = <$in>) {
