@@ -53,6 +53,7 @@ my $build = Module::Build->new(
                              'scripts/bc_convert_ids',
                              'scripts/bc_correct_misassignments',
                              'scripts/bc_get_info',
+                             'scripts/bc_manage_members',
                              'scripts/bc_manage_samples',
                              'scripts/bc_measure_alpha',
                              'scripts/bc_measure_beta',

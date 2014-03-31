@@ -135,7 +135,7 @@ exit;
 func clean ($input_files, $count_threshold, $prevalence_threshold,
    $output_prefix) {
 
-   # Read input communities and do weight assignment
+   # Read input communities
    my $meta = Bio::Community::Meta->new;
    my $format;
    for my $input_file (@$input_files) {
@@ -157,7 +157,7 @@ func clean ($input_files, $count_threshold, $prevalence_threshold,
    );
    $meta = $cleaner->clean;
 
-   # Write results, converting to relative abundance if desired
+   # Write results
    write_communities($meta, $output_prefix, $format);
 
    return 1;
