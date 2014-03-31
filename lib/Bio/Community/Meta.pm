@@ -231,7 +231,7 @@ method remove_community ( Bio::Community $community ) {
 
  Function: Access the next community in the metacommunity (in the order the
            communities were added). 
- Usage   : my $member = $meta->next_community();
+ Usage   : my $community = $meta->next_community();
  Args    : None
  Returns : A Bio::Community object
 

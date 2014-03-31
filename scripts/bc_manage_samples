@@ -84,19 +84,18 @@ Suffix to add to the end of all community names. Default: name_suffix.default
 
 If names of communities are specified, only these communities will be included
 in the output file, in the requested order. This is also useful to arrange the
-communities in a specific order.
-
-Community names can be specified using wildcards, which means that 'marine*2013'
-will match all names starting with 'marine' and finishing with '2013', while
-'*gut*' will match all names containing 'gut'.
+communities in a specific order. Community names can be specified using
+wildcards, which means that 'marine*2013' will match all names starting with
+'marine' and finishing with '2013', while '*gut*' will match all names
+containing 'gut'.
 
 =for Euclid:
    include_names.type: string
 
 =item -en <exclude_names>... | -exclude_names <exclude_names>...
 
-If names of communities are specified, these communities will be excluded from
-the output file. As with <include_names>, wildcards are supported.
+Name of communities to exclude from the output file. As with <include_names>,
+wildcards are supported.
 
 =for Euclid:
    exclude_names.type: string
