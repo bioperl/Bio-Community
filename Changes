@@ -2,6 +2,8 @@ Revision history for Perl extension Bio-Community.
 
 x.x.x xxxx-xx-xx
   - New script, bc_manage_members, to rename and remove given community members
+  - Chao2 richness estimator added to Bio::Community::Alpha (suggested by Renato
+    Santos)
 
 0.1.5 2014-03-12
   - Bio::Community::next_member is faster and now returns identical objects

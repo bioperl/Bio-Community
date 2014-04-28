@@ -216,6 +216,7 @@ method _chao1 () {
    # Calculate Chao's bias-corrected chao1 richness
    # We use the bias-corrected version because it is always defined, even if
    # there are no doubletons, contrary to the non-bias corrected version
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 40
    my $d = 0;
    my ($n1, $n2) = (0, 0); # singletons and doubletons
    my $community = $self->community;

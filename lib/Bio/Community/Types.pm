@@ -122,6 +122,16 @@ subtype 'AlphaType'
    => message { _gen_err_msg(\@AlphaType, $_) };
 
 
+# Type of gamma diversity
+my @GammaType = ( qw(
+      chao2
+   ), @AlphaType
+);
+subtype 'GammaType'
+   => as enum( \@GammaType )
+   => message { _gen_err_msg(\@GammaType, $_) };
+
+
 # Type of transformation
 my @TransformationType = qw(identity binary relative hellinger chord);
 subtype 'TransformationType'

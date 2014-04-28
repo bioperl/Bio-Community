@@ -103,15 +103,20 @@ has metacommunity => (
 
  Function: Get or set the type of gamma diversity metric to measure.
  Usage   : my $type = $gamma->type;
- Args    : String for the desired type of gamma diversity. The same metrics are
-           available as in L<Bio::Community::Alpha>. Default is 'observed'.
+ Args    : String for the desired type of gamma diversity ('observed' by default).
+           In addition to the same metrics available as in L<Bio::Community::Alpha>,
+           you can use:
+
+            * chao2 : Bias-corrected chao2 richness estimator, which is based on
+                      the number of members present in exactly 1 and 2 samples.
+
  Returns : String for the desired type of gamma diversity
 
 =cut
 
 has type => (
    is => 'rw',
-   isa => 'AlphaType', # supports the same metrics as Bio::Community::Alpha
+   isa => 'GammaType',
    required => 0,
    lazy => 1,
    default => 'observed',
@@ -129,12 +134,47 @@ has type => (
 =cut
 
 method get_gamma () {
-   my $alpha = Bio::Community::Alpha->new(
-      -community => $self->metacommunity->get_metacommunity,
-      -type      => $self->type,
-   );
-   return $alpha->get_alpha;
+   my $gamma;
+   my $meta = $self->metacommunity;
+   my $metric = '_'.$self->type;
+   if ($self->can($metric)) {
+      $gamma = $self->$metric($meta);
+   } else {
+      my $alpha = Bio::Community::Alpha->new(
+         -community => $meta->get_metacommunity,
+         -type      => $self->type,
+      );
+      $gamma = $alpha->get_alpha;
+   }
+   return $gamma;
 };
+
+
+method _chao2 ($meta) {
+   # Calculate Chao's bias-corrected chao2 richness
+   # We use the bias-corrected version because it is always defined, even if
+   # there are no doubletons, contrary to the non-bias corrected version
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 40
+   my $members = $meta->get_all_members;
+   my $richness = scalar @$members;
+   my $communities = $meta->get_all_communities;
+   my $m = scalar @$communities;
+   my $q1; # number of species present in exactly 1 community
+   my $q2; # number of species present in exactly 2 communities
+   for my $member (@$members) {
+      my $k = 0;
+      for my $community (@$communities) {
+         $k++ if $community->get_rel_ab($member);
+         last if $k > 2;
+      }
+      if ($k == 1) {
+         $q1++;
+      } elsif ($k == 2) {
+         $q2++;
+      }
+   }
+   return $richness + ($m-1) * $q1 * ($q1-1) / (2 * $m * ($q2+1));
+}
 
 
 __PACKAGE__->meta->make_immutable;
