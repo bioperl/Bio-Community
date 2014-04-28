@@ -249,8 +249,9 @@ method _ace () {
    my $community = $self->community;
    if ($community->get_richness > 0) {
       my $thresh = 10;
-      my ($s_rare, $s_abund) = (0, 0); # number of rare, and abundant (>10) species
       my @F = (0) x $thresh; # number of singletons, doubletons, tripletons, ... 10-tons
+      my ($s_rare, $s_abund) = (0, 0); # number of rare, and abundant (>10) species
+      my $n_rare = 0;
       while (my $member = $community->next_member('_alpha_ace')) {
          my $c = $community->get_count($member);
          if ($c > $thresh) {
@@ -262,19 +263,17 @@ method _ace () {
             } else {
                $F[$c-1]++;
             }
+            $n_rare += $c;
          }
-      }
-      my ($n_rare, $tmp_sum) = (0, 0);
-      for my $i (0.. $thresh) {
-         my $add = $i * $F[$i-1];
-         $n_rare  += $add;
-         $add *= $i-1;
-         $tmp_sum += $add;
       }
       if ($n_rare == $F[0]) {
          # ACE is not defined when all rare species are singletons
          $d = undef;
       } else {
+         my $tmp_sum = 0;
+         for my $k (2 .. $thresh) {
+            $tmp_sum += $k * ($k-1) * $F[$k-1];
+         }
          my $C = 1 - $F[0]/$n_rare;
          my $gamma = ($s_rare * $tmp_sum) / ($C * $n_rare * ($n_rare-1)) - 1;
          $gamma = max($gamma, 0);
