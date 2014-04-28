@@ -267,8 +267,9 @@ method _ace () {
          }
       }
       if ($n_rare == $F[0]) {
-         # ACE is not defined when all rare species are singletons
-         $d = undef;
+         # ACE is not defined when all rare species are singletons.
+         # Fall back to chao1 (advised by Anne Chao, implemented in EstimateS)
+         $d = $self->_chao1();
       } else {
          my $tmp_sum = 0;
          for my $k (2 .. $thresh) {

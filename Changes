@@ -5,6 +5,8 @@ x.x.x xxxx-xx-xx
   - Added new richness estimators to Bio::Community::Gamma: Chao-2 (suggested by
     Renato Santos), ICE and jackknife (first & second-order)
   - Added first and second-order jackknife estimators to Bio::Community::Alpha
+  - ACE estimator of richness now falls back to Chao-1 in special case (as
+    advised by Anne Chao and implemented in EstimateS)
 
 0.1.5 2014-03-12
   - Bio::Community::next_member is faster and now returns identical objects

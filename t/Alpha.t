@@ -80,7 +80,7 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
-is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, undef;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 1.0; # same as chao1
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 2.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 3.0;
 
@@ -158,7 +158,7 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 0.1690309;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
-is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, undef;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 1.0; # same as chao1
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 1.0;
 

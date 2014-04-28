@@ -245,7 +245,8 @@ method _ice ($meta) {
    $m_inf = scalar keys %{$m_inf}; # number of samples with >=1 infrequent spp
    if ($n_inf == $q[0]) {
       # ICE is not defined when all infrequent species are uniques
-      $d = undef;
+      # Fall back to chao2 (advised by Anne Chao, implemented in EstimateS)
+      $d = $self->_chao2();
    } else {
       my $tmp_sum = 0;
       for my $k (2 .. $thresh) {
