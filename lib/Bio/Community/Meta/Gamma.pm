@@ -107,8 +107,10 @@ has metacommunity => (
            In addition to the same metrics available as in L<Bio::Community::Alpha>,
            you can use:
 
-            * chao2 : Bias-corrected chao2 richness estimator, which is based on
-                      the number of members present in exactly 1 and 2 samples.
+            * chao2   : Bias-corrected chao2 estimator, which is based on the
+                        number of members present in exactly 1 and 2 samples.
+            * jack1_i : First-order jackknife estimator for incidence data.
+            * jack2_i : Second-order jackknife estimator for incidence data.
 
  Returns : String for the desired type of gamma diversity
 
@@ -154,14 +156,19 @@ method _chao2 ($meta) {
    # Calculate Chao's bias-corrected chao2 richness
    # We use the bias-corrected version because it is always defined, even if
    # there are no doubletons, contrary to the non-bias corrected version
-   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 40
-   my $members = $meta->get_all_members;
-   my $richness = scalar @$members;
+   # http://chao.stat.nthu.edu.tw/software/SPADE/SPADE_UserGuide.pdf page 18
+   my $richness = scalar @{$meta->get_all_members};
+   my $m = scalar @{$meta->get_all_communities};
+   my ($q1, $q2) = $self->__calc_xtons($meta);
+   return $richness + ($m-1) * $q1 * ($q1-1) / (2 * $m * ($q2+1));
+}
+
+
+method __calc_xtons ($meta) {
+   # Return the #spp. present in exactly 1 and 2 communities, respectively
+   my ($q1, $q2) = (0, 0);
    my $communities = $meta->get_all_communities;
-   my $m = scalar @$communities;
-   my $q1; # number of species present in exactly 1 community
-   my $q2; # number of species present in exactly 2 communities
-   for my $member (@$members) {
+   for my $member (@{$meta->get_all_members}) {
       my $k = 0;
       for my $community (@$communities) {
          $k++ if $community->get_rel_ab($member);
@@ -173,7 +180,27 @@ method _chao2 ($meta) {
          $q2++;
       }
    }
-   return $richness + ($m-1) * $q1 * ($q1-1) / (2 * $m * ($q2+1));
+   return $q1, $q2;
+}
+
+
+method _jack1_i ($meta) {
+   # Calculate the first-order jackknife estimator for incidence data
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 41
+   my $richness = scalar @{$meta->get_all_members};
+   my $m = scalar @{$meta->get_all_communities};
+   my ($q1, $q2) = $self->__calc_xtons($meta);
+   return $richness + $q1 * ($m-1) / $m;
+}
+
+
+method _jack2_i ($meta) {
+   # Calculate the second-order jackknife estimator for incidence data
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 41
+   my $richness = scalar @{$meta->get_all_members};
+   my $m = scalar @{$meta->get_all_communities};
+   my ($q1, $q2) = $self->__calc_xtons($meta);
+   return $richness + $q1 * (2*$m-3) / $m - $q2 * ($m-2)**2 / ($m * ($m-1));
 }
 
 

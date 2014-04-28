@@ -124,7 +124,7 @@ subtype 'AlphaType'
 
 # Type of gamma diversity
 my @GammaType = ( qw(
-      chao2
+      chao2 jack1_i jack2_i
    ), @AlphaType
 );
 subtype 'GammaType'
