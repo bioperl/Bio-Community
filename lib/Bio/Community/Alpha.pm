@@ -102,17 +102,18 @@ has community => (
  Usage   : my $type = $alpha->type;
  Args    : String for the desired type of alpha diversity ('observed' by default).
 
-           Richness (or estimated number of species):
+           Richness (estimated number of species), based on counts, not relative
+           abundance:
             * observed :  C<S>
             * menhinick:  C<S/sqrt(n)>, where C<n> is the total counts (observations).
             * margalef : C<(S-1)/ln(n)>
             * chao1    : Bias-corrected chao1 richness, C<S+n1*(n1-1)/(2*(n2+1))>
                          where C<n1> and C<n2> are the number of singletons and
                          doubletons, respectively. Particularly useful for data
-                         skewed toward the low-abundance species, e.g. microbial.
-                         Based on counts, not relative abundance.
-            * ace      : Abundance-based Coverage Estimator (ACE). Based on
-                         counts, not relative abundance.
+                         skewed by low-abundance species, e.g. microbial data.
+            * ace      : Abundance-based Coverage Estimator (ACE).
+            * jack1    : First-order jackknife richness estimator, C<S+n1>.
+            * jack2    : Second-order jackknife richness estimator, C<S+2*n1-n2>.
 
            Evenness (or equitability):
             * buzas      : Buzas & Gibson's (or Sheldon's) evenness, C<e^H/S>.
@@ -217,20 +218,27 @@ method _chao1 () {
    # We use the bias-corrected version because it is always defined, even if
    # there are no doubletons, contrary to the non-bias corrected version
    # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 40
-   my $d = 0;
-   my ($n1, $n2) = (0, 0); # singletons and doubletons
    my $community = $self->community;
-   while (my $member = $community->next_member('_alpha_chao1')) {
+   my ($n1, $n2) = $self->__calc_xtons($community);
+   return $community->get_richness + ($n1*($n1-1)) / (2*($n2+1));
+}
+
+
+method __calc_xtons ($community) {
+   # Return the number of singleton and doubletons in the given community
+   my ($n1, $n2) = (0, 0);
+   while (my $member = $community->next_member('_alpha_calc_xtons')) {
       my $c = $community->get_count($member);
       if ($c == 1) {
          $n1++;
       } elsif ($c == 2) {
          $n2++;
       } elsif ( $c != int($c) ) {
-         $self->throw("Got count $c but can only compute chao1 on integer numbers");
+         $self->throw("Got count $c but can only compute metric '".$self->type.
+            "' on integer abundance data");
       }
    }
-   return $community->get_richness + ($n1*($n1-1)) / (2*($n2+1));
+   return $n1, $n2;
 }
 
 
@@ -274,6 +282,24 @@ method _ace () {
       }
    }
    return $d;
+}
+
+
+method _jack1 () {
+   # Calculate first-order jackknife richness estimator.
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 41
+   my $community = $self->community;
+   my ($n1, $n2) = $self->__calc_xtons($community);
+   return $community->get_richness + $n1;
+}
+
+
+method _jack2 () {
+   # Calculate second-order jackknife richness estimator.
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 41
+   my $community = $self->community;
+   my ($n1, $n2) = $self->__calc_xtons($community);
+   return $community->get_richness + 2 * $n1 - $n2;
 }
 
 
