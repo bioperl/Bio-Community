@@ -124,7 +124,7 @@ subtype 'AlphaType'
 
 # Type of gamma diversity
 my @GammaType = ( qw(
-      chao2 jack1_i jack2_i
+      chao2 jack1_i jack2_i ice
    ), @AlphaType
 );
 subtype 'GammaType'
@@ -210,13 +210,13 @@ func _gen_err_msg ($accepts, $got = '') {
    my $accept_str;
    if (ref($accepts) eq 'ARRAY') {
       if (scalar @$accepts > 1) {
-         $accept_str = join(', ', @$accepts[0,-2]);
+         $accept_str = join(', ', @$accepts[0 .. scalar @$accepts - 2]);
       }
       $accept_str = $accept_str.' or '.$accepts->[-1];
    } else {
       $accept_str = $accepts;
    }
-   return "It can only be $accept_str, but was '$got'";
+   return "'$got' was given, but valid input can only be $accept_str";
 }
 
 
