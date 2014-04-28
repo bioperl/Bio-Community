@@ -76,6 +76,7 @@ use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use Method::Signatures;
 use namespace::autoclean;
+use List::Util qw(max);
 use Bio::Community::Alpha;
 
 extends 'Bio::Root::Root';
@@ -111,6 +112,7 @@ has metacommunity => (
                         number of members present in exactly 1 and 2 samples.
             * jack1_i : First-order jackknife estimator for incidence data.
             * jack2_i : Second-order jackknife estimator for incidence data.
+            * ice     : Incidence-based Coverage Estimator (ICE).
 
  Returns : String for the desired type of gamma diversity
 
@@ -201,6 +203,60 @@ method _jack2_i ($meta) {
    my $m = scalar @{$meta->get_all_communities};
    my ($q1, $q2) = $self->__calc_xtons($meta);
    return $richness + $q1 * (2*$m-3) / $m - $q2 * ($m-2)**2 / ($m * ($m-1));
+}
+
+
+method _ice ($meta) {
+   # Calculate the incidence-based coverage estimator (ICE)
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 40
+   my $d = 0;
+   my $thresh = 10;
+   my @q = (0) x $thresh; # number of species in only one, two, ... 10 communities
+   my ($s_inf, $s_freq) = (0, 0); # number of infrequent and frequent (>10 samples) spp
+   my $n_inf = 0;
+   my $communities = $meta->get_all_communities;
+   my $m_inf; # communities with at least one infrequent species
+   MEMBER: for my $member (@{$meta->get_all_members}) {
+      my $k = 0;
+      my $abs = [];
+      for my $community (@$communities) {
+         my $ab = $community->get_rel_ab($member);
+         push @$abs, $ab;
+         if ($ab) {
+            $k++;
+         }
+         if ($k > 10) {
+            $s_freq++;
+            next MEMBER;
+         }
+      }
+      $q[$k-1]++;
+      $s_inf++;
+      $n_inf += $k;
+      # Keep track of communities with infrequent species
+      for my $i (0 .. scalar @$communities - 1) {
+         my $community = $communities->[$i];
+         my $ab = $abs->[$i];
+         if ($ab) {
+            $m_inf->{$community} = 1;
+         }
+      }
+   }
+   $m_inf = scalar keys %{$m_inf}; # number of samples with >=1 infrequent spp
+   if ($n_inf == $q[0]) {
+      # ICE is not defined when all infrequent species are uniques
+      $d = undef;
+   } else {
+      my $tmp_sum = 0;
+      for my $k (2 .. $thresh) {
+         $tmp_sum += $k * ($k-1) * $q[$k-1];
+      }
+      my $C = 1 - $q[0] / $n_inf;
+      my $gamma = ($s_inf * $m_inf * $tmp_sum) / ($C * ($m_inf-1) * $n_inf**2) - 1;
+      $gamma = max($gamma, 0);
+      $d = $s_freq + $s_inf/$C + $q[0]*$gamma/$C;
+   }
+   return $d;
 }
 
 
