@@ -1,6 +1,6 @@
 Revision history for Perl extension Bio-Community.
 
-x.x.x xxxx-xx-xx
+0.1.6 2014-04-29
   - New script, bc_manage_members, to rename and remove given community members
   - Added new richness estimators to Bio::Community::Gamma: Chao-2 (suggested by
     Renato Santos), ICE and jackknife (first & second-order)
