@@ -32,11 +32,10 @@ Bio::Community::Meta::Beta - Beta diversity or distance separating communities
 
 =head1 DESCRIPTION
 
-Calculate how dissimilar communities are by calculating their beta diversity.
-The more different communities are, the larger their beta diversity. Some
-beta diversity metrics are a distance measure (in the mathematical sense).
-Qualitative (presence/absence) and qualitative measures of beta diversity are
-available: see type().
+The Bio::Community::Beta module quantifies how dissimilar communities are
+by calculating their beta diversity. The more different communities are, the
+larger their beta diversity. Some beta diversity metrics are proper distance
+measures (in the mathematical sense).
 
 Since the relative abundance of community members is not always proportional to
 member counts (see weights() in Bio::Community::Member and use_weights() in
@@ -44,6 +43,83 @@ Bio::Community), the beta diversity measured here are always based on relative
 abundance (as a fractional number between 0 and 1, not as a percentage), even
 for beta diversity metrics that are usually based on number of observations
 (counts).
+
+=head1 METRICS
+
+Qualitative and quantitive measures of beta diversity are available and can be
+specified with the C<type()> method:
+
+=head2 Qualitative
+
+Qualitative metrics are based on the presence or absence of community members
+only.
+
+=over
+
+=item jaccard
+
+The Jaccard distance (between 0 and 1), i.e. the fraction of non-shared species
+relative to the overall richness of the metacommunity.
+
+=item sorensen
+
+The Sørensen dissimilarity, or Whittaker's species turnover (between 0 and 1),
+i.e. the fraction of non-shared species relative to the average richness in the
+metacommunity.
+
+=item shared
+
+The percentage of species shared (between 0 and 100), relative to the least
+rich community. Note: this is the opposite of a beta diversity measure since
+the higher the percent of species shared, the smaller the beta diversity.
+
+=back
+
+=head2 Quantitative
+
+=over
+
+=item 1-norm
+
+The 1-norm, or Manhattan distance, i.e. the sum of difference in abundance for all species.
+
+=item 2-norm (euclidean)
+
+The 2-norm, or euclidean distance.
+
+=item infinity-norm
+
+The infinity-norm, i.e. the maximum difference in abundance over all species.
+
+=item hellinger
+
+Like the euclidean distance, but constrained between 0 and 1.
+
+=item bray-curtis
+
+The Bray-Curtis dissimilarity (or Sørensen quantitative index), which varies
+between 0 and 1.
+
+=item morisita-horn
+
+The Morisita-Horn dissimilarity, which varies between 0 and 1. Affected
+strongly by the abundance of the most abundant species, but not by sample size
+or richness.
+
+=item permuted
+
+A beta diversity measure between 0 and 100, representing the percentage of the
+dominant species in the first community with a permuted abundance rank in the
+second community. As a special case, when no species are shared (and the
+percentage permuted is meaningless), undef is returned.
+
+=item maxiphi
+
+A beta diversity measure between 0 and 1, based on the percentage of species
+shared and the percentage of top species permuted (that have had a change in
+abundance rank).
+
+=back
 
 =head1 AUTHOR
 
@@ -124,42 +200,8 @@ has metacommunity => (
 
  Function: Get or set the beta diversity metric to calculate.
  Usage   : my $type = $beta->type;
- Args    : String for the desired type of beta diversity.
-
-           Qualitative (presence/absence):
-            * jaccard: the Jaccard distance (between 0 and 1), i.e. the
-                fraction of non-shared species relative to the overall richness
-                of the metacommunity.
-            * sorensen: the Sørensen dissimilarity, or Whittaker's species
-                turnover (between 0 and 1), i.e. the fraction of non-shared
-                species relative to the average richness in the metacommunity.
-            * shared: percentage of species shared (between 0 and 100), relative
-                to the least rich community. Note: this is the opposite
-                of a beta diversity measure since the higher the percent of
-                species shared, the smaller the beta diversity.
-
-           Quantitative:
-            * 1-norm: the 1-norm, or Manhattan distance, i.e. the sum of
-                 difference in abundance for all species.
-            * 2-norm (euclidean): the 2-norm, or euclidean distance.
-            * infinity-norm: the infinity-norm, i.e. the maximum difference in
-                 abundance over all species.
-            * hellinger: like the euclidean distance, but constrained between 0
-                and 1.
-            * bray-curtis: the Bray-Curtis dissimilarity (or Sørensen
-                quantitative index), which varies between 0 and 1.
-            * morisita-horn: the Morisita-Horn dissimilarity, which varies
-                between 0 and 1. Affected strongly by the abundance of the most
-                abundant species, but not by sample size or richness.
-            * permuted: a beta diversity measure between 0 and 100, representing
-                the percentage of the dominant species in the first community
-                with a permuted abundance rank in the second community. As a
-                special case, when no species are shared (and the percentage
-                permuted is meaningless), undef is returned.
-            * maxiphi: a beta diversity measure between 0 and 1, based on the 
-                percentage of species shared and the percentage of top species
-                permuted (that have had a change in abundance rank).
-
+ Args    : String for the desired type of beta diversity ('2-norm' by default).
+           See L</METRICS> for details.
  Returns : String for the desired type of beta diversity
 
 =cut

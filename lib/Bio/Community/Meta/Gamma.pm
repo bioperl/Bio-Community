@@ -22,11 +22,34 @@ Bio::Community::Meta::Gamma - Calculate the gamma diversity of a metacommunity
 =head1 DESCRIPTION
 
 The Bio::Community::Meta::Gamma module calculates the gamma diversity of a group
-of communities (provided as a metacommunity object). The goal is to support the
-same diversity metrics provided by Bio::Community::Alpha, but the only metric
-available at the moment is: richness.
+of communities (provided as a metacommunity object). Higer gamma diversity values
+indicate more diverse metacommunities.
 
-For all these metrics, a higher value means that the community is more diverse.
+=head1 METRICS
+
+This module supports the same diversity metrics provided in
+L<Bio::Community::Alpha>. In addition, you can use:
+
+=over
+
+=item chao2
+
+Bias-corrected chao2 estimator, which is based on the number of members present
+in exactly 1 and 2 samples.
+
+=item jack1_i
+
+First-order jackknife estimator for incidence data.
+
+=item jack2_i
+
+Second-order jackknife estimator for incidence data.
+
+=item ice
+
+Incidence-based Coverage Estimator (ICE).
+
+=back
 
 =head1 AUTHOR
 
@@ -104,16 +127,8 @@ has metacommunity => (
 
  Function: Get or set the type of gamma diversity metric to measure.
  Usage   : my $type = $gamma->type;
- Args    : String for the desired type of gamma diversity ('observed' by default).
-           In addition to the same metrics available as in L<Bio::Community::Alpha>,
-           you can use:
-
-            * chao2   : Bias-corrected chao2 estimator, which is based on the
-                        number of members present in exactly 1 and 2 samples.
-            * jack1_i : First-order jackknife estimator for incidence data.
-            * jack2_i : Second-order jackknife estimator for incidence data.
-            * ice     : Incidence-based Coverage Estimator (ICE).
-
+ Args    : String for the desired type of gamma diversity ('observed' by
+           default). See L</METRICS> for details.
  Returns : String for the desired type of gamma diversity
 
 =cut

@@ -21,9 +21,155 @@ Bio::Community::Alpha - Calculate the alpha diversity of a community
 
 =head1 DESCRIPTION
 
-The Bio::Community::Alpha module calculates the alpha diversity within a
-community. This module supports different types of alpha diversity metrics:
-richness, evenness, dominance and indices. See type() for details.
+The Bio::Community::Alpha module calculates alpha diversity, i.e. the diversity
+contained within a community. Higer alpha diversity values indicate more diverse
+communities.
+
+=head1 METRICS
+
+This module calculates different types of alpha diversity: richness, evenness,
+dominance and indices. Specifically, the following metrics are supported and
+can be specified using the C<type()> method:
+
+=head2 Richness
+
+Richness is the estimated number of species in a community. Some of these metrics
+base their estimate on species abundance data and need I<integer counts>.
+
+=over
+
+=item observed
+
+Observed richness C<S>.
+
+=item menhinick
+
+Menhinick's richness C<S/sqrt(n)>, where C<n> is the total counts (observations).
+
+=item margalef
+
+Margalef's richness C<(S-1)/ln(n)>.
+
+=item chao1
+
+Bias-corrected chao1 richness, C<S+n1*(n1-1)/(2*(n2+1))>, where C<n1> and C<n2>
+are the number of singletons and doubletons, respectively. Particularly useful
+for data skewed by low-abundance species, e.g. microbial data.
+
+=item ace
+
+Abundance-based Coverage Estimator (ACE).
+
+=item jack1
+
+First-order jackknife richness estimator, C<S+n1>.
+
+=item jack2
+
+Second-order jackknife richness estimator, C<S+2*n1-n2>.
+
+=back
+
+=head2 Evenness
+
+Evenness or equitability, represents how similar in abundance members of a
+community are.
+
+=over
+
+=item buzas
+
+Buzas & Gibson's (or Sheldon's) evenness, C<e^H/S>. Ranges from 0 to 1.
+
+=item heip
+
+Heip's evenness, C<(e^H-1)/(S-1)>. Ranges from 0 to 1.
+
+=item shannon_e
+
+Shannon's evenness, or the Shannon-Wiener index divided by the maximum
+diversity possible in the community. Ranges from 0 to 1.
+
+=item simpson_e
+
+Simpson's evenness, or the Simpson's Index of Diversity divided by the maximum
+diversity possible in the community. Ranges from 0 to 1.
+
+=item brillouin_e
+
+Brillouin's evenness, or the Brillouin's index divided by the maximum diversity
+possible in the community. Ranges from 0 to 1. Note that the L<Math::GSL::SF>
+module is needed to calculate this metric.
+
+=item hill_e
+
+Hill's C<E_2,1> evenness, i.e. Simpson's Reciprocal index divided by C<e^H>.
+
+=item mcintosh_e
+
+McIntosh's evenness.
+
+=item camargo
+
+Camargo's eveness. Ranges from 0 to 1.
+
+=back
+
+=head2 Dominance
+
+Dominance has the opposite meaning of evenness. It is not strictly speaking a
+diversity metrics since the higher the dominance, the lower the diversity.
+
+=over
+
+=item simpson_d
+
+Simpson's Dominance Index C<D>. Ranges from 0 to 1.
+
+=item berger
+
+Berger-Parker dominance, i.e. the proportion of the most abundant species.
+Ranges from 0 to 1.
+
+=back
+
+=head2 Indices
+
+Indices (accounting for species abundance):
+
+=over
+
+=item shannon
+
+Shannon-Wiener index C<H>. Emphasizes richness and ranges from 0 to infinity.
+
+=item simpson
+
+Simpson's Index of Diversity C<1-D> (or Gini-Simpson index), where C<D> is
+Simpson's dominance index. C<1-D> is the probability that two individuals taken
+randomly are not from the same species. Emphasizes evenness and ranges from 0
+to 1.
+
+=item simpson_r
+
+Simpson's Reciprocal Index C<1/D>. Ranges from 1 to infinity.
+
+=item brillouin
+
+Brillouin's index, appropriate for small, completely censused communities.
+Based on counts, not relative abundance. Note that the L<Math::GSL::SF> module
+is needed to calculate this metric.
+
+=item hill
+
+Hill's C<N_inf> index, the inverse of the Berger-Parker dominance. Ranges from
+1 to infinity.
+
+=item mcintosh
+
+McIntosh's index. Based on counts, not relative abundance.
+
+=back
 
 =head1 AUTHOR
 
@@ -100,62 +246,8 @@ has community => (
 
  Function: Get or set the type of alpha diversity metric to measure.
  Usage   : my $type = $alpha->type;
- Args    : String for the desired type of alpha diversity ('observed' by default).
-
-           Richness (estimated number of species), based on counts, not relative
-           abundance:
-            * observed :  C<S>
-            * menhinick:  C<S/sqrt(n)>, where C<n> is the total counts (observations).
-            * margalef : C<(S-1)/ln(n)>
-            * chao1    : Bias-corrected chao1 richness, C<S+n1*(n1-1)/(2*(n2+1))>
-                         where C<n1> and C<n2> are the number of singletons and
-                         doubletons, respectively. Particularly useful for data
-                         skewed by low-abundance species, e.g. microbial data.
-            * ace      : Abundance-based Coverage Estimator (ACE).
-            * jack1    : First-order jackknife richness estimator, C<S+n1>.
-            * jack2    : Second-order jackknife richness estimator, C<S+2*n1-n2>.
-
-           Evenness (or equitability):
-            * buzas      : Buzas & Gibson's (or Sheldon's) evenness, C<e^H/S>.
-                           Ranges from 0 to 1.
-            * heip       : Heip's evenness, C<(e^H-1)/(S-1)>. Ranges from 0 to 1.
-            * shannon_e  : Shannon's evenness, or the Shannon-Wiener index
-                           divided by the maximum diversity possible in the
-                           community. Ranges from 0 to 1.
-            * simpson_e  : Simpson's evenness, or the Simpson's Index of Diversity
-                           divided by the maximum diversity possible in the
-                           community. Ranges from 0 to 1.
-            * brillouin_e: Brillouin's evenness, or the Brillouin's index divided
-                           by the maximum diversity possible in the community.
-                           Ranges from 0 to 1.
-            * hill_e     : Hill's C<E_2,1> evenness, i.e. Simpson's Reciprocal
-                           index divided by C<e^H>.
-            * mcintosh_e : McIntosh's evenness.
-            * camargo    : Camargo's eveness. Ranges from 0 to 1.
-
-           Indices (accounting for species abundance):
-            * shannon  : Shannon-Wiener index C<H>. Emphasizes richness and ranges
-                         from 0 to infinity.
-            * simpson  : Simpson's Index of Diversity C<1-D> (or Gini-Simpson
-                         index), where C<D> is Simpson's dominance index. C<1-D>
-                         is the probability that two individuals taken randomly
-                         are not from the same species. Emphasizes evenness and
-                         anges from 0 to 1.
-            * simpson_r: Simpson's Reciprocal Index C<1/D>. Ranges from 1 to
-                         infinity.
-            * brillouin: Brillouin's index, appropriate for small, completely
-                         censused communities. Based on counts, not relative
-                         abundance.
-            * hill     : Hill's C<N_inf> index, the inverse of the Berger-Parker
-                         dominance. Ranges from 1 to infinity.
-            * mcintosh : McIntosh's index. Based on counts, not relative abundance.
-
-           Dominance (B<not> diversity metrics since the higher their value, the
-           lower the diversity):
-            * simpson_d: Simpson's Dominance Index C<D>. Ranges from 0 to 1.
-            * berger   : Berger-Parker dominance, i.e. the proportion of the most
-                         abundant species. Ranges from 0 to 1.
-
+ Args    : String for the desired type of alpha diversity ('observed' by 
+           default). See L</METRICS> for details.
  Returns : String for the desired type of alpha diversity.
 
 =cut
