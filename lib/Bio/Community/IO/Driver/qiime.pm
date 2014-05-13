@@ -30,7 +30,9 @@ file. Here is an example of QIIME OTU table file:
   2	0	230	110
   3	0	30	80
 
-The same OTU table with a given metacommunity name (the first line) and
+Note that the first line is an arbitrary comment line, which can be used to
+specify a metacommunity name. The second line contains column names. Here is
+the same OTU table with a given metacommunity name (the first line) and
 assignments to the GreenGenes taxonomy:
 
   # biome_comparison_2013
@@ -39,6 +41,8 @@ assignments to the GreenGenes taxonomy:
   1	10	24	0	k__Bacteria;p__TM6;c__;o__;f__;g__;s__
   2	0	230	110	k__Bacteria;p__Cyanobacteria;c__;o__Oscillatoriales;f__;g__Trichodesmium;s__Trichodesmium erythraeum
   3	0	30	80	k__Bacteria;p__Acidobacteria;c__Solibacteres;o__Solibacterales;f__Solibacteraceae;g__Candidatus Solibacter;s__
+
+To be recognized, the last column must match the pattern *lineage* or *taxon*.
 
 For each Bio::Community::Member $member generated from a QIIME file, $member->id()
 contains the OTU ID, while $member->desc() holds the content of the consensus
@@ -186,7 +190,8 @@ method _generate_members () {
          if ($last_col_header eq '') {
             $self->throw("Parsing error. It looks like the last column of the ".
                "QIIME OTU table might be empty.\n");
-         } elsif ($last_col_header =~ m/consensus\s*lineage/i) {
+         } elsif ($last_col_header =~ m/(?:lineage|taxon)/i) {
+            # Will match 'Consensus lineage', 'taxonomy', etc
             $taxo_col = $self->_get_max_col;
             $self->_skip_last_col(1);
          }
