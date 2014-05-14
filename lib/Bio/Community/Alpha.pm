@@ -21,9 +21,155 @@ Bio::Community::Alpha - Calculate the alpha diversity of a community
 
 =head1 DESCRIPTION
 
-The Bio::Community::Alpha module calculates the alpha diversity within a
-community. This module supports different types of alpha diversity metrics:
-richness, evenness, dominance and indices. See type() for details.
+The Bio::Community::Alpha module calculates alpha diversity, i.e. the diversity
+contained within a community. Higer alpha diversity values indicate more diverse
+communities.
+
+=head1 METRICS
+
+This module calculates different types of alpha diversity: richness, evenness,
+dominance and indices. Specifically, the following metrics are supported and
+can be specified using the C<type()> method:
+
+=head2 Richness
+
+Richness is the estimated number of species in a community. Some of these metrics
+base their estimate on species abundance data and need I<integer counts>.
+
+=over
+
+=item observed
+
+Observed richness C<S>.
+
+=item menhinick
+
+Menhinick's richness C<S/sqrt(n)>, where C<n> is the total counts (observations).
+
+=item margalef
+
+Margalef's richness C<(S-1)/ln(n)>.
+
+=item chao1
+
+Bias-corrected chao1 richness, C<S+n1*(n1-1)/(2*(n2+1))>, where C<n1> and C<n2>
+are the number of singletons and doubletons, respectively. Particularly useful
+for data skewed by low-abundance species, e.g. microbial data.
+
+=item ace
+
+Abundance-based Coverage Estimator (ACE).
+
+=item jack1
+
+First-order jackknife richness estimator, C<S+n1>.
+
+=item jack2
+
+Second-order jackknife richness estimator, C<S+2*n1-n2>.
+
+=back
+
+=head2 Evenness
+
+Evenness or equitability, represents how similar in abundance members of a
+community are.
+
+=over
+
+=item buzas
+
+Buzas & Gibson's (or Sheldon's) evenness, C<e^H/S>. Ranges from 0 to 1.
+
+=item heip
+
+Heip's evenness, C<(e^H-1)/(S-1)>. Ranges from 0 to 1.
+
+=item shannon_e
+
+Shannon's evenness, or the Shannon-Wiener index divided by the maximum
+diversity possible in the community. Ranges from 0 to 1.
+
+=item simpson_e
+
+Simpson's evenness, or the Simpson's Index of Diversity divided by the maximum
+diversity possible in the community. Ranges from 0 to 1.
+
+=item brillouin_e
+
+Brillouin's evenness, or the Brillouin's index divided by the maximum diversity
+possible in the community. Ranges from 0 to 1. Note that the L<Math::GSL::SF>
+module is needed to calculate this metric.
+
+=item hill_e
+
+Hill's C<E_2,1> evenness, i.e. Simpson's Reciprocal index divided by C<e^H>.
+
+=item mcintosh_e
+
+McIntosh's evenness.
+
+=item camargo
+
+Camargo's eveness. Ranges from 0 to 1.
+
+=back
+
+=head2 Dominance
+
+Dominance has the opposite meaning of evenness. It is not strictly speaking a
+diversity metrics since the higher the dominance, the lower the diversity.
+
+=over
+
+=item simpson_d
+
+Simpson's Dominance Index C<D>. Ranges from 0 to 1.
+
+=item berger
+
+Berger-Parker dominance, i.e. the proportion of the most abundant species.
+Ranges from 0 to 1.
+
+=back
+
+=head2 Indices
+
+Indices (accounting for species abundance):
+
+=over
+
+=item shannon
+
+Shannon-Wiener index C<H>. Emphasizes richness and ranges from 0 to infinity.
+
+=item simpson
+
+Simpson's Index of Diversity C<1-D> (or Gini-Simpson index), where C<D> is
+Simpson's dominance index. C<1-D> is the probability that two individuals taken
+randomly are not from the same species. Emphasizes evenness and ranges from 0
+to 1.
+
+=item simpson_r
+
+Simpson's Reciprocal Index C<1/D>. Ranges from 1 to infinity.
+
+=item brillouin
+
+Brillouin's index, appropriate for small, completely censused communities.
+Based on counts, not relative abundance. Note that the L<Math::GSL::SF> module
+is needed to calculate this metric.
+
+=item hill
+
+Hill's C<N_inf> index, the inverse of the Berger-Parker dominance. Ranges from
+1 to infinity.
+
+=item mcintosh
+
+McIntosh's index. Based on counts, not relative abundance.
+
+=back
 
 =head1 AUTHOR
 
@@ -100,61 +246,8 @@ has community => (
 
  Function: Get or set the type of alpha diversity metric to measure.
  Usage   : my $type = $alpha->type;
- Args    : String for the desired type of alpha diversity ('observed' by default).
-
-           Richness (or estimated number of species):
-            * observed :  C<S>
-            * menhinick:  C<S/sqrt(n)>, where C<n> is the total counts (observations).
-            * margalef : C<(S-1)/ln(n)>
-            * chao1    : Bias-corrected chao1 richness, C<S+n1*(n1-1)/(2*(n2+1))>
-                         where C<n1> and C<n2> are the number of singletons and
-                         doubletons, respectively. Particularly useful for data
-                         skewed toward the low-abundance species, e.g. microbial.
-                         Based on counts, not relative abundance.
-            * ace      : Abundance-based Coverage Estimator (ACE). Based on
-                         counts, not relative abundance.
-
-           Evenness (or equitability):
-            * buzas      : Buzas & Gibson's (or Sheldon's) evenness, C<e^H/S>.
-                           Ranges from 0 to 1.
-            * heip       : Heip's evenness, C<(e^H-1)/(S-1)>. Ranges from 0 to 1.
-            * shannon_e  : Shannon's evenness, or the Shannon-Wiener index
-                           divided by the maximum diversity possible in the
-                           community. Ranges from 0 to 1.
-            * simpson_e  : Simpson's evenness, or the Simpson's Index of Diversity
-                           divided by the maximum diversity possible in the
-                           community. Ranges from 0 to 1.
-            * brillouin_e: Brillouin's evenness, or the Brillouin's index divided
-                           by the maximum diversity possible in the community.
-                           Ranges from 0 to 1.
-            * hill_e     : Hill's C<E_2,1> evenness, i.e. Simpson's Reciprocal
-                           index divided by C<e^H>.
-            * mcintosh_e : McIntosh's evenness.
-            * camargo    : Camargo's eveness. Ranges from 0 to 1.
-
-           Indices (accounting for species abundance):
-            * shannon  : Shannon-Wiener index C<H>. Emphasizes richness and ranges
-                         from 0 to infinity.
-            * simpson  : Simpson's Index of Diversity C<1-D> (or Gini-Simpson
-                         index), where C<D> is Simpson's dominance index. C<1-D>
-                         is the probability that two individuals taken randomly
-                         are not from the same species. Emphasizes evenness and
-                         anges from 0 to 1.
-            * simpson_r: Simpson's Reciprocal Index C<1/D>. Ranges from 1 to
-                         infinity.
-            * brillouin: Brillouin's index, appropriate for small, completely
-                         censused communities. Based on counts, not relative
-                         abundance.
-            * hill     : Hill's C<N_inf> index, the inverse of the Berger-Parker
-                         dominance. Ranges from 1 to infinity.
-            * mcintosh : McIntosh's index. Based on counts, not relative abundance.
-
-           Dominance (B<not> diversity metrics since the higher their value, the
-           lower the diversity):
-            * simpson_d: Simpson's Dominance Index C<D>. Ranges from 0 to 1.
-            * berger   : Berger-Parker dominance, i.e. the proportion of the most
-                         abundant species. Ranges from 0 to 1.
-
+ Args    : String for the desired type of alpha diversity ('observed' by 
+           default). See L</METRICS> for details.
  Returns : String for the desired type of alpha diversity.
 
 =cut
@@ -216,20 +309,28 @@ method _chao1 () {
    # Calculate Chao's bias-corrected chao1 richness
    # We use the bias-corrected version because it is always defined, even if
    # there are no doubletons, contrary to the non-bias corrected version
-   my $d = 0;
-   my ($n1, $n2) = (0, 0); # singletons and doubletons
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 40
    my $community = $self->community;
-   while (my $member = $community->next_member('_alpha_chao1')) {
+   my ($n1, $n2) = $self->__calc_xtons($community);
+   return $community->get_richness + ($n1*($n1-1)) / (2*($n2+1));
+}
+
+
+method __calc_xtons ($community) {
+   # Return the number of singleton and doubletons in the given community
+   my ($n1, $n2) = (0, 0);
+   while (my $member = $community->next_member('_alpha_calc_xtons')) {
       my $c = $community->get_count($member);
       if ($c == 1) {
          $n1++;
       } elsif ($c == 2) {
          $n2++;
       } elsif ( $c != int($c) ) {
-         $self->throw("Got count $c but can only compute chao1 on integer numbers");
+         $self->throw("Got count $c but can only compute metric '".$self->type.
+            "' on integer abundance data");
       }
    }
-   return $community->get_richness + ($n1*($n1-1)) / (2*($n2+1));
+   return $n1, $n2;
 }
 
 
@@ -240,8 +341,9 @@ method _ace () {
    my $community = $self->community;
    if ($community->get_richness > 0) {
       my $thresh = 10;
-      my ($s_rare, $s_abund) = (0, 0); # number of rare, and abundant (>10) species
       my @F = (0) x $thresh; # number of singletons, doubletons, tripletons, ... 10-tons
+      my ($s_rare, $s_abund) = (0, 0); # number of rare, and abundant (>10) species
+      my $n_rare = 0;
       while (my $member = $community->next_member('_alpha_ace')) {
          my $c = $community->get_count($member);
          if ($c > $thresh) {
@@ -253,19 +355,18 @@ method _ace () {
             } else {
                $F[$c-1]++;
             }
+            $n_rare += $c;
          }
       }
-      my ($n_rare, $tmp_sum) = (0, 0);
-      for my $i (0.. $thresh) {
-         my $add = $i * $F[$i-1];
-         $n_rare  += $add;
-         $add *= $i-1;
-         $tmp_sum += $add;
-      }
       if ($n_rare == $F[0]) {
-         # ACE is not defined when all rare species are singletons
-         $d = undef;
+         # ACE is not defined when all rare species are singletons.
+         # Fall back to chao1 (advised by Anne Chao, implemented in EstimateS)
+         $d = $self->_chao1();
       } else {
+         my $tmp_sum = 0;
+         for my $k (2 .. $thresh) {
+            $tmp_sum += $k * ($k-1) * $F[$k-1];
+         }
          my $C = 1 - $F[0]/$n_rare;
          my $gamma = ($s_rare * $tmp_sum) / ($C * $n_rare * ($n_rare-1)) - 1;
          $gamma = max($gamma, 0);
@@ -273,6 +374,24 @@ method _ace () {
       }
    }
    return $d;
+}
+
+
+method _jack1 () {
+   # Calculate first-order jackknife richness estimator.
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 41
+   my $community = $self->community;
+   my ($n1, $n2) = $self->__calc_xtons($community);
+   return $community->get_richness + $n1;
+}
+
+
+method _jack2 () {
+   # Calculate second-order jackknife richness estimator.
+   # http://www.uvm.edu/~ngotelli/manuscriptpdfs/Chapter%204.pdf page 41
+   my $community = $self->community;
+   my ($n1, $n2) = $self->__calc_xtons($community);
+   return $community->get_richness + 2 * $n1 - $n2;
 }
 
 

@@ -42,6 +42,13 @@ delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'he
 delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'shannon'   )->get_gamma, 0.863869925360591;
 
 
+# Gamma-specific metrics
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'chao2'     )->get_gamma, 3.25;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'jack1_i'   )->get_gamma, 4.0;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'jack2_i'   )->get_gamma, 4.0;
+delta_ok Bio::Community::Meta::Gamma->new( -metacommunity => $meta, -type => 'ice'       )->get_gamma, 8.0;
+
+
 done_testing();
 
 exit;

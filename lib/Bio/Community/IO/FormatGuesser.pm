@@ -399,9 +399,9 @@ func _possibly_qiime ($fields, $line, $line_num) {
    #   #OTU ID	20100302	20100304	20100823
    #   0	40	0	76
    #   1	0	142	2
-   # Note that the first (comment) line has only one column and does not need to
-   # mention 'QIIME'.
-   # Last column can be an extra non-numeric column containing lineage
+   # The first line can contain any comment. The second line must have
+   # the name of the columns. The last column can be an extra non-numeric
+   # column containing taxonomic information.
    my $ok = 0;
    my $num_fields = scalar @$fields;
    if ($num_fields == 1) {

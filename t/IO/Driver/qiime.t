@@ -404,7 +404,7 @@ is $community2->get_count($member), 76;
 is $community2->get_member_by_rank(2), undef;
 
 
-# Read QIIME file where a taxonomy has root and Consensuslineage is spelled differently
+# Read QIIME file where a taxonomy has root
 
 ok $in = Bio::Community::IO->new(
    -file     => test_input_file('qiime_w_root.txt'),
@@ -449,6 +449,43 @@ is $member->taxon->ancestor->ancestor->ancestor->ancestor, undef;
 is $community->get_count($member), 1;
 
 is $community->get_member_by_rank(4), undef;
+
+
+# Read QIIME file with less conventional headers and taxonomy column
+ok $in = Bio::Community::IO->new(
+   -file     => test_input_file('qiime_alt_header.txt'),
+   -taxonomy => Bio::DB::Taxonomy->new( -source => 'list' ),
+   -format   => 'qiime',
+), 'Read QIIME file with alternative headers';
+
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 2;
+is $community->name, '20100302';
+
+ok $in->next_community;
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 2;
+is $member->desc, 'No blast hit';
+is $member->taxon, undef;
+is $community->get_count($member), 41;
+
+ok $member = $community->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->id, 0;
+is $member->desc, 'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rickettsiales;f__;g__Candidatus Pelagibacter;s__';
+is $member->taxon->node_name, 'g__Candidatus Pelagibacter';
+is $member->taxon->ancestor->ancestor->ancestor->ancestor->ancestor->node_name, 'k__Bacteria';
+is $member->taxon->ancestor->ancestor->ancestor->ancestor->ancestor->ancestor, undef;
+is $community->get_count($member), 40;
+
+is $community->get_member_by_rank(3), undef;
+
 
 
 done_testing();

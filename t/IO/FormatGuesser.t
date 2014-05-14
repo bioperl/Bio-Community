@@ -182,6 +182,11 @@ ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
 is $guesser->guess, 'qiime';
 
+$file = test_input_file('qiime_alt_header.txt');
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file );
+is $guesser->file, $file;
+is $guesser->guess, 'qiime';
+
 
 # Test unknown format
 

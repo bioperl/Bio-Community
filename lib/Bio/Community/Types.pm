@@ -112,14 +112,24 @@ subtype 'DistanceType'
 
 # Type of alpha diversity
 my @AlphaType = qw(
-   observed  menhinick   chao1  margalef   ace
-   shannon_e brillouin_e hill_e mcintosh_e simpson_e buzas heip camargo
+   observed  menhinick   chao1  margalef   ace       jack1     jack2
+   shannon_e brillouin_e hill_e mcintosh_e simpson_e buzas     heip  camargo
    shannon   brillouin   hill   mcintosh   simpson   simpson_r
    simpson_d berger
 );
 subtype 'AlphaType'
    => as enum( \@AlphaType )
    => message { _gen_err_msg(\@AlphaType, $_) };
+
+
+# Type of gamma diversity
+my @GammaType = ( qw(
+      chao2 jack1_i jack2_i ice
+   ), @AlphaType
+);
+subtype 'GammaType'
+   => as enum( \@GammaType )
+   => message { _gen_err_msg(\@GammaType, $_) };
 
 
 # Type of transformation
@@ -200,13 +210,13 @@ func _gen_err_msg ($accepts, $got = '') {
    my $accept_str;
    if (ref($accepts) eq 'ARRAY') {
       if (scalar @$accepts > 1) {
-         $accept_str = join(', ', @$accepts[0,-2]);
+         $accept_str = join(', ', @$accepts[0 .. scalar @$accepts - 2]);
       }
       $accept_str = $accept_str.' or '.$accepts->[-1];
    } else {
       $accept_str = $accepts;
    }
-   return "It can only be $accept_str, but was '$got'";
+   return "'$got' was given, but valid input can only be $accept_str";
 }
 
 

@@ -42,6 +42,8 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 0.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 0.0;
 
 is Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, undef;
 is Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
@@ -78,7 +80,9 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
-is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, undef;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 1.0; # same as chao1
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 2.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 3.0;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
 is       Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
@@ -116,6 +120,8 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 1.0;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
 is       Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
@@ -152,7 +158,9 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'observed' )->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alpha, 0.1690309;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 1.0;
-is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, undef;
+is       Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 1.0; # same as chao1
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 1.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 1.0;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 1.0;
 is       Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, undef;
@@ -191,6 +199,8 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 0.2969742;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 2.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 2.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 2.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 2.0;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.7468004;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.4936008;
@@ -230,6 +240,8 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 1.11622125310249;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 3.0;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 3.6;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 4.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 4.0;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.916486424665735;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.874729636998600;
@@ -270,6 +282,8 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 1.1078081;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'chao1'    )->get_alpha, 4.5;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'ace'      )->get_alpha, 7.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack1'    )->get_alpha, 6.0;
+delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'jack2'    )->get_alpha, 7.0;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.5891230;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.4521640;
@@ -310,6 +324,8 @@ delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'menhinick')->get_alp
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'margalef' )->get_alpha, 1.0919928;
 throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'chao1' )->get_alpha} qr/EXCEPTION.*integer/msi;
 throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'ace'   )->get_alpha} qr/EXCEPTION.*integer/msi;
+throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'jack1' )->get_alpha} qr/EXCEPTION.*integer/msi;
+throws_ok { Bio::Community::Alpha->new(-community=>$c, -type=>'jack2' )->get_alpha} qr/EXCEPTION.*integer/msi;
 
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'buzas'      )->get_alpha, 0.5477421;
 delta_ok Bio::Community::Alpha->new(-community=>$c, -type=>'heip'       )->get_alpha, 0.3969895;
