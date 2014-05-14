@@ -139,6 +139,13 @@ subtype 'TransformationType'
    => message { _gen_err_msg(\@TransformationType, $_) };
 
 
+# Type of accumulation curve
+my @AccumulationType = qw(rarefaction collector);
+subtype 'AccumulationType'
+   => as enum( \@AccumulationType )
+   => message { _gen_err_msg(\@AccumulationType, $_) };
+
+
 # Members identification method
 my @IdentifyMembersByType = qw(id desc);
 subtype 'IdentifyMembersByType'
