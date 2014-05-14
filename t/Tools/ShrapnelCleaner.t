@@ -42,7 +42,7 @@ $meta = Bio::Community::Meta->new( -communities => [$community1, $community2] );
 
 ok $cleaner = Bio::Community::Tools::ShrapnelCleaner->new( );
 isa_ok $cleaner, 'Bio::Community::Tools::ShrapnelCleaner';
-
+throws_ok { $cleaner->clean } qr/EXCEPTION.*metacommunity/msi;
 
 # Cleaner with default
 

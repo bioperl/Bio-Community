@@ -14,6 +14,13 @@ my ($meta1, $meta2, $community1, $community2, $member1, $member2, $member3, $cou
 my %info;
 
 
+# Basic cleaner object
+
+ok $converter = Bio::Community::Tools::IdConverter->new( );
+isa_ok $converter, 'Bio::Community::Tools::IdConverter';
+throws_ok { $converter->get_converted_meta } qr/EXCEPTION.*metacommunity/msi;
+
+
 # Test ID conversion to cluster ID representative
 
 $member1 = Bio::Community::Member->new( -id => 187144 );
@@ -30,7 +37,6 @@ ok $converter = Bio::Community::Tools::IdConverter->new(
    -metacommunity => $meta1,
    -cluster_file  => test_input_file('gg_99_otu_map.txt'),
 ), 'Cluster ID representative';
-isa_ok $converter, 'Bio::Community::Tools::IdConverter';
 
 ok $meta2 = $converter->get_converted_meta;
 isa_ok $meta2, 'Bio::Community::Meta';

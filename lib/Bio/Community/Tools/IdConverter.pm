@@ -129,7 +129,7 @@ extends 'Bio::Root::Root';
 
 has metacommunity => (
    is => 'rw',
-   isa => 'Bio::Community::Meta',
+   isa => 'Maybe[Bio::Community::Meta]',
    required => 0,
    #lazy => 1,
    #default => undef,
@@ -258,6 +258,11 @@ has taxassign_file => (
 
 method get_converted_meta () {
    # Sanity checks
+   my $meta = $self->metacommunity;
+   if ( (not $meta) || ($meta->get_communities_count == 0) ) {
+      $self->throw('Should have a metacommunity containing at least one community');
+   }
+
    if ( $self->_has_member_attr + $self->_has_cluster_file + $self->_has_blast_file
       + $self->_has_taxassign_file > 1) {
       $self->throw('Specify only one of -member_attr, -cluster_file, -blast_file'.
@@ -284,7 +289,6 @@ method get_converted_meta () {
    }
 
    # Process IDs
-   my $meta = $self->metacommunity;
    my $meta2 = Bio::Community::Meta->new;
 
    while (my $community = $meta->next_community) {

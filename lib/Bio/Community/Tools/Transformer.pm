@@ -95,7 +95,7 @@ extends 'Bio::Root::Root';
 
 has metacommunity => (
    is => 'rw',
-   isa => 'Bio::Community::Meta',
+   isa => 'Maybe[Bio::Community::Meta]',
    required => 0,
    default => undef,
    lazy => 1,
@@ -159,8 +159,8 @@ before get_transformed_meta => sub {
 method _transform () {
    # Sanity check
    my $meta = $self->metacommunity;
-   if ($meta->get_communities_count == 0) {
-      $self->throw('Metacommunity should contain at least one community');
+   if ( (not $meta) || ($meta->get_communities_count == 0) ) {
+      $self->throw('Should have a metacommunity containing at least one community');
    }
 
    # Register transformation functions

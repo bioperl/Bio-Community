@@ -19,10 +19,11 @@ my ($summarizer, $member, $member1, $member2, $member3, $member4, $member5,
    $id3, $in);
 
 
-# Bare object
+# Basic object
 
 ok $summarizer = Bio::Community::Tools::Summarizer->new(), 'Bare object';
 isa_ok $summarizer, 'Bio::Community::Tools::Summarizer';
+throws_ok { $summarizer->get_summary } qr/EXCEPTION.*metacommunity/msi;
 
 
 # Test with multiple communities

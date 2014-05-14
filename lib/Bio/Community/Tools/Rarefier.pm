@@ -129,7 +129,7 @@ with 'Bio::Community::Role::PRNG';
 
 has metacommunity => (
    is => 'rw',
-   isa => 'Bio::Community::Meta',
+   isa => 'Maybe[Bio::Community::Meta]',
    required => 0,
    default => undef,
    lazy => 1,
@@ -308,8 +308,8 @@ method _count_normalize () {
 
    # Sanity check
    my $meta = $self->metacommunity;
-   if ($meta->get_communities_count == 0) {
-      $self->throw('Metacommunity should contain at least one community');
+   if ( (not $meta) || ($meta->get_communities_count == 0) ) {
+      $self->throw('Should have a metacommunity containing at least one community');
    }
 
    # Get or set sample size

@@ -42,6 +42,7 @@ $meta = Bio::Community::Meta->new( -communities => [$community1, $community2] );
 
 ok $transformer = Bio::Community::Tools::Transformer->new( );
 isa_ok $transformer, 'Bio::Community::Tools::Transformer';
+throws_ok { $transformer->get_transformed_meta } qr/EXCEPTION.*metacommunity/msi;
 
 
 # Identity transformation

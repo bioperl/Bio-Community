@@ -92,7 +92,7 @@ $meta = Bio::Community::Meta->new( -communities => [$community1, $community2] );
 
 ok $rarefier = Bio::Community::Tools::Rarefier->new( );
 isa_ok $rarefier, 'Bio::Community::Tools::Rarefier';
-
+throws_ok { $rarefier->get_repr_meta } qr/EXCEPTION.*metacommunity/msi;
 
 # Normalizer with specified repetitions
 
