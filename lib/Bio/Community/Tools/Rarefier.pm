@@ -262,7 +262,7 @@ has drop => (
    required => 0, 
    default => 0,
    lazy => 1,
-   init_arg => '-verbose',
+   init_arg => '-drop',
 );
 
 
