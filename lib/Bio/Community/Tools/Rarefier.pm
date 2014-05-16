@@ -191,13 +191,13 @@ has threshold => (
 
 =head2 repetitions
 
- Function: Get or set the number of bootstrap repetitions to perform. If specified,
+ Function: Get or set the number of bootstrap repetitions to perform. When given,
            instead of relying on the threshold() to determine when to stop
            repeating the bootstrap process, perform an arbitrary number of
            repetitions. After communities have been normalized by count using
            threshold() method, the number of repetitions actually done can be
            accessed using this method. As a special case, specify 'inf' to
-           simulate as if an infinity of repetitions had been performed.
+           simulate an infinite number of repetitions.
  Usage   : my $repetitions = $rarefier->repetitions;
  Args    : positive integer or 'inf' number of repetitions
  Returns : positive integer for the (minimum) number of repetitions
@@ -230,12 +230,33 @@ has repetitions => (
  Function: Get or set verbose mode. In verbose mode, the current number of
            iterations (and beta diversity if a threshold is used) is displayed.
  Usage   : $rarefier->verbose(1);
- Args    : 0 or 1
+ Args    : 0 (default) or 1
  Returns : 0 or 1
 
 =cut
 
 has verbose => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0, 
+   default => 0,
+   lazy => 1,
+   init_arg => '-verbose',
+);
+
+
+=head2 drop
+
+ Function: Get or set drop mode. In drop mode, this module silently drops
+           communities that do not have enough members instead of reporting an
+           error.
+ Usage   : $rarefier->drop(1);
+ Args    : 0 (default) or 1
+ Returns : 0 or 1
+
+=cut
+
+has drop => (
    is => 'rw',
    isa => 'Bool',
    required => 0, 
@@ -337,7 +358,7 @@ method _count_normalize () {
          }
          $self->throw("Was given a sample size of $sample_size which is larger".
             " than counts in the smallest community, (name: '$name', counts: ".
-            "$min)");
+            "$min)") if not $self->drop;
       }
    }
    if ($self->verbose) {
@@ -355,10 +376,13 @@ method _count_normalize () {
    my $max_threshold = 0;
    for my $community ( @$communities ) {
       my ($average, $repetitions, $beta_val);
-      if ($community->get_members_count == $sample_size) {
+      my $count = $community->get_members_count;
+      if ($count > $sample_size) {
+         ($average, $repetitions, $beta_val) = $self->_bootstrap($community);
+      } elsif ($count == $sample_size) {
          ($average, $repetitions, $beta_val) = ($community->clone, undef, undef);
       } else {
-         ($average, $repetitions, $beta_val) = $self->_bootstrap($community);
+         next; # drop this community
       }
       my $name = $community->name;
       #$name .= ' ' if $name;

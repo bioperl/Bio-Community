@@ -198,8 +198,6 @@ is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_repr_meta->get_communities_count, 2;
 
 is $rarefier->repetitions, 'inf';
-is $rarefier->threshold, 0;
-is $rarefier->sample_size, 1000;
 is $rarefier->verbose, 0;
 
 $average = $rarefier->get_avg_meta->get_community_by_name('community1');
@@ -237,6 +235,24 @@ delta_ok $representative->get_members_count, 1000;
 delta_within $representative->get_count($member1), $representative->get_count($member1), $epsilon2;
 delta_within $representative->get_count($member3), $representative->get_count($member3), $epsilon2;
 delta_within $representative->get_count($member6), $representative->get_count($member6), $epsilon2;
+
+
+# Same thing, but silently dropping communities that have a low count
+
+$rarefier->sample_size(2000);
+$rarefier->drop(1);
+
+is $rarefier->get_avg_meta->get_communities_count, 1;
+is $rarefier->get_repr_meta->get_communities_count, 1;
+
+is $rarefier->sample_size, 2000;
+is $rarefier->drop, 1;
+
+is $rarefier->get_avg_meta->get_community_by_name('community1'), undef;
+is $rarefier->get_repr_meta->get_community_by_name('community1'), undef;
+
+$average = $rarefier->get_avg_meta->get_community_by_name('community2');
+delta_ok $average->get_members_count, 2000;
 
 
 # Normalizer with manually specified threshold
