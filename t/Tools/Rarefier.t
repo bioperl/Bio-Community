@@ -189,15 +189,10 @@ delta_within $representative->get_count($member3), $representative->get_count($m
 delta_within $representative->get_count($member6), $representative->get_count($member6), $epsilon2;
 
 
-# Assume an infinity of bootstrap repetitions
+# Assume an infinity of bootstrap repetitions (and reusing previous object)
 
-ok $rarefier = Bio::Community::Tools::Rarefier->new(
-   -metacommunity => $meta,
-   -repetitions   => 'inf',
-   -sample_size   => 1000,
-   -verbose       => 0,
-);
-
+$rarefier->verbose(0);
+$rarefier->repetitions('inf');
 
 is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_repr_meta->get_communities_count, 2;

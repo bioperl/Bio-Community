@@ -134,6 +134,7 @@ has metacommunity => (
    default => undef,
    lazy => 1,
    init_arg => '-metacommunity',
+   trigger => sub { $_[0]->_clear_avg_meta; $_[0]->_clear_repr_meta },
 );
 
 
@@ -156,6 +157,7 @@ has sample_size => (
    default => undef,
    lazy => 1,
    init_arg => '-sample_size',
+   trigger => sub { $_[0]->_clear_avg_meta; $_[0]->_clear_repr_meta },
 );
 
 
@@ -183,6 +185,7 @@ has threshold => (
    default => 1E-5, # maybe impossible to reach lower thresholds for simplistic communities
    lazy => 1,
    init_arg => '-threshold',
+   trigger => sub { $_[0]->_clear_avg_meta; $_[0]->_clear_repr_meta },
 );
 
 
@@ -208,6 +211,7 @@ has repetitions => (
    default => undef,
    lazy => 1,
    init_arg => '-repetitions',
+   trigger => sub { $_[0]->_clear_avg_meta; $_[0]->_clear_repr_meta },
 );
 
 
@@ -252,13 +256,14 @@ has verbose => (
 
 has average_meta => (
    is => 'rw',
-   isa => 'Bio::Community::Meta',
+   isa => 'Maybe[Bio::Community::Meta]',
    required => 0,
    default => sub { undef },
    lazy => 1,
    reader => 'get_avg_meta',
    writer => '_set_avg_meta',
    predicate => '_has_avg_meta',
+   clearer => '_clear_avg_meta',
 );
 
 before get_avg_meta => sub {
@@ -286,6 +291,7 @@ has representative_meta => (
    reader => 'get_repr_meta',
    writer => '_set_repr_meta',
    predicate => '_has_repr_meta',
+   clearer => '_clear_repr_meta',
 );
 
 before get_repr_meta => sub {
@@ -365,7 +371,6 @@ method _count_normalize () {
       }
       $average_meta->add_communities([$average]);
    }
-   $self->_set_avg_meta($average_meta);
 
    if (defined $self->repetitions) {
       $self->threshold($max_threshold);
@@ -375,6 +380,8 @@ method _count_normalize () {
       }
       $self->repetitions($min_repetitions);
    }
+
+   $self->_set_avg_meta($average_meta);
 
    return 1;
 }
