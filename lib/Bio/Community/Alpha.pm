@@ -246,9 +246,9 @@ has community => (
 
  Function: Get or set the type of alpha diversity metric to measure.
  Usage   : my $type = $alpha->type;
- Args    : String for the desired type of alpha diversity ('observed' by 
-           default). See L</METRICS> for details.
- Returns : String for the desired type of alpha diversity.
+ Args    : String of the desired alpha diversity type ('observed' by default).
+           See L</METRICS> for details.
+ Returns : String of the desired alpha diversity type.
 
 =cut
 

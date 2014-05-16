@@ -36,12 +36,6 @@ Bio::Community::Tools::Accumulator - Species accumulation curves
 ###     -repetitions   => 0.001, # stop after this number of bootstrap iterations
 ###  );
 
-###  # ... or assume an infinite number of repetitions
-###  my $rarefier = Bio::Community::Tools::Rarefier->new(
-###     -metacommunity => $meta,
-###     -sample_size   => 1000,
-###     -repetitions   => 'inf',
-###  );
 
 =head1 DESCRIPTION
 
@@ -105,10 +99,10 @@ use Moose;
 use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use namespace::autoclean;
+use Bio::Community::Alpha;
 use Bio::Community::Meta;
-####use Bio::Community::Meta::Beta;
-####use POSIX;
-####use List::Util qw(min); ####
+use Bio::Community::Tools::Rarefier;
+use List::Util qw( shuffle );
 use Method::Signatures;
 
 extends 'Bio::Root::Root';
@@ -158,8 +152,8 @@ has type => (
  Function: Get or set the number of repetitions to perform. The mean across all
            these repetitions is reported.
  Usage   : my $repetitions = $accumulator->repetitions;
- Args    : positive integer or 'inf' number of repetitions
- Returns : positive integer for the (minimum) number of repetitions
+ Args    : positive integer for the number of repetitions
+ Returns : positive integer for the number of repetitions
 
 =cut
 
@@ -199,18 +193,19 @@ has nof_ticks => (
 
  Function: Get or set the type of alpha diversity to calculate.
  Usage   : my $alpha = $accumulator->alpha;
- Args    : 
- Returns : 
+ Args    : String of the desired alpha diversity type ('observed' by default).
+           See C<type()> in L<Bio::Community::Alpha> for details.
+ Returns : String of the desired alpha diversity type.
 
 =cut
 
 has alpha => (
    is => 'rw',
-   ####isa => 'Maybe[PositiveInt | Str]',
+   isa => 'AlphaType',
    required => 0, 
-   default => undef,
+   default => 'observed',
    lazy => 1,
-   init_arg => '-repetitions',
+   init_arg => '-alpha',
 );
 
 
@@ -238,26 +233,91 @@ method get_curve {
    #    collector: 1..nof_samples for collector
    #    rarefaction: 1 to max_count of smallest comm. Extend for larger communities
    my $ticks = $self->_get_ticks();
-   use Data::Dumper; print Dumper($ticks);
-   # rarefaction: can use 
-   # if (rarefaction) {
-   #    for my $num (@range) {
-   #       # use Rarefier (special case for inf!)
-   #       # calculate alpha
-   #    }
-   # } elsif (collector) {
-   #    for my $num (@range) {
-   #       # mix communities manually
-   #       # calculate alpha
-   #    }
-   # } else { 
-   #    error
-   # }
-   #return $string;
+
+   use Data::Dumper; print "ticks: ".Dumper($ticks); ####
+
+   my $meta = $self->metacommunity;
+   my $comm_names = [map { $_->name } @{$meta->get_all_communities}];
+   my $res = '';
+
+   if ($self->type eq 'rarefaction') {
+      # Rarefaction curve
+      my $rarefier = Bio::Community::Tools::Rarefier->new(
+         -metacommunity => $meta,
+         -repetitions   => 1,
+         -drop          => 1,
+         -verbose       => 0,
+      );
+      for my $tick (@$ticks) {
+         $rarefier->sample_size($tick);
+         my $avg_alphas;
+         for my $rep (1 .. $self->repetitions) {
+            my $acc_meta = $rarefier->get_repr_meta;
+            my $alphas = $self->_get_alpha( $tick, $comm_names, $acc_meta );
+            # add to $avg_alphas
+         }
+         # divide $avg_alphas
+         #$res .= join "\t", $tick, @$avg_alphas;
+      }
+   } else {
+      # Collector curve
+      $comm_names = ['collector'];
+      for my $tick (@$ticks) {
+         my $avg_alphas;
+         for my $rep (1 .. $self->repetitions) {
+            my $acc_meta = $self->_combine_comms( $tick );
+            my $alphas = $self->_get_alpha( $tick, $comm_names, $acc_meta );
+            # add to $avg_alphas
+         }
+         # divide $avg_alphas
+         #$res .= join "\t", $tick, @$avg_alphas;
+      }
+   }
+
+   $res = join("\t", '', @$comm_names)."\n".$res;
+
+   return $res;
+}
+
+
+method _combine_comms ($num) {
+   # Create a community that is the combination of a random subset of the
+   # communities in the given metacommunity
+   my @rand_comms = shuffle @{$self->metacommunity->get_all_communities};
+   @rand_comms = @rand_comms[0..$num-1];
+   my $meta = Bio::Community::Meta->new( -communities => \@rand_comms );   
+   return $meta;
+}
+
+
+method _get_alpha ($tick, $comm_names, $meta) {
+   # Calculate the alpha diversity of the communities in the given metacommunity
+   # Return the results as a tab-delimited string
+   my @alphas = ($tick);
+   for my $comm_name (@$comm_names) {
+      my $comm;
+      if ($self->type eq 'rarefaction') {
+         $comm = $meta->get_community_by_name($comm_name);
+      } else {
+         $comm = $meta->get_metacommunity;
+      }
+      my $alpha = '';
+      if ($comm) {
+         $alpha = Bio::Community::Alpha->new(
+            -community => $comm,
+            -type      => $self->alpha,
+         )->get_alpha;
+      }
+      push @alphas, $alpha;
+   }
+   return join("\t", @alphas)."\n";
 }
 
 
 method _get_ticks {
+   # Calculate which number of members or communities to sample from for the
+   # accumulation curve.
+
    # Sanity check
    my $meta = $self->metacommunity;
    if ( (not $meta) || ($meta->get_communities_count == 0) ) {
@@ -273,6 +333,7 @@ method _get_ticks {
       my $comms = $meta->get_all_communities;
 
       my $counts = [ map {$_->get_members_count} @$comms ];
+
       my $sort_order = [ sort { $counts->[$a] <=> $counts->[$b] } 0..$#$comms ];
       my $min_count = $counts->[0];
       my $max_count = $counts->[1];
@@ -300,7 +361,6 @@ method _get_ticks {
          while (1) {
             $tick_num++;
             $val = $param*(exp($tick_num)-1)+1;
-            print "val: $val\n"; ####
             $val = int( $val + 0.5 );
             next if $val == $ticks[-1]; # avoid duplicates
             if ($val < $count) {
