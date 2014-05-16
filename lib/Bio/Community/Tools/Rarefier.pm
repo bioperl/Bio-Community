@@ -516,6 +516,7 @@ method _bootstrap (Bio::Community $community) {
    if (defined $sampler) {
       $average = $self->_divide( $overall, $iteration, $members );
    } else {
+      $sample_size ||= 1; # protect against div/0 when size is 0
       $average = $self->_divide( $overall, 100 / $sample_size, $members );
    }
 

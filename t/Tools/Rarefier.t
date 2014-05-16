@@ -99,7 +99,7 @@ throws_ok { $rarefier->get_repr_meta } qr/EXCEPTION.*metacommunity/msi;
 
 ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -metacommunity => $meta,
-   -repetitions   => 10,
+   -repetitions   => 'inf',
    -sample_size   => 0,
    -seed          => 12537409,
 );
