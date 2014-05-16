@@ -28,7 +28,7 @@ $community->add_member( $member3, 1);
 ok $sampler = Bio::Community::Tools::Sampler->new(
    -community => $community,
    -seed      => 12537409,
-);
+), 'Even community';
 isa_ok $sampler, 'Bio::Community::Tools::Sampler';
 
 %descs = ();
@@ -57,7 +57,7 @@ $community->add_member( $member3, 1);
 ok $sampler = Bio::Community::Tools::Sampler->new(
    -community => $community,
    -seed      => 72904653,
-);
+), 'Uneven community';
 
 %descs = ();
 $count = 1000;
@@ -83,6 +83,18 @@ cmp_ok( $rand_community->get_count($member2), '>=',   50 ); # should be  100
 cmp_ok( $rand_community->get_count($member2), '<=',  150 );
 cmp_ok( $rand_community->get_count($member3), '>=',    4 ); # should be   10
 cmp_ok( $rand_community->get_count($member3), '<=',   16 );
+
+
+# Zero members
+
+ok $sampler = Bio::Community::Tools::Sampler->new(
+   -community => $community,
+   -seed      => 72904653,
+), 'Zero members';
+
+$count = 0;
+ok $rand_community = $sampler->get_rand_community($count);
+is scalar @{$rand_community->get_all_members}, 0;
 
 
 done_testing();

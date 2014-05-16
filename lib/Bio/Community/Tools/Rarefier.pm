@@ -144,14 +144,14 @@ has metacommunity => (
            smallest community or an error will be generated. If the sample size
            is omitted, it defaults to the get_members_count() of the smallest community.
  Usage   : my $sample_size = $rarefier->sample_size;
- Args    : positive integer for the sample size
- Returns : positive integer for the sample size
+ Args    : integer for the sample size
+ Returns : integer for the sample size
 
 =cut
 
 has sample_size => (
    is => 'rw',
-   isa => 'Maybe[StrictlyPositiveInt]',
+   isa => 'Maybe[PositiveInt]',
    required => 0,
    default => undef,
    lazy => 1,

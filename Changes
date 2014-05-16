@@ -3,6 +3,7 @@ Revision history for Perl extension Bio-Community.
 x.x.x XXXX-XX-XX
   - Support for QIIME files containing alternative taxonomic header (reported
     by Brian Kemish and Jason Steen).
+  - Support sampling 0 members in Sampler and Rarefier
 
 0.1.6 2014-04-29
   - New script, bc_manage_members, to rename and remove given community members
