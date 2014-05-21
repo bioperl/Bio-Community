@@ -229,49 +229,63 @@ has alpha => (
 =cut
 
 method get_curve {
-   # Determine range:
-   #    collector: 1..nof_samples for collector
-   #    rarefaction: 1 to max_count of smallest comm. Extend for larger communities
-   my $ticks = $self->_get_ticks();
-
-   use Data::Dumper; print "ticks: ".Dumper($ticks); ####
 
    my $meta = $self->metacommunity;
    my $comm_names = [map { $_->name } @{$meta->get_all_communities}];
    my $res = '';
 
+   my $ticks = $self->_get_ticks(); # Determine range of sample sizes
+
+   my $rarefier;
    if ($self->type eq 'rarefaction') {
       # Rarefaction curve
-      my $rarefier = Bio::Community::Tools::Rarefier->new(
+      $rarefier = Bio::Community::Tools::Rarefier->new(
          -metacommunity => $meta,
          -repetitions   => 1,
          -drop          => 1,
          -verbose       => 0,
       );
-      for my $tick (@$ticks) {
-         $rarefier->sample_size($tick);
-         my $avg_alphas;
-         for my $rep (1 .. $self->repetitions) {
-            my $acc_meta = $rarefier->get_repr_meta;
-            my $alphas = $self->_get_alpha( $tick, $comm_names, $acc_meta );
-            # add to $avg_alphas
-         }
-         # divide $avg_alphas
-         #$res .= join "\t", $tick, @$avg_alphas;
-      }
    } else {
       # Collector curve
       $comm_names = ['collector'];
-      for my $tick (@$ticks) {
-         my $avg_alphas;
-         for my $rep (1 .. $self->repetitions) {
-            my $acc_meta = $self->_combine_comms( $tick );
-            my $alphas = $self->_get_alpha( $tick, $comm_names, $acc_meta );
-            # add to $avg_alphas
+   }
+
+   for my $tick (@$ticks) {
+      my $avg_alphas;
+      for my $rep (1 .. $self->repetitions) {
+
+         # Rarefy or collect communities
+         my $acc_meta;
+         if ($rarefier) {
+            $rarefier->sample_size($tick);
+            $acc_meta = $rarefier->get_repr_meta;
+         } else {
+            $self->_collect_comms($tick);
          }
-         # divide $avg_alphas
-         #$res .= join "\t", $tick, @$avg_alphas;
+
+         # Calculate the alpha diversity of the communities
+         for my $i (0 .. $#$comm_names) {
+            my $acc_comm = $rarefier ?
+                       $acc_meta->get_community_by_name($comm_names->[$i]) :
+                       $acc_meta->get_metacommunity;
+            my $alpha = Bio::Community::Alpha->new(
+                           -community => $acc_comm,
+                           -type      => $self->alpha,
+                        )->get_alpha 
+                        if $acc_comm;
+            if (defined $alpha) {
+               $avg_alphas->[$i] += $alpha;
+            } else {
+               $avg_alphas->[$i] = undef;
+            }
+         }
+
       }
+
+      # Calculate average alpha diversity and stringify
+      $avg_alphas = [ map { defined($_) ? $_ / $self->repetitions : '' } @$avg_alphas ];
+      $res .= join("\t", $tick, @$avg_alphas)."\n";
+
    }
 
    $res = join("\t", '', @$comm_names)."\n".$res;
@@ -280,37 +294,13 @@ method get_curve {
 }
 
 
-method _combine_comms ($num) {
+method _collect_comms ($num) {
    # Create a community that is the combination of a random subset of the
    # communities in the given metacommunity
    my @rand_comms = shuffle @{$self->metacommunity->get_all_communities};
    @rand_comms = @rand_comms[0..$num-1];
    my $meta = Bio::Community::Meta->new( -communities => \@rand_comms );   
    return $meta;
-}
-
-
-method _get_alpha ($tick, $comm_names, $meta) {
-   # Calculate the alpha diversity of the communities in the given metacommunity
-   # Return the results as a tab-delimited string
-   my @alphas = ($tick);
-   for my $comm_name (@$comm_names) {
-      my $comm;
-      if ($self->type eq 'rarefaction') {
-         $comm = $meta->get_community_by_name($comm_name);
-      } else {
-         $comm = $meta->get_metacommunity;
-      }
-      my $alpha = '';
-      if ($comm) {
-         $alpha = Bio::Community::Alpha->new(
-            -community => $comm,
-            -type      => $self->alpha,
-         )->get_alpha;
-      }
-      push @alphas, $alpha;
-   }
-   return join("\t", @alphas)."\n";
 }
 
 
