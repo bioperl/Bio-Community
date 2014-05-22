@@ -47,6 +47,7 @@ my $build = Module::Build->new(
                              'Math::GSL::SF'                =>  0, # C bindings for arithmetic
                             },
     script_files         => [
+                             'scripts/bc_accumulate',
                              'scripts/bc_add_taxonomy',
                              'scripts/bc_clean_shrapnel',
                              'scripts/bc_convert_files',

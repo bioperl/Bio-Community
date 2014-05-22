@@ -1,0 +1,216 @@
+#! /usr/bin/env perl
+
+# BioPerl script bc_accumulate
+#
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
+#
+# Copyright 2011-2014 Florent Angly <florent.angly@gmail.com>
+#
+# You may distribute this module under the same terms as perl itself
+
+
+use strict;
+use warnings;
+use Method::Signatures;
+use Bio::Community::IO;
+use Bio::Community::Tools::Accumulator;
+use Getopt::Euclid qw(:minimal_keys);
+
+
+=head1 NAME
+
+bc_accumulate - Create collector or rarefaction curves
+
+=head1 SYNOPSIS
+
+  bc_accumulate -input_files   communities.generic      \
+                -type          collector                \
+                -repetitions   20
+                -alpha_type    menhinick                \
+                -output_prefix community_alpha
+
+=head1 DESCRIPTION
+
+This script reads files containing biological communities generates an
+accumulation curve, either collector or rarefaction.
+
+In a rarefaction curve, an increasing number of randomly drawn members is
+sampled from the given communities and alpha diversity is calculated. In a
+collector curve, an increasing number of communities is randomly drawn and
+combined and their cumulative alpha diversity is determined. 
+
+The output is a tab-delimited file containing the average alpha diversity at
+each sampling depth, with the community names in the first row. Note that no
+plot is actually drawn. Note also that some alpha diversity metrics are based on
+relative abundances, and may thus be affected by the weights you provide.
+
+=head1 REQUIRED ARGUMENTS
+
+=over
+
+=item -if <input_files>... | -input_files <input_files>...
+
+Input file containing the communities to manipulate. When providing communities
+in a format that supports only one community per file (e.g. gaas), you can
+provide multiple input files.
+
+=for Euclid:
+   input_files.type: readable
+
+=back
+
+=head1 OPTIONAL ARGUMENTS
+
+=over
+
+=item -at <accumulation_type> | -accumulation_type <accumulation_type>
+
+The types of species accumulation curve to produce, either 'rarefaction' or
+'collector'. Default: accumulation_type.default
+
+=for Euclid:
+   accumulation_type.type: /rarefaction|collector/
+   accumulation_type.default: 'rarefaction'
+
+=item -r <repetitions > | -repetitions <repetitions>
+
+The number of repetitions to perform at each sampling depth. Default: repetitions.default
+
+=for Euclid:
+   repetitions.type: +integer
+   repetitions.default: 10
+
+=item nof_ticks ####
+
+ Function: For rarefaction curves, get or set how many different numbers of
+           individuals to sample, for the smallest community. This number may
+           not always be honored because ticks have to be integer numbers.
+ Usage   : my $nof_ticks = $accumulator->nof_ticks;
+ Args    : positive integer for the number of ticks (default: 10)
+ Returns : positive integer for the number of ticks
+
+=item tick_spacing ####
+
+ Function: Get or set the type of spacing between the ticks of a rarefaction
+           curve.
+ Usage   : my $tick_spacing = $accumulator->tick_spacing;
+ Args    : String, either 'logarithmic' (default) or 'linear'
+ Returns : String
+
+=item alpha ####
+
+=item -wf <weight_files>... | -weight_files <weight_files>...
+
+Tab-delimited files containing weights to assign to the community members.
+
+=for Euclid:
+   weight_files.type: readable
+
+=item -wa <weight_assign> | -weight_assign <weight_assign>
+
+When using a files of weights, define what to do for community members whose
+weight is not specified in the weight file (default: weight_assign.default):
+
+* $num : assign to the member the arbitrary weight $num provided
+
+* average : assign to the member the average weight in this file.
+
+* ancestor: go up the taxonomic lineage of the member and assign to it the weight
+of the first ancestor that has a weight in the weights file. Fall back to the
+'average' method if no taxonomic information is available for this member
+(for example a member with no BLAST hit).
+
+=for Euclid:
+   weight_assign.type: string
+   weight_assign.default: 'ancestor'
+
+=item -op <output_prefix> | -output_prefix <output_prefix>
+
+Path and prefix for the output file. Default: output_prefix.default
+
+=for Euclid:
+   output_prefix.type: string
+   output_prefix.default: 'bc_accumulate'
+
+=back
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this
+and other Bioperl modules. Send your comments and suggestions preferably
+to one of the Bioperl mailing lists.
+
+Your participation is much appreciated.
+
+  bioperl-l@bioperl.org                  - General discussion
+  http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
+
+=head2 Support 
+
+Please direct usage questions or support issues to the mailing list:
+
+I<bioperl-l@bioperl.org>
+
+rather than to the module maintainer directly. Many experienced and 
+reponsive experts will be able look at the problem and quickly 
+address it. Please include a thorough description of the problem 
+with code and data examples if at all possible.
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via the
+web:
+
+  http://bugzilla.open-bio.org/
+
+=head1 AUTHOR - Florent Angly
+
+Email florent.angly@gmail.com
+
+=cut
+
+
+calc_alpha( $ARGV{'input_files'}  , $ARGV{'alpha_type'}   , $ARGV{'weight_files'},
+            $ARGV{'weight_assign'}, $ARGV{'output_prefix'},                       );
+exit;
+
+
+
+func calc_alpha ($input_files, $alpha_types, $weight_files, $weight_assign,
+   $output_prefix) {
+
+   # Read input communities
+   my $meta = Bio::Community::Meta->new;
+   for my $input_file (@$input_files) {
+      print "Reading file '$input_file'\n";
+      my $in = Bio::Community::IO->new(
+         -file          => $input_file,
+         -weight_assign => $weight_assign,
+      );
+      if ($weight_files) {
+         $in->weight_files($weight_files);
+      }
+      while (my $community = $in->next_community) {
+         $meta->add_communities([$community]);
+      }
+      $in->close;
+   }
+
+   # Calculate alpha diversity
+   my $out_file = $output_prefix.'.txt';
+   print "Writing alpha diversity to file '$out_file'\n";
+   open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
+   print $out join("\t", '# community', @$alpha_types)."\n";
+   while (my $community = $meta->next_community) {
+      my $alpha = Bio::Community::Alpha->new(
+         -community => $community,
+      );
+      my @alpha_vals = map {$alpha->type($_); $alpha->get_alpha || '-'} @$alpha_types;
+      print $out join("\t", $community->name, @alpha_vals)."\n";
+   }
+
+   return 1;
+}
