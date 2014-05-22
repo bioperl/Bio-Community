@@ -1,4 +1,4 @@
-# BioPerl module for Bio::Community::Tools::Rarefier
+# BioPerl module for Bio::Community::Tools::Accumulator
 #
 # Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
@@ -15,38 +15,39 @@ Bio::Community::Tools::Accumulator - Species accumulation curves
 
   use Bio::Community::Tools::Accumulator;
 
-###  # Normalize communities in a metacommunity by repeatedly taking 1,000 random members
-###  my $rarefier = Bio::Community::Tools::Rarefier->new(
-###     -metacommunity => $meta,
-###     -sample_size   => 1000,
-###     -threshold     => 0.001, # stop bootstrap iterations when threshold is reached
-###  );
+  # A collector curve 
+  my $collector = Bio::Community::Tools::Accumulator->new(
+     -metacommunity => $meta,
+     -type          => 'collector',
+  );
+  my $numbers = $collector->get_numbers;
+  # or
+  my $string = $collector->get_string;
 
-###  # Rarefied results, with decimal counts
-###  my $average_community = $rarefier->get_avg_meta->[0];
-
-###  # Round counts to integer numbers
-###  my $representative_community = $rarefier->get_repr_meta->[0];
-###  
-
-###  # Alternatively, specify a number of repetitions
-###  my $rarefier = Bio::Community::Tools::Rarefier->new(
-###     -metacommunity => $meta,
-###     -sample_size   => 1000,
-###     -repetitions   => 0.001, # stop after this number of bootstrap iterations
-###  );
-
+  # A rarefaction curve, with custom parameters
+  my $rarefaction = Bio::Community::Tools::Accumulator->new(
+     -metacommunity => $meta,
+     -type          => 'rarefaction',
+     -repetitions   => 100,
+     -nof_ticks     => 8,
+     -tick_spacing  => 'linear', 
+     -alpha         => 'shannon',
+  );
+  my $numbers = $rarefaction->get_numbers;
 
 =head1 DESCRIPTION
 
-This module takes a metacommunity and produces two types of species accumulation
-curves: rarefaction curves, collector curves.
+This module takes a metacommunity and produces one of two types of species
+accumulation curves: a rarefaction curve or a collector curve.
 
-NEED EXPLANATIONS
+In a rarefaction curve, an increasing number of randomly drawn members is
+sampled from the given communities and alpha diversity is calculated. In a
+collector curve, an increasing number of communities is randomly drawn and
+combined and their cumulative alpha diversity is determined. 
 
-WARNING: NEED integer counts, not relative abundance
-
-Note: No plots are drawn. Only the data needed for the plots is computed.
+The average alpha diversity for the different sampling sizes is reported either
+as array references or a tab-delimited string. Note that no plot is actually
+drawn.
 
 =head1 AUTHOR
 
@@ -86,6 +87,7 @@ methods. Internal methods are usually preceded with a _
            -type         : 'rarefaction' or 'collector'
            -repetitions  : see repetitions()
            -nof_ticks    : see nof_ticks()
+           -tick_spacing : see tick_spacing()
            -alpha        : see alpha()
            -seed         : see set_seed()
  Returns : a new Bio::Community::Tools::Accumulator object
@@ -106,7 +108,6 @@ use List::Util qw( shuffle );
 use Method::Signatures;
 
 extends 'Bio::Root::Root';
-with 'Bio::Community::Role::PRNG';
 
 
 =head2 metacommunity
@@ -131,9 +132,9 @@ has metacommunity => (
 =head2 type
 
  Function: Get or set the type of accumulation curve to produce.
- Usage   : my $type = $accumularot->type;
- Args    : String of the accumulation curve type: 'rarefaction' (default) or 'collector'
- Returns : String of the accumulation curve type
+ Usage   : my $type = $accumulator->type;
+ Args    : String of the accumulation type: 'rarefaction' (default) or 'collector'
+ Returns : String of the accumulation type
 
 =cut
 
@@ -149,8 +150,7 @@ has type => (
 
 =head2 repetitions
 
- Function: Get or set the number of repetitions to perform. The mean across all
-           these repetitions is reported.
+ Function: Get or set the number of repetitions to do at each sampling depth.
  Usage   : my $repetitions = $accumulator->repetitions;
  Args    : positive integer for the number of repetitions
  Returns : positive integer for the number of repetitions
@@ -161,7 +161,7 @@ has repetitions => (
    is => 'rw',
    isa => 'Maybe[PositiveInt | Str]',
    required => 0, 
-   default => undef,
+   default => 10,
    lazy => 1,
    init_arg => '-repetitions',
 );
@@ -170,7 +170,7 @@ has repetitions => (
 =head2 nof_ticks
 
  Function: For rarefaction curves, get or set how many different numbers of
-           individuals to sample for the smallest community. This number may
+           individuals to sample, for the smallest community. This number may
            not always be honored because ticks have to be integer numbers.
  Usage   : my $nof_ticks = $accumulator->nof_ticks;
  Args    : positive integer for the number of ticks (default: 10)
@@ -190,10 +190,11 @@ has nof_ticks => (
 
 =head2 tick_spacing
 
- Function: Type of spacing between the ticks of a rarefaction curve.
+ Function: Get or set the type of spacing between the ticks of a rarefaction
+           curve.
  Usage   : my $tick_spacing = $accumulator->tick_spacing;
- Args    : either 'logarithmic' (default) or 'linear'
- Returns : either 'logarithmic' or 'linear'
+ Args    : String, either 'logarithmic' (default) or 'linear'
+ Returns : String
 
 =cut
 
@@ -227,30 +228,28 @@ has alpha => (
 );
 
 
-=head2 get_seed, set_seed
+=head2 get_numbers
 
- Usage   : $sampler->set_seed(1234513451);
- Function: Get or set the seed used to pick the random members.
- Args    : Positive integer
- Returns : Positive integer
-
-=cut
-
-
-=head2 get_curve
-
- Function: Calculate the accumulation curve.
- Usage   : my $curve = $rarefier->get_curve;
+ Function: Calculate the accumulation curve and return the numbers.
+ Usage   : my $nums = $accumulator->get_numbers;
  Args    : none
- Returns : A tab-delimited string for the accumulation curve.
+ Returns : An arrayref of arrayrefs containing the average alpha diversity of
+           the communities for each tick value, e.g.
+              [ [tick1, alpha1, alpha2, ...],
+                [tick2, alpha1, alpha2, ...], ... ]
 
 =cut
 
-method get_curve {
+method get_numbers {
 
+   # Sanity check
    my $meta = $self->metacommunity;
+   if ( (not $meta) || ($meta->get_communities_count == 0) ) {
+      $self->throw('Should have a metacommunity containing at least one community');
+   }
+
    my $comm_names = [map { $_->name } @{$meta->get_all_communities}];
-   my $res = '';
+   my $res = [];
 
    my $ticks = $self->_get_ticks(); # Determine range of sample sizes
 
@@ -269,7 +268,8 @@ method get_curve {
    }
 
    for my $tick (@$ticks) {
-      my $avg_alphas;
+
+      my @avg_alphas;
       for my $rep (1 .. $self->repetitions) {
 
          # Rarefy or collect communities
@@ -278,7 +278,7 @@ method get_curve {
             $rarefier->sample_size($tick);
             $acc_meta = $rarefier->get_repr_meta;
          } else {
-            $self->_collect_comms($tick);
+            $acc_meta = $self->_collect_comms($tick);
          }
 
          # Calculate the alpha diversity of the communities
@@ -292,23 +292,42 @@ method get_curve {
                         )->get_alpha 
                         if $acc_comm;
             if (defined $alpha) {
-               $avg_alphas->[$i] += $alpha;
+               $avg_alphas[$i] += $alpha;
             } else {
-               $avg_alphas->[$i] = undef;
+               $avg_alphas[$i] = undef;
             }
          }
 
       }
 
-      # Calculate average alpha diversity and stringify
-      $avg_alphas = [ map { defined($_) ? $_ / $self->repetitions : '' } @$avg_alphas ];
-      $res .= join("\t", $tick, @$avg_alphas)."\n";
+      # Calculate average alpha diversity and save it
+      @avg_alphas = map { defined($_) ? $_ / $self->repetitions : '' } @avg_alphas;
+
+      push @$res, [$tick, @avg_alphas];
 
    }
 
-   $res = join("\t", '', @$comm_names)."\n".$res;
-
    return $res;
+}
+
+
+=head2 get_string
+
+ Function: Calculate the accumulation curve and return it as a tab-delimited string.
+ Usage   : my $string = $accumulator->get_string;
+ Args    : none
+ Returns : A tab-delimited string for the accumulation curve.
+
+=cut
+
+method get_string {
+   my $comm_names = [map {$_->name} @{$self->metacommunity->get_all_communities}];
+   my $str = join("\t", '', @$comm_names)."\n";
+   my $nums = $self->get_numbers;
+   for my $alphas (@$nums) {
+      $str .= join("\t", @$alphas)."\n";
+   }
+   return $str;
 }
 
 
@@ -335,7 +354,8 @@ method _get_ticks {
    my @ticks;
    if ($self->type eq 'collector') {
       # Ticks for a collector curve, i.e. number of communities
-      @ticks = 1 .. $meta->get_communities_count;
+      @ticks = 0 .. $meta->get_communities_count;
+
    } else {
       # Ticks for a rarefaction curve, i.e. number of individuals
       my $comms = $meta->get_all_communities;
@@ -347,63 +367,36 @@ method _get_ticks {
 
       @ticks = (0);
       my $nof_ticks = $self->nof_ticks - 1;
+      my $linear_spacing = $self->tick_spacing eq 'linear';
 
-      if ($self->tick_spacing eq 'logarithmic') {
-         # Logarithmic tick spacing
-         my $param = ($min_count-1) / (exp($nof_ticks-1)-1);
-         my $tick_num = -1;
-         for my $i (@$sort_order) {
-            my $count = $counts->[$i];
-            my $val;
-            while (1) {
-               $tick_num++;
-               $val = $param*(exp($tick_num)-1)+1;
-               $val = int( $val + 0.5 );
-               next if $val == $ticks[-1]; # avoid duplicates
-               if ($val < $count) {
-                  push @ticks, $val;
-               } else {
-                  push @ticks, $count;
-                  $tick_num-- if $val > $count;
-                  last;
-               }
+      my $param = $linear_spacing ?
+                  ($min_count-1) / ($nof_ticks-1) :
+                  ($min_count-1) / (exp($nof_ticks-1)-1);
+
+      my $tick_num = -1;
+      for my $i (@$sort_order) {
+         my $count = $counts->[$i];
+         my $tick;
+         while (1) {
+            $tick_num++;
+            $tick = $linear_spacing ?
+                    1 + $tick_num * $param :
+                    $param*(exp($tick_num)-1)+1;
+
+            $tick = int( $tick + 0.5 );  # round
+            next if $tick == $ticks[-1]; # avoid duplicates
+
+            if ($tick < $count) {
+               push @ticks, $tick;
+            } else {
+               push @ticks, $count;
+               $tick_num-- if $tick > $count;
+               last;
             }
          }
-
-      } else {
-         # Linear tick spacing
-         my $interval = ($min_count-1) / ($nof_ticks-1);
-         push @ticks, 1;
-
-#         for my $i (2 .. $nof_ticks) {
-#            push @ticks, $ticks[$i-1]+$interval;
-#         }
-
-         my $tick_num = -1;
-         for my $i (@$sort_order) {
-            my $count = $counts->[$i];
-            my $val;
-            while (1) {
-               $tick_num++;
-               $val = $ticks[$i-1]+$interval;
-#               $val = int( $val + 0.5 );
-#               next if $val == $ticks[-1]; # avoid duplicates
-#               if ($val < $count) {
-#                  push @ticks, $val;
-#               } else {
-#                  push @ticks, $count;
-#                  $tick_num-- if $val > $count;
-#                  last;
-#               }
-#            }
-#         }
-
-
       }
 
    }
-
-   use Data::Dumper; print Dumper(\@ticks); ###
 
    return \@ticks;
 }

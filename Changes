@@ -5,7 +5,8 @@ x.x.x XXXX-XX-XX
     by Brian Kemish and Jason Steen).
   - Support sampling 0 members in Sampler and Rarefier
   - Fixed bug where results were not clearer when reusing Rarefier objects 
-  - Option to silently drop communities with low number of members in Rarefier
+  - Option to silently drop communities with low member count in Rarefier
+  - New Accumulator module for collector and rarefaction curves
 
 0.1.6 2014-04-29
   - New script, bc_manage_members, to rename and remove given community members
