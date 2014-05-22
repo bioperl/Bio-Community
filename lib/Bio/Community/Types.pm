@@ -146,6 +146,13 @@ subtype 'AccumulationType'
    => message { _gen_err_msg(\@AccumulationType, $_) };
 
 
+# Type of spacing
+my @SpacingType = qw(linear logarithmic);
+subtype 'SpacingType'
+   => as enum( \@SpacingType )
+   => message { _gen_err_msg(\@SpacingType, $_) };
+
+
 # Members identification method
 my @IdentifyMembersByType = qw(id desc);
 subtype 'IdentifyMembersByType'

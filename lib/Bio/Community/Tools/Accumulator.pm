@@ -170,12 +170,11 @@ has repetitions => (
 =head2 nof_ticks
 
  Function: For rarefaction curves, get or set how many different numbers of
-           individuals to sample. This number is a minimum (for the community
-           with the smallest number of individuals) and the ticks are
-           logarithmically spaced.
- Usage   : my $nof_ticks = $accumulator->repetitions;
- Args    : positive integer for the number of repetitions  (default: 10)
- Returns : positive integer for the number of repetitions
+           individuals to sample for the smallest community. This number may
+           not always be honored because ticks have to be integer numbers.
+ Usage   : my $nof_ticks = $accumulator->nof_ticks;
+ Args    : positive integer for the number of ticks (default: 10)
+ Returns : positive integer for the number of ticks
 
 =cut
 
@@ -186,6 +185,25 @@ has nof_ticks => (
    default => 12,
    lazy => 1,
    init_arg => '-nof_ticks',
+);
+
+
+=head2 tick_spacing
+
+ Function: Type of spacing between the ticks of a rarefaction curve.
+ Usage   : my $tick_spacing = $accumulator->tick_spacing;
+ Args    : either 'logarithmic' (default) or 'linear'
+ Returns : either 'logarithmic' or 'linear'
+
+=cut
+
+has tick_spacing => (
+   is => 'rw',
+   isa => 'SpacingType',
+   required => 0, 
+   default => 'logarithmic',
+   lazy => 1,
+   init_arg => '-tick_spacing',
 );
 
 
@@ -323,47 +341,70 @@ method _get_ticks {
       my $comms = $meta->get_all_communities;
 
       my $counts = [ map {$_->get_members_count} @$comms ];
-
       my $sort_order = [ sort { $counts->[$a] <=> $counts->[$b] } 0..$#$comms ];
       my $min_count = $counts->[0];
       my $max_count = $counts->[1];
 
-      my $nof_ticks = $self->nof_ticks - 1;
-      
-      #my $interval = $min_count / ($nof_ticks-1);
-      #print "interval: $interval\n"; ###
-      #my @ticks = (0);
-      #for my $i (1 .. $nof_ticks) {
-      #   push @ticks, $ticks[$i-1]+$interval;
-      #}
-      #use Data::Dumper; print Dumper(\@ticks);
-
-      #my $param = $min_count / (exp($nof_ticks-1)-1);
-      #print "param: $param\n"; ###
-      #@ticks = map { $param*(exp($_)-1) } 0..$nof_ticks-1;
-
-      my $param = ($min_count-1) / (exp($nof_ticks-1)-1);
       @ticks = (0);
-      my $tick_num = -1;
-      for my $i (@$sort_order) {
-         my $count = $counts->[$i];
-         my $val;
-         while (1) {
-            $tick_num++;
-            $val = $param*(exp($tick_num)-1)+1;
-            $val = int( $val + 0.5 );
-            next if $val == $ticks[-1]; # avoid duplicates
-            if ($val < $count) {
-               push @ticks, $val;
-            } else {
-               push @ticks, $count;
-               $tick_num-- if $val > $count;
-               last;
+      my $nof_ticks = $self->nof_ticks - 1;
+
+      if ($self->tick_spacing eq 'logarithmic') {
+         # Logarithmic tick spacing
+         my $param = ($min_count-1) / (exp($nof_ticks-1)-1);
+         my $tick_num = -1;
+         for my $i (@$sort_order) {
+            my $count = $counts->[$i];
+            my $val;
+            while (1) {
+               $tick_num++;
+               $val = $param*(exp($tick_num)-1)+1;
+               $val = int( $val + 0.5 );
+               next if $val == $ticks[-1]; # avoid duplicates
+               if ($val < $count) {
+                  push @ticks, $val;
+               } else {
+                  push @ticks, $count;
+                  $tick_num-- if $val > $count;
+                  last;
+               }
             }
          }
+
+      } else {
+         # Linear tick spacing
+         my $interval = ($min_count-1) / ($nof_ticks-1);
+         push @ticks, 1;
+
+#         for my $i (2 .. $nof_ticks) {
+#            push @ticks, $ticks[$i-1]+$interval;
+#         }
+
+         my $tick_num = -1;
+         for my $i (@$sort_order) {
+            my $count = $counts->[$i];
+            my $val;
+            while (1) {
+               $tick_num++;
+               $val = $ticks[$i-1]+$interval;
+#               $val = int( $val + 0.5 );
+#               next if $val == $ticks[-1]; # avoid duplicates
+#               if ($val < $count) {
+#                  push @ticks, $val;
+#               } else {
+#                  push @ticks, $count;
+#                  $tick_num-- if $val > $count;
+#                  last;
+#               }
+#            }
+#         }
+
+
       }
 
    }
+
+   use Data::Dumper; print Dumper(\@ticks); ###
+
    return \@ticks;
 }
 
