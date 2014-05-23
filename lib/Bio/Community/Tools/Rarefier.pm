@@ -31,16 +31,16 @@ Bio::Community::Tools::Rarefier - Normalize communities by count
 
   # Alternatively, specify a number of repetitions
   my $rarefier = Bio::Community::Tools::Rarefier->new(
-     -metacommunity => $meta,
-     -sample_size   => 1000,
-     -repetitions   => 0.001, # stop after this number of bootstrap iterations
+     -metacommunity   => $meta,
+     -sample_size     => 1000,
+     -num_repetitions => 0.001, # stop after this number of bootstrap iterations
   );
 
   # ... or assume an infinite number of repetitions
   my $rarefier = Bio::Community::Tools::Rarefier->new(
-     -metacommunity => $meta,
-     -sample_size   => 1000,
-     -repetitions   => 'inf',
+     -metacommunity   => $meta,
+     -sample_size     => 1000,
+     -num_repetitions => 'inf',
   );
 
 =head1 DESCRIPTION
@@ -93,10 +93,10 @@ methods. Internal methods are usually preceded with a _
 
  Function: Create a new Bio::Community::Tool::Rarefier object
  Usage   : my $rarefier = Bio::Community::Tool::Rarefier->new( );
- Args    : -metacommunity: see metacommunity()
-           -repetitions  : see repetitions()
-           -sample_size  : see sample_size()
-           -seed         : see set_seed()
+ Args    : -metacommunity  : see metacommunity()
+           -num_repetitions: see num_repetitions()
+           -sample_size    : see sample_size()
+           -seed           : see set_seed()
  Returns : a new Bio::Community::Tools::Rarefier object
 
 =cut
@@ -167,9 +167,9 @@ has sample_size => (
            distance between the average community and the average community at
            the previous iteration decreases below this threshold, the
            bootstrapping is stopped. By default, the threshold is 1e-5. The
-           repetitions() method provides an alternative way to specify when to
-           stop the computation. After communities have been normalized using
-           the repetitions() method instead of the threshold() method, the
+           num_repetitions() method provides an alternative way to specify when
+           to stop the computation. After communities have been normalized using
+           the num_repetitions() method instead of the threshold() method, the
            beta diversity between the last two average communities repetitions
            can be accessed using the threshold() method.
  Usage   : my $threshold = $rarefier->threshold;
@@ -189,7 +189,7 @@ has threshold => (
 );
 
 
-=head2 repetitions
+=head2 num_repetitions
 
  Function: Get or set the number of bootstrap repetitions to perform. When given,
            instead of relying on the threshold() to determine when to stop
@@ -204,15 +204,17 @@ has threshold => (
 
 =cut
 
-has repetitions => (
+has num_repetitions => (
    is => 'rw',
    isa => 'Maybe[PositiveInt | Str]',
    required => 0, 
    default => undef,
    lazy => 1,
-   init_arg => '-repetitions',
+   init_arg => '-num_repetitions',
    trigger => sub { $_[0]->_clear_avg_meta; $_[0]->_clear_repr_meta },
 );
+
+*repetitions = \&num_repetitions;
 
 
 =head2 get_seed, set_seed
@@ -363,8 +365,8 @@ method _count_normalize () {
    }
    if ($self->verbose) {
       print "Bootstrap sample size: $sample_size\n";
-      if ($self->repetitions) {
-         print "Bootstrap number of repetitions: ".$self->repetitions."\n";
+      if ($self->num_repetitions) {
+         print "Bootstrap number of repetitions: ".$self->num_repetitions."\n";
       } else {
          print "Bootstrap beta diversity threshold: ".$self->threshold."\n";
       }
@@ -388,7 +390,7 @@ method _count_normalize () {
       #$name .= ' ' if $name;
       #$name .= 'average';
       $average->name($name);
-      if (defined $self->repetitions) {
+      if (defined $self->num_repetitions) {
          $max_threshold = $beta_val if (defined $beta_val) && ($beta_val > $max_threshold);
       } else {
          $min_repetitions = $repetitions if (defined $repetitions) && ($repetitions < $min_repetitions);
@@ -396,13 +398,13 @@ method _count_normalize () {
       $average_meta->add_communities([$average]);
    }
 
-   if (defined $self->repetitions) {
+   if (defined $self->num_repetitions) {
       $self->threshold($max_threshold);
    } else {
       if ($min_repetitions == POSIX::DBL_MAX) {
          $min_repetitions = 0;
       }
-      $self->repetitions($min_repetitions);
+      $self->num_repetitions($min_repetitions);
    }
 
    $self->_set_avg_meta($average_meta);
@@ -415,7 +417,7 @@ method _bootstrap (Bio::Community $community) {
    # Re-sample a community many times and report the average community
    my $threshold   = $self->threshold();
    my $sample_size = $self->sample_size();
-   my $repetitions = $self->repetitions();
+   my $repetitions = $self->num_repetitions();
 
    # Set 'use_weights' to sample from counts (similar to unweighted relative abundances)
    my $use_weights = $community->use_weights;

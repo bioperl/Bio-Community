@@ -172,7 +172,7 @@ func rarefy ($input_files, $output_prefix, $sample_size, $dist_threshold,
       $normalizer->threshold($dist_threshold);
    }
    if (defined $num_repetitions) {
-      $normalizer->repetitions($num_repetitions);
+      $normalizer->num_repetitions($num_repetitions);
    }
    if (defined $sample_size) {
       $normalizer->sample_size($sample_size);
