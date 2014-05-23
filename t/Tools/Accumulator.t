@@ -52,7 +52,7 @@ is     $nums->[3]->[1], 3;
 ok $accumulator = Bio::Community::Tools::Accumulator->new(
    -metacommunity => $meta,
    -type          => 'rarefaction',
-   -nof_ticks     => 7,
+   -num_ticks     => 7,
    -tick_spacing  => 'linear',
    -repetitions   => 14,
    -alpha         => 'shannon',
@@ -136,7 +136,7 @@ is     $nums->[11]->[3], '';
 ok $accumulator = Bio::Community::Tools::Accumulator->new(
    -metacommunity => $meta,
    -type          => 'rarefaction',
-   -nof_ticks     => 7,
+   -num_ticks     => 7,
    -tick_spacing  => 'logarithmic',
 ), 'Rarefaction curve (logarithmic)';
 ok $nums = $accumulator->get_numbers;

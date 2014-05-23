@@ -26,12 +26,12 @@ Bio::Community::Tools::Accumulator - Species accumulation curves
 
   # A rarefaction curve, with custom parameters
   my $rarefaction = Bio::Community::Tools::Accumulator->new(
-     -metacommunity => $meta,
-     -type          => 'rarefaction',
-     -repetitions   => 100,
-     -nof_ticks     => 8,
-     -tick_spacing  => 'linear', 
-     -alpha         => 'shannon',
+     -metacommunity   => $meta,
+     -type            => 'rarefaction',
+     -num_repetitions => 100,
+     -num_ticks       => 8,
+     -tick_spacing    => 'linear', 
+     -alpha           => 'shannon',
   );
   my $numbers = $rarefaction->get_numbers;
 
@@ -84,12 +84,12 @@ methods. Internal methods are usually preceded with a _
  Function: Create a new Bio::Community::Tool::Accumulator object
  Usage   : my $accumulator = Bio::Community::Tool::Accumulator->new( );
  Args    : -metacommunity: see metacommunity()
-           -type         : 'rarefaction' or 'collector'
-           -repetitions  : see repetitions()
-           -nof_ticks    : see nof_ticks()
-           -tick_spacing : see tick_spacing()
-           -alpha        : see alpha()
-           -seed         : see set_seed()
+           -type            : 'rarefaction' or 'collector'
+           -num_repetitions : see num_repetitions()
+           -num_ticks       : see num_ticks()
+           -tick_spacing    : see tick_spacing()
+           -alpha           : see alpha()
+           -seed            : see set_seed()
  Returns : a new Bio::Community::Tools::Accumulator object
 
 =cut
@@ -148,43 +148,43 @@ has type => (
 );
 
 
-=head2 repetitions
+=head2 num_repetitions
 
- Function: Get or set the number of repetitions to do at each sampling depth.
- Usage   : my $repetitions = $accumulator->repetitions;
+ Function: Get or set the number of num_repetitions to do at each sampling depth.
+ Usage   : my $num_repetitions = $accumulator->num_repetitions;
  Args    : positive integer for the number of repetitions
  Returns : positive integer for the number of repetitions
 
 =cut
 
-has repetitions => (
+has num_repetitions => (
    is => 'rw',
    isa => 'Maybe[PositiveInt | Str]',
    required => 0, 
    default => 10,
    lazy => 1,
-   init_arg => '-repetitions',
+   init_arg => '-num_repetitions',
 );
 
 
-=head2 nof_ticks
+=head2 num_ticks
 
  Function: For rarefaction curves, get or set how many different numbers of
            individuals to sample, for the smallest community. This number may
            not always be honored because ticks have to be integer numbers.
- Usage   : my $nof_ticks = $accumulator->nof_ticks;
+ Usage   : my $num_ticks = $accumulator->num_ticks;
  Args    : positive integer for the number of ticks (default: 10)
  Returns : positive integer for the number of ticks
 
 =cut
 
-has nof_ticks => (
+has num_ticks => (
    is => 'rw',
    isa => 'StrictlyPositiveInt',
    required => 0, 
    default => 12,
    lazy => 1,
-   init_arg => '-nof_ticks',
+   init_arg => '-num_ticks',
 );
 
 
@@ -257,10 +257,10 @@ method get_numbers {
    if ($self->type eq 'rarefaction') {
       # Rarefaction curve
       $rarefier = Bio::Community::Tools::Rarefier->new(
-         -metacommunity => $meta,
-         -repetitions   => 1,
-         -drop          => 1,
-         -verbose       => 0,
+         -metacommunity   => $meta,
+         -num_repetitions => 1,
+         -drop            => 1,
+         -verbose         => 0,
       );
    } else {
       # Collector curve
@@ -270,7 +270,7 @@ method get_numbers {
    for my $tick (@$ticks) {
 
       my @avg_alphas;
-      for my $rep (1 .. $self->repetitions) {
+      for my $rep (1 .. $self->num_repetitions) {
 
          # Rarefy or collect communities
          my $acc_meta;
@@ -301,7 +301,7 @@ method get_numbers {
       }
 
       # Calculate average alpha diversity and save it
-      @avg_alphas = map { defined($_) ? $_ / $self->repetitions : '' } @avg_alphas;
+      @avg_alphas = map { defined($_) ? $_ / $self->num_repetitions : '' } @avg_alphas;
 
       push @$res, [$tick, @avg_alphas];
 
@@ -366,12 +366,12 @@ method _get_ticks {
       my $max_count = $counts->[1];
 
       @ticks = (0);
-      my $nof_ticks = $self->nof_ticks - 1;
+      my $num_ticks = $self->num_ticks - 1;
       my $linear_spacing = $self->tick_spacing eq 'linear';
 
       my $param = $linear_spacing ?
-                  ($min_count-1) / ($nof_ticks-1) :
-                  ($min_count-1) / (exp($nof_ticks-1)-1);
+                  ($min_count-1) / ($num_ticks-1) :
+                  ($min_count-1) / (exp($num_ticks-1)-1);
 
       my $tick_num = -1;
       for my $i (@$sort_order) {
