@@ -26,10 +26,10 @@ throws_ok { $accumulator->get_numbers } qr/EXCEPTION.*metacommunity/msi;
 # Collector curve with observed richness
 
 ok $accumulator = Bio::Community::Tools::Accumulator->new(
-   -metacommunity => $meta,
-   -type          => 'collector',
-   -repetitions   => 10,
-   -alpha         => 'observed',
+   -metacommunity   => $meta,
+   -type            => 'collector',
+   -num_repetitions => 10,
+   -alpha           => 'observed',
 ), 'Collector curve';
 ok     $nums = $accumulator->get_numbers;
 
@@ -50,12 +50,12 @@ is     $nums->[3]->[1], 3;
 # Rarefaction with linear spacing and Shannon-Wiener diversity
 
 ok $accumulator = Bio::Community::Tools::Accumulator->new(
-   -metacommunity => $meta,
-   -type          => 'rarefaction',
-   -num_ticks     => 7,
-   -tick_spacing  => 'linear',
-   -repetitions   => 14,
-   -alpha         => 'shannon',
+   -metacommunity   => $meta,
+   -type            => 'rarefaction',
+   -num_ticks       => 7,
+   -tick_spacing    => 'linear',
+   -num_repetitions => 14,
+   -alpha           => 'shannon',
 ), 'Rarefaction curve';
 ok $nums = $accumulator->get_numbers;
 
