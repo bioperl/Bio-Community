@@ -83,6 +83,13 @@ subtype 'Count'
    => as 'PositiveNum';
 
 
+# Number of ticks (at least three)
+subtype 'NumTicks'
+   => as 'PositiveNum'
+   => where { $_ > 2 }
+   => message { _gen_err_msg('an integer greater than two', $_) };
+
+
 # Sort numerically
 subtype 'NumericSort'
    => as enum( [ qw(-1 0 1) ] )

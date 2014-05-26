@@ -180,7 +180,7 @@ has num_repetitions => (
 
 has num_ticks => (
    is => 'rw',
-   isa => 'StrictlyPositiveInt',
+   isa => 'NumTicks',
    required => 0, 
    default => 12,
    lazy => 1,
