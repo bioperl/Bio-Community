@@ -99,7 +99,7 @@ throws_ok { $rarefier->get_repr_meta } qr/EXCEPTION.*metacommunity/msi;
 
 ok $rarefier = Bio::Community::Tools::Rarefier->new(
    -metacommunity   => $meta,
-   -num_repetitions => 'inf',
+   -num_repetitions => 10,
    -sample_size     => 0,
    -seed            => 12537409,
 );
@@ -108,6 +108,44 @@ is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_repr_meta->get_communities_count, 2;
 
 is $rarefier->num_repetitions, 10;
+isnt $rarefier->threshold, 0.001;
+cmp_ok $rarefier->threshold, '<', 1;
+is $rarefier->sample_size, 0;
+
+$average = $rarefier->get_avg_meta->get_community_by_name('community1');
+isa_ok $average, 'Bio::Community';
+is $average->name, 'community1';
+delta_ok $average->get_members_count, 0;
+
+$representative = $rarefier->get_repr_meta->get_community_by_name('community1');
+isa_ok $representative, 'Bio::Community';
+is $representative->name, 'community1';
+delta_ok $representative->get_members_count, 0;
+
+$average = $rarefier->get_avg_meta->get_community_by_name('community2');
+isa_ok $average, 'Bio::Community';
+is $average->name, 'community2';
+delta_ok $average->get_members_count, 0;
+
+$representative = $rarefier->get_repr_meta->get_community_by_name('community2');
+isa_ok $representative, 'Bio::Community';
+is $representative->name, 'community2';
+delta_ok $representative->get_members_count, 0;
+
+
+# Normalizer with sample size of zero (and inf repetitions)
+
+ok $rarefier = Bio::Community::Tools::Rarefier->new(
+   -metacommunity   => $meta,
+   -num_repetitions => 'inf',
+   -sample_size     => 0,
+   -seed            => 12537409,
+);
+
+is $rarefier->get_avg_meta->get_communities_count, 2;
+is $rarefier->get_repr_meta->get_communities_count, 2;
+
+is $rarefier->num_repetitions, 'inf';
 isnt $rarefier->threshold, 0.001;
 cmp_ok $rarefier->threshold, '<', 1;
 is $rarefier->sample_size, 0;

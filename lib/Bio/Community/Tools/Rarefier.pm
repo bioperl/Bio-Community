@@ -459,11 +459,15 @@ method _bootstrap (Bio::Community $community) {
          # Exit when assuming infinite number of repetitions
          # In fact, do a single repetition where we add the relative abundance
          # as counts into a new community
-         require Bio::Community::Tools::Transformer;
-         $overall = Bio::Community::Tools::Transformer->new(
-            -metacommunity => Bio::Community::Meta->new(-communities =>[$community]),
-            -type          => 'relative',
-         )->get_transformed_meta->next_community;
+         if ($sample_size == 0) {
+            $overall = Bio::Community->new();
+         } else {
+            require Bio::Community::Tools::Transformer;
+            $overall = Bio::Community::Tools::Transformer->new(
+               -metacommunity => Bio::Community::Meta->new(-communities =>[$community]),
+               -type          => 'relative',
+            )->get_transformed_meta->next_community;
+         }
          if ($verbose) {
             print "   iteration inf\n";
          }
