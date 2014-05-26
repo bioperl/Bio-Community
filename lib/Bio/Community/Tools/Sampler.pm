@@ -15,11 +15,13 @@ Bio::Community::Tools::Sampler - Sample organisms according to their abundance
 
   use Bio::Community::Tools::Sampler;
 
-  # get a community somehow...
-
-  my $sampler = Bio::Community::Tools::Sampler->new( -community => $community );
+  # Sample members from a reference community 
+  my $sampler = Bio::Community::Tools::Sampler->new( -community => $ref_community );
   my $member1 = $sampler->get_rand_member();
   my $member2 = $sampler->get_rand_member();
+
+  # Or sample 100 members in one step
+  my $rand_community = $sampler->get_rand_community( 100 );
 
 =head1 DESCRIPTION
 
