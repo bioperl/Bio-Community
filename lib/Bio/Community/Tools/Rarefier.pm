@@ -454,10 +454,10 @@ method _bootstrap (Bio::Community $community) {
       my $random;
       if (defined $sampler) {
          $random = $sampler->get_rand_community($sample_size);
-         $overall = $self->_add( $overall, $random, $members );
+         $self->_add( $overall, $random, $members );
       } else {
          # Exit when assuming infinite number of repetitions
-         # In fact, do a single repetitions where we add the relative abundance
+         # In fact, do a single repetition where we add the relative abundance
          # as counts into a new community
          require Bio::Community::Tools::Transformer;
          $overall = Bio::Community::Tools::Transformer->new(
@@ -473,7 +473,7 @@ method _bootstrap (Bio::Community $community) {
 
       # We could divide here, but since the beta diversity is based on the
       # relative abundance, not the counts, it would be the same. Hence, only
-      # divide at the end
+      # divide at the end.
 
       my $meta = Bio::Community::Meta->new(-communities =>[$overall, $prev_overall]);
 
@@ -514,12 +514,11 @@ method _bootstrap (Bio::Community $community) {
 
    $community->use_weights($use_weights);
 
-   my $average;
    if (defined $sampler) {
-      $average = $self->_divide( $overall, $iteration, $members );
+      $self->_divide( $overall, $iteration, $members );
    } else {
       $sample_size ||= 1; # protect against div/0 when size is 0
-      $average = $self->_divide( $overall, 100 / $sample_size, $members );
+      $self->_divide( $overall, 100 / $sample_size, $members );
    }
 
    return $overall, $iteration, $beta_val;
@@ -533,7 +532,7 @@ method _add ($existing, $new, $members) { # keep it lean
       my $count = $new->get_count($member);
       $existing->add_member( $member, $count );
    }
-   return $existing;
+   return 1;
 }
 
 
@@ -545,7 +544,7 @@ method _divide (Bio::Community $community, Num $divisor, $members) {
       my $diff = $count - $new_count;
       $community->remove_member( $member, $diff );
    }
-   return $community;
+   return 1;
 }
 
 
