@@ -100,7 +100,7 @@ has community => (
    required => 0,
    lazy => 0,
    init_arg => '-community',
-   trigger => \&_clear_cdf, ####
+   trigger => \&_clear_cdf,
 );
 
 
@@ -110,7 +110,7 @@ has _cdf => (
    lazy => 1,
    default => sub { shift->_init_cdf( ) },
    init_arg => undef,
-   clearer => '_clear_cdf', ####
+   clearer => '_clear_cdf',
 );
 
 
