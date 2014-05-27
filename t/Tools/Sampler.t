@@ -18,6 +18,13 @@ $member2 = Bio::Community::Member->new( -desc => 'B' );
 $member3 = Bio::Community::Member->new( -desc => 'C' );
 
 
+# Bare object
+
+ok $sampler = Bio::Community::Tools::Sampler->new(), 'Bare object';
+isa_ok $sampler, 'Bio::Community::Tools::Sampler';
+throws_ok { $sampler->get_rand_member } qr/EXCEPTION.*community/msi;
+
+
 # Even community
 
 $even_comm = Bio::Community->new();

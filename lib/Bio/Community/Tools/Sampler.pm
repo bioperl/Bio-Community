@@ -97,7 +97,7 @@ with 'Bio::Community::Role::PRNG';
 has community => (
    is => 'rw',
    isa => 'Bio::Community',
-   required => 1,
+   required => 0,
    lazy => 0,
    init_arg => '-community',
    trigger => \&_clear_cdf, ####
@@ -193,7 +193,7 @@ method _init_cdf () {
    # Sort the members of the community by decreasing rank and calculate the
    # cumulative density function of their relative abundance. Store the
    # resulting CDF and members;
-   my $community = $self->community;
+   my $community = $self->community || $self->throw('No community was provided');
 
    my @cdf;
    my @members = ();
