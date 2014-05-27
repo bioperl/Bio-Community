@@ -211,7 +211,11 @@ has num_repetitions => (
    default => undef,
    lazy => 1,
    init_arg => '-num_repetitions',
-   trigger => sub { $_[0]->_clear_avg_meta; $_[0]->_clear_repr_meta },
+   trigger => sub {
+      $_[0]->_clear_avg_meta;
+      $_[0]->_clear_repr_meta;
+      $_[0]->_clear_sampler if $_[0]->num_repetitions eq 'inf';
+   },
 );
 
 *repetitions = \&num_repetitions;
@@ -332,6 +336,20 @@ before get_repr_meta => sub {
 };
 
 
+# Storage for a Sampler object
+has _sampler => (
+   is => 'ro',
+   #isa => 'Bio::Community::Tools::Sampler',
+   required => 0,
+   default => sub {
+      require Bio::Community::Tools::Sampler;
+      return Bio::Community::Tools::Sampler->new( -seed => shift->get_seed ); },
+   lazy => 1,
+   predicate => '_has_sampler',
+   clearer => '_clear_sampler',
+);
+
+
 method _count_normalize () {
    # Normalize communities by total count
 
@@ -370,6 +388,11 @@ method _count_normalize () {
       } else {
          print "Bootstrap beta diversity threshold: ".$self->threshold."\n";
       }
+   }
+
+   # Initialize a Sampler if performing a finite number of repetitions
+   if ( not( defined $self->num_repetitions && $self->num_repetitions eq 'inf' ) )  {
+      $self->_sampler();
    }
 
    # Bootstrap now
@@ -436,12 +459,9 @@ method _bootstrap (Bio::Community $community) {
    );
 
    my $sampler;
-   if ( not( defined $repetitions && $repetitions eq 'inf' ) )  {
-      require Bio::Community::Tools::Sampler;
-      $sampler = Bio::Community::Tools::Sampler->new(
-         -community => $community,
-         -seed      => $self->get_seed,
-      );
+   if ($self->_has_sampler) {
+      $sampler = $self->_sampler;
+      $sampler->community($community);
    }
 
    my $prev_overall = Bio::Community->new( -name => 'prev' );
@@ -451,12 +471,8 @@ method _bootstrap (Bio::Community $community) {
 
       # Get a random community and add it to the overall community
       $iteration++;
-      my $random;
-      if (defined $sampler) {
-         $random = $sampler->get_rand_community($sample_size);
-         $self->_add( $overall, $random, $members );
-      } else {
-         # Exit when assuming infinite number of repetitions
+
+      if (not $sampler) { 
          # In fact, do a single repetition where we add the relative abundance
          # as counts into a new community
          if ($sample_size == 0) {
@@ -472,8 +488,12 @@ method _bootstrap (Bio::Community $community) {
             print "   iteration inf\n";
          }
          $beta_val = 0;
-         last;
+         last; # Exit when assuming infinite number of repetitions
       }
+
+      # If the Sampler is defined
+      my $random = $sampler->get_rand_community($sample_size);
+      $self->_add( $overall, $random, $members );
 
       # We could divide here, but since the beta diversity is based on the
       # relative abundance, not the counts, it would be the same. Hence, only
