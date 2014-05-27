@@ -4,7 +4,7 @@ x.x.x XXXX-XX-XX
   - Support for QIIME files containing alternative taxonomic header (reported
     by Brian Kemish and Jason Steen).
   - Support sampling 0 members in Sampler and Rarefier
-  - Fixed bug where results were not clearer when reusing Rarefier objects 
+  - Added possibility to reuse Sampler and Rarefier objects 
   - Option to silently drop communities with low member count in Rarefier
   - New Accumulator module for collector and rarefaction curves
 

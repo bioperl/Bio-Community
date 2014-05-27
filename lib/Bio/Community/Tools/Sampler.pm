@@ -87,7 +87,7 @@ with 'Bio::Community::Role::PRNG';
 
 =head2 community
 
- Function: Get or set the community to sample from
+ Function: Get or set the community to sample from.
  Usage   : my $community = $sampler->community();
  Args    : a Bio::Community object
  Returns : a Bio::Community object
@@ -95,11 +95,12 @@ with 'Bio::Community::Role::PRNG';
 =cut
 
 has community => (
-   is => 'ro',
+   is => 'rw',
    isa => 'Bio::Community',
    required => 1,
    lazy => 0,
    init_arg => '-community',
+   trigger => \&_clear_cdf, ####
 );
 
 
@@ -109,6 +110,7 @@ has _cdf => (
    lazy => 1,
    default => sub { shift->_init_cdf( ) },
    init_arg => undef,
+   clearer => '_clear_cdf', ####
 );
 
 
