@@ -142,15 +142,19 @@ ok $accumulator = Bio::Community::Tools::Accumulator->new(
 ok $nums = $accumulator->get_numbers;
 
 ok @string = split /\n/, $accumulator->get_string;
+
+my $rre = qr/(?:(?i)(?:[+-]?)(?:(?=[.]?[0123456789])(?:[0123456789]*)(?:(?:[.])(?:[0123456789]{0,}))?)(?:(?:[E])(?:(?:[+-]?)(?:[0123456789]+))|))/;
+# regular expression to match a real number, taken from Regexp::Common
+
 is   $string[0], "\t20100302\t20100304\t20100823";
 is   $string[1], "0\t0\t0\t0";
 is   $string[2], "1\t1\t1\t1";
-like $string[3], qr/^2\t\d+\t\d+\t\d+/;
-like $string[4], qr/^4\t\d+\t\d+\t\d+/;
-like $string[5], qr/^11\t\d+\t\d+\t\d+/;
-like $string[6], qr/^30\t\d+\t\d+\t\d+/;
-like $string[7], qr/^81\t\d+\t\d+\t\d+/;
-like $string[8], qr/^121\t\t\d+\t\d+/;
+like $string[3], qr/^2\t$rre\t1\t$rre/;
+like $string[4], qr/^4\t$rre\t1\t$rre/;
+like $string[5], qr/^11\t$rre\t1\t$rre/;
+like $string[6], qr/^30\t$rre\t1\t$rre/;
+like $string[7], qr/^81\t2\t1\t$rre/;
+like $string[8], qr/^121\t\t1\t3/;
 is $string[9], "142\t\t1\t";
 
 

@@ -269,8 +269,8 @@ isnt $compo1->{5}, $compo2->{5};
 
 # Assume an infinity of bootstrap repetitions (and reusing previous object)
 
-$rarefier->num_repetitions('inf'), 'Infinite repetitions';
-$rarefier->verbose(0);
+ok $rarefier->num_repetitions('inf'), 'Infinite repetitions';
+is $rarefier->verbose(0), 0;
 
 is $rarefier->get_avg_meta->get_communities_count, 2;
 is $rarefier->get_repr_meta->get_communities_count, 2;
@@ -317,8 +317,8 @@ delta_within $representative->get_count($member6), $representative->get_count($m
 
 # Same thing, but silently dropping communities that have a low count
 
-$rarefier->drop(1), 'Drop option';
-$rarefier->sample_size(2000);
+ok $rarefier->drop(1), 'Drop option';
+ok $rarefier->sample_size(2000);
 
 is $rarefier->get_avg_meta->get_communities_count, 1;
 is $rarefier->get_repr_meta->get_communities_count, 1;
