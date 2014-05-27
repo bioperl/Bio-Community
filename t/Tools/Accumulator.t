@@ -29,7 +29,7 @@ ok $accumulator = Bio::Community::Tools::Accumulator->new(
    -metacommunity   => $meta,
    -type            => 'collector',
    -num_repetitions => 10,
-   -alpha           => 'observed',
+   -alpha_types     => ['observed'],
 ), 'Collector curve';
 ok     $nums = $accumulator->get_numbers;
 
@@ -55,7 +55,7 @@ ok $accumulator = Bio::Community::Tools::Accumulator->new(
    -num_ticks       => 7,
    -tick_spacing    => 'linear',
    -num_repetitions => 14,
-   -alpha           => 'shannon',
+   -alpha_types     => ['shannon'],
 ), 'Rarefaction curve';
 ok $nums = $accumulator->get_numbers;
 

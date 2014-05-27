@@ -31,7 +31,7 @@ Bio::Community::Tools::Accumulator - Species accumulation curves
      -num_repetitions => 100,
      -num_ticks       => 8,
      -tick_spacing    => 'linear', 
-     -alpha           => 'shannon',
+     -alpha_types     => ['simpson', 'shannon'],
   );
   my $numbers = $rarefaction->get_numbers;
 
@@ -88,7 +88,7 @@ methods. Internal methods are usually preceded with a _
            -num_repetitions : see num_repetitions()
            -num_ticks       : see num_ticks()
            -tick_spacing    : see tick_spacing()
-           -alpha           : see alpha()
+           -alpha_types     : see alpha_types()
            -seed            : see set_seed()
  Returns : a new Bio::Community::Tools::Accumulator object
 
@@ -208,23 +208,23 @@ has tick_spacing => (
 );
 
 
-=head2 alpha
+=head2 alpha_types
 
  Function: Get or set the type of alpha diversity to calculate.
- Usage   : my $alpha = $accumulator->alpha;
- Args    : String of the desired alpha diversity type ('observed' by default).
+ Usage   : my $alphas = $accumulator->alpha_types;
+ Args    : Arrayref of alpha diversity types (['observed'] by default).
            See C<type()> in L<Bio::Community::Alpha> for details.
- Returns : String of the desired alpha diversity type.
+ Returns : Arrayref of alpha diversity types.
 
 =cut
 
-has alpha => (
+has alpha_types => (
    is => 'rw',
-   isa => 'AlphaType',
+   isa => 'ArrayRef[AlphaType]',
    required => 0, 
-   default => 'observed',
+   default => sub { ['observed'] },
    lazy => 1,
-   init_arg => '-alpha',
+   init_arg => '-alpha_types',
 );
 
 
@@ -267,10 +267,14 @@ method get_numbers {
       $comm_names = ['collector'];
    }
 
+   my $avg_alphas;
    for my $tick (@$ticks) {
 
-      my @avg_alphas;
+      print "TICK $tick\n"; ###
+
       for my $rep (1 .. $self->num_repetitions) {
+
+         print "  REP $rep\n"; ###
 
          # Rarefy or collect communities
          my $acc_meta;
@@ -281,31 +285,49 @@ method get_numbers {
             $acc_meta = $self->_collect_comms($tick);
          }
 
-         # Calculate the alpha diversity of the communities
-         for my $i (0 .. $#$comm_names) {
-            my $acc_comm = $rarefier ?
-                       $acc_meta->get_community_by_name($comm_names->[$i]) :
-                       $acc_meta->get_metacommunity;
-            my $alpha = Bio::Community::Alpha->new(
-                           -community => $acc_comm,
-                           -type      => $self->alpha,
-                        )->get_alpha 
-                        if $acc_comm;
-            if (defined $alpha) {
-               $avg_alphas[$i] += $alpha;
-            } else {
-               $avg_alphas[$i] = undef;
+         for my $alpha (@{$self->alpha_types}) {
+
+            print "    Alpha $alpha\n"; ###
+
+            # Calculate the alpha diversity of the communities
+            for my $i (0 .. $#$comm_names) {
+               my $acc_comm = $rarefier ?
+                          $acc_meta->get_community_by_name($comm_names->[$i]) :
+                          $acc_meta->get_metacommunity;
+
+               my $val = Bio::Community::Alpha->new(
+                              -community => $acc_comm,
+                              -type      => $alpha,
+                           )->get_alpha 
+                           if $acc_comm;
+
+               print "      comm ".$comm_names->[$i]." -> ".($val||'-')."\n"; ###
+
+               if (defined $val) {
+                  $avg_alphas->{$alpha}->{$tick}->[$i] += $val;
+               } else {
+                  $avg_alphas->{$alpha}->{$tick}->[$i] = undef;
+               }
+
             }
+
          }
 
       }
 
-      # Calculate average alpha diversity and save it
-      @avg_alphas = map { defined($_) ? $_ / $self->num_repetitions : '' } @avg_alphas;
-
-      push @$res, [$tick, @avg_alphas];
-
    }
+
+      # Calculate average alpha diversity and save it
+      #for my $alpha (@{$self->alpha_types}) {
+      #   $avg_alphas->{$alpha} = [ map { defined($_) ? $_ / $self->num_repetitions : '' } @{$avg_alphas->{$alpha}} ];
+      #}
+
+      #push @$res, [$tick, $avg_alphas ];
+      #use Data::Dumper; print "avg_alphas: ".Dumper($avg_alphas); ####
+
+   use Data::Dumper; print "avg_alphas: ".Dumper($avg_alphas); ####
+
+   #use Data::Dumper; print "res: ".Dumper($res); ####
 
    return $res;
 }

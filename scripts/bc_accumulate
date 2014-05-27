@@ -100,14 +100,15 @@ Default: tick_spacing.default
    tick_spacing.type: /linear|logarithmic/
    tick_spacing.default: 'logarithmic'
 
-=item -at <alpha_type> | -alpha_type <alpha_type>
+=item -at <alpha_type>... | -alpha_type <alpha_type>...
 
-The alpha diversity metric to calculate at each repetition. See L<Bio::Community::Alpha>
-for the complete list of metrics available. Default: alpha_type.default
+The types of alpha diversity metric to calculate at each repetition. See
+L<Bio::Community::Alpha> for the complete list of metrics available. Default:
+alpha_type.default
 
 =for Euclid:
    alpha_type.type: string
-   alpha_type.default: 'observed'
+   alpha_type.default: ['observed']
 
 =item -wf <weight_files>... | -weight_files <weight_files>...
 
@@ -191,7 +192,7 @@ exit;
 
 
 func accumulate ($input_files, $type, $num_repetitions, $num_ticks, $tick_spacing,
-   $alpha_type, $weight_files, $weight_assign, $output_prefix) {
+   $alpha_types, $weight_files, $weight_assign, $output_prefix) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new;
@@ -220,7 +221,7 @@ func accumulate ($input_files, $type, $num_repetitions, $num_ticks, $tick_spacin
       -num_repetitions => $num_repetitions,
       -num_ticks       => $num_ticks,
       -tick_spacing    => $tick_spacing,
-      -alpha           => $alpha_type,
+      -alpha_types     => $alpha_types,
    );
    print $out $acc->get_string;
    close $out;
