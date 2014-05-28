@@ -55,7 +55,7 @@ provide multiple input files.
 
 =over
 
-=item -at <alpha_type>... | -alpha_type <alpha_type>...
+=item -at <alpha_types>... | -alpha_types <alpha_types>...
 
 The types of alpha diversity metric to calculate:
 
@@ -68,11 +68,11 @@ brillouin_e, hill_e, mcintosh_e, camargo
 
 * Dominance metrics: simpson_d, berger
 
-See L<Bio::Community::Alpha> for details about these metrics. Default: alpha_type.default
+See L<Bio::Community::Alpha> for details about these metrics. Default: alpha_types.default
 
 =for Euclid:
-   alpha_type.type: string
-   alpha_type.default: ['observed']
+   alpha_types.type: string
+   alpha_types.default: ['observed']
 
 =item -wf <weight_files>... | -weight_files <weight_files>...
 
@@ -148,7 +148,7 @@ Email florent.angly@gmail.com
 =cut
 
 
-calc_alpha( $ARGV{'input_files'}  , $ARGV{'alpha_type'}   , $ARGV{'weight_files'},
+calc_alpha( $ARGV{'input_files'}  , $ARGV{'alpha_types'}  , $ARGV{'weight_files'},
             $ARGV{'weight_assign'}, $ARGV{'output_prefix'},                       );
 exit;
 

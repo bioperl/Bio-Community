@@ -56,7 +56,7 @@ provide multiple input files.
 
 =over
 
-=item -bt <beta_type>... | -beta_type <beta_type>...
+=item -bt <beta_types>... | -beta_types <beta_types>...
 
 The types of beta diversity metric to calculate.
 
@@ -65,11 +65,11 @@ The types of beta diversity metric to calculate.
 * Quantitative metrics: 1-norm, 2-norm (euclidean), infinity-norm, hellinger,
 bray-curtis, morisita-horn, permuted, or maxiphi.
 
-See L<Bio::Community::Meta::Beta> for details about these metrics. Default: beta_type.default
+See L<Bio::Community::Meta::Beta> for details about these metrics. Default: beta_types.default
 
 =for Euclid:
-   beta_type.type: string
-   beta_type.default: ['euclidean']
+   beta_types.type: string
+   beta_types.default: ['euclidean']
 
 =item -pf <pair_files>... | -pair_files <pair_files>...
 
@@ -155,7 +155,7 @@ Email florent.angly@gmail.com
 =cut
 
 
-calc_beta( $ARGV{'input_files'} , $ARGV{'beta_type'}    , $ARGV{'pair_files'},
+calc_beta( $ARGV{'input_files'} , $ARGV{'beta_types'}   , $ARGV{'pair_files'},
            $ARGV{'weight_files'}, $ARGV{'weight_assign'}, $ARGV{'output_prefix'} );
 exit;
 
