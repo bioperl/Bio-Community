@@ -240,8 +240,13 @@ method guess () {
       %ok_formats = ();
       my ($test_format, $test_function);
       while ( ($test_format, $test_function) = each (%test_formats) ) {
-         if ( &$test_function(\@fields, $line, $line_num) ) {
-            # Line matches this format
+         my $score = &$test_function(\@fields, $line, $line_num);
+         if ( $score == 2 ) {
+            # This line is specific of this format
+            %ok_formats = ( $test_format => undef );
+            last;
+         } elsif ($score == 1) {
+            # Line is possibly in this format
             $ok_formats{$test_format} = undef;
          } else {
             # Do not try to match this format with upcoming lines
@@ -291,6 +296,12 @@ method guess () {
 }
 
 
+#-----  Format-specific methods -----#
+# These methods return:
+#    1 is the given line is possibly in this format
+#    2 if they are sure
+
+
 func _possibly_biom ($fields, $line, $line_num) {
    # Example:
    # {
@@ -306,7 +317,7 @@ func _possibly_biom ($fields, $line, $line_num) {
    } else {
       if ( ($line =~ m/"\S+":/) || 
            ($line =~ m/Biological Observation Matrix/) ) {
-         $ok = 1;
+         $ok = 2; # biom for sure
       }
    }
    return $ok;
@@ -323,8 +334,7 @@ func _possibly_generic ($fields, $line, $line_num) {
    my $num_fields = scalar @$fields;
    if ($num_fields >= 2) {
       if ($line_num == 1) {
-        $ok = 1 if $line !~ m/^#/; #### don't like this... too restrictive
-        #$ok = 1; ###
+        $ok = 1;
       } else {
          for my $i (1 .. $num_fields - 1) {
             if ($fields->[$i] =~ $real_re) {
@@ -353,7 +363,7 @@ func _possibly_gaas ($fields, $line, $line_num) {
    if ($num_fields == 3) {
       if ($line_num == 1) {
         if ($line =~ m/^#\s*.+name.+id.+abund.*$/) {
-           $ok = 1;
+           $ok = 2; # gaas for sure
          }
       } else {
         if ($line !~ m/^#/) {
@@ -413,7 +423,7 @@ func _possibly_qiime ($fields, $line, $line_num) {
    } elsif ($num_fields >= 2) {
       if ($line_num == 2) {
          if ($line =~ m/^#/) {
-            $ok = 1;
+            $ok = 2; # qiime for sure
          }
       } elsif ($line_num > 2) {
          for my $i (1 .. $num_fields - 2) {

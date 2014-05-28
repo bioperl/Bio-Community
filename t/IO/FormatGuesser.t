@@ -108,6 +108,11 @@ ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file ), 'generic
 is $guesser->file, $file;
 is $guesser->guess, 'generic';
 
+$file = test_input_file('generic_table_tricky.txt');
+ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file );
+is $guesser->file, $file;
+is $guesser->guess, 'generic';
+
 $file = test_input_file('qiime_w_silva_taxo_L2.txt');
 ok $guesser = Bio::Community::IO::FormatGuesser->new( -file => $file );
 is $guesser->file, $file;
