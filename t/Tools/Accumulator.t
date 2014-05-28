@@ -11,8 +11,12 @@ use_ok($_) for qw(
 
 my ($accumulator, $nums, @string);
 
-my $meta = Bio::Community::IO->new(
+my $meta1 = Bio::Community::IO->new(
    -file => test_input_file('qiime_w_no_taxo.txt'),
+)->next_metacommunity;
+
+my $meta2 = Bio::Community::IO->new(
+   -file => test_input_file('gaas_compo.txt'),
 )->next_metacommunity;
 
 
@@ -26,7 +30,7 @@ throws_ok { $accumulator->get_numbers } qr/EXCEPTION.*metacommunity/msi;
 # Collector curve with observed richness
 
 ok $accumulator = Bio::Community::Tools::Accumulator->new(
-   -metacommunity   => $meta,
+   -metacommunity   => $meta1,
    -type            => 'collector',
    -num_repetitions => 10,
    -alpha_types     => ['observed', 'menhinick'],
@@ -56,10 +60,20 @@ cmp_ok $nums->{'menhinick'}->[3]->[1], '>', 0;
 cmp_ok $nums->{'menhinick'}->[3]->[1], '<', 1;
 
 
+# Community with not quite integer count, e.g. 0.999999999999999
+
+ok $accumulator = Bio::Community::Tools::Accumulator->new(
+   -metacommunity   => $meta2,
+   -type            => 'rarefaction',
+   -num_repetitions => 10,
+), 'Not quite integer';
+ok     $nums = $accumulator->get_numbers;
+
+
 # Rarefaction with linear spacing and Shannon-Wiener diversity
 
 ok $accumulator = Bio::Community::Tools::Accumulator->new(
-   -metacommunity   => $meta,
+   -metacommunity   => $meta1,
    -type            => 'rarefaction',
    -num_ticks       => 7,
    -tick_spacing    => 'linear',
@@ -146,7 +160,7 @@ my $rre = qr/(?:(?i)(?:[+-]?)(?:(?=[.]?[0123456789])(?:[0123456789]*)(?:(?:[.])(
 # regular expression to match a real number, taken from Regexp::Common
 
 ok $accumulator = Bio::Community::Tools::Accumulator->new(
-   -metacommunity => $meta,
+   -metacommunity => $meta1,
    -type          => 'rarefaction',
    -num_ticks     => 7,
    -tick_spacing  => 'logarithmic',

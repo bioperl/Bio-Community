@@ -390,20 +390,18 @@ method _get_ticks {
       my $tick_num = -1;
       for my $i (@$sort_order) {
          my $count = $counts->[$i];
+         $count = int( $count + 0.5 ); # round
          my $tick;
          while (1) {
             $tick_num++;
             $tick = $linear_spacing ?
                     1 + $tick_num * $param :
                     $param*(exp($tick_num)-1)+1;
-
-            $tick = int( $tick + 0.5 );  # round
-            next if $tick == $ticks[-1]; # avoid duplicates
-
+            $tick = int( $tick + 0.5 ); # round
             if ($tick < $count) {
-               push @ticks, $tick;
+               push @ticks, $tick  if $tick  != $ticks[-1]; # avoid dups
             } else {
-               push @ticks, $count;
+               push @ticks, $count if $count != $ticks[-1]; # avoid dups
                $tick_num-- if $tick > $count;
                last;
             }
