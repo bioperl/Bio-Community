@@ -29,22 +29,31 @@ ok $accumulator = Bio::Community::Tools::Accumulator->new(
    -metacommunity   => $meta,
    -type            => 'collector',
    -num_repetitions => 10,
-   -alpha_types     => ['observed'],
+   -alpha_types     => ['observed', 'menhinick'],
 ), 'Collector curve';
 ok     $nums = $accumulator->get_numbers;
 
-is     $nums->[0]->[0], 0;
-is     $nums->[0]->[1], 0;
+is     $nums->{'observed'}->[0]->[0], 0;
+is     $nums->{'observed'}->[0]->[1], 0;
+is     $nums->{'observed'}->[1]->[0], 1;
+cmp_ok $nums->{'observed'}->[1]->[1], '>=', 1;
+cmp_ok $nums->{'observed'}->[1]->[1], '<=', 3;
+is     $nums->{'observed'}->[2]->[0], 2;
+is     $nums->{'observed'}->[2]->[1], 3;
+is     $nums->{'observed'}->[3]->[0], 3;
+is     $nums->{'observed'}->[3]->[1], 3;
 
-is     $nums->[1]->[0], 1;
-cmp_ok $nums->[1]->[1], '>=', 1;
-cmp_ok $nums->[1]->[1], '<=', 3;
-
-is     $nums->[2]->[0], 2;
-is     $nums->[2]->[1], 3;
-
-is     $nums->[3]->[0], 3;
-is     $nums->[3]->[1], 3;
+is     $nums->{'menhinick'}->[0]->[0], 0;
+is     $nums->{'menhinick'}->[0]->[1], 0;
+is     $nums->{'menhinick'}->[1]->[0], 1;
+cmp_ok $nums->{'menhinick'}->[1]->[1], '>', 0;
+cmp_ok $nums->{'menhinick'}->[1]->[1], '<', 1;
+is     $nums->{'menhinick'}->[2]->[0], 2;
+cmp_ok $nums->{'menhinick'}->[2]->[1], '>', 0;
+cmp_ok $nums->{'menhinick'}->[2]->[1], '<', 1;
+is     $nums->{'menhinick'}->[3]->[0], 3;
+cmp_ok $nums->{'menhinick'}->[3]->[1], '>', 0;
+cmp_ok $nums->{'menhinick'}->[3]->[1], '<', 1;
 
 
 # Rarefaction with linear spacing and Shannon-Wiener diversity
@@ -59,79 +68,82 @@ ok $accumulator = Bio::Community::Tools::Accumulator->new(
 ), 'Rarefaction curve';
 ok $nums = $accumulator->get_numbers;
 
-is     $nums->[0]->[0], 0;
-is     $nums->[0]->[1], 0;
+is     $nums->{'shannon'}->[0]->[0], 0;
+is     $nums->{'shannon'}->[0]->[1], 0;
 
-is     $nums->[1]->[0], 1;
-is     $nums->[1]->[1], 0;
-is     $nums->[1]->[2], 0;
-is     $nums->[1]->[3], 0;
+is     $nums->{'shannon'}->[1]->[0], 1;
+is     $nums->{'shannon'}->[1]->[1], 0;
+is     $nums->{'shannon'}->[1]->[2], 0;
+is     $nums->{'shannon'}->[1]->[3], 0;
 
-is     $nums->[2]->[0], 17;
-cmp_ok $nums->[2]->[1], '>', 0;
-cmp_ok $nums->[2]->[1], '<', 1;
-is     $nums->[2]->[2], 0;
-cmp_ok $nums->[2]->[3], '>', 0;
-cmp_ok $nums->[2]->[3], '<', 1;
+is     $nums->{'shannon'}->[2]->[0], 17;
+cmp_ok $nums->{'shannon'}->[2]->[1], '>', 0;
+cmp_ok $nums->{'shannon'}->[2]->[1], '<', 1;
+is     $nums->{'shannon'}->[2]->[2], 0;
+cmp_ok $nums->{'shannon'}->[2]->[3], '>', 0;
+cmp_ok $nums->{'shannon'}->[2]->[3], '<', 1;
 
-is     $nums->[3]->[0], 33;
-cmp_ok $nums->[3]->[1], '>', 0;
-cmp_ok $nums->[3]->[1], '<', 1;
-is     $nums->[3]->[2], 0;
-cmp_ok $nums->[3]->[3], '>', 0;
-cmp_ok $nums->[3]->[3], '<', 1;
+is     $nums->{'shannon'}->[3]->[0], 33;
+cmp_ok $nums->{'shannon'}->[3]->[1], '>', 0;
+cmp_ok $nums->{'shannon'}->[3]->[1], '<', 1;
+is     $nums->{'shannon'}->[3]->[2], 0;
+cmp_ok $nums->{'shannon'}->[3]->[3], '>', 0;
+cmp_ok $nums->{'shannon'}->[3]->[3], '<', 1;
 
-is     $nums->[4]->[0], 49;
-cmp_ok $nums->[4]->[1], '>', 0;
-cmp_ok $nums->[4]->[1], '<', 1;
-is     $nums->[4]->[2], 0;
-cmp_ok $nums->[4]->[3], '>', 0;
-cmp_ok $nums->[4]->[3], '<', 1;
+is     $nums->{'shannon'}->[4]->[0], 49;
+cmp_ok $nums->{'shannon'}->[4]->[1], '>', 0;
+cmp_ok $nums->{'shannon'}->[4]->[1], '<', 1;
+is     $nums->{'shannon'}->[4]->[2], 0;
+cmp_ok $nums->{'shannon'}->[4]->[3], '>', 0;
+cmp_ok $nums->{'shannon'}->[4]->[3], '<', 1;
 
-is     $nums->[5]->[0], 65;
-cmp_ok $nums->[5]->[1], '>', 0;
-cmp_ok $nums->[5]->[1], '<', 1;
-is     $nums->[5]->[2], 0;
-cmp_ok $nums->[5]->[3], '>', 0;
-cmp_ok $nums->[5]->[3], '<', 1;
+is     $nums->{'shannon'}->[5]->[0], 65;
+cmp_ok $nums->{'shannon'}->[5]->[1], '>', 0;
+cmp_ok $nums->{'shannon'}->[5]->[1], '<', 1;
+is     $nums->{'shannon'}->[5]->[2], 0;
+cmp_ok $nums->{'shannon'}->[5]->[3], '>', 0;
+cmp_ok $nums->{'shannon'}->[5]->[3], '<', 1;
 
-is     $nums->[6]->[0], 81;
-cmp_ok $nums->[6]->[1], '>', 0;
-cmp_ok $nums->[6]->[1], '<', 1;
-is     $nums->[6]->[2], 0;
-cmp_ok $nums->[6]->[3], '>', 0;
-cmp_ok $nums->[6]->[3], '<', 1;
+is     $nums->{'shannon'}->[6]->[0], 81;
+cmp_ok $nums->{'shannon'}->[6]->[1], '>', 0;
+cmp_ok $nums->{'shannon'}->[6]->[1], '<', 1;
+is     $nums->{'shannon'}->[6]->[2], 0;
+cmp_ok $nums->{'shannon'}->[6]->[3], '>', 0;
+cmp_ok $nums->{'shannon'}->[6]->[3], '<', 1;
 
-is     $nums->[7]->[0], 97;
-is     $nums->[7]->[1], '';
-is     $nums->[7]->[2], 0;
-cmp_ok $nums->[7]->[3], '>', 0;
-cmp_ok $nums->[7]->[3], '<', 1;
+is     $nums->{'shannon'}->[7]->[0], 97;
+is     $nums->{'shannon'}->[7]->[1], '';
+is     $nums->{'shannon'}->[7]->[2], 0;
+cmp_ok $nums->{'shannon'}->[7]->[3], '>', 0;
+cmp_ok $nums->{'shannon'}->[7]->[3], '<', 1;
 
-is     $nums->[8]->[0], 113;
-is     $nums->[8]->[1], '';
-is     $nums->[8]->[2], 0;
-cmp_ok $nums->[8]->[3], '>', 0;
-cmp_ok $nums->[8]->[3], '<', 1;
+is     $nums->{'shannon'}->[8]->[0], 113;
+is     $nums->{'shannon'}->[8]->[1], '';
+is     $nums->{'shannon'}->[8]->[2], 0;
+cmp_ok $nums->{'shannon'}->[8]->[3], '>', 0;
+cmp_ok $nums->{'shannon'}->[8]->[3], '<', 1;
 
-is     $nums->[9]->[0], 121;
-is     $nums->[9]->[1], '';
-is     $nums->[9]->[2], 0;
-cmp_ok $nums->[9]->[3], '>', 0;
-cmp_ok $nums->[9]->[3], '<', 1;
+is     $nums->{'shannon'}->[9]->[0], 121;
+is     $nums->{'shannon'}->[9]->[1], '';
+is     $nums->{'shannon'}->[9]->[2], 0;
+cmp_ok $nums->{'shannon'}->[9]->[3], '>', 0;
+cmp_ok $nums->{'shannon'}->[9]->[3], '<', 1;
 
-is     $nums->[10]->[0], 129;
-is     $nums->[10]->[1], '';
-is     $nums->[10]->[2], 0;
-is     $nums->[10]->[3], '';
+is     $nums->{'shannon'}->[10]->[0], 129;
+is     $nums->{'shannon'}->[10]->[1], '';
+is     $nums->{'shannon'}->[10]->[2], 0;
+is     $nums->{'shannon'}->[10]->[3], '';
 
-is     $nums->[11]->[0], 142;
-is     $nums->[11]->[1], '';
-is     $nums->[11]->[2], 0;
-is     $nums->[11]->[3], '';
+is     $nums->{'shannon'}->[11]->[0], 142;
+is     $nums->{'shannon'}->[11]->[1], '';
+is     $nums->{'shannon'}->[11]->[2], 0;
+is     $nums->{'shannon'}->[11]->[3], '';
 
 
 # Rarefaction with logarithmic spacing
+
+my $rre = qr/(?:(?i)(?:[+-]?)(?:(?=[.]?[0123456789])(?:[0123456789]*)(?:(?:[.])(?:[0123456789]{0,}))?)(?:(?:[E])(?:(?:[+-]?)(?:[0123456789]+))|))/;
+# regular expression to match a real number, taken from Regexp::Common
 
 ok $accumulator = Bio::Community::Tools::Accumulator->new(
    -metacommunity => $meta,
@@ -139,14 +151,10 @@ ok $accumulator = Bio::Community::Tools::Accumulator->new(
    -num_ticks     => 7,
    -tick_spacing  => 'logarithmic',
 ), 'Rarefaction curve (logarithmic)';
-ok $nums = $accumulator->get_numbers;
+ok $nums = $accumulator->get_strings;
 
-ok @string = split /\n/, $accumulator->get_string;
-
-my $rre = qr/(?:(?i)(?:[+-]?)(?:(?=[.]?[0123456789])(?:[0123456789]*)(?:(?:[.])(?:[0123456789]{0,}))?)(?:(?:[E])(?:(?:[+-]?)(?:[0123456789]+))|))/;
-# regular expression to match a real number, taken from Regexp::Common
-
-is   $string[0], "\t20100302\t20100304\t20100823";
+ok   @string = split /\n/, $nums->[0];
+is   $string[0], "observed\t20100302\t20100304\t20100823";
 is   $string[1], "0\t0\t0\t0";
 is   $string[2], "1\t1\t1\t1";
 like $string[3], qr/^2\t$rre\t1\t$rre/;

@@ -212,9 +212,6 @@ func accumulate ($input_files, $type, $num_repetitions, $num_ticks, $tick_spacin
    }
 
    # Determine species accumulation curve
-   my $out_file = $output_prefix.'.txt';
-   print "Writing accumulation curve to file '$out_file'\n";
-   open my $out, '>', $out_file or die "Error: Could not write file $out_file\n";
    my $acc = Bio::Community::Tools::Accumulator->new(
       -metacommunity   => $meta,
       -type            => $type,
@@ -223,8 +220,17 @@ func accumulate ($input_files, $type, $num_repetitions, $num_ticks, $tick_spacin
       -tick_spacing    => $tick_spacing,
       -alpha_types     => $alpha_types,
    );
-   print $out $acc->get_string;
-   close $out;
+   my $strings = $acc->get_strings;
+
+   # Write results to files
+   for my $i (0 .. $#$alpha_types) {
+      my $alpha_type = $alpha_types->[$i];
+      my $out_file = $output_prefix."_$alpha_type.txt";
+      print "Writing accumulation curve to file '$out_file'\n";
+      open my $out, '>', $out_file or die "Error: Could not write file '$out_file'\n";
+      print $out $strings->[$i];
+      close $out;
+   }
 
    return 1;
 }

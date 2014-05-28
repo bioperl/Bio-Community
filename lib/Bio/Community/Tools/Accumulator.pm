@@ -22,7 +22,7 @@ Bio::Community::Tools::Accumulator - Species accumulation curves
   );
   my $numbers = $collector->get_numbers;
   # or
-  my $string = $collector->get_string;
+  my $strings = $collector->get_strings;
 
   # A rarefaction curve, with custom parameters
   my $rarefaction = Bio::Community::Tools::Accumulator->new(
@@ -233,10 +233,9 @@ has alpha_types => (
  Function: Calculate the accumulation curve and return the numbers.
  Usage   : my $nums = $accumulator->get_numbers;
  Args    : none
- Returns : An arrayref of arrayrefs containing the average alpha diversity of
-           the communities for each tick value, e.g.
-              [ [tick1, alpha1, alpha2, ...],
-                [tick2, alpha1, alpha2, ...], ... ]
+ Returns : A structure containing the average alpha diversity of the communities
+           for each tick value, for each requested alpha type:
+              { alpha_type => [ [tick, alpha1, alpha2, ... ], ... ], ... }
 
 =cut
 
@@ -248,12 +247,10 @@ method get_numbers {
       $self->throw('Should have a metacommunity containing at least one community');
    }
 
-   my $comm_names = [map { $_->name } @{$meta->get_all_communities}];
-   my $res = [];
-
    my $ticks = $self->_get_ticks(); # Determine range of sample sizes
 
    my $rarefier;
+   my $comm_names = [map { $_->name } @{$meta->get_all_communities}];
    if ($self->type eq 'rarefaction') {
       # Rarefaction curve
       $rarefier = Bio::Community::Tools::Rarefier->new(
@@ -270,11 +267,7 @@ method get_numbers {
    my $avg_alphas;
    for my $tick (@$ticks) {
 
-      print "TICK $tick\n"; ###
-
       for my $rep (1 .. $self->num_repetitions) {
-
-         print "  REP $rep\n"; ###
 
          # Rarefy or collect communities
          my $acc_meta;
@@ -287,8 +280,6 @@ method get_numbers {
 
          for my $alpha (@{$self->alpha_types}) {
 
-            print "    Alpha $alpha\n"; ###
-
             # Calculate the alpha diversity of the communities
             for my $i (0 .. $#$comm_names) {
                my $acc_comm = $rarefier ?
@@ -300,8 +291,6 @@ method get_numbers {
                               -type      => $alpha,
                            )->get_alpha 
                            if $acc_comm;
-
-               print "      comm ".$comm_names->[$i]." -> ".($val||'-')."\n"; ###
 
                if (defined $val) {
                   $avg_alphas->{$alpha}->{$tick}->[$i] += $val;
@@ -317,39 +306,42 @@ method get_numbers {
 
    }
 
-      # Calculate average alpha diversity and save it
-      #for my $alpha (@{$self->alpha_types}) {
-      #   $avg_alphas->{$alpha} = [ map { defined($_) ? $_ / $self->num_repetitions : '' } @{$avg_alphas->{$alpha}} ];
-      #}
-
-      #push @$res, [$tick, $avg_alphas ];
-      #use Data::Dumper; print "avg_alphas: ".Dumper($avg_alphas); ####
-
-   use Data::Dumper; print "avg_alphas: ".Dumper($avg_alphas); ####
-
-   #use Data::Dumper; print "res: ".Dumper($res); ####
+   # Divide results to obtain averages and format in a friendly way
+   my $res;
+   for my $alpha (@{$self->alpha_types}) {
+      for my $tick (@$ticks) {
+         my @vals = map { defined($_) ? $_ / $self->num_repetitions : '' } @{$avg_alphas->{$alpha}->{$tick}};
+         push @{$res->{$alpha}}, [$tick, @vals];
+      }
+   }
 
    return $res;
 }
 
 
-=head2 get_string
+=head2 get_strings
 
- Function: Calculate the accumulation curve and return it as a tab-delimited string.
- Usage   : my $string = $accumulator->get_string;
+ Function: Calculate the accumulation curves and return them as strings.
+ Usage   : my $strings = $accumulator->get_strings;
  Args    : none
- Returns : A tab-delimited string for the accumulation curve.
+ Returns : A arrayref of strings, each of which represents the accumulation
+           curve for a given alpha diversity type.
 
 =cut
 
-method get_string {
+method get_strings {
    my $comm_names = [map {$_->name} @{$self->metacommunity->get_all_communities}];
-   my $str = join("\t", '', @$comm_names)."\n";
+   my $header = join("\t", '', @$comm_names)."\n";
    my $nums = $self->get_numbers;
-   for my $alphas (@$nums) {
-      $str .= join("\t", @$alphas)."\n";
+   my @res;
+   for my $alpha (@{$self->alpha_types}) {
+      my $str = $alpha.$header;
+      for my $row (@{$nums->{$alpha}}) {
+         $str .= join("\t", @$row)."\n";
+      }
+      push @res, $str;
    }
-   return $str;
+   return \@res;
 }
 
 
