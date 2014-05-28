@@ -34,6 +34,7 @@ ok $accumulator = Bio::Community::Tools::Accumulator->new(
    -type            => 'collector',
    -num_repetitions => 10,
    -alpha_types     => ['observed', 'menhinick'],
+   -verbose         => 1,
 ), 'Collector curve';
 ok     $nums = $accumulator->get_numbers;
 

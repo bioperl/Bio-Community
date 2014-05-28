@@ -219,6 +219,7 @@ func accumulate ($input_files, $type, $num_repetitions, $num_ticks, $tick_spacin
       -num_ticks       => $num_ticks,
       -tick_spacing    => $tick_spacing,
       -alpha_types     => $alpha_types,
+      -verbose         => 1,
    );
    my $strings = $acc->get_strings;
 

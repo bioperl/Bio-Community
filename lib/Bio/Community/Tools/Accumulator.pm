@@ -228,6 +228,26 @@ has alpha_types => (
 );
 
 
+=head2 verbose
+
+ Function: Get or set verbose mode. This displays the number of ticks to use
+           before the accumulation curve itself is computed.
+ Usage   : $accumulator->verbose(1);
+ Args    : 0 (default) or 1
+ Returns : 0 or 1
+
+=cut
+
+has verbose => (
+   is => 'rw',
+   isa => 'Bool',
+   required => 0, 
+   default => 0,
+   lazy => 1,
+   init_arg => '-verbose',
+);
+
+
 =head2 get_numbers
 
  Function: Calculate the accumulation curve and return the numbers.
@@ -248,6 +268,7 @@ method get_numbers {
    }
 
    my $ticks = $self->_get_ticks(); # Determine range of sample sizes
+   print "Using ticks: ".join(' ', @$ticks)."\n" if $self->verbose;
 
    my $rarefier;
    my $comm_names = [map { $_->name } @{$meta->get_all_communities}];
