@@ -1,10 +1,9 @@
 Revision history for Perl extension Bio-Community.
 
-x.x.x XXXX-XX-XX
+0.1.7 2014-05-28
   - Support for QIIME files containing alternative taxonomic header (reported
     by Brian Kemish and Jason Steen).
-  - Support sampling 0 members in Sampler and Rarefier
-  - Added possibility to reuse Sampler and Rarefier objects 
+  - Support sampling 0 members and Sampler and Rarefier object re-use
   - Option to silently drop communities with low member count in Rarefier
   - New Accumulator module for collector and rarefaction curves
   - Option names pluralized to -alpha_types and -beta_types in bc_measure_alpha
