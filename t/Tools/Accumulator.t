@@ -154,7 +154,7 @@ ok $accumulator = Bio::Community::Tools::Accumulator->new(
 ok $nums = $accumulator->get_strings;
 
 ok   @string = split /\n/, $nums->[0];
-is   $string[0], "observed\t20100302\t20100304\t20100823";
+is   $string[0], "# observed\t20100302\t20100304\t20100823";
 is   $string[1], "0\t0\t0\t0";
 is   $string[2], "1\t1\t1\t1";
 like $string[3], qr/^2\t$rre\t1\t$rre/;

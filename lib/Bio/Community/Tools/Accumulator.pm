@@ -335,7 +335,7 @@ method get_strings {
    my $nums = $self->get_numbers;
    my @res;
    for my $alpha (@{$self->alpha_types}) {
-      my $str = $alpha.$header;
+      my $str = '# '.$alpha.$header;
       for my $row (@{$nums->{$alpha}}) {
          $str .= join("\t", @$row)."\n";
       }
