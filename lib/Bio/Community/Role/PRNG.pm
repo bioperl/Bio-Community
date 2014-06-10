@@ -75,8 +75,6 @@ use Math::Random::MT;
 has _prng  => (
    is => 'rw',
    #isa => 'Math::Random::MT',
-   required => 0,
-   default => undef,
    default => sub { Math::Random::MT->new( shift->_seed ) },
    init_arg => undef,
    lazy => 1,
