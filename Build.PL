@@ -45,6 +45,8 @@ my $build = Module::Build->new(
     recommends           => {
                              #'Clone::Fast'                 =>  0, # C bindings for Bio::Root::clone(). Broken in 0.97?!
                              'Math::GSL::SF'                =>  0, # C bindings for arithmetic
+                             'Math::GSL::Randist'           =>  0, # C bindings for random number generation
+                             'Math::GSL::RNG'               =>  0, # C bindings for random number generation
                             },
     script_files         => [
                              'scripts/bc_accumulate',

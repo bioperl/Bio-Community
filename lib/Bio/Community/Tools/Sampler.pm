@@ -78,6 +78,7 @@ use Moose;
 use MooseX::NonMoose;
 use MooseX::StrictConstructor;
 use Method::Signatures;
+use List::Util qw(first);
 use namespace::autoclean;
 use Bio::Community;
 
@@ -100,26 +101,6 @@ has community => (
    required => 0,
    lazy => 0,
    init_arg => '-community',
-   trigger => \&_clear_cdf,
-);
-
-
-has _cdf => (
-   is => 'rw',
-   isa => 'ArrayRef', # ArrayRef[PositiveNum]
-   lazy => 1,
-   default => sub { shift->_init_cdf( ) },
-   init_arg => undef,
-   clearer => '_clear_cdf',
-);
-
-
-has _members => (
-   is => 'rw',
-   isa => 'ArrayRef', # ArrayRef[Bio::Community::Member]
-   lazy => 1,
-   default => sub{ [] },
-   init_arg => undef,
 );
 
 
@@ -135,7 +116,10 @@ has _members => (
 
 =head2 get_rand_member
 
- Function: Get a random member from a community (sample with replacement).
+ Function: Get a random member from a community (sample with replacement). This
+           method requires the Math::GSL::Randist module.
+           Note: If you need to draw many members, using get_rand_community() is
+           much more efficient.
  Usage   : my $member = $sampler->get_rand_member();
  Args    : None
  Returns : A Bio::Community::Member object
@@ -144,20 +128,24 @@ has _members => (
 
 method get_rand_member () {
    # Pick a random member based on the community's cdf
-   my $rand_pick = $self->rand();
-   my $cdf = $self->_cdf;
-   my $index = 0;
-   while (1) {
-      last if $rand_pick < $cdf->[$index];
-      $index++;
+   my $counts = $self->_get_rand_members(1);
+   # Get the rank of this member
+   my $rank;
+   for my $i ( 0 .. $#$counts ) {
+        if ($counts->[$i] > 0) {
+           $rank = $i+1;
+           last;
+        }
    }
-   return ${$self->_members}[$index];
+   # Get and return the corresponding Member
+   return $self->community->get_member_by_rank($rank);
 }
 
 
 =head2 get_rand_community
 
- Function: Create a community from random members of a community
+ Function: Create a community from random members of a community. This method
+           requires the Math::GSL::Randist module.
  Usage   : my $community = $sampler->get_rand_community(1000);
  Args    : Number of members (positive integer)
  Returns : A Bio::Community object
@@ -167,52 +155,44 @@ method get_rand_member () {
 method get_rand_community ( PositiveInt $total_count = 1 ) {
    # Adding random members 1 by 1 in a communty is slow. Generate all the members
    # first. Then add them all at once to a community.
-
-   # 1/ Generate all random members
-   my $members = {};
-   my $counts  = {};
-   for (1 .. $total_count) {
-      my $member = $self->get_rand_member;
-      my $id = $member->id;
-      $members->{$id} = $member;
-      $counts->{$id}++;
+   my $counts = $self->_get_rand_members($total_count);
+   my $randcomm = Bio::Community->new();
+   my $comm = $self->community;
+   for my $rank (1 .. scalar @$counts) {
+      my $count  = $counts->[$rank-1];
+      next if not $count;
+      my $member = $comm->get_member_by_rank($rank);
+      $randcomm->add_member( $member, $count );
    }
 
-   # 2/ Add all members in a community object
-   my $community = Bio::Community->new();
-   while (my ($id, $member) = each %$members) {
-      my $count = $counts->{$id};
-      $community->add_member( $member, $count );
-   }
-   
-   return $community;
+   return $randcomm;
 }
 
 
-method _init_cdf () {
-   # Sort the members of the community by decreasing rank and calculate the
-   # cumulative density function of their relative abundance. Store the
-   # resulting CDF and members;
-   my $community = $self->community || $self->throw('No community was provided');
-
-   my @cdf;
-   my @members = ();
-   while ( my $member = $community->next_member('_calc_cdf_ite') ) {
-      my $rank = $community->get_rank($member);
-      $members[$rank-1] = $member;
-      my $rel_ab = $community->get_rel_ab($member);
-      $cdf[$rank-1] = $rel_ab / 100;
+method _get_rand_members ( $total_count = 1 ) {
+   # 1/ Get member probabilities (i.e. relative abundances)
+   my @P = ();
+   my $comm = $self->community || $self->throw('No community was provided');
+   for my $rank (1 .. $comm->get_richness) {
+      my $relab = $comm->get_rel_ab( $comm->get_member_by_rank($rank) );
+      push @P, $relab;
    }
 
-   for my $i ( 1 .. scalar @cdf - 1 ) {
-      $cdf[$i] += $cdf[$i-1];
+   # 2/ Draw random members
+   if (not eval { require Math::GSL::Randist }) {
+      $self->throw("Need module Math::GSL::Randist to draw random members from community\n$@");
    }
 
-   $self->_cdf( \@cdf );
-   $self->_members( \@members );
-   return \@cdf;
+   ####
+   if (not eval { require Math::GSL::RNG }) {
+      $self->throw("Need module Math::GSL::RNG to draw random members from community\n$@");
+   }
+   my $rng = Math::GSL::RNG->new()->raw; ### TODO: Should get this from B:C:PRNG, properly seeded
+   ####
+
+   # Could call $self->get_rand_member() many times instead, but it is very slow!
+   return Math::GSL::Randist::gsl_ran_multinomial($rng, \@P, $total_count);
 }
-
 
 
 __PACKAGE__->meta->make_immutable;
