@@ -24,6 +24,9 @@ ok $sampler = Bio::Community::Tools::Sampler->new(), 'Bare object';
 isa_ok $sampler, 'Bio::Community::Tools::Sampler';
 throws_ok { $sampler->get_rand_member } qr/EXCEPTION.*community/msi;
 
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::Randist');
+
 
 # Even community
 
@@ -123,6 +126,8 @@ $count = 0;
 ok $rand_comm = $sampler->get_rand_community($count);
 is scalar @{$rand_comm->get_all_members}, 0;
 
+
+}
 
 done_testing();
 
