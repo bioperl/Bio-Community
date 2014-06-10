@@ -10,6 +10,10 @@ use_ok($_) for qw(
 my ($num, $obj, $obj2, @expected);
 
 
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::RNG');
+
+
 # Basic object
 
 ok $obj = t::Role::PRNG->new(), 'Basic object';
@@ -35,7 +39,10 @@ for (1..10) {
 # Provide a seed
 
 ok $obj->set_seed( 1234 ), 'Specified seed';
+is $obj->get_seed, 1234;
+
 ok $obj2 = t::Role::PRNG->new( -seed => 1234 );
+is $obj2->get_seed, 1234;
 
 @expected = (2, 5, 7, 9, 5, 7, 8, 8, 8, 9);
 for my $i (0..9) {
@@ -44,6 +51,8 @@ for my $i (0..9) {
 }
 
 
+}
+
 done_testing();
 
-
+exit;

@@ -27,7 +27,7 @@ Bio::Community::Role::PRNG - Role for objects that use a pseudo-random number ge
 
 This role provides the capability to generate random numbers using a specified
 or automatically determined seed. This module uses the superior Mersenne-Twister
-algorithm provided by the L<Math::Random::MT> module to draw uniformly
+algorithm provided by the L<Math::GSL::RNG> module to draw uniformly
 distributed random numbers.
 
 =head1 AUTHOR
@@ -69,48 +69,50 @@ use Moose::Role;
 use namespace::autoclean;
 use Method::Signatures;
 use Bio::Community::Types;
-use Math::Random::MT;
 
 
 has _prng  => (
    is => 'rw',
-   #isa => 'Math::Random::MT',
-   default => sub { Math::Random::MT->new( shift->_seed ) },
+   #isa => 'Math::GSL::RNG',
+   default => sub {
+      if (not eval { require Math::GSL::RNG }) {
+         shift->throw("Need module require Math::GSL::RNG for PRNG role\n$@");
+      }
+      my $seed = shift->get_seed;
+      my $rng = Math::GSL::RNG->new($Math::GSL::RNG::gsl_rng_mt19937, $seed);
+      return $rng->raw;
+   },
    init_arg => undef,
    lazy => 1,
    predicate => '_has_prng',
 );
 
 
-# The -seed constructor
-
-has _seed => (
-   is => 'rw',
-   isa => 'Maybe[PositiveInt]',
-   required => 0,
-   default => undef,
-   init_arg => '-seed',
-   lazy => 1,
-);
-
-
 =head2 get_seed, set_seed
 
  Usage   : $prng->set_seed(1234513451);
- Function: Get or set the seed used to generate the random numbers.
+ Function: Get or set the seed used to generate the random numbers. The default
+           is an automatically generated seed.
  Args    : Positive integer
  Returns : Positive integer
 
 =cut
 
-method get_seed {
-   $self->_prng->get_seed;
-}
-
-
-method set_seed ($int) {
-   $self->_prng->set_seed($int);
-}
+has _seed => (
+   is => 'rw',
+   isa => 'Maybe[PositiveInt]',
+   required => 0,
+   default => sub { int(CORE::rand(2**32)) }, # Autoseed like Math::Random::MT
+   init_arg => '-seed',
+   lazy => 1,
+   reader => 'get_seed',
+   writer => 'set_seed',
+   trigger => sub { my $self = shift;
+                    my $seed = $self->get_seed;
+                    Math::GSL::RNG::gsl_rng_set($self->_prng, $seed);
+                    return $seed;
+              }
+);
 
 
 =head2 rand
@@ -122,8 +124,8 @@ method set_seed ($int) {
 
 =cut
 
-method rand ($num?) {
-   $self->_prng->rand($num);
+method rand ($num=1) {
+   return Math::GSL::RNG::gsl_rng_uniform($self->_prng)*$num;
 }
 
 

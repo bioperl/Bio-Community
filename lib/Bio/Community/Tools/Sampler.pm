@@ -182,16 +182,8 @@ method _get_rand_members ( $total_count = 1 ) {
    if (not eval { require Math::GSL::Randist }) {
       $self->throw("Need module Math::GSL::Randist to draw random members from community\n$@");
    }
-
-   ####
-   if (not eval { require Math::GSL::RNG }) {
-      $self->throw("Need module Math::GSL::RNG to draw random members from community\n$@");
-   }
-   my $rng = Math::GSL::RNG->new()->raw; ### TODO: Should get this from B:C:PRNG, properly seeded
-   ####
-
-   # Could call $self->get_rand_member() many times instead, but it is very slow!
-   return Math::GSL::Randist::gsl_ran_multinomial($rng, \@P, $total_count);
+   # Could call $self->get_rand_member() many times instead, but would be very slow!
+   return Math::GSL::Randist::gsl_ran_multinomial($self->_prng, \@P, $total_count);
 }
 
 

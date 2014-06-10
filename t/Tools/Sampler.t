@@ -18,14 +18,15 @@ $member2 = Bio::Community::Member->new( -desc => 'B' );
 $member3 = Bio::Community::Member->new( -desc => 'C' );
 
 
+SKIP: {
+test_skip(-tests => 1, -requires_module => 'Math::GSL::Randist');
+
+
 # Bare object
 
 ok $sampler = Bio::Community::Tools::Sampler->new(), 'Bare object';
 isa_ok $sampler, 'Bio::Community::Tools::Sampler';
 throws_ok { $sampler->get_rand_member } qr/EXCEPTION.*community/msi;
-
-SKIP: {
-test_skip(-tests => 1, -requires_module => 'Math::GSL::Randist');
 
 
 # Even community
