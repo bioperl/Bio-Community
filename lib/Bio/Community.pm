@@ -300,7 +300,7 @@ has _members_iterator => (
    is => 'rw',
    #isa => 'Maybe[HashRef]',
    lazy => 1,
-   default => undef,
+   default => sub{ {} }, 
    init_arg => undef,
    clearer => '_clear_members_iterator',
 );
@@ -398,13 +398,10 @@ method next_member ( $iter_name = 'default' ) {
    $self->_reset if $self->_has_changed;
 
    # Create or re-use a named iterator
-   my $iters = $self->_members_iterator;
-   my $iter;
-   if (exists $iters->{$iter_name}) {
-      $iter = $iters->{$iter_name};
-   } else {
-      $iter = $self->_create_hash_val_iter( $self->_members );
-      $iters->{$iter_name} = $iter;
+   my $iter = $self->_members_iterator->{$iter_name};
+   if (not $iter) {
+      $iter = $self->_members_iterator->{$iter_name} =
+         $self->_create_hash_val_iter( $self->_members );
    }
 
    # Get next member from iterator
@@ -412,10 +409,9 @@ method next_member ( $iter_name = 'default' ) {
 
    # Delete iterator when done
    if (not $member) { 
-      delete $iters->{$iter_name};
+      delete $self->_members_iterator->{$iter_name};
    }
 
-   $self->_members_iterator($iters);
    return $member;
 }
 
