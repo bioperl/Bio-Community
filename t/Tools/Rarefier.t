@@ -5,6 +5,10 @@ use Test::Number::Delta;
 use Bio::Community;
 use Bio::Community::Meta;
 
+BEGIN {
+    test_begin(-requires_module => 'Math::GSL::RNG');
+}
+
 use_ok($_) for qw(
     Bio::Community::Tools::Rarefier
 );
