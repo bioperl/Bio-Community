@@ -65,6 +65,9 @@ package Bio::Community::Role::Weighted;
 
 use Moose::Role;
 use namespace::autoclean;
+use Method::Signatures;
+use Bio::Community::Types;
+
 
 =head2 weights
 
@@ -89,9 +92,31 @@ has weights => (
    ###isa => 'Maybe[ArrayRef[StrictlyPositiveNum]]',
    isa => 'Maybe[ArrayRef[PositiveNum]]',
    required => 0,
-   default => sub{[ 1 ]},
+   default => sub {[ 1 ]},
    init_arg => '-weights',
    lazy => 1,
+   trigger => sub { shift->_clear_weights_prod; },
+);
+
+
+=head2 get_weights_prod
+
+ Usage   : my $product = $member->get_weights_prod();
+ Function: Calculate the product of the weights.
+ Args    : None
+ Returns : Product of the weights
+
+=cut
+
+has _weights_prod => (
+   is => 'ro',
+   ###isa => 'Num',
+   required => 0,
+   default => sub { my $prod = 1; $prod *= $_ for @{shift->weights}; return $prod; },
+   init_arg => undef,
+   lazy => 1,
+   clearer => '_clear_weights_prod',
+   reader => 'get_weights_prod',
 );
 
 

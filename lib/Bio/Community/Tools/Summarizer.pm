@@ -285,7 +285,7 @@ method _merge_duplicates ( $meta, $merge_dups ) {
          while (my $community = $meta->next_community) {
             $i++;
             my $count = $community->get_count($member);
-            my $wcount = $count / Bio::Community::_prod($member->weights);
+            my $wcount = $count / $member->get_weights_prod;
             $taxa_counts->{$lineage_str}->{$i}->[0] += $count;
             $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
          }
@@ -344,7 +344,7 @@ method _group_by_taxonomic_level ( $meta, $tax_level ) {
             while (my $community = $meta->next_community) {
                $i++;
                my $count = $community->get_count($member);
-               my $wcount = $count / Bio::Community::_prod($member->weights);
+               my $wcount = $count / $member->get_weights_prod;
                $taxa_counts->{$lineage_str}->{$i}->[0] += $count;
                $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
             }
@@ -372,7 +372,7 @@ method _group_by_taxonomic_level ( $meta, $tax_level ) {
          while (my $community = $meta->next_community) {
             $i++;
             my $count = $community->get_count($member);
-            my $wcount = $count / Bio::Community::_prod($member->weights);
+            my $wcount = $count / $member->get_weights_prod;
             $taxa_counts->{$lineage_str}->{$i}->[0] += $count;
             $taxa_counts->{$lineage_str}->{$i}->[1] += $wcount;
          }
@@ -435,7 +435,7 @@ method _group_by_relative_abundance ( $meta, $params ) {
             if ($member_to_group) {
                # Will group member
                $taxa_counts->{$desc}->{$i}->[0] += $count; # count
-               $taxa_counts->{$desc}->{$i}->[1] += $count / Bio::Community::_prod($member->weights); # weighted count
+               $taxa_counts->{$desc}->{$i}->[1] += $count / $member->get_weights_prod;
             } else {
                # Add member as-is, ungrouped
                $summary->get_community_by_name($community->name)->add_member($member, $count);

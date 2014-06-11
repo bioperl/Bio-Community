@@ -330,7 +330,7 @@ method add_member ( $member, $count = 1 ) {
    $self->_counts->{$member_id} += $count;
    $self->_members->{$member_id} = $member;
    $self->_set_members_count( $self->get_members_count + $count );
-   $self->_weighted_count( $self->_weighted_count + $count / _prod($member->weights) );
+   $self->_weighted_count( $self->_weighted_count + $count / $member->get_weights_prod );
    $self->_has_changed(1);
    return 1;
 }
@@ -368,7 +368,7 @@ method remove_member ( $member, $count? ) {
          delete $self->_members->{$member_id};
       }
       $self->_set_members_count( $self->get_members_count - $count );
-      $self->_weighted_count(  $self->_weighted_count - $count / _prod($member->weights) );
+      $self->_weighted_count(  $self->_weighted_count - $count / $member->get_weights_prod );
       $self->_has_changed(1);
    } else {
        # Nothing to remove
@@ -584,7 +584,7 @@ method get_rel_ab (Bio::Community::Member $member) {
   my $rel_ab = 0;
   my ($weight, $weighted_count);
   if ($self->use_weights) {
-     $weight = _prod($member->weights);
+     $weight = $member->get_weights_prod;
      $weighted_count = $self->_weighted_count;
   } else {
      $weight = 1;
@@ -699,14 +699,6 @@ func _two_array_sort ($l1, $l2) {
       $k2[$i] = $ids[$i][1];
    }
    return \@k1, \@k2;
-}
-
-
-func _prod ($arr) {
-   # Calculate the product of the numbers in an array
-   my $prod = 1;
-   $prod *= $_ for @$arr;
-   return $prod;
 }
 
 
