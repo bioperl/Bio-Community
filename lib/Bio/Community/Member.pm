@@ -128,7 +128,7 @@ my $mod_re = qr/^Bio::Community/;
            ID prefixed with 'bc' is generated, e.g. 'bc1', 'bc2', etc. This
            makes it easy to distinguish IDs assigned by Bio::Community::Member
            from IDs obtained from other sources, e.g. Greengenes taxa ID or
-           QIIME aritrary OTU ID. Use of the 'bc' prefix is restricted to the
+           QIIME arbitrary OTU ID. Use of the 'bc' prefix is restricted to the
            L<Bio::Community::Member> module; please refrain from using it yourself.
  Args    : A string
  Returns : A string
