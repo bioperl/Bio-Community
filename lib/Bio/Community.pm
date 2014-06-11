@@ -230,7 +230,7 @@ has _weighted_count => (
 
 has _members => (
    is => 'rw',
-   isa => 'HashRef',
+   #sa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -239,7 +239,7 @@ has _members => (
 
 has _counts => (
    is => 'rw',
-   isa => 'HashRef',
+   #isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -248,7 +248,7 @@ has _counts => (
 
 has _ranks_hash_weighted => (
    is => 'rw',
-   isa => 'HashRef',
+   #isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -258,7 +258,7 @@ has _ranks_hash_weighted => (
 
 has _ranks_arr_weighted => (
    is => 'rw',
-   isa => 'ArrayRef',
+   #isa => 'ArrayRef',
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
@@ -268,7 +268,7 @@ has _ranks_arr_weighted => (
 
 has _ranks_hash_unweighted => (
    is => 'rw',
-   isa => 'HashRef',
+   #isa => 'HashRef',
    lazy => 1,
    default => sub{ {} },
    init_arg => undef,
@@ -278,7 +278,7 @@ has _ranks_hash_unweighted => (
 
 has _ranks_arr_unweighted => (
    is => 'rw',
-   isa => 'ArrayRef',
+   #isa => 'ArrayRef',
    lazy => 1,
    default => sub{ [] },
    init_arg => undef,
@@ -288,7 +288,7 @@ has _ranks_arr_unweighted => (
 
 has _richness => (
    is => 'rw',
-   isa => 'Maybe[Int]',
+   #isa => 'Maybe[Int]',
    lazy => 1,
    default => undef,
    init_arg => undef,
@@ -298,7 +298,7 @@ has _richness => (
 
 has _members_iterator => (
    is => 'rw',
-   isa => 'Maybe[HashRef]',
+   #isa => 'Maybe[HashRef]',
    lazy => 1,
    default => undef,
    init_arg => undef,
@@ -307,7 +307,7 @@ has _members_iterator => (
 
 has _has_changed => (
    is => 'rw',
-   isa => 'Bool',
+   #isa => 'Bool',
    lazy => 1,
    default => 0,
    init_arg => undef,
@@ -397,23 +397,21 @@ method remove_member ( $member, $count? ) {
 method next_member ( $iter_name = 'default' ) {
    $self->_reset if $self->_has_changed;
 
+   # Create or re-use a named iterator
    my $iters = $self->_members_iterator;
-
-   # Create a named iterator
    my $iter;
-   if (not exists $iters->{$iter_name}) {
-      # Create new iterator
+   if (exists $iters->{$iter_name}) {
+      $iter = $iters->{$iter_name};
+   } else {
       $iter = $self->_create_hash_val_iter( $self->_members );
       $iters->{$iter_name} = $iter;
-   } else {
-      $iter = $iters->{$iter_name};
    }
 
    # Get next member from iterator
    my $member = $iter->();
 
    # Delete iterator when done
-   if (not defined $member) { 
+   if (not $member) { 
       delete $iters->{$iter_name};
    }
 
@@ -484,7 +482,8 @@ method get_all_members () {
 
 =cut
 
-method get_member_by_id (Str $member_id) {
+#method get_member_by_id (Str $member_id) {
+method get_member_by_id ($member_id) {
    return $self->_members->{$member_id};
 }
 
@@ -499,7 +498,8 @@ method get_member_by_id (Str $member_id) {
 
 =cut
 
-method get_member_by_rank (AbundanceRank $rank) {
+#method get_member_by_rank (AbundanceRank $rank) {
+method get_member_by_rank ($rank) {
    $self->_reset if $self->_has_changed;
    if ( $self->use_weights && (scalar @{$self->_ranks_arr_weighted} == 0) ) {
       # Calculate the relative abundance ranks unless they already exist
@@ -580,20 +580,16 @@ method get_count ($member) {
 
 =cut
 
-method get_rel_ab (Bio::Community::Member $member) {
-  my $rel_ab = 0;
-  my ($weight, $weighted_count);
-  if ($self->use_weights) {
-     $weight = $member->get_weights_prod;
-     $weighted_count = $self->_weighted_count;
-  } else {
-     $weight = 1;
-     $weighted_count = $self->get_members_count;
-  }
-  if ($weighted_count != 0) {
-     $rel_ab = $self->get_count($member) * 100 / ($weight * $weighted_count);
-  }
-  return $rel_ab;
+#method get_rel_ab (Bio::Community::Member $member) {
+method get_rel_ab ($member) {
+   my $rel_ab = 0;
+   my ($weight                  , $total_count            ) = $self->use_weights ?
+      ($member->get_weights_prod, $self->_weighted_count  ) :
+      (1                        , $self->get_members_count) ;
+   if ($total_count) {
+      $rel_ab = $self->get_count($member) * 100 / ($weight * $total_count);
+   }
+   return $rel_ab;
 }
 
 
@@ -607,8 +603,9 @@ method get_rel_ab (Bio::Community::Member $member) {
 
 =cut
 
-method get_abs_ab (Bio::Community::Member $member) {
-  return $self->get_rel_ab($member) / 100 * $self->get_members_abundance;
+#method get_abs_ab (Bio::Community::Member $member) {
+method get_abs_ab ($member) {
+   return $self->get_rel_ab($member) / 100 * $self->get_members_abundance;
 }
 
 
@@ -624,7 +621,8 @@ method get_abs_ab (Bio::Community::Member $member) {
 
 =cut
 
-method get_rank (Bio::Community::Member $member) {
+#method get_rank (Bio::Community::Member $member) {
+method get_rank ($member) {
    $self->_reset if $self->_has_changed;
    my $member_id = $member->id;
    if ( $self->get_member_by_id($member_id) ) { # If the member exists

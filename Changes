@@ -4,6 +4,7 @@ x.x.x XXXX-XX-XX
   - More robust FormatGuesser and extended detection of generic file format
   - Much faster Sampler tool, courtesy of the Math::GSL modules
   - All random number duties relegated to Math::GSL
+  - Speed optimizations in Community module
 
 0.1.7 2014-05-28
   - Support for QIIME files containing alternative taxonomic header (reported
