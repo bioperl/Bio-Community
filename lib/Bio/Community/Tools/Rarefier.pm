@@ -402,13 +402,8 @@ method _count_normalize () {
    for my $community ( @$communities ) {
       my ($average, $repetitions, $beta_val);
       my $count = $community->get_members_count;
-      if ($count > $sample_size) {
-         ($average, $repetitions, $beta_val) = $self->_bootstrap($community);
-      } elsif ($count == $sample_size) {
-         ($average, $repetitions, $beta_val) = ($community->clone, undef, undef);
-      } else {
-         next; # drop this community
-      }
+      next if $count < $sample_size; # drop this community
+      ($average, $repetitions, $beta_val) = $self->_bootstrap($community);
       my $name = $community->name;
       #$name .= ' ' if $name;
       #$name .= 'average';

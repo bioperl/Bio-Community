@@ -180,7 +180,7 @@ SKIP: {
     like $string[5], qr/^11\t$rre\t1\t$rre/;
     like $string[6], qr/^30\t$rre\t1\t$rre/;
     like $string[7], qr/^81\t2\t1\t$rre/;
-    like $string[8], qr/^121\t\t1\t3/;
+    like $string[8], qr/^121\t\t1\t$rre/;
     is $string[9], "142\t\t1\t";
 }
 

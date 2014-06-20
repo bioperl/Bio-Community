@@ -164,9 +164,26 @@ method get_rand_community ( PositiveInt $total_count = 1 ) {
       my $member = $comm->get_member_by_rank($rank);
       $randcomm->add_member( $member, $count );
    }
-
    return $randcomm;
 }
+
+
+####
+# Implement sampling without replacement:
+#    Use gsl_ran_choose from GSL: https://www.gnu.org/software/gsl/manual/html_node/Shuffling-and-Sampling.html
+#    Output == input if count required == count in reference community
+#    Throw if count required > count in reference community
+#    Throw if reference community
+
+# Without replacement should be default. It is beneficial when:
+#    sampling close to max count in community
+
+# Sampling with replacement is beneficial when:
+#    sampling from percentages (or with weights)
+#    sampling beyond observed count in community
+
+# But which one is faster / more resource economic?
+####
 
 
 method _get_rand_members ( $total_count = 1 ) {
