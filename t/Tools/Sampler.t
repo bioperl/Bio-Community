@@ -10,7 +10,7 @@ use_ok($_) for qw(
 
 
 my ($member1, $member2, $member3, $even_comm, $uneven_comm, $sampler, $rand_member,
-    $rand_comm, $count);
+    $rand_comm, $rand_comm2, $count);
 my %descs;
 
 $member1 = Bio::Community::Member->new( -desc => 'A' );
@@ -98,7 +98,7 @@ cmp_ok( $rand_comm->get_count($member3), '<=',   16 );
 
 # Re-using same object
 
-ok $sampler->community($even_comm);
+ok $sampler->community($even_comm), 'Re-use same Sampler';
 
 %descs = ();
 $count = 999;
@@ -126,6 +126,46 @@ ok $sampler = Bio::Community::Tools::Sampler->new(
 $count = 0;
 ok $rand_comm = $sampler->get_rand_community($count);
 is scalar @{$rand_comm->get_all_members}, 0;
+
+
+# Operate at max count (without replacement)
+
+$uneven_comm = Bio::Community->new( );
+for my $i (1..1000) {
+   $uneven_comm->add_member( Bio::Community::Member->new(), $i*10);
+}
+$uneven_comm->add_member( Bio::Community::Member->new(), 1);
+
+ok $sampler = Bio::Community::Tools::Sampler->new(
+   -community => $uneven_comm,
+), 'Max count';
+ok $rand_comm = $sampler->get_rand_community($uneven_comm->get_members_count);
+
+TODO: {
+   local $TODO = 'Need to implement Sampler without replacement';
+   is $rand_comm->get_richness, $uneven_comm->get_richness;
+}
+
+
+# Operate close to max count (without replacement)
+
+ok $sampler = Bio::Community::Tools::Sampler->new(
+   -community => $uneven_comm,
+   -seed      => 46285024,
+), 'Close to max count';
+ok $rand_comm = $sampler->get_rand_community($uneven_comm->get_members_count);
+
+ok $sampler = Bio::Community::Tools::Sampler->new(
+   -community => $uneven_comm,
+   -seed      => 314235333,
+);
+ok $rand_comm2 = $sampler->get_rand_community($uneven_comm->get_members_count - 1);
+
+is $rand_comm2->get_richness, $rand_comm->get_richness;
+
+
+### TODO: same with replacement
+
 
 
 }

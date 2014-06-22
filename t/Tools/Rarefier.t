@@ -14,7 +14,7 @@ use_ok($_) for qw(
 );
 
 
-my ($rarefier, $meta, $community1, $community2, $community3, $average, $representative, $representative2,
+my ($rarefier, $meta, $community1, $community2, $community3, $average, $representative,
    $member1 , $member2 , $member3 , $member4 , $member5 , $member6 , $member7 , $member8 , $member9 , $member10,
    $member11, $member12, $member13, $member14, $member15, $member16, $member17, $member18, $member19, $member20,
    $member21, $member22, $member23, $member24, $member25, $member26, $member27, $member28, $member29, $member30,
@@ -853,50 +853,6 @@ delta_ok $representative->get_members_count, 1000;
 delta_within $representative->get_count($member1), $representative->get_count($member1), $epsilon2;
 delta_within $representative->get_count($member3), $representative->get_count($member3), $epsilon2;
 delta_within $representative->get_count($member6), $representative->get_count($member6), $epsilon2;
-
-
-# Operate at max count in community
-
-$community1 = Bio::Community->new( -name => 'community1' );
-for my $i (1..1000) {
-   $community1->add_member( Bio::Community::Member->new(), $i*10);
-}
-$community1->add_member( $member6, 1);
-
-$meta = Bio::Community::Meta->new( -communities => [$community1] );
-ok $rarefier = Bio::Community::Tools::Rarefier->new(
-   -metacommunity   => $meta,
-   -num_repetitions => 1,
-   -sample_size     => $community1->get_members_count,
-);
-$representative = $rarefier->get_repr_meta->next_community;
-
-TODO: {
-   local $TODO = 'Need to implement Sampler without replacement';
-   is $representative->get_richness, $community1->get_richness;
-}
-
-
-# Operate close to max count in community
-
-$meta = Bio::Community::Meta->new( -communities => [$community1] );
-ok $rarefier = Bio::Community::Tools::Rarefier->new(
-   -metacommunity   => $meta,
-   -num_repetitions => 1,
-   -sample_size     => $community1->get_members_count,
-   -seed            => 46285024,
-);
-$representative = $rarefier->get_repr_meta->next_community;
-
-ok $rarefier = Bio::Community::Tools::Rarefier->new(
-   -metacommunity   => $meta,
-   -num_repetitions => 1,
-   -sample_size     => $community1->get_members_count - 1,
-   -seed            => 314235333,
-);
-$representative2 = $rarefier->get_repr_meta->next_community;
-
-is $representative2->get_richness, $representative->get_richness;
 
 
 
