@@ -142,7 +142,6 @@ is $member->desc, 'Sequence.1';
 delta_ok $community3->get_count($member), 1;
 is $community3->get_member_by_rank(3), undef;
 
-
 # Write Unifrac quantitative format
 
 $output_file = test_output_file();
@@ -238,18 +237,17 @@ is $in->next_community, undef;
 
 $in->close;
 
-@members = @{$community->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
+@members = sort {$a->desc cmp $b->desc} @{$community->get_all_members};
+is_deeply [map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
 is_deeply [map {$community->get_count($_)} @members], [1,1,1,1];
 
-@members = @{$community2->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.4', 'Sequence.6'];
+@members = sort {$a->desc cmp $b->desc} @{$community2->get_all_members};
+is_deeply [map {$_->desc} @members], ['Sequence.1', 'Sequence.4', 'Sequence.6'];
 is_deeply [map {$community2->get_count($_)} @members], [1, 1, 1];
 
-@members = @{$community3->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.6'];
+@members = sort {$a->desc cmp $b->desc} @{$community3->get_all_members};
+is_deeply [map {$_->desc} @members], ['Sequence.6'];
 is_deeply [map {$community3->get_count($_)} @members], [1];
-
 
 # Write Unifrac qualitative format
 
@@ -269,19 +267,116 @@ ok $in = Bio::Community::IO->new(
 ), 'Re-read Unifrac qualitative format';
 
 ok $community = $in->next_community;
-@members = @{$community->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
+@members = sort {$a->desc cmp $b->desc} @{$community->get_all_members};
+is_deeply [map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
 is_deeply [map {$community->get_count($_)} @members], [1,1,1,1];
 
 ok $community2 = $in->next_community;
-@members = @{$community2->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.1', 'Sequence.4', 'Sequence.6'];
+@members = sort {$a->desc cmp $b->desc} @{$community2->get_all_members};
+is_deeply [map {$_->desc} @members], ['Sequence.1', 'Sequence.4', 'Sequence.6'];
 is_deeply [map {$community2->get_count($_)} @members], [1, 1, 1];
 
 ok $community3 = $in->next_community;
-@members = @{$community3->get_all_members};
-is_deeply [sort map {$_->desc} @members], ['Sequence.6'];
+@members = sort {$a->desc cmp $b->desc} @{$community3->get_all_members};
+is_deeply [map {$_->desc} @members], ['Sequence.6'];
 is_deeply [map {$community3->get_count($_)} @members], [1];
+
+is $in->next_community, undef;
+
+$in->close;
+
+
+# Read Unifrac quantitative format (with relative abundances)
+
+ok $in = Bio::Community::IO->new(
+   -file   => test_input_file('unifrac_quantitative_relab.txt'),
+   -format => 'unifrac',
+), 'Read Unifrac quantitative format (relative abundances)';
+
+ok $community = $in->next_community;
+isa_ok $community, 'Bio::Community';
+is $community->get_richness, 4;
+is $community->name, 'Sample.1';
+
+ok $community2 = $in->next_community;
+isa_ok $community2, 'Bio::Community';
+is $community2->get_richness, 2;
+is $community2->name, 'Sample.2';
+
+ok $community3 = $in->next_community;
+isa_ok $community3, 'Bio::Community';
+is $community3->get_richness, 1;
+is $community3->name, 'Sample.3';
+
+is $in->next_community, undef;
+
+$in->close;
+
+ok $member = $community->get_member_by_rank(4);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.2';
+delta_ok $community->get_count($member), 0.15;
+ok $member = $community->get_member_by_rank(3);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.3';
+delta_ok $community->get_count($member), 0.20;
+ok $member = $community->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.1';
+delta_ok $community->get_count($member), 0.25;
+ok $member = $community->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.5';
+delta_ok $community->get_count($member), 0.4;
+is $community->get_member_by_rank(5), undef;
+
+ok $member = $community2->get_member_by_rank(2);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.6';
+delta_ok $community2->get_count($member), 0.1;
+ok $member = $community2->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.4';
+delta_ok $community2->get_count($member), 0.9;
+is $community2->get_member_by_rank(3), undef;
+
+ok $member = $community3->get_member_by_rank(1);
+isa_ok $member, 'Bio::Community::Member';
+is $member->desc, 'Sequence.6';
+delta_ok $community3->get_count($member), 1.0;
+is $community3->get_member_by_rank(2), undef;
+
+# Write Unifrac Unifrac quantitative format (with relative abundances)
+
+$output_file = test_output_file();
+ok $out = Bio::Community::IO->new(
+   -file   => '>'.$output_file,
+   -format => 'unifrac',
+), 'Write Unifrac quantitative format (relative abundances)';
+ok $out->write_community($community);
+ok $out->write_community($community2);
+ok $out->write_community($community3);
+$out->close;
+
+ok $in = Bio::Community::IO->new(
+   -file   => $output_file,
+   -format => 'unifrac',
+), 'Re-read Unifrac quantitative format (relative abundances)';
+
+ok $community = $in->next_community;
+@members = sort {$a->desc cmp $b->desc} @{$community->get_all_members};
+is_deeply [map {$_->desc} @members], ['Sequence.1', 'Sequence.2', 'Sequence.3', 'Sequence.5'];
+is_deeply [map {$community->get_count($_)} @members], [0.25, 0.15, 0.20, 0.4];
+
+ok $community2 = $in->next_community;
+@members = sort {$a->desc cmp $b->desc} @{$community2->get_all_members};
+is_deeply [map {$_->desc} @members], ['Sequence.4', 'Sequence.6'];
+is_deeply [map {$community2->get_count($_)} @members], [0.9, 0.1];
+
+ok $community3 = $in->next_community;
+@members = sort {$a->desc cmp $b->desc} @{$community3->get_all_members};
+is_deeply [sort map {$_->desc} @members], ['Sequence.6'];
+is_deeply [map {$community3->get_count($_)} @members], [1.0];
 
 is $in->next_community, undef;
 

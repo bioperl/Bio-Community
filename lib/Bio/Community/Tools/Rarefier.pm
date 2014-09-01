@@ -95,7 +95,9 @@ methods. Internal methods are usually preceded with a _
  Usage   : my $rarefier = Bio::Community::Tool::Rarefier->new( );
  Args    : -metacommunity  : see metacommunity()
            -num_repetitions: see num_repetitions()
+           -threshold      : see threshold()
            -sample_size    : see sample_size()
+           -drop           : see drop()
            -seed           : see set_seed()
  Returns : a new Bio::Community::Tools::Rarefier object
 

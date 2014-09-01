@@ -1,7 +1,9 @@
 Revision history for Perl extension Bio-Community.
 
 x.x.x XXXX-XX-XX
-  - More robust FormatGuesser and extended detection of generic file format
+  - More robust FormatGuesser
+  - Extended detection of generic file format
+  - Handling of relative abundances in unifrac file format
   - Much faster Sampler tool, courtesy of the Math::GSL modules
   - All random number duties relegated to Math::GSL
   - Speed optimizations in Community module
