@@ -245,9 +245,6 @@ func use_cluster_repr ($input_files, $member_attr, $cluster_file, $blast_file,
    } elsif (defined $taxassign_file) {
       $converter->taxassign_file($taxassign_file);
    }
-   if (defined $conv_meth) {
-      $converter->
-   }
    my $out_meta = $converter->get_converted_meta;
 
    # Write metacommunity
