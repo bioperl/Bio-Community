@@ -15,14 +15,15 @@ Bio::Community::Tools::IdConverter - Various methods to convert member ID
 
   use Bio::Community::Tools::IdConverter;
 
-  # Based on member description
+  # Add member description to its ID
   my $converter = Bio::Community::Tools::IdConverter->new(
-     -metacommunity => $meta,
-     -member_attr   => 'desc',
+     -metacommunity     => $meta,
+     -member_attr       => 'desc',
+     -conversion_method => 'append',
   );
   my $meta_by_otu = $converter->get_converted_meta;
 
-  # Based on IDs given in a file
+  # Replace by IDs given in a file
   $converter = Bio::Community::Tools::IdConverter->new(
      -metacommunity => $meta,
      -cluster_file  => 'gg_99_otu_map.txt',
@@ -139,8 +140,8 @@ has metacommunity => (
 
 =head2 member_attr
 
- Function: Get / set whether member ID should be replaced by the value of another
-           attribute, e.g. the member's description. Replacing a member's ID
+ Function: Get / set whether member ID should be converted using the value of
+           another attribute, e.g. the member's description. Replacing member ID
            by its description is useful when importing data from formats that do
            not explicitly represent member ID, e.g. from 'generic' to 'qiime'.
  Usage   : $converter->member_attr('id');
@@ -247,6 +248,46 @@ has taxassign_file => (
 );
 
 
+=head2 conversion_method
+
+ Function: Get / set how to convert IDs, i.e. either replace the existing ID
+           (the default), prepend in front of it, or append after it.
+ Usage   : $converter->conversion_method('prepend');
+ Args    : conversion method, 'replace', 'prepend' or 'append'
+ Returns : conversion method
+
+=cut
+
+has conversion_method => (
+   is => 'rw',
+   isa => 'IdConversionType',
+   required => 0,
+   lazy => 1,
+   default => 'replace',
+   init_arg => '-conversion_method',
+);
+
+
+=head2 conversion_separator
+
+ Function: Get / set the string used to construct the ID when using the 'append'
+           or 'prepend' conversion method, '_' by default
+ Usage   : $converter->conversion_separator(' ');
+ Args    : any string to use as conversion separator
+ Returns : the string used as conversion method
+
+=cut
+
+has conversion_separator => (
+   is => 'rw',
+   isa => 'Str',
+   required => 0,
+   lazy => 1,
+   default => '_',
+   init_arg => '-conversion_separator',
+);
+
+
 =head2 get_converted_meta
 
  Function: Convert the communities and return the corresponding metacommunity.
@@ -316,6 +357,12 @@ method get_converted_meta () {
                "Keeping original ID.");
             $repr_id = $id;
          }
+
+         if ($self->conversion_method eq 'append') {
+            $repr_id = $id.$self->conversion_separator.$repr_id;
+         } elsif ($self->conversion_method eq 'prepend') {
+            $repr_id = $repr_id.$self->conversion_separator.$id;
+         } # else just use $repr_id as the new ID
 
          my $member2 = $community2->get_member_by_id($repr_id);
          if (not defined $member2) {

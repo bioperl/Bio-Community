@@ -134,6 +134,22 @@ follow this format.
    taxassign_file.type: readable
    taxassign_file.excludes: member_attr, cluster_file, blast_file
 
+=item -cm <conversion_method> | -conversion_method <conversion_method>
+
+Choose to either 'replace' the existing ID, 'prepend' in front of it, or 'append'
+after it. Default: conversion_method.default
+
+=for Euclid:
+   conversion_method.type: /replace|prepend|append/
+
+=item -cs <conversion_separator> | -conversion_separator <conversion_separator>
+
+Set the string that will be used to construct the ID when using the 'append' or
+'prepend' conversion method. Default: conversion_separator.default
+
+=for Euclid:
+   conversion_separator.type: string
+
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
 Path and prefix for the output files. Default: output_prefix.default
@@ -185,13 +201,14 @@ Email florent.angly@gmail.com
 
 use_cluster_repr(
    $ARGV{'input_files'}, $ARGV{'member_attr'}, $ARGV{'cluster_file'},
-   $ARGV{'blast_file'}, $ARGV{'taxassign_file'}, $ARGV{'output_prefix'},
+   $ARGV{'blast_file'}, $ARGV{'taxassign_file'}, $ARGV{'conversion_method'},
+   $ARGV{'conversion_separator'}, $ARGV{'output_prefix'},
 );
 exit;
 
 
 func use_cluster_repr ($input_files, $member_attr, $cluster_file, $blast_file,
-   $taxassign_file, $output_prefix) {
+   $taxassign_file, $conv_meth, $conv_sep, $output_prefix) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new();
@@ -223,6 +240,12 @@ func use_cluster_repr ($input_files, $member_attr, $cluster_file, $blast_file,
       $converter->blast_file($blast_file);
    } elsif (defined $taxassign_file) {
       $converter->taxassign_file($taxassign_file);
+   }
+   if (defined $conv_meth) {
+      $converter->conversion_method($conv_meth);
+   }
+   if (defined $conv_sep) {
+      $converter->conversion_separator($conv_sep);
    }
    my $out_meta = $converter->get_converted_meta;
 
