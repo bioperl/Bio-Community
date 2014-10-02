@@ -141,6 +141,7 @@ after it. Default: conversion_method.default
 
 =for Euclid:
    conversion_method.type: /replace|prepend|append/
+   conversion_method.default: 'replace'
 
 =item -cs <conversion_separator> | -conversion_separator <conversion_separator>
 
@@ -149,6 +150,7 @@ Set the string that will be used to construct the ID when using the 'append' or
 
 =for Euclid:
    conversion_separator.type: string
+   conversion_separator.default: '_'
 
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
@@ -230,7 +232,9 @@ func use_cluster_repr ($input_files, $member_attr, $cluster_file, $blast_file,
 
    # Convert IDs
    my $converter = Bio::Community::Tools::IdConverter->new(
-      -metacommunity => $meta,
+      -metacommunity        => $meta,
+      -conversion_method    => $conv_meth,
+      -conversion_separator => $conv_sep,
    );
    if (defined $member_attr) {
       $converter->member_attr($member_attr);
@@ -242,10 +246,7 @@ func use_cluster_repr ($input_files, $member_attr, $cluster_file, $blast_file,
       $converter->taxassign_file($taxassign_file);
    }
    if (defined $conv_meth) {
-      $converter->conversion_method($conv_meth);
-   }
-   if (defined $conv_sep) {
-      $converter->conversion_separator($conv_sep);
+      $converter->
    }
    my $out_meta = $converter->get_converted_meta;
 
