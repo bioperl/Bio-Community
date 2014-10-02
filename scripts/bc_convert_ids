@@ -74,10 +74,10 @@ provide multiple input files.
 
 =item -ma <member_attr> | -member_attr <member_attr>
 
-Replace member ID should by the value of another member attribute, e.g. the
-member's description field ('desc'). Replacing a member's ID by its description
-is useful when importing data from formats that do not explicitly represent
-member ID, e.g. from 'generic' to 'qiime'.
+Replace member ID by the value of another member attribute, e.g. the member's
+description field ('desc'). Replacing a member's ID by its description is useful
+when importing data from formats that do not explicitly represent member ID,
+e.g. from 'generic' to 'qiime'.
 
 =for Euclid:
    member_attr.type: string
