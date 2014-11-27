@@ -356,7 +356,7 @@ method remove_member ( $member, $count? ) {
       # Remove existing member
       my $existing_count = $counts->{$member_id};
       if ( defined($count) && ($count > $existing_count) ) {
-         $self->throw("Error: More members to remove ($count) than there are in the community (".$counts->{$member}."\n");
+         $self->throw("Error: More members to remove ($count) than there are in the community (".$counts->{$member}.")\n");
       }
       # Now remove unwanted members
       if (not defined $count) {
