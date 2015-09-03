@@ -339,7 +339,8 @@ method write_member (Bio::Community::Member $member, Count $count) {
 
    }
 
-   if ($self->_qualitative_unifrac && $count > 1) {
+   if ($self->_qualitative_unifrac && $count != 1) {
+      # 1 is the default value we use for qualitative UniFrac
       $self->_qualitative_unifrac( 0 );
    }
 

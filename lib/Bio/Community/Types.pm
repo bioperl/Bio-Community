@@ -191,6 +191,13 @@ subtype 'BiomMatrixType'
    => message { _gen_err_msg(\@BiomMatrixType, $_) };
 
 
+# ID Conversion type
+my @IdConversionType = qw(replace prepend append);
+subtype 'IdConversionType'
+   => as enum( \@IdConversionType )
+   => message { _gen_err_msg(\@IdConversionType, $_) };
+
+
 # A readable file
 subtype 'ReadableFile'
    => as 'Str'

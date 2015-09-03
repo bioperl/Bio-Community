@@ -74,10 +74,10 @@ provide multiple input files.
 
 =item -ma <member_attr> | -member_attr <member_attr>
 
-Replace member ID should by the value of another member attribute, e.g. the
-member's description field ('desc'). Replacing a member's ID by its description
-is useful when importing data from formats that do not explicitly represent
-member ID, e.g. from 'generic' to 'qiime'.
+Replace member ID by the value of another member attribute, e.g. the member's
+description field ('desc'). Replacing a member's ID by its description is useful
+when importing data from formats that do not explicitly represent member ID,
+e.g. from 'generic' to 'qiime'.
 
 =for Euclid:
    member_attr.type: string
@@ -134,6 +134,24 @@ follow this format.
    taxassign_file.type: readable
    taxassign_file.excludes: member_attr, cluster_file, blast_file
 
+=item -cm <conversion_method> | -conversion_method <conversion_method>
+
+Choose to either 'replace' the existing ID, 'prepend' in front of it, or 'append'
+after it. Default: conversion_method.default
+
+=for Euclid:
+   conversion_method.type: /replace|prepend|append/
+   conversion_method.default: 'replace'
+
+=item -cs <conversion_separator> | -conversion_separator <conversion_separator>
+
+Set the string that will be used to construct the ID when using the 'append' or
+'prepend' conversion method. Default: conversion_separator.default
+
+=for Euclid:
+   conversion_separator.type: string
+   conversion_separator.default: '_'
+
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
 Path and prefix for the output files. Default: output_prefix.default
@@ -185,13 +203,14 @@ Email florent.angly@gmail.com
 
 use_cluster_repr(
    $ARGV{'input_files'}, $ARGV{'member_attr'}, $ARGV{'cluster_file'},
-   $ARGV{'blast_file'}, $ARGV{'taxassign_file'}, $ARGV{'output_prefix'},
+   $ARGV{'blast_file'}, $ARGV{'taxassign_file'}, $ARGV{'conversion_method'},
+   $ARGV{'conversion_separator'}, $ARGV{'output_prefix'},
 );
 exit;
 
 
 func use_cluster_repr ($input_files, $member_attr, $cluster_file, $blast_file,
-   $taxassign_file, $output_prefix) {
+   $taxassign_file, $conv_meth, $conv_sep, $output_prefix) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new();
@@ -213,7 +232,9 @@ func use_cluster_repr ($input_files, $member_attr, $cluster_file, $blast_file,
 
    # Convert IDs
    my $converter = Bio::Community::Tools::IdConverter->new(
-      -metacommunity => $meta,
+      -metacommunity        => $meta,
+      -conversion_method    => $conv_meth,
+      -conversion_separator => $conv_sep,
    );
    if (defined $member_attr) {
       $converter->member_attr($member_attr);
