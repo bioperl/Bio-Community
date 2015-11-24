@@ -112,9 +112,11 @@ use MooseX::StrictConstructor;
 use namespace::autoclean;
 use Bio::Community::Meta;
 use Bio::Community::Meta::Beta;
-use POSIX;
 use List::Util qw(min);
 use Method::Signatures;
+
+use POSIX; # defines DBL_EPSILON to something like 2.22044604925031e-16
+use constant EPSILON => 100 * DBL_EPSILON; # suggested in "Mastering Algorithms in Perl"
 
 extends 'Bio::Root::Root';
 with 'Bio::Community::Role::PRNG';
@@ -142,10 +144,11 @@ has metacommunity => (
 
 =head2 sample_size
 
- Function: Get or set the sample size, i.e. the number of members to pick randomly
-           at each iteration. It has to be smaller than the total count of the
-           smallest community or an error will be generated. If the sample size
-           is omitted, it defaults to the get_members_count() of the smallest community.
+ Function: Get or set the sample size, i.e. the number of members to pick
+           randomly at each iteration. It has to be smaller than or equal to the
+           total count of the smallest community or an error will be generated.
+           If the sample size is omitted, it defaults to the get_members_count()
+           of the smallest community.
  Usage   : my $sample_size = $rarefier->sample_size;
  Args    : integer for the sample size
  Returns : integer for the sample size
@@ -370,7 +373,7 @@ method _count_normalize () {
       $sample_size = int $min;
       $self->sample_size($sample_size); 
    } else {
-      if ($sample_size > $min) {
+      if ($sample_size - EPSILON > $min + EPSILON ) { # sample_size > min
          my $name;
          for my $community (@$communities) {
             if ($community->get_members_count == $min) {

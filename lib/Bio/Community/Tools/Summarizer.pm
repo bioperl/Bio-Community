@@ -94,7 +94,7 @@ use Bio::Community::TaxonomyUtils
    qw(get_taxon_lineage get_lineage_string clean_lineage_arr);
 
 use POSIX; # defines DBL_EPSILON to something like 2.22044604925031e-16
-use constant EPSILON => 10 * DBL_EPSILON;
+use constant EPSILON => 100 * DBL_EPSILON; # suggested in "Mastering Algorithms in Perl"
 
 
 extends 'Bio::Root::Root';
