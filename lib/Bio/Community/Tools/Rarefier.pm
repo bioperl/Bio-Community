@@ -373,7 +373,7 @@ method _count_normalize () {
       $sample_size = int $min;
       $self->sample_size($sample_size); 
    } else {
-      if ($sample_size - EPSILON > $min + EPSILON ) { # sample_size > min
+      if ($sample_size - EPSILON > $min + EPSILON) { # sample_size > min
          my $name;
          for my $community (@$communities) {
             if ($community->get_members_count == $min) {
@@ -407,7 +407,9 @@ method _count_normalize () {
    for my $community ( @$communities ) {
       my ($average, $repetitions, $beta_val);
       my $count = $community->get_members_count;
-      next if $count < $sample_size; # drop this community
+      if ($sample_size - EPSILON > $count + EPSILON) { # sample_size > count
+         next; # drop this community
+      }
       ($average, $repetitions, $beta_val) = $self->_bootstrap($community);
       my $name = $community->name;
       #$name .= ' ' if $name;
