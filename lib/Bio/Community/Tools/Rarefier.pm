@@ -116,7 +116,7 @@ use List::Util qw(min);
 use Method::Signatures;
 
 use POSIX; # defines DBL_EPSILON to something like 2.22044604925031e-16
-use constant EPSILON => 100 * DBL_EPSILON; # suggested in "Mastering Algorithms in Perl"
+use constant REL_EPSILON => 1 + 10 * DBL_EPSILON;
 
 extends 'Bio::Root::Root';
 with 'Bio::Community::Role::PRNG';
@@ -373,7 +373,7 @@ method _count_normalize () {
       $sample_size = int $min;
       $self->sample_size($sample_size); 
    } else {
-      if ($sample_size - EPSILON > $min + EPSILON) { # sample_size > min
+      if ($sample_size / REL_EPSILON > $min * REL_EPSILON) { # sample_size > min
          my $name;
          for my $community (@$communities) {
             if ($community->get_members_count == $min) {
@@ -407,7 +407,7 @@ method _count_normalize () {
    for my $community ( @$communities ) {
       my ($average, $repetitions, $beta_val);
       my $count = $community->get_members_count;
-      if ($sample_size - EPSILON > $count + EPSILON) { # sample_size > count
+      if ($sample_size / REL_EPSILON > $count * REL_EPSILON) { # sample_size > min
          next; # drop this community
       }
       ($average, $repetitions, $beta_val) = $self->_bootstrap($community);
