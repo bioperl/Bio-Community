@@ -24,16 +24,17 @@ bc_relative_to_absolute - Convert relative abundances into absolute
 
 =head1 SYNOPSIS
 
-  bc_relative_to_absolute -input_files     my_communities.generic \
-                          -abundance_file  my_counts.tsv          \
-                          -output_prefix   my_results
+  bc_relative_to_absolute -input_files      my_communities.generic \
+                          -abundance_file   my_counts.tsv          \
+                          -round_abundance  1                      \
+                          -output_prefix    my_results
 
 =head1 DESCRIPTION
 
 This script reads files containing biological communities and a file of
 abundance for these communities. The relative abundance of each member is
-multiplied by the total abundance for its community to obtain the absolute
-abundance of this member.
+multiplied by the total abundance for its community and rounded (if requested)
+to obtain the absolute abundance of this member.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -61,6 +62,15 @@ be tab-separated and have two columns: community name, total abundance.
 =head1 OPTIONAL ARGUMENTS
 
 =over
+
+=item -ra <round_abundance> | -round_abundance <round_abundance>
+
+Specify whether or not the absolute abundance should be rounded to the nearest
+integer. Default: round_abundance.default
+
+=for Euclid:
+   round_abundance.type: integer, round_abundance == 0 || round_abundance == 1
+   round_abundance.default: 0
 
 =item -op <output_prefix> | -output_prefix <output_prefix>
 
@@ -113,13 +123,14 @@ Email florent.angly@gmail.com
 
 
 relative_to_absolute(
-   $ARGV{'input_files'}, $ARGV{'abundance_file'}, $ARGV{'output_prefix'}
+   $ARGV{'input_files'}, $ARGV{'abundance_file'}, $ARGV{'round_abundance'},
+   $ARGV{'output_prefix'}
 );
 
 exit;
 
 
-func relative_to_absolute ($input_files, $abundance_file, $output_prefix) {
+func relative_to_absolute ($input_files, $abundance_file, $round_abundance, $output_prefix) {
 
    # Read input communities
    my $meta = Bio::Community::Meta->new();
@@ -143,13 +154,46 @@ func relative_to_absolute ($input_files, $abundance_file, $output_prefix) {
    my $abundances = read_abundance_file($abundance_file);
 
    # Add total abundances to communities
+   my $rounded_meta;
+   if ($round_abundance) {
+      $rounded_meta = $meta->clone;
+      while (my $community = $rounded_meta->next_community) {
+         $rounded_meta->remove_community($community);
+      }
+   }
    while (my $community = $meta->next_community) {
       my $name = $community->name;
       my $abundance = $abundances->{$name};
       if (not defined $abundance) {
          die "Error: No total abundance specified for community '$name'\n";
       }
+      print "Processing community '$name' (total abundance: $abundance)\n";
+
       $community->set_members_abundance($abundance);
+
+      if ($round_abundance) {
+         # Calculate rounded absolute abundance
+         my $tmp_community = $community->clone;
+         while (my $member = $community->next_member) {
+            $tmp_community->remove_member($member);
+            $tmp_community->add_member($member, $community->get_abs_ab($member));
+            # counts in $tmp_community represent decimal absolute abundance
+         }
+         require Bio::Community::Tools::Rarefier;
+         my $rarefier = Bio::Community::Tools::Rarefier->new(
+            -metacommunity   =>
+                Bio::Community::Meta->new(-communities =>[$tmp_community]),
+            -sample_size     => $abundance,
+            -num_repetitions => 'inf',
+         );
+         my $rounded_community = $rarefier->get_repr_meta->next_community;
+         # counts are now integers representing absolute abundance
+         $rounded_meta->add_communities([$rounded_community]);
+      }
+
+   }
+   if ($round_abundance) {
+      $meta = $rounded_meta;
    }
 
    write_communities($meta, $output_prefix, $format, '');
