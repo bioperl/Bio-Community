@@ -23,10 +23,10 @@ Bio::Community::Tools::Rarefier - Normalize communities by count
   );
 
   # Rarefied results, with decimal counts
-  my $average_community = $rarefier->get_avg_meta->[0];
+  my $average_community = $rarefier->get_avg_meta->next_community;
 
   # Round counts to integer numbers
-  my $representative_community = $rarefier->get_repr_meta->[0];
+  my $representative_community = $rarefier->get_repr_meta->next_community;
   
 
   # Alternatively, specify a number of repetitions
@@ -201,7 +201,7 @@ has threshold => (
            accessed using this method. As a special case, specify 'inf' to
            simulate an infinite number of repetitions.
  Usage   : my $repetitions = $rarefier->repetitions;
- Args    : positive integer or 'inf' number of repetitions
+ Args    : positive integer or 'inf' for the number of repetitions
  Returns : positive integer for the (minimum) number of repetitions
 
 =cut
