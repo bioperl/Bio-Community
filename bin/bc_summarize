@@ -270,7 +270,7 @@ func summarize ($input_files, $weight_files, $weight_assign, $output_prefix,
 
 
 func write_communities ($meta, $output_prefix, $output_format, $type = '',
-   $convert2relab) {
+   $convert2relab = 1) {
    my $multiple_communities = Bio::Community::IO->new(-format=>$output_format)->multiple_communities;
    my $num = 0;
    my $out;
