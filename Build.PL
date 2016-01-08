@@ -27,14 +27,14 @@ my $build = Module::Build->new(
                             },
     requires             => {
                              'perl'                         => '5.10.0',
-                             'Bio::Root::Version'           => '1.006922',
+                             'Bio::Root::Version'           => '1.006923',
                              'DateTime'                     =>  0,
                              'Getopt::Euclid'               => '0.4.3',
                              'JSON::XS'                     =>  0, # biom format
                              'Hash::Util'                   =>  0,
                              'Math::Random::MT'             =>  0, # PRNG role
-                             'Module::Runtime'              =>  0, # load IO drivers
                              'Method::Signatures'           =>  20140224,
+                             'Module::Runtime'              =>  0, # load IO drivers
                              'Moose'                        =>  0,
                              'MooseX::NonMoose'             =>  0,
                              'MooseX::StrictConstructor'    =>  0,

@@ -24,7 +24,6 @@ required and will be installed during the installation procedure:
   Method::Signatures
   Module::Runtime
   Moose
-  Moose::Util::TypeConstraints
   MooseX::NonMoose
   MooseX::StrictConstructor
   PerlIO:eol
@@ -32,8 +31,10 @@ required and will be installed during the installation procedure:
   Tie::IxHash
   Test::Number::Delta
 
-This other module is recommended:
+These other modules are recommended:
   Math::GSL::SF
+  Math::GSL::Randist
+  Math::GSL::RNG
 
 The easiest way to install Bio-Community is using the CPAN way. See the detailed
 instructions at http://www.cpan.org/modules/INSTALL.html

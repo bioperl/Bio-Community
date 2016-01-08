@@ -1,6 +1,6 @@
 Revision history for Perl extension Bio-Community.
 
-x.x.x XXXX-XX-XX
+0.1.8 2016-01-08
   - Script bc_relative_to_absolute will now round results if requested
   - IdConverter can now append or prepend in addition to replacing IDs
   - More robust FormatGuesser

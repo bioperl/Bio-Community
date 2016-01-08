@@ -85,7 +85,7 @@ use Method::Signatures;
 use namespace::autoclean;
 use Bio::Community::Member;
 
-our $VERSION = '0.001007'; # 0.1.7
+our $VERSION = '0.001008'; # 0.1.8
 
 extends 'Bio::Root::Root';
 
